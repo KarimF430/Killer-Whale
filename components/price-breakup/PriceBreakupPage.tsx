@@ -1,0 +1,1630 @@
+'use client'
+
+import React, { useState, useEffect, useRef } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { ChevronDown, Share2, Heart, Calendar, Fuel, Users } from 'lucide-react'
+import { formatPrice } from '@/utils/priceFormatter'
+import { calculateOnRoadPrice, OnRoadPriceBreakup } from '@/lib/rto-data-optimized'
+import { truncateCarName } from '@/lib/text-utils'
+import PageSection from '../common/PageSection'
+import AdBanner from '../home/AdBanner'
+import Footer from '../Footer'
+import VariantCard from '../car-model/VariantCard'
+import CarCard from '../home/CarCard'
+
+// Helper function to format price in Indian numbering system
+const formatIndianPrice = (price: number): string => {
+  return price.toLocaleString('en-IN', {
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0
+  })
+}
+
+// Helper function to format launch date
+const formatLaunchDate = (date: string): string => {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const parts = date.split('-')
+  if (parts.length === 2) {
+    const year = parts[0]
+    const monthIndex = parseInt(parts[1]) - 1
+    return `${months[monthIndex]} ${year}`
+  }
+  return date
+}
+
+interface PriceBreakupPageProps {
+  brandSlug?: string
+  modelSlug?: string
+  citySlug?: string
+}
+
+export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: PriceBreakupPageProps = {}) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [showVariantDropdown, setShowVariantDropdown] = useState(false)
+  const variantDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Get URL parameters - support both new slug-based URLs and old query params
+  const getBrandName = () => {
+    if (brandSlug) {
+      // Convert slug to display name: "honda" -> "Honda"
+      return brandSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    }
+    return searchParams.get('brand') || 'Honda'
+  }
+  
+  const getModelName = () => {
+    if (modelSlug) {
+      // Convert slug to display name: "elevate" -> "Elevate"
+      return modelSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    }
+    return searchParams.get('model') || 'Elevate'
+  }
+  
+  const getCityName = () => {
+    if (citySlug) {
+      // Convert slug to display name: "bangalore" -> "Bangalore, Karnataka"
+      const cityMap: { [key: string]: string } = {
+        'mumbai': 'Mumbai, Maharashtra',
+        'delhi': 'Delhi, NCR',
+        'bangalore': 'Bangalore, Karnataka',
+        'bengaluru': 'Bangalore, Karnataka',
+        'chennai': 'Chennai, Tamil Nadu',
+        'hyderabad': 'Hyderabad, Telangana',
+        'pune': 'Pune, Maharashtra',
+        'kolkata': 'Kolkata, West Bengal',
+        'ahmedabad': 'Ahmedabad, Gujarat',
+        'jaipur': 'Jaipur, Rajasthan'
+      }
+      return cityMap[citySlug.toLowerCase()] || `${citySlug.charAt(0).toUpperCase() + citySlug.slice(1)}, India`
+    }
+    return searchParams.get('city') || 'Mumbai, Maharashtra'
+  }
+  
+  const brandName = getBrandName()
+  const modelName = getModelName()
+  const variantParam = searchParams.get('variant')
+  const [selectedCity, setSelectedCity] = useState(() => getCityName())
+  const [selectedVariantName, setSelectedVariantName] = useState<string>('')
+  const [activeSection, setActiveSection] = useState('overview')
+  
+  // Section navigation data
+  const sections = [
+    { id: 'overview', name: 'Overview' },
+    { id: 'price-breakup', name: 'Price Breakup' },
+    { id: 'emi', name: 'EMI' },
+    { id: 'variants', name: 'Variants' },
+    { id: 'similar-cars', name: 'Similar Cars' },
+    { id: 'popular-cars', name: 'Popular Cars' },
+    { id: 'reviews', name: 'Reviews' },
+    { id: 'faq', name: 'FAQ' },
+    { id: 'dealers', name: 'Dealers' },
+    { id: 'price-cities', name: 'Price Across Cities' },
+    { id: 'feedback', name: 'Feedback' }
+  ]
+  
+  // Smooth scroll to section
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const headerOffset = 60 // Height of sticky header
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+      
+      // Update active section after scroll
+      setTimeout(() => setActiveSection(sectionId), 100)
+    }
+  }
+  
+  // Scroll spy - update active section based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 100 // Offset for better UX
+      
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = document.getElementById(sections[i].id)
+        if (section) {
+          const sectionTop = section.offsetTop
+          if (scrollPosition >= sectionTop) {
+            setActiveSection(sections[i].id)
+            break
+          }
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // Call once on mount
+    
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+  
+  // Update city when citySlug prop changes
+  useEffect(() => {
+    console.log('🔍 citySlug changed:', citySlug)
+    const cityMap: { [key: string]: string } = {
+      'mumbai': 'Mumbai, Maharashtra',
+      'delhi': 'Delhi, NCR',
+      'bangalore': 'Bangalore, Karnataka',
+      'bengaluru': 'Bangalore, Karnataka',
+      'chennai': 'Chennai, Tamil Nadu',
+      'hyderabad': 'Hyderabad, Telangana',
+      'pune': 'Pune, Maharashtra',
+      'kolkata': 'Kolkata, West Bengal',
+      'ahmedabad': 'Ahmedabad, Gujarat',
+      'jaipur': 'Jaipur, Rajasthan'
+    }
+    
+    if (citySlug) {
+      const newCity = cityMap[citySlug.toLowerCase()] || `${citySlug.charAt(0).toUpperCase() + citySlug.slice(1)}, India`
+      console.log('✅ Setting city to:', newCity)
+      setSelectedCity(newCity)
+    }
+  }, [citySlug])
+  
+  // Variants state
+  const [activeFilter, setActiveFilter] = useState('All')
+  const [modelVariants, setModelVariants] = useState<any[]>([])
+  const [loadingVariants, setLoadingVariants] = useState(true)
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null)
+  
+  // Popular cars state
+  const [popularCars, setPopularCars] = useState<any[]>([])
+  const [loadingPopularCars, setLoadingPopularCars] = useState(true)
+  
+  // On-Road Price Calculation
+  const [priceBreakup, setPriceBreakup] = useState<OnRoadPriceBreakup | null>(null)
+  
+  // Calculate EMI for display (20% down, 7 years, 8% interest)
+  const calculateDisplayEMI = (price: number) => {
+    const downPayment = price * 0.2
+    const principal = price - downPayment
+    const monthlyRate = 8 / 12 / 100
+    const months = 7 * 12
+    
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
+                (Math.pow(1 + monthlyRate, months) - 1)
+    
+    return Math.round(emi)
+  }
+  
+  const displayEMI = priceBreakup ? calculateDisplayEMI(priceBreakup.totalOnRoadPrice) : 0
+  
+  // Hero image from backend
+  const [heroImage, setHeroImage] = useState<string>('https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&h=500&fit=crop')
+  
+  // Model and Brand data
+  const [model, setModel] = useState<any>(null)
+  const [brand, setBrand] = useState<any>(null)
+  
+  // Fetch model, brand, and variants from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoadingVariants(true)
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+        
+        console.log('🔍 PriceBreakup: Fetching data for:', { brandName, modelName, variantParam })
+        
+        // Fetch all models to find the current model
+        const modelsRes = await fetch(`${backendUrl}/api/models`)
+        const models = await modelsRes.json()
+        
+        // Find the model by name (case-insensitive)
+        const foundModel = models.find((m: any) => 
+          m.name.toLowerCase() === modelName.toLowerCase()
+        )
+        
+        if (foundModel) {
+          setModel(foundModel)
+          
+          // Fetch hero image
+          if (foundModel.heroImage) {
+            const imageUrl = foundModel.heroImage.startsWith('/uploads/') 
+              ? `${backendUrl}${foundModel.heroImage}` 
+              : foundModel.heroImage
+            setHeroImage(imageUrl)
+          }
+          
+          // Fetch variants for this model
+          const variantsRes = await fetch(`${backendUrl}/api/variants?modelId=${foundModel.id}`)
+          const variants = await variantsRes.json()
+          
+          console.log('✅ Fetched variants:', variants.length)
+          
+          // Transform variants to match the expected format
+          const transformedVariants = variants.map((v: any) => ({
+            id: v.id,
+            name: v.name,
+            fuel: v.fuel || v.fuelType || 'Petrol',
+            transmission: v.transmission || 'Manual',
+            power: v.maxPower || 'N/A',
+            features: Array.isArray(v.keyFeatures) ? v.keyFeatures.join(', ') : (v.keyFeatures || 'Standard features'),
+            price: v.price // Keep in rupees for exact calculation
+          }))
+          
+          setModelVariants(transformedVariants)
+          
+          // Set default variant: use URL param if provided, otherwise lowest price variant
+          if (variantParam) {
+            // Convert slug to name (e.g., "zx-cvt" -> "ZX CVT")
+            const variantNameFromSlug = variantParam.split('-').map(word => word.toUpperCase()).join(' ')
+            
+            // Try to find match by comparing slugified versions
+            const matchedVariant = transformedVariants.find((v: any) => {
+              const variantSlug = v.name.toLowerCase().replace(/\s+/g, '-')
+              const paramSlug = variantParam.toLowerCase()
+              return variantSlug === paramSlug || v.name.toLowerCase() === variantParam.toLowerCase()
+            })
+            
+            console.log('🔍 Variant matching:', { 
+              variantParam, 
+              variantNameFromSlug, 
+              matchedVariant: matchedVariant?.name,
+              allVariants: transformedVariants.map((v: any) => v.name)
+            })
+            
+            setSelectedVariantName(matchedVariant?.name || transformedVariants[0]?.name || '')
+          } else {
+            // Find lowest price variant
+            const lowestPriceVariant = transformedVariants.reduce((lowest: any, current: any) => {
+              return (current.price < lowest.price) ? current : lowest
+            }, transformedVariants[0])
+            
+            setSelectedVariantName(lowestPriceVariant?.name || '')
+            console.log('🎯 Auto-selected lowest price variant:', lowestPriceVariant?.name, '₹', lowestPriceVariant?.price)
+          }
+        }
+        
+        setLoadingVariants(false)
+      } catch (error) {
+        console.error('❌ Error fetching data:', error)
+        setLoadingVariants(false)
+      }
+    }
+    
+    fetchData()
+  }, [brandName, modelName])
+  
+  // Fetch popular cars from backend
+  useEffect(() => {
+    const fetchPopularCars = async () => {
+      try {
+        setLoadingPopularCars(true)
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+        
+        // Fetch all models, brands, and variants
+        const [modelsRes, brandsRes, variantsRes] = await Promise.all([
+          fetch(`${backendUrl}/api/models`),
+          fetch(`${backendUrl}/api/brands`),
+          fetch(`${backendUrl}/api/variants`)
+        ])
+        
+        if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
+          console.error('Failed to fetch popular cars data')
+          setPopularCars([])
+          setLoadingPopularCars(false)
+          return
+        }
+        
+        const models = await modelsRes.json()
+        const brands = await brandsRes.json()
+        const variants = await variantsRes.json()
+        
+        // Create a map of brand IDs to brand names
+        const brandMap = brands.reduce((acc: any, brand: any) => {
+          acc[brand.id] = brand.name
+          return acc
+        }, {})
+        
+        // Filter only popular models
+        const popularModels = models.filter((model: any) => model.isPopular === true)
+        
+        // Process each popular model
+        const processedCars = popularModels.map((model: any) => {
+          // Find all variants for this model
+          const modelVariants = variants.filter((v: any) => v.modelId === model.id)
+          
+          // Find lowest price variant
+          const lowestPrice = modelVariants.length > 0
+            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
+            : model.price || 0
+          
+          // Get unique fuel types and transmissions
+          const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
+            ? model.fuelTypes
+            : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
+          
+          const transmissions = model.transmissions && model.transmissions.length > 0
+            ? model.transmissions
+            : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
+          
+          // Get hero image
+          const heroImage = model.heroImage
+            ? `${backendUrl}${model.heroImage}`
+            : ''
+          
+          return {
+            id: model.id,
+            name: model.name,
+            brand: model.brandId,
+            brandName: brandMap[model.brandId] || 'Unknown',
+            image: heroImage,
+            startingPrice: lowestPrice,
+            fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
+            transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+            seating: model.seating || 5,
+            launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
+            slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+            isNew: model.isNew || false,
+            isPopular: model.isPopular || false,
+            popularRank: model.popularRank || null
+          }
+        })
+        
+        // Sort by popularRank
+        const sortedCars = processedCars.sort((a, b) => {
+          const rankA = a.popularRank || 999
+          const rankB = b.popularRank || 999
+          return rankA - rankB
+        })
+        
+        setPopularCars(sortedCars)
+      } catch (error) {
+        console.error('Error fetching popular cars:', error)
+      } finally {
+        setLoadingPopularCars(false)
+      }
+    }
+    
+    fetchPopularCars()
+  }, [])
+  
+  const mockVariants = [
+    'V Apex Summer Edition',
+    'VX',
+    'ZX',
+    'ZX CVT'
+  ]
+  const mockCities = [
+    'Mumbai, Maharashtra',
+    'Delhi, NCR',
+    'Bangalore, Karnataka',
+    'Chennai, Tamil Nadu'
+  ]
+
+  // Similar cars data - dynamically fetched based on body type and sub-body type
+  const [similarCars, setSimilarCars] = useState<any[]>([])
+  const [loadingSimilarCars, setLoadingSimilarCars] = useState(true)
+  const [currentModelData, setCurrentModelData] = useState<any>(null)
+
+  // Fetch current model data and similar cars
+  useEffect(() => {
+    const fetchSimilarCars = async () => {
+      try {
+        setLoadingSimilarCars(true)
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+        
+        // Fetch all models, brands, and variants
+        const [modelsRes, brandsRes, variantsRes] = await Promise.all([
+          fetch(`${backendUrl}/api/models`),
+          fetch(`${backendUrl}/api/brands`),
+          fetch(`${backendUrl}/api/variants`)
+        ])
+        
+        if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
+          console.error('Failed to fetch similar cars data')
+          setSimilarCars([])
+          setLoadingSimilarCars(false)
+          return
+        }
+        
+        const models = await modelsRes.json()
+        const brands = await brandsRes.json()
+        const variants = await variantsRes.json()
+        
+        // Create brand map
+        const brandMap = brands.reduce((acc: any, brand: any) => {
+          acc[brand.id] = brand.name
+          return acc
+        }, {})
+        
+        // Find current model by matching brand and model name
+        const currentModel = models.find((m: any) => {
+          const mBrandName = brandMap[m.brandId]?.toLowerCase().replace(/\s+/g, '-')
+          const mModelName = m.name.toLowerCase().replace(/\s+/g, '-')
+          return mBrandName === brandSlug && mModelName === modelSlug
+        })
+        
+        if (!currentModel || !currentModel.bodyType) {
+          setSimilarCars([])
+          setLoadingSimilarCars(false)
+          return
+        }
+        
+        setCurrentModelData(currentModel)
+        
+        // Filter models with matching body type and sub-body type, excluding current model
+        const matchingModels = models.filter((m: any) => 
+          m.id !== currentModel.id && // Exclude current model
+          m.bodyType === currentModel.bodyType && // Match body type
+          m.subBodyType === currentModel.subBodyType // Match sub-body type
+        )
+        
+        // Process matching models
+        const processedCars = matchingModels.map((m: any) => {
+          const modelVariants = variants.filter((v: any) => v.modelId === m.id)
+          const lowestPrice = modelVariants.length > 0
+            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
+            : m.price || 0
+          
+          const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
+            ? m.fuelTypes
+            : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
+          
+          const heroImage = m.heroImage ? `${backendUrl}${m.heroImage}` : ''
+          
+          const formatLaunchDate = (date: string): string => {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            const parts = date.split('-')
+            if (parts.length === 2) {
+              const year = parts[0]
+              const monthIndex = parseInt(parts[1]) - 1
+              return `${months[monthIndex]} ${year}`
+            }
+            return date
+          }
+          
+          return {
+            id: m.id,
+            name: m.name,
+            brand: brandMap[m.brandId] || 'Unknown',
+            image: heroImage,
+            startingPrice: lowestPrice,
+            fuelType: fuelTypes.length > 0 ? fuelTypes.join('/') : 'Petrol',
+            seating: m.seatingCapacity || 5,
+            launchDate: m.launchDate ? `Launched ${formatLaunchDate(m.launchDate)}` : 'New Launch',
+            slug: `${brandMap[m.brandId]?.toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
+            isNew: m.isNew || false
+          }
+        })
+        
+        setSimilarCars(processedCars.slice(0, 6)) // Limit to 6 cars
+        setLoadingSimilarCars(false)
+      } catch (error) {
+        console.error('Error fetching similar cars:', error)
+        setSimilarCars([])
+        setLoadingSimilarCars(false)
+      }
+    }
+
+    fetchSimilarCars()
+  }, [brandSlug, modelSlug])
+
+
+  // Use real variants from backend, fallback to empty array if loading
+  const allVariants = modelVariants
+
+  // Helper function to check if transmission is automatic type
+  const isAutomaticTransmission = (transmission: string) => {
+    const automaticTypes = ['automatic', 'cvt', 'amt', 'dct', 'torque converter', 'dual clutch']
+    return automaticTypes.some(type => transmission.toLowerCase().includes(type))
+  }
+
+  // Generate dynamic filters based on available variants
+  const getDynamicFilters = () => {
+    const filters = ['All']
+    const fuelTypes = new Set<string>()
+    let hasAutomatic = false
+
+    allVariants.forEach(variant => {
+      if (variant.fuel) fuelTypes.add(variant.fuel)
+      if (variant.transmission && isAutomaticTransmission(variant.transmission)) {
+        hasAutomatic = true
+      }
+    })
+
+    fuelTypes.forEach(fuel => filters.push(fuel))
+    if (hasAutomatic) filters.push('Automatic')
+    
+    return filters
+  }
+
+  const availableFilters = getDynamicFilters()
+
+  // Filter variants based on active filter
+  const getFilteredVariants = () => {
+    switch (activeFilter) {
+      case 'All':
+        return allVariants
+      case 'Diesel':
+        return allVariants.filter(variant => variant.fuel === 'Diesel')
+      case 'Petrol':
+        return allVariants.filter(variant => variant.fuel === 'Petrol')
+      case 'CNG':
+        return allVariants.filter(variant => variant.fuel === 'CNG')
+      case 'Automatic':
+        return allVariants.filter(variant => 
+          variant.transmission && isAutomaticTransmission(variant.transmission)
+        )
+      default:
+        return allVariants
+    }
+  }
+
+  const filteredVariants = getFilteredVariants()
+
+  const handleVariantClick = (variant: any) => {
+    const brandSlug = brandName?.toLowerCase().replace(/\s+/g, '-')
+    const modelSlug = modelName?.toLowerCase().replace(/\s+/g, '-')
+    const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
+    router.push(`/${brandSlug}-cars/${modelSlug}/${variantSlug}`)
+  }
+
+  // Fetch hero image from backend
+  useEffect(() => {
+    const fetchModelImage = async () => {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+        console.log('🖼️ Fetching model image from:', backendUrl)
+        
+        // Fetch all models to find the matching one
+        const response = await fetch(`${backendUrl}/api/models`)
+        
+        if (response.ok) {
+          const models = await response.json()
+          console.log('📦 Fetched models:', models.length)
+          
+          // Find the model by name (case-insensitive)
+          const model = models.find((m: any) => 
+            m.name.toLowerCase() === modelName.toLowerCase()
+          )
+          
+          console.log('🔍 Found model:', model?.name, 'Hero image:', model?.heroImage)
+          
+          if (model && model.heroImage) {
+            // Prepend backend URL to the image path
+            const imageUrl = `${backendUrl}${model.heroImage}`
+            console.log('✅ Setting hero image to:', imageUrl)
+            setHeroImage(imageUrl)
+          } else {
+            console.warn('⚠️ No hero image found for model:', modelName)
+          }
+        } else {
+          console.error('❌ Failed to fetch models:', response.status)
+        }
+      } catch (error) {
+        console.error('❌ Error fetching model image:', error)
+        // Keep default image on error
+      }
+    }
+
+    if (modelName) {
+      fetchModelImage()
+    }
+  }, [modelName])
+
+  // Listen for city changes from localStorage (when user returns from location page)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedCity = localStorage.getItem('selectedCity')
+      if (savedCity && savedCity !== selectedCity) {
+        setSelectedCity(savedCity)
+        // Update URL with new city
+        const brandSlug = brandName.toLowerCase().replace(/\s+/g, '-')
+        const modelSlug = modelName.toLowerCase().replace(/\s+/g, '-')
+        const citySlug = savedCity.split(',')[0].toLowerCase().replace(/\s+/g, '-')
+        router.push(`/${brandSlug}-cars/${modelSlug}/price-in/${citySlug}`)
+      }
+    }
+
+    // Listen for storage events
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Check on mount
+    handleStorageChange()
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [])
+
+  // Calculate On-Road Price when variant or city changes
+  useEffect(() => {
+    // Only calculate if we have variants loaded and a selected variant
+    if (allVariants.length === 0 || !selectedVariantName) {
+      console.log('⏳ Waiting for variants to load...', { 
+        variantsCount: allVariants.length, 
+        selectedVariantName 
+      })
+      return
+    }
+    
+    // Find the selected variant from allVariants
+    const selectedVariant = allVariants.find(v => v.name === selectedVariantName)
+    
+    if (selectedVariant) {
+      // Price is already in rupees from backend (e.g., 1201150)
+      const exShowroomPrice = selectedVariant.price
+      
+      console.log('💰 Calculating on-road price:', {
+        variant: selectedVariantName,
+        exShowroomPrice,
+        city: selectedCity
+      })
+      
+      // Extract state from city (e.g., "Mumbai, Maharashtra" -> "Maharashtra")
+      const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
+      
+      // Get fuel type
+      const fuelType = selectedVariant.fuel || 'Petrol'
+      
+      // Calculate the breakup
+      const breakup = calculateOnRoadPrice(exShowroomPrice, state, fuelType)
+      setPriceBreakup(breakup)
+    } else {
+      console.warn('⚠️ Variant not found:', selectedVariantName, 'Available:', allVariants.map(v => v.name))
+    }
+  }, [selectedVariantName, selectedCity, allVariants])
+
+  // FAQ toggle function
+  const toggleFAQ = (index: number) => {
+    setOpenFAQ(openFAQ === index ? null : index)
+  }
+
+  // Mock FAQ data
+  const faqs = [
+    {
+      question: `Q: What is the avg ex-showroom price of ${brandName} ${modelName} base model?`,
+      answer: `The ex-showroom price of the ${brandName} ${modelName} base model starts at approximately ₹12.01 Lakh.`
+    },
+    {
+      question: `Q: What is the avg ex-showroom price of ${brandName} ${modelName} top model?`,
+      answer: `The ex-showroom price of the ${brandName} ${modelName} top model is around ₹16.93 Lakh.`
+    },
+    {
+      question: `Q: What is the real world versus claimed mileage of ${brandName} ${modelName}?`,
+      answer: `The ${brandName} ${modelName} delivers a real-world mileage of 14-16 km/l in city conditions and 18-20 km/l on highways, while the claimed mileage is around 16-18 km/l.`
+    },
+    {
+      question: `Q: What is the seating capacity in ${brandName} ${modelName}?`,
+      answer: `The ${brandName} ${modelName} has a seating capacity of 5 people.`
+    }
+  ]
+
+  // Mock dealers data
+  const dealers = [
+    {
+      name: 'Solitaire Honda',
+      address: 'Krish Cars Pvt.Ltd. C/o Shakti Insulated Wires, Shakti Industrial & Commercial Business Centre, Dattapada road, Rajendra Nagar, Borivali (East)',
+      city: 'Mumbai, Maharashtra, 400066'
+    },
+    {
+      name: 'Arya Honda',
+      address: 'Shaman Cars India, 99/100, L.B.S. Marg, Next to St. Xaviers High School, Bhandup (W)',
+      city: 'Mumbai, Maharashtra, 400078'
+    },
+    {
+      name: 'Arya Honda',
+      address: 'Janmabhoomi Chambers, Walchand Hirachand Marg, Near G.P.O, Ballard Estate',
+      city: 'Mumbai, Maharashtra, 400001'
+    }
+  ]
+
+  // Mock city prices data
+  const cityPrices = [
+    { id: '1', name: 'Delhi', price: 12.89 },
+    { id: '2', name: 'Mumbai', price: 12.99 },
+    { id: '3', name: 'Bangalore', price: 13.09 },
+    { id: '4', name: 'Chennai', price: 13.19 },
+  ]
+
+  // Feedback form state
+  const [feedbackForm, setFeedbackForm] = useState({
+    feedback: '',
+    name: '',
+    email: ''
+  })
+
+  // Close variant dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (variantDropdownRef.current && !variantDropdownRef.current.contains(event.target as Node)) {
+        setShowVariantDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Sticky Navigation Ribbon */}
+      <div className="bg-white border-b sticky top-0 z-40 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
+            {sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => scrollToSection(section.id)}
+                className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                  activeSection === section.id
+                    ? 'border-red-600 text-red-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {section.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Section 1: Hero with Car Image, Variant/City Selection, and On-Road Price */}
+      <PageSection background="white" maxWidth="7xl">
+        <div id="overview" className="pt-4 pb-8">
+          {/* Page Title */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {modelName} Price in {selectedCity.split(',')[0]}
+            </h1>
+            <p className="text-gray-600 text-base">
+              The on road price of the {modelName} in {selectedCity.split(',')[0]} ranges from Rs. 8.44 Lakh to Rs. 17.06 Lakh. 
+              The ex-showroom price is between Rs. 7.32 Lakh and Rs. 14.15 Lakh.
+              <button className="text-red-600 ml-1 font-medium">...more</button>
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left: Hero Image */}
+            <div>
+              {/* Clickable Image - Links to Model Page */}
+              <Link 
+                href={`/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars/${modelName.toLowerCase().replace(/\s+/g, '-')}`}
+                className="block bg-gray-100 rounded-2xl overflow-hidden mb-4 cursor-pointer hover:opacity-90 transition-opacity"
+              >
+                <img
+                  src={heroImage}
+                  alt={`${brandName} ${modelName}`}
+                  className="w-full h-auto object-contain"
+                />
+              </Link>
+
+              {/* Car Name with Icons */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {brandName} {modelName} {selectedVariantName}
+                </h2>
+                <div className="flex items-center space-x-3">
+                  <button className="p-2 hover:bg-gray-100 rounded-full">
+                    <Share2 className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-100 rounded-full">
+                    <Heart className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Variant Dropdown - Shows all variants with prices */}
+              <div className="mb-4 relative" ref={variantDropdownRef}>
+                <button
+                  onClick={() => setShowVariantDropdown(!showVariantDropdown)}
+                  className="w-full bg-white border-2 border-blue-500 rounded-lg px-4 py-3 text-left flex items-center justify-between hover:border-blue-600 transition-colors"
+                >
+                  <span className="text-gray-900 font-medium">{selectedVariantName || 'Loading...'}</span>
+                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showVariantDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showVariantDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-96 overflow-y-auto">
+                    {allVariants.map((variant) => (
+                      <button
+                        key={variant.id}
+                        onClick={() => {
+                          setSelectedVariantName(variant.name)
+                          setShowVariantDropdown(false)
+                        }}
+                        className={`block w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                          variant.name === selectedVariantName ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={`text-gray-900 font-medium ${variant.name === selectedVariantName ? 'text-blue-600' : ''}`}>
+                            {variant.name}
+                          </span>
+                          <span className="text-gray-600 text-sm font-semibold">
+                            ₹ {(variant.price / 100000).toFixed(2)} Lakh
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* City Selector - Links to Location Page */}
+              <Link
+                href="/location"
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-left flex items-center justify-between hover:border-gray-400 transition-colors"
+              >
+                <span className="text-gray-700">{selectedCity}</span>
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              </Link>
+            </div>
+
+            {/* Right: On-Road Price Breakdown */}
+            <div id="price-breakup">
+              <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                <div className="bg-gradient-to-r from-red-600 to-orange-500 px-6 py-5">
+                  <h3 className="text-2xl font-bold text-white">On-Road Price</h3>
+                </div>
+                
+                <div className="p-6">
+                  {priceBreakup ? (
+                    <>
+                      {/* Price Items - Cleaner spacing */}
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="text-gray-700 font-medium">Ex-Showroom Price</span>
+                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.exShowroomPrice)}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="text-gray-700 font-medium">RTO Charges</span>
+                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.rtoCharges)}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="text-gray-700 font-medium">Road Safety Tax/Cess</span>
+                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.roadSafetyTax)}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="text-gray-700 font-medium">Insurance Cost</span>
+                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.insurance)}</span>
+                        </div>
+                        
+                        {priceBreakup.tcs > 0 && (
+                          <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                            <span className="text-gray-700 font-medium">Tax Collected at Source (TCS)</span>
+                            <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.tcs)}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="text-gray-700 font-medium">Other Charges</span>
+                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.otherCharges)}</span>
+                        </div>
+
+                        {/* Optional Charges - Lighter styling */}
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="text-gray-500">Hypothecation Charges</span>
+                          <span className="font-medium text-gray-500">₹ {formatIndianPrice(priceBreakup.hypothecation)}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                          <span className="text-gray-500">FasTag Charges</span>
+                          <span className="font-medium text-gray-500">₹ {formatIndianPrice(priceBreakup.fasTag)}</span>
+                        </div>
+                      </div>
+
+                      {/* Total On-Road Price - Compact */}
+                      <div className="mt-6">
+                        <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 rounded-xl p-4 border-2 border-green-200">
+                          <div className="flex flex-col space-y-1">
+                            <span className="text-sm font-semibold text-gray-700">On-Road Price in {selectedCity.split(',')[0]}</span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-600 text-2xl font-bold">₹</span>
+                              <span className="text-green-600 text-3xl font-bold tracking-tight">
+                                {formatIndianPrice(priceBreakup.totalOnRoadPrice)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      Calculating price...
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </PageSection>
+
+      {/* Section 2: AD Banner & EMI Calculator */}
+      <PageSection background="gray" maxWidth="7xl">
+        <div className="py-8 space-y-6">
+          {/* AD Banner */}
+          <div className="bg-gray-300 rounded-lg py-20 text-center">
+            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
+          </div>
+
+          {/* EMI Calculator Card */}
+          <div id="emi" className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">K</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">kotak</h3>
+                  <p className="text-sm text-gray-600">Mahindra Bank</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Starting EMI</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(displayEMI)}
+                </p>
+                <p className="text-sm text-gray-600">per month</p>
+              </div>
+            </div>
+            
+            <Link
+              href={`/emi-calculator?brand=${encodeURIComponent(brandName)}&model=${encodeURIComponent(modelName)}&variant=${encodeURIComponent(selectedVariantName)}&price=${priceBreakup?.totalOnRoadPrice || 0}`}
+              className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-3 rounded-full font-semibold transition-colors flex items-center justify-center"
+            >
+              <span>Calculate EMI</span>
+            </Link>
+          </div>
+        </div>
+      </PageSection>
+
+      {/* Section 3: More Variants */}
+      <PageSection background="white" maxWidth="7xl">
+        <div id="variants" className="py-8 space-y-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            More {modelName} Variants price in {selectedCity.split(',')[0]}
+          </h2>
+
+          {/* Filter Options - Dynamic based on available variants */}
+          <div className="flex flex-wrap gap-3">
+            {availableFilters.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeFilter === filter
+                    ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+
+          {/* Variant Cards - Show only 8 */}
+          <div className="space-y-4">
+            {loadingVariants ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
+                <p className="text-gray-500">Loading variants...</p>
+              </div>
+            ) : filteredVariants.length > 0 ? (
+              filteredVariants.slice(0, 8).map((variant) => (
+                <VariantCard
+                  key={variant.id}
+                  variant={{
+                    ...variant,
+                    price: variant.price / 100000 // Convert rupees to lakhs for VariantCard
+                  }}
+                  onClick={() => {
+                    const brandSlug = brandName?.toLowerCase().replace(/\s+/g, '-')
+                    const modelSlug = modelName?.toLowerCase().replace(/\s+/g, '-')
+                    const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
+                    router.push(`/${brandSlug}-cars/${modelSlug}/variant/${variantSlug}`)
+                  }}
+                  onGetPrice={(e) => {
+                    e.stopPropagation()
+                    setSelectedVariantName(variant.name)
+                  }}
+                  onCompare={(e) => e.stopPropagation()}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No variants found for the selected filter.</p>
+              </div>
+            )}
+          </div>
+
+          {/* View All Variants Button - Only show if more than 8 variants */}
+          {!loadingVariants && allVariants.length > 8 && (
+            <div className="text-center pt-4">
+              <button 
+                className="text-red-600 hover:text-orange-600 font-medium text-lg"
+                onClick={() => {
+                  const brandSlug = brandName?.toLowerCase().replace(/\s+/g, '-')
+                  const modelSlug = modelName?.toLowerCase().replace(/\s+/g, '-')
+                  router.push(`/${brandSlug}-cars/${modelSlug}/variants`)
+                }}
+              >
+                View All {allVariants.length} Variants
+              </button>
+            </div>
+          )}
+        </div>
+      </PageSection>
+
+      {/* Section 4: AD Banner, Similar Cars & Popular Cars */}
+      <PageSection background="white" maxWidth="7xl">
+        <div id="similar-cars" className="py-8 space-y-12">
+          {/* AD Banner */}
+          <div className="bg-gray-300 rounded-lg py-20 text-center">
+            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
+          </div>
+
+          {/* Similar Cars Section */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Similar Cars to {brandName} {modelName}</h2>
+            
+            {/* Cars Horizontal Scroll */}
+            <div className="relative">
+              <div
+                className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {similarCars.map((car) => (
+                  <Link
+                    key={car.id}
+                    href={`/${car.brand.toLowerCase().replace(/\s+/g, '-')}-cars/${car.name.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden block"
+                  >
+                    {/* Car Image with Badges */}
+                    <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
+                      {/* NEW Badge */}
+                      {car.isNew && (
+                        <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
+                          NEW
+                        </div>
+                      )}
+                      
+                      {/* Heart Icon */}
+                      <button className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
+                        <Heart className="h-5 w-5 text-gray-600" />
+                      </button>
+
+                      {/* Car Image */}
+                      <div className="w-full h-full flex items-center justify-center">
+                        <img 
+                          src={car.image}
+                          alt={`${car.brand} ${car.name}`}
+                          className="w-full h-full object-contain object-center transition-transform duration-300"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Car Info */}
+                    <div className="p-5">
+                      <h3 className="font-bold text-gray-900 mb-2 text-lg">{truncateCarName(car.brand, car.name, 18)}</h3>
+                      
+                      <div className="flex items-center text-red-600 font-bold text-xl mb-4">
+                        <span>₹ {(car.startingPrice / 100000).toFixed(2)} Lakh</span>
+                      </div>
+
+                      <div className="space-y-3 text-sm text-gray-600 mb-4">
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-3 text-gray-400" />
+                          <span>{car.launchDate}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Fuel className="h-4 w-4 mr-3 text-gray-400" />
+                          <span>{car.fuelType}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Users className="h-4 w-4 mr-3 text-gray-400" />
+                          <span>{car.seating} Seater</span>
+                        </div>
+                      </div>
+
+                      <button className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-3 rounded-lg transition-all duration-200 text-sm font-semibold">
+                        View Details
+                      </button>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Popular Cars Section */}
+          <div id="popular-cars" className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Popular Cars</h2>
+            
+            {/* Cars Horizontal Scroll */}
+            <div className="relative">
+              {loadingPopularCars ? (
+                <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="h-48 bg-gray-200 animate-pulse"></div>
+                      <div className="p-5 space-y-3">
+                        <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+                        <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : popularCars.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p>No popular cars found.</p>
+                </div>
+              ) : (
+                <div
+                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {popularCars.map((car) => (
+                    <CarCard
+                      key={car.id}
+                      car={car}
+                      onClick={() => {
+                        const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                        const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                        router.push(`/${brandSlug}-cars/${modelSlug}`)
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </PageSection>
+
+      {/* Section 5: AD Banner & Owner Reviews */}
+      <PageSection background="white" maxWidth="7xl">
+        <div id="reviews" className="py-8 space-y-12">
+          {/* AD Banner */}
+          <div className="bg-gray-300 rounded-lg py-20 text-center">
+            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
+          </div>
+
+          {/* Owner Reviews Section */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">{brandName} {modelName} Owner Reviews</h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Rating Summary */}
+              <div className="lg:col-span-1">
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4].map((star) => (
+                        <svg key={star} className="h-6 w-6 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                      <svg className="h-6 w-6 text-gray-300" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                    <span className="ml-2 text-2xl font-bold text-gray-900">4.2</span>
+                    <span className="ml-2 text-gray-500">(1,543 reviews)</span>
+                  </div>
+
+                  <div className="space-y-2 mb-6">
+                    <h3 className="font-semibold text-gray-900 mb-3">Rating Breakdown</h3>
+                    
+                    {/* 5 Star */}
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-8">5★</span>
+                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
+                        <div className="bg-orange-400 h-2 rounded-full" style={{ width: '55%' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600 w-12 text-right">856</span>
+                    </div>
+                    
+                    {/* 4 Star */}
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-8">4★</span>
+                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
+                        <div className="bg-orange-400 h-2 rounded-full" style={{ width: '21%' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600 w-12 text-right">324</span>
+                    </div>
+                    
+                    {/* 3 Star */}
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-8">3★</span>
+                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
+                        <div className="bg-orange-400 h-2 rounded-full" style={{ width: '12%' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600 w-12 text-right">189</span>
+                    </div>
+                    
+                    {/* 2 Star */}
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-8">2★</span>
+                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
+                        <div className="bg-gray-300 h-2 rounded-full" style={{ width: '2%' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600 w-12 text-right">26</span>
+                    </div>
+                    
+                    {/* 1 Star */}
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-8">1★</span>
+                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
+                        <div className="bg-gray-300 h-2 rounded-full" style={{ width: '1%' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600 w-12 text-right">13</span>
+                    </div>
+                  </div>
+
+                  {/* Filter Options */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Filter by rating:</label>
+                      <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option>All Ratings</option>
+                        <option>5 Stars</option>
+                        <option>4 Stars</option>
+                        <option>3 Stars</option>
+                        <option>2 Stars</option>
+                        <option>1 Star</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Sort by:</label>
+                      <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option>Most Recent</option>
+                        <option>Most Helpful</option>
+                        <option>Highest Rating</option>
+                        <option>Lowest Rating</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reviews List */}
+              <div className="lg:col-span-2">
+                {/* Individual Reviews */}
+                <div className="space-y-6">
+                  {/* Review 1 */}
+                  <div className="border-b border-gray-200 pb-6">
+                    <div className="flex items-start">
+                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-orange-600 font-semibold text-sm">R</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 flex items-center">
+                              Rajesh Kumar
+                              <svg className="h-4 w-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                            </h4>
+                            <p className="text-sm text-gray-500">15/01/2024</p>
+                          </div>
+                          <div className="flex items-center">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <svg key={star} className="h-4 w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                            ))}
+                          </div>
+                        </div>
+                        <h5 className="font-semibold text-gray-900 mb-2">Excellent car with great mileage</h5>
+                        <p className="text-gray-700 mb-3">
+                          I have been using this car for 6 months now. The mileage is excellent in city conditions. Build quality is good and maintenance cost is reasonable.
+                        </p>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <button className="flex items-center hover:text-gray-700">
+                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                            </svg>
+                            24
+                          </button>
+                          <button className="flex items-center hover:text-gray-700">
+                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
+                            </svg>
+                            2
+                          </button>
+                          <span>Helpful</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Review 2 */}
+                  <div className="border-b border-gray-200 pb-6">
+                    <div className="flex items-start">
+                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-orange-600 font-semibold text-sm">P</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 flex items-center">
+                              Priya Sharma
+                              <svg className="h-4 w-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                            </h4>
+                            <p className="text-sm text-gray-500">10/01/2024</p>
+                          </div>
+                          <div className="flex items-center">
+                            {[1, 2, 3, 4].map((star) => (
+                              <svg key={star} className="h-4 w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                            ))}
+                            <svg className="h-4 w-4 text-gray-300" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <h5 className="font-semibold text-gray-900 mb-2">Good family car</h5>
+                        <p className="text-gray-700 mb-3">
+                          Perfect for family use. Spacious interior and comfortable seats. Only issue is the road noise at high speeds.
+                        </p>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <button className="flex items-center hover:text-gray-700">
+                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                            </svg>
+                            18
+                          </button>
+                          <button className="flex items-center hover:text-gray-700">
+                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
+                            </svg>
+                            1
+                          </button>
+                          <span>Helpful</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Read More Button */}
+                <div className="text-center mt-6">
+                  <button className="text-red-600 hover:text-orange-600 font-medium transition-colors">Read More</button>
+                </div>
+
+                {/* Write Review CTA */}
+                <div className="bg-gray-50 rounded-lg p-6 mt-6 text-center">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Own a {brandName} {modelName}? Share your experience!</h3>
+                  <p className="text-gray-600 mb-4">
+                    Help other buyers make informed decisions by sharing your honest review
+                  </p>
+                  <button className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-md">
+                    Write a Review
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </PageSection>
+
+      {/* Section 6: AD Banner, FAQ & Brand Dealers */}
+      <PageSection background="white" maxWidth="7xl">
+        <div id="faq" className="py-8 space-y-12">
+          {/* AD Banner */}
+          <div className="bg-gray-300 rounded-lg py-20 text-center">
+            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
+          </div>
+
+          {/* FAQ Section */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">{brandName} {modelName} FAQ</h2>
+            
+            <div className="space-y-4 max-w-4xl mx-auto">
+              {faqs.map((faq, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg border border-gray-200">
+                  <button 
+                    onClick={() => toggleFAQ(index)}
+                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-100 transition-colors"
+                  >
+                    <span className="text-base font-medium text-gray-900">
+                      {faq.question}
+                    </span>
+                    <svg 
+                      className={`h-5 w-5 text-gray-500 transition-transform flex-shrink-0 ml-4 ${openFAQ === index ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {openFAQ === index && (
+                    <div className="px-6 pb-4 text-gray-600 leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Brand Dealers Section */}
+          <div id="dealers">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{brandName} Dealers in {selectedCity.split(',')[0]}</h2>
+            <p className="text-gray-600 mb-8">
+              Planning to Buy {modelName}? Here are a few showrooms/dealers in {selectedCity.split(',')[0]}
+            </p>
+
+            <div className="space-y-6">
+              {dealers.map((dealer, index) => (
+                <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-start">
+                    {/* Dealer Icon */}
+                    <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+
+                    {/* Dealer Info */}
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{dealer.name}</h3>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="font-medium">Address:</span> {dealer.address}
+                      </p>
+                      <p className="text-sm text-gray-600">{dealer.city}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* View All Dealers Button */}
+            <div className="text-center mt-8">
+              <button className="w-full max-w-md bg-white border-2 border-gray-300 hover:border-red-600 text-gray-900 hover:text-red-600 px-6 py-3 rounded-lg font-semibold transition-all duration-200">
+                View All Dealers in {selectedCity.split(',')[0]}
+              </button>
+            </div>
+          </div>
+        </div>
+      </PageSection>
+
+      {/* Section 7: Price across India, AD Banner & Share Feedback */}
+      <PageSection background="white" maxWidth="7xl">
+        <div className="py-8 space-y-12">
+          {/* Price across India */}
+          <div id="price-cities" className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {brandName} {modelName} {selectedVariantName} Price across India
+            </h2>
+            
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              {/* Table Header */}
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <div className="grid grid-cols-2 gap-4">
+                  <h3 className="text-lg font-semibold text-gray-900">City</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">On-Road Prices</h3>
+                </div>
+              </div>
+              
+              {/* City Price List */}
+              <div className="divide-y divide-gray-200">
+                {cityPrices.map((city) => (
+                  <div key={city.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                    <div className="grid grid-cols-2 gap-4">
+                      <span className="text-red-600 font-medium hover:text-red-700 cursor-pointer">
+                        {city.name}
+                      </span>
+                      <span className="text-gray-900 font-semibold">
+                        Rs. {city.price.toFixed(2)} Lakh
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* View More Cities Button */}
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
+                <button className="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center justify-center space-x-1 mx-auto">
+                  <span>View More Cities</span>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* AD Banner */}
+          <div className="bg-gray-300 rounded-lg py-20 text-center">
+            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
+          </div>
+
+          {/* Share Your Feedback */}
+          <div id="feedback" className="max-w-2xl mx-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-8">
+              <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">Share Your Feedback</h2>
+              <p className="text-gray-600 text-center mb-8">
+                Help us improve by sharing your thoughts about this page
+              </p>
+
+              <form className="space-y-6">
+                {/* Feedback Textarea */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Feedback
+                  </label>
+                  <textarea
+                    value={feedbackForm.feedback}
+                    onChange={(e) => setFeedbackForm({ ...feedbackForm, feedback: e.target.value })}
+                    placeholder="Tell us what you think about this car page..."
+                    rows={4}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                  />
+                </div>
+
+                {/* Name Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={feedbackForm.name}
+                    onChange={(e) => setFeedbackForm({ ...feedbackForm, name: e.target.value })}
+                    placeholder="Enter your name"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Email Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={feedbackForm.email}
+                    onChange={(e) => setFeedbackForm({ ...feedbackForm, email: e.target.value })}
+                    placeholder="Enter your email"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Submit Feedback</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </PageSection>
+
+      {/* Footer */}
+      <Footer />
+    </div>
+  )
+}

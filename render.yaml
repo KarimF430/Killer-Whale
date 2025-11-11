@@ -1,0 +1,56 @@
+# Render Blueprint for MotorOctane
+services:
+  # Frontend (Next.js)
+  - type: web
+    name: motoroctane-frontend
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: motoroctane-backend
+          property: host
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          type: web
+          name: motoroctane-backend
+          property: host
+      - key: NEXT_PUBLIC_SENTRY_DSN
+        sync: false
+      - key: NEXT_PUBLIC_GA_ID
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+    
+  # Backend (Express.js)
+  - type: web
+    name: motoroctane-backend
+    env: node
+    plan: starter
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SENTRY_DSN
+        sync: false
+      - key: PORT
+        value: 5001
+
+databases:
+  # MongoDB (if using Render's database)
+  - name: motoroctane-db
+    plan: starter
