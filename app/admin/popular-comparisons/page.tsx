@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, Save } from 'lucide-react'
 
+// Force dynamic rendering to prevent static generation
+export const dynamic = 'force-dynamic'
+
 interface Brand {
   id: string
   name: string

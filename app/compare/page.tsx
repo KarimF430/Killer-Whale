@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+
+// Force dynamic rendering to prevent static generation
+export const dynamic = 'force-dynamic'
 import { Plus } from 'lucide-react'
 import Footer from '@/components/Footer'
 import PopularComparisons from '@/components/home/PopularComparisons'

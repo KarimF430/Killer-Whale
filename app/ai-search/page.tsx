@@ -2,6 +2,9 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+
+// Force dynamic rendering to prevent static generation
+export const dynamic = 'force-dynamic'
 import { Search, Bot, Car, Fuel, Users, Calendar, IndianRupee, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
