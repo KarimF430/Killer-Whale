@@ -640,6 +640,9 @@ export default function VariantPage({
                           src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}`}
                           alt={`${displayBrandName || 'Car'} ${displayModelName || 'Model'}`}
                           className="w-full h-full object-contain rounded-2xl"
+                          loading="eager"
+                          fetchpriority="high"
+                          decoding="async"
                         />
                       </div>
                     )}
@@ -650,6 +653,8 @@ export default function VariantPage({
                           src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`}
                           alt={`${displayBrandName || 'Car'} ${displayModelName || 'Model'} - Image ${index + 1}`}
                           className="w-full h-full object-cover rounded-2xl"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                     ))}
@@ -719,35 +724,40 @@ export default function VariantPage({
 
             {/* Description */}
             <div className="text-gray-700 leading-relaxed">
-              <p>
-                {showSkeleton ? (
-                  <div className="space-y-2">
-                    <div className="bg-gray-200 animate-pulse h-4 w-full rounded"></div>
-                    <div className="bg-gray-200 animate-pulse h-4 w-3/4 rounded"></div>
-                  </div>
-                ) : (
-                  showFullDescription ? currentVariantData.description : 
-                   (currentVariantData.description?.length > 150 ? 
-                    `${currentVariantData.description.substring(0, 150)}...` : 
-                    currentVariantData.description)
-                )}
-                {!showSkeleton && !showFullDescription && currentVariantData.description?.length > 150 && (
-                  <button
-                    onClick={() => setShowFullDescription(true)}
-                    className="text-red-600 hover:text-orange-600 font-medium ml-1"
-                  >
-                    ...more
-                  </button>
-                )}
-                {!showSkeleton && showFullDescription && currentVariantData.description?.length > 150 && (
-                  <button
-                    onClick={() => setShowFullDescription(false)}
-                    className="text-red-600 hover:text-orange-600 font-medium ml-2"
-                  >
-                    Show less
-                  </button>
-                )}
-              </p>
+              {showSkeleton ? (
+                <div className="space-y-2">
+                  <div className="bg-gray-200 animate-pulse h-4 w-full rounded"></div>
+                  <div className="bg-gray-200 animate-pulse h-4 w-3/4 rounded"></div>
+                </div>
+              ) : (
+                <>
+                  <p>
+                    {showFullDescription ? currentVariantData.description : 
+                      (currentVariantData.description?.length > 150 ? 
+                        `${currentVariantData.description.substring(0, 150)}...` : 
+                        currentVariantData.description)}
+                  </p>
+                  {currentVariantData.description?.length > 150 && (
+                    <div className="mt-2">
+                      {!showFullDescription ? (
+                        <button
+                          onClick={() => setShowFullDescription(true)}
+                          className="text-red-600 hover:text-orange-600 font-medium"
+                        >
+                          ...more
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setShowFullDescription(false)}
+                          className="text-red-600 hover:text-orange-600 font-medium"
+                        >
+                          Show less
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Single Price Display for Variant */}
@@ -901,6 +911,8 @@ export default function VariantPage({
                                 src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}`}
                                 alt={highlight.caption || `${displayBrandName} ${displayModelName} Feature ${index + 1}`}
                                 className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
                                 onError={(e) => {
                                   // Fallback to placeholder if image fails to load
                                   e.currentTarget.src = `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
@@ -927,6 +939,8 @@ export default function VariantPage({
                               src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
                               alt="Advanced Safety Features"
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                             {/* Image Caption Overlay */}
                             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
@@ -944,6 +958,8 @@ export default function VariantPage({
                               src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
                               alt="Premium Interior"
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                             {/* Image Caption Overlay */}
                             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
@@ -961,6 +977,8 @@ export default function VariantPage({
                               src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop&crop=center"
                               alt="Fuel Efficiency"
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                             {/* Image Caption Overlay */}
                             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">

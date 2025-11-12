@@ -34,9 +34,9 @@ Sentry.init({
     }),
     new Sentry.Replay({
       // Mask all text content for privacy
-      maskAllText: false,
+      maskAllText: true,
       // Block all media for privacy
-      blockAllMedia: false,
+      blockAllMedia: true,
     }),
   ],
   

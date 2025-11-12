@@ -82,6 +82,9 @@ export default function HeroSection({ carData }: HeroSectionProps) {
               src={carData.images[selectedImage] || '/api/placeholder/800/600'}
               alt={`${carData.fullName} - Image ${selectedImage + 1}`}
               className="w-full h-full object-cover"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
             />
             
             {/* Navigation Arrows */}
@@ -131,6 +134,8 @@ export default function HeroSection({ carData }: HeroSectionProps) {
                   src={image || '/api/placeholder/80/60'}
                   alt={`${carData.fullName} thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               </button>
             ))}

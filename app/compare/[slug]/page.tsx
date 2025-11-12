@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-
-// Force dynamic rendering to prevent static generation
-export const dynamic = 'force-dynamic'
 import { ChevronDown, Plus, Share2, X, TrendingUp, TrendingDown, Award } from 'lucide-react'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 import Footer from '@/components/Footer'

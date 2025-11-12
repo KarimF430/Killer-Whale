@@ -1,10 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Save } from 'lucide-react'
-
-// Force dynamic rendering to prevent static generation
-export const dynamic = 'force-dynamic'
+import { Save } from 'lucide-react'
 
 interface Brand {
   id: string

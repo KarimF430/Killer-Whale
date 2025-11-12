@@ -2,9 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { MapPin, ArrowLeft, X, Navigation, Loader2 } from 'lucide-react'
-
-// Force dynamic rendering to prevent static generation
-export const dynamic = 'force-dynamic'
 import { useRouter } from 'next/navigation'
 import { indianCities, getPopularCities, searchCities, type City } from '@/lib/cities-data'
 import { 

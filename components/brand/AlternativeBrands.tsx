@@ -106,6 +106,8 @@ export default function AlternativeBrands({ currentBrand }: AlternativeBrandsPro
                       src={brand.logo}
                       alt={`${brand.name} logo`}
                       className="w-12 h-12 object-contain"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';

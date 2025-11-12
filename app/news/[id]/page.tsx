@@ -2,9 +2,6 @@
 
 import Link from 'next/link'
 import { Eye, Calendar, User } from 'lucide-react'
-
-// Force dynamic rendering to prevent static generation
-export const dynamic = 'force-dynamic'
 import Footer from '@/components/Footer'
 import FeedbackSection from '@/components/car-model/FeedbackSection'
 import LatestCarNews from '@/components/home/LatestCarNews'

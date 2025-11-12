@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Search, ArrowLeft, X } from 'lucide-react'
-
-// Force dynamic rendering to prevent static generation
-export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 

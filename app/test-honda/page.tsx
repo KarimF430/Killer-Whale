@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import BrandFAQ from '@/components/brand/BrandFAQ'
-
-// Force dynamic rendering to prevent static generation
-export const dynamic = 'force-dynamic'
 import FormattedBrandSummary from '@/components/brand/FormattedBrandSummary'
 
 export default function TestHondaPage() {

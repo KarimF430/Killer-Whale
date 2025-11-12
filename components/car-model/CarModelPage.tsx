@@ -1048,6 +1048,9 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                       src={model.heroImage}
                       alt={`${model?.brand || 'Car'} ${model?.name || 'Model'}`}
                       className="w-full h-full object-contain rounded-2xl"
+                      loading="eager"
+                      fetchpriority="high"
+                      decoding="async"
                     />
                   </div>
                 )}
@@ -1058,6 +1061,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                       src={imgUrl}
                       alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} - Image ${index + 1}`}
                       className="w-full h-full object-cover rounded-2xl"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ))}
@@ -1316,6 +1321,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                                 }
                                 alt={highlight.caption || highlight.title || 'Car Feature'}
                                 className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
                                 onError={(e) => {
                                   // Fallback to placeholder if image fails to load
                                   e.currentTarget.src = `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
@@ -1342,6 +1349,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
                               alt="Advanced Safety Features"
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                             {/* Sample Caption */}
                             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
@@ -1364,6 +1373,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
                               alt="Premium Interior"
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                             {/* Sample Caption */}
                             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
@@ -1386,6 +1397,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
                               alt="Fuel Efficiency"
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                             {/* Sample Caption */}
                             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
@@ -1408,6 +1421,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
                               alt="Smart Technology"
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                             {/* Sample Caption */}
                             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
@@ -1557,6 +1572,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.colorImages.find(c => c.caption === selectedColor)?.url || model.colorImages[0]?.url}`}
                           alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${selectedColor || 'default color'}`}
                           className="w-full h-auto object-contain"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                     </div>
@@ -1585,6 +1602,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${color.url}`}
                               alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${color.caption}`}
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                           </div>
                           
@@ -1608,6 +1627,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           src={carColors.find(color => color.name === selectedColor)?.image || carColors[0].image}
                           alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${selectedColor || 'default color'}`}
                           className="w-full h-auto object-contain"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                     </div>
@@ -1636,6 +1657,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               src={color.image}
                               alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${color.name}`}
                               className="w-full h-full object-cover rounded-lg"
+                              loading="lazy"
+                              decoding="async"
                             />
                           </div>
                           
@@ -2124,6 +2147,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                             src={car.image}
                             alt={`${car.brand} ${car.name}`}
                             className="w-full h-full object-contain object-center transition-transform duration-300"
+                            loading="lazy"
+                            decoding="async"
                             onError={(e) => {
                               // Fallback to a car silhouette if image fails to load
                               e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
@@ -2206,6 +2231,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                                   src={model?.heroImage || ''}
                                   alt={`${model?.brand} ${model?.name}`}
                                   className="w-full h-20 object-contain"
+                                  loading="lazy"
+                                  decoding="async"
                                   onError={(e) => {
                                     e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
                                   }}
@@ -2235,6 +2262,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                                   src={car.image}
                                   alt={`${car.brand} ${car.name}`}
                                   className="w-full h-20 object-contain"
+                                  loading="lazy"
+                                  decoding="async"
                                   onError={(e) => {
                                     e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
                                   }}
