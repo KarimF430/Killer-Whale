@@ -6,8 +6,9 @@ import Redis from 'ioredis';
  * Production-ready distributed caching
  */
 
-// Initialize Redis client
+// Initialize Redis client (only if configured)
 const useUrl = !!process.env.REDIS_URL;
+const hasHost = !!process.env.REDIS_HOST;
 const commonOpts = {
   maxRetriesPerRequest: 3,
   enableOfflineQueue: false,
@@ -26,28 +27,35 @@ const commonOpts = {
 
 const tlsOpt = process.env.REDIS_TLS === 'true' ? { tls: {} as Record<string, unknown> } : {};
 
-const redis = useUrl
-  ? new Redis(process.env.REDIS_URL as string, { ...commonOpts, ...tlsOpt })
-  : new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      ...commonOpts,
-      ...tlsOpt,
-    });
+let redis: Redis | null = null;
+if (useUrl || hasHost) {
+  redis = useUrl
+    ? new Redis(process.env.REDIS_URL as string, { ...commonOpts, ...tlsOpt })
+    : new Redis({
+        host: process.env.REDIS_HOST as string,
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD,
+        ...commonOpts,
+        ...tlsOpt,
+      });
+}
 
 // Redis connection events
-redis.on('connect', () => {
-  console.log('✅ Redis connected successfully');
-});
+if (redis) {
+  redis.on('connect', () => {
+    console.log('✅ Redis connected successfully');
+  });
 
-redis.on('error', (err) => {
-  console.error('❌ Redis connection error:', err);
-});
+  redis.on('error', (err) => {
+    console.error('❌ Redis connection error:', err);
+  });
 
-redis.on('ready', () => {
-  console.log('🚀 Redis ready for operations');
-});
+  redis.on('ready', () => {
+    console.log('🚀 Redis ready for operations');
+  });
+} else {
+  console.log('ℹ️ Redis not configured (set REDIS_URL or REDIS_HOST). Caching and rate-limit store disabled.');
+}
 
 /**
  * Cache Middleware Factory with Redis
@@ -56,6 +64,11 @@ export function redisCacheMiddleware(ttl: number = 300) {
   return async (req: Request, res: Response, next: NextFunction) => {
     // Only cache GET requests
     if (req.method !== 'GET') {
+      return next();
+    }
+
+    // Skip entirely if Redis is not configured
+    if (!redis) {
       return next();
     }
 
@@ -85,8 +98,10 @@ export function redisCacheMiddleware(ttl: number = 300) {
       // Override res.json to cache the response
       res.json = function(data: any) {
         // Cache the response asynchronously
-        redis.setex(cacheKey, ttl, JSON.stringify(data))
-          .catch(err => console.error('Redis cache set error:', err));
+        if (redis) {
+          redis.setex(cacheKey, ttl, JSON.stringify(data))
+            .catch(err => console.error('Redis cache set error:', err));
+        }
         
         // Add cache headers
         res.set('X-Cache', 'MISS');
@@ -109,6 +124,7 @@ export function redisCacheMiddleware(ttl: number = 300) {
  */
 export async function invalidateRedisCache(pattern: string): Promise<void> {
   try {
+    if (!redis) return;
     const keys = await redis.keys(`cache:${pattern}*`);
     if (keys.length > 0) {
       await redis.del(...keys);
@@ -124,6 +140,7 @@ export async function invalidateRedisCache(pattern: string): Promise<void> {
  */
 export async function clearAllCache(): Promise<void> {
   try {
+    if (!redis) return;
     await redis.flushdb();
     console.log('🗑️ All Redis cache cleared');
   } catch (error) {
@@ -136,6 +153,9 @@ export async function clearAllCache(): Promise<void> {
  */
 export async function getRedisCacheStats() {
   try {
+    if (!redis) {
+      return { connected: false, totalKeys: 0 };
+    }
     const info = await redis.info('stats');
     const dbSize = await redis.dbsize();
     
@@ -160,7 +180,7 @@ export async function getRedisCacheStats() {
     console.error('Redis stats error:', error);
     return {
       connected: false,
-      error: error.message
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 }
@@ -170,6 +190,10 @@ export async function getRedisCacheStats() {
  */
 export async function warmUpCache(storage: any) {
   try {
+    if (!redis) {
+      console.warn('Skipping Redis cache warmup: Redis not configured');
+      return;
+    }
     console.log('🔥 Warming up Redis cache...');
     
     // Cache brands
