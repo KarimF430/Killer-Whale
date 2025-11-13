@@ -242,25 +242,29 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       // Create new session
       await storage.createSession(user.id, accessToken);
 
-      // Set HTTP-only cookie
+      // Set cookies
+      const isProd = process.env.NODE_ENV === 'production';
+      const sameSitePolicy: any = (isProd && process.env.FRONTEND_URL) ? 'none' : 'strict';
       res.cookie('token', accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: isProd,
+        sameSite: sameSitePolicy,
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
       });
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: isProd,
+        sameSite: sameSitePolicy,
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
 
-      // Return user data only; tokens are set as HttpOnly cookies
+      // Return tokens as well for clients that use Authorization header (cross-site frontends)
       res.json({
         success: true,
-        user: sanitizeUser(user)
+        user: sanitizeUser(user),
+        token: accessToken,
+        refreshToken
       });
     } catch (error) {
       console.error('Login error:', error);
