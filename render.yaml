@@ -8,18 +8,20 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
         fromService:
           type: web
           name: motoroctane-backend
-          property: host
+          property: url
       - key: NEXT_PUBLIC_BACKEND_URL
         fromService:
           type: web
           name: motoroctane-backend
-          property: host
+          property: url
       - key: NEXT_PUBLIC_SENTRY_DSN
         sync: false
       - key: NEXT_PUBLIC_GA_ID
@@ -34,9 +36,11 @@ services:
     name: motoroctane-backend
     env: node
     plan: starter
-    buildCommand: cd backend && npm install
+    buildCommand: cd backend && npm ci && npm run build
     startCommand: cd backend && npm start
     envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
@@ -47,8 +51,20 @@ services:
         generateValue: true
       - key: SENTRY_DSN
         sync: false
-      - key: PORT
-        value: 5001
+      - key: FRONTEND_URL
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
 
 databases:
   # MongoDB (if using Render's database)
