@@ -26,6 +26,7 @@ import { imageProcessingConfigs, ImageProcessor } from "./middleware/image-proce
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { readFileSync } from "fs";
 import { randomUUID } from "crypto";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -658,14 +659,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   // FILE UPLOAD ROUTES
   // ============================================
   
-  // File upload endpoint for logos with WebP conversion
+  // File upload endpoint for logos with WebP conversion and R2 support
   app.post("/api/upload/logo", 
     authenticateToken,
     modifyLimiter,
     upload.single('logo'),
     validateFileUpload,
     imageProcessingConfigs.logo,
-    (req, res) => {
+    async (req, res) => {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
@@ -677,8 +678,51 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         compressionRatio: processedImages[0].compressionRatio
       } : null;
       
+      // Default to local URL
+      let fileUrl = `/uploads/${req.file.filename}`;
+      
+      // Upload to R2 if configured
+      const bucket = process.env.R2_BUCKET;
+      if (bucket) {
+        try {
+          const accountId = process.env.R2_ACCOUNT_ID;
+          const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+          const client = new S3Client({
+            region: process.env.R2_REGION || 'auto',
+            endpoint,
+            credentials: process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY ? {
+              accessKeyId: process.env.R2_ACCESS_KEY_ID as string,
+              secretAccessKey: process.env.R2_SECRET_ACCESS_KEY as string,
+            } : undefined,
+            forcePathStyle: true,
+          });
+
+          const now = new Date();
+          const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const key = `uploads/logos/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
+          const body = readFileSync(req.file.path);
+          
+          await client.send(new PutObjectCommand({
+            Bucket: bucket,
+            Key: key,
+            Body: body,
+            ContentType: req.file.mimetype || 'image/webp',
+          }));
+          
+          const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '');
+          if (publicBase) {
+            fileUrl = `${publicBase}/${key}`;
+          }
+          
+          console.log(`✅ Logo uploaded to R2: ${fileUrl}`);
+        } catch (e) {
+          console.error('R2 logo upload failed, serving local URL:', e);
+          // Keep local URL as fallback
+        }
+      }
+      
       res.json({ 
-        url: `/uploads/${req.file.filename}`,
+        url: fileUrl,
         processed: true,
         format: 'webp',
         compression: compressionInfo
@@ -686,14 +730,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   );
 
-  // Generic image upload endpoint for model images with WebP conversion
+  // Generic image upload endpoint for model images with WebP conversion and R2 support
   app.post("/api/upload/image", 
     authenticateToken,
     modifyLimiter,
     upload.single('image'),
     validateFileUpload,
     imageProcessingConfigs.gallery,
-    (req, res) => {
+    async (req, res) => {
       if (!req.file) {
         return res.status(400).json({ error: "No image uploaded" });
       }
@@ -705,7 +749,49 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         compressionRatio: processedImages[0].compressionRatio
       } : null;
     
-      const fileUrl = `/uploads/${req.file.filename}`;
+      // Default to local URL
+      let fileUrl = `/uploads/${req.file.filename}`;
+      
+      // Upload to R2 if configured
+      const bucket = process.env.R2_BUCKET;
+      if (bucket) {
+        try {
+          const accountId = process.env.R2_ACCOUNT_ID;
+          const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+          const client = new S3Client({
+            region: process.env.R2_REGION || 'auto',
+            endpoint,
+            credentials: process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY ? {
+              accessKeyId: process.env.R2_ACCESS_KEY_ID as string,
+              secretAccessKey: process.env.R2_SECRET_ACCESS_KEY as string,
+            } : undefined,
+            forcePathStyle: true,
+          });
+
+          const now = new Date();
+          const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const key = `uploads/images/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
+          const body = readFileSync(req.file.path);
+          
+          await client.send(new PutObjectCommand({
+            Bucket: bucket,
+            Key: key,
+            Body: body,
+            ContentType: req.file.mimetype || 'image/webp',
+          }));
+          
+          const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '');
+          if (publicBase) {
+            fileUrl = `${publicBase}/${key}`;
+          }
+          
+          console.log(`✅ Image uploaded to R2: ${fileUrl}`);
+        } catch (e) {
+          console.error('R2 image upload failed, serving local URL:', e);
+          // Keep local URL as fallback
+        }
+      }
+      
       res.json({ 
         url: fileUrl, 
         filename: req.file.filename,
