@@ -1,42 +1,24 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
 
-// Production-safe config - only load Replit plugins in development
-const getPlugins = async () => {
-  const plugins = [react()];
-  
-  // Only load Replit plugins in development and when REPL_ID exists
-  if (process.env.NODE_ENV !== "production" && process.env.REPL_ID) {
-    try {
-      const { default: runtimeErrorOverlay } = await import("@replit/vite-plugin-runtime-error-modal");
-      plugins.push(runtimeErrorOverlay());
-      
-      const cartographer = await import("@replit/vite-plugin-cartographer");
-      plugins.push(cartographer.cartographer());
-      
-      const devBanner = await import("@replit/vite-plugin-dev-banner");
-      plugins.push(devBanner.devBanner());
-    } catch (error) {
-      console.warn("Replit plugins not available, skipping...");
-    }
-  }
-  
-  return plugins;
-};
+// Node-compatible __dirname for ESM
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(async () => ({
-  plugins: await getPlugins(),
+// Production-safe, synchronous Vite config (no dynamic imports)
+export default defineConfig({
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "@": resolve(__dirname, "client", "src"),
+      "@shared": resolve(__dirname, "shared"),
+      "@assets": resolve(__dirname, "attached_assets"),
     },
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  root: resolve(__dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: resolve(__dirname, "dist/public"),
     emptyOutDir: true,
   },
   server: {
