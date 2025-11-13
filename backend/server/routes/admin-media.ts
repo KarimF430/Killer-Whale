@@ -3,6 +3,8 @@ import multer from 'multer'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs/promises'
+import { randomUUID } from 'crypto'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { imageProcessingConfigs } from '../middleware/image-processor'
 import { newsStorage } from '../db/news-storage'
 
@@ -76,7 +78,43 @@ router.post('/upload', upload.single('file'), imageProcessingConfigs.news, async
     }
 
     const fileType = req.file.mimetype.startsWith('image/') ? 'image' : 'video'
-    const fileUrl = `/uploads/news/${req.file.filename}`
+
+    // Prefer R2 when configured
+    let fileUrl = `/uploads/news/${req.file.filename}`
+    const bucket = process.env.R2_BUCKET
+    if (bucket) {
+      try {
+        const accountId = process.env.R2_ACCOUNT_ID
+        const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined)
+        const client = new S3Client({
+          region: process.env.R2_REGION || 'auto',
+          endpoint,
+          credentials: process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY ? {
+            accessKeyId: process.env.R2_ACCESS_KEY_ID as string,
+            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY as string,
+          } : undefined,
+          forcePathStyle: true,
+        })
+
+        const now = new Date()
+        const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')
+        const key = `uploads/news/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`
+        const body = await fs.readFile(req.file.path)
+        await client.send(new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: body,
+          ContentType: req.file.mimetype || 'application/octet-stream',
+        }))
+        const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '')
+        if (publicBase) {
+          fileUrl = `${publicBase}/${key}`
+        }
+      } catch (e) {
+        console.error('R2 upload failed, serving local URL:', e)
+        fileUrl = `/uploads/news/${req.file.filename}`
+      }
+    }
 
     const media = await newsStorage.createMedia({
       filename: req.file.filename,
@@ -101,10 +139,36 @@ router.post('/upload-multiple', upload.array('files', 10), imageProcessingConfig
       return res.status(400).json({ error: 'No files uploaded' })
     }
 
+    const bucket = process.env.R2_BUCKET
+    const accountId = process.env.R2_ACCOUNT_ID
+    const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined)
+    const client = bucket ? new S3Client({
+      region: process.env.R2_REGION || 'auto',
+      endpoint,
+      credentials: process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY ? {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID as string,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY as string,
+      } : undefined,
+      forcePathStyle: true,
+    }) : null
+
     const uploadedMedia = await Promise.all(
-      req.files.map(async (file) => {
+      (req.files as Express.Multer.File[]).map(async (file) => {
         const fileType = file.mimetype.startsWith('image/') ? 'image' : 'video'
-        const fileUrl = `/uploads/news/${file.filename}`
+        let fileUrl = `/uploads/news/${file.filename}`
+        if (bucket && client) {
+          try {
+            const now = new Date()
+            const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')
+            const key = `uploads/news/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`
+            const body = await fs.readFile(file.path)
+            await client.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: file.mimetype || 'application/octet-stream' }))
+            const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '')
+            if (publicBase) fileUrl = `${publicBase}/${key}`
+          } catch (e) {
+            console.error('R2 upload failed (multiple), serving local URL:', e)
+          }
+        }
 
         return newsStorage.createMedia({
           filename: file.filename,
@@ -112,7 +176,7 @@ router.post('/upload-multiple', upload.array('files', 10), imageProcessingConfig
           url: fileUrl,
           type: fileType,
           size: file.size,
-          uploaderId: 'admin' // Default uploader since auth is removed
+          uploaderId: 'admin'
         })
       })
     )

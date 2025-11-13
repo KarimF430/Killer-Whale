@@ -85,6 +85,13 @@ app.get('/uploads/*', (req, res, next) => {
     fs.access(absPath, fs.constants.R_OK, (err) => {
       if (!err) return next(); // file exists; let static middleware handle it
 
+      // If R2 public base is configured, redirect to it as a primary fallback
+      const publicBase = process.env.R2_PUBLIC_BASE_URL;
+      if (publicBase) {
+        const target = `${publicBase}/${relPath}`;
+        return res.redirect(302, target);
+      }
+
       // Try .webp counterpart
       const webpRel = relPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
       if (webpRel === relPath) return next();

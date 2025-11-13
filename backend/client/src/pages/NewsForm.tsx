@@ -28,6 +28,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { uploadImage } from "@/lib/imageUpload";
 
 interface Category {
   id: string;
@@ -307,14 +308,14 @@ export default function NewsForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Mock upload - replace with actual API call
-    const uploadedUrl = URL.createObjectURL(file);
-    setFormData((prev: FormData) => ({ ...prev, featuredImage: uploadedUrl }));
-
-    toast({
-      title: "Image uploaded",
-      description: "Featured image uploaded successfully",
-    });
+    try {
+      const uploadedUrl = await uploadImage(file);
+      if (!uploadedUrl) throw new Error('Upload failed');
+      setFormData((prev: FormData) => ({ ...prev, featuredImage: uploadedUrl }));
+      toast({ title: "Image uploaded", description: "Featured image uploaded successfully" });
+    } catch (err) {
+      toast({ title: "Upload failed", description: "Could not upload featured image.", variant: "destructive" });
+    }
   };
 
   const handleSubmit = async (status: string) => {
