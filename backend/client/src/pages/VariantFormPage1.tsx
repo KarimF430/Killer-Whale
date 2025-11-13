@@ -124,6 +124,7 @@ export default function VariantFormPage1() {
         formDataLocal.append('image', file);
         const res = await fetch(`${API_BASE}/api/upload/image`, {
           method: 'POST',
+          credentials: 'include',
           body: formDataLocal,
         });
         if (!res.ok) throw new Error(await res.text());

@@ -147,9 +147,13 @@ export default function BrandForm() {
     if (!logoFile) return formData.logo || null;
     try {
       // 1) Presign
+      const rawToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = rawToken && (rawToken === 'dev-access-token' || rawToken.split('.').length === 3) ? rawToken : null;
+      const authHeader: Record<string, string> = {};
+      if (token) authHeader['Authorization'] = `Bearer ${token}`;
       const presign = await fetch(`${API_BASE}/api/uploads/presign`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeader },
         credentials: 'include',
         body: JSON.stringify({ filename: logoFile.name, contentType: logoFile.type || 'image/png' })
       });
@@ -172,6 +176,7 @@ export default function BrandForm() {
         formDataUpload.append('logo', logoFile);
         const response = await fetch(`${API_BASE}/api/upload/logo`, {
           method: 'POST',
+          headers: authHeader,
           body: formDataUpload,
           credentials: 'include',
         });

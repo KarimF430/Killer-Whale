@@ -3,7 +3,8 @@ import { API_BASE } from "./queryClient";
 export async function uploadImage(file: File): Promise<string | null> {
   if (!file) return null;
   const backendBase = API_BASE;
-  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+  const rawToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+  const token = rawToken && (rawToken === 'dev-access-token' || rawToken.split('.').length === 3) ? rawToken : null;
   const presignHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) presignHeaders['Authorization'] = `Bearer ${token}`;
   try {
@@ -11,6 +12,7 @@ export async function uploadImage(file: File): Promise<string | null> {
     const presignRes = await fetch(`${backendBase}/api/uploads/presign`, {
       method: 'POST',
       headers: presignHeaders,
+      credentials: 'include',
       body: JSON.stringify({ filename: file.name, contentType: file.type || 'application/octet-stream' })
     });
     if (!presignRes.ok) {
@@ -42,6 +44,7 @@ export async function uploadImage(file: File): Promise<string | null> {
       const res = await fetch(`${backendBase}/api/upload/image`, {
         method: 'POST',
         headers: localHeaders,
+        credentials: 'include',
         body: formData,
       });
       if (!res.ok) throw new Error(await res.text());
