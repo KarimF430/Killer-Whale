@@ -17,7 +17,8 @@ const router = express.Router()
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads/news')
+    // Use a canonical absolute path rooted at process.cwd()
+    const uploadDir = path.join(process.cwd(), 'uploads/news')
     await fs.mkdir(uploadDir, { recursive: true })
     cb(null, uploadDir)
   },
@@ -133,7 +134,7 @@ router.delete('/:id', async (req, res) => {
     }
 
     // Delete file from filesystem
-    const filePath = path.join(__dirname, '../../', media.url)
+    const filePath = path.join(process.cwd(), media.url.replace(/^\//, ''))
     try {
       await fs.unlink(filePath)
     } catch (error) {

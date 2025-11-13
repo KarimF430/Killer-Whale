@@ -3,6 +3,7 @@ import { createServer } from "http";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { MongoDBStorage } from "./db/mongodb-storage";
@@ -72,8 +73,34 @@ app.use(helmet({
 }));
 app.use('/api', apiLimiter);
 
-// Serve uploaded files statically
-const uploadsStaticPath = path.join(__dirname, '../uploads');
+// Serve uploaded files statically from a canonical path
+const uploadsStaticPath = path.join(process.cwd(), 'uploads');
+
+// Fallback: if a legacy .jpg/.png is requested but only a .webp exists, serve the .webp
+app.get('/uploads/*', (req, res, next) => {
+  try {
+    const reqPath = req.path; // e.g., /uploads/image-123.jpg
+    const relPath = reqPath.replace(/^\/+/, ''); // remove leading /
+    const absPath = path.join(process.cwd(), relPath);
+    fs.access(absPath, fs.constants.R_OK, (err) => {
+      if (!err) return next(); // file exists; let static middleware handle it
+
+      // Try .webp counterpart
+      const webpRel = relPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+      if (webpRel === relPath) return next();
+      const webpAbs = path.join(process.cwd(), webpRel);
+      fs.access(webpAbs, fs.constants.R_OK, (err2) => {
+        if (!err2) {
+          res.type('image/webp').sendFile(webpAbs);
+        } else {
+          next();
+        }
+      });
+    });
+  } catch {
+    next();
+  }
+});
 if (!isProd) {
   app.use(
     '/uploads',
