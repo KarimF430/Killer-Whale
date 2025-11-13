@@ -23,8 +23,11 @@ export async function POST(request: NextRequest) {
     const backendFormData = new FormData();
     backendFormData.append('image', image);
     
-    const backendUrl = 'http://localhost:5000/api/upload/image';
-    const response = await fetch(backendUrl, {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL 
+      || process.env.NEXT_PUBLIC_API_URL 
+      || 'http://localhost:5000';
+    const uploadEndpoint = `${backendUrl}/api/upload/image`;
+    const response = await fetch(uploadEndpoint, {
       method: 'POST',
       body: backendFormData,
     });
