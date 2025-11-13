@@ -7,10 +7,8 @@ import Redis from 'ioredis';
  */
 
 // Initialize Redis client
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
+const useUrl = !!process.env.REDIS_URL;
+const commonOpts = {
   maxRetriesPerRequest: 3,
   enableOfflineQueue: false,
   retryStrategy: (times: number) => {
@@ -19,12 +17,24 @@ const redis = new Redis({
   },
   reconnectOnError: (err: Error) => {
     const targetError = 'READONLY';
-    if (err.message.includes(targetError)) {
+    if ((err as any).message && (err as any).message.includes(targetError)) {
       return true;
     }
     return false;
-  }
-});
+  },
+} as const;
+
+const tlsOpt = process.env.REDIS_TLS === 'true' ? { tls: {} as Record<string, unknown> } : {};
+
+const redis = useUrl
+  ? new Redis(process.env.REDIS_URL as string, { ...commonOpts, ...tlsOpt })
+  : new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      ...commonOpts,
+      ...tlsOpt,
+    });
 
 // Redis connection events
 redis.on('connect', () => {
