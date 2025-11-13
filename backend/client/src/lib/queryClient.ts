@@ -1,5 +1,15 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Determine API base dynamically
+export const API_BASE = (() => {
+  const envBase = (import.meta as any)?.env?.VITE_API_BASE as string | undefined;
+  if (envBase) return envBase.replace(/\/$/, '');
+  if (typeof window !== 'undefined' && window.location) {
+    return window.location.origin;
+  }
+  return 'http://localhost:5001';
+})();
+
 type UnauthorizedBehavior = "returnNull" | "throw";
 
 async function throwIfResNotOk(res: Response) {
@@ -26,7 +36,7 @@ export async function apiRequest(method: string, url: string, data?: any) {
   }
 
   try {
-    const response = await fetch(`http://localhost:5001${url}`, config);
+    const response = await fetch(`${API_BASE}${url}`, config);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -57,7 +67,7 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const res = await fetch(`${API_BASE}${queryKey.join("/") as string}`.replace(`${API_BASE}//`, `${API_BASE}/`), {
       credentials: "include",
     });
 

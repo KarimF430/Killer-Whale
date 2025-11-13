@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
+import { API_BASE } from "@/lib/queryClient";
 
 interface BrandCardProps {
   id: string;
@@ -12,6 +13,7 @@ interface BrandCardProps {
 }
 
 export default function BrandCard({ id, name, logo, rank, onEdit, onDelete }: BrandCardProps) {
+  const resolvedLogo = logo && !/^https?:\/\//i.test(logo) ? `${API_BASE}${logo}` : logo;
   return (
     <Card className="p-4 hover-elevate" data-testid={`card-brand-${id}`}>
       <div className="flex items-center gap-3">
@@ -19,8 +21,8 @@ export default function BrandCard({ id, name, logo, rank, onEdit, onDelete }: Br
           {rank}.
         </span>
         <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
-          {logo ? (
-            <img src={logo} alt={name} className="w-full h-full object-contain rounded-md" />
+          {resolvedLogo ? (
+            <img src={resolvedLogo} alt={name} className="w-full h-full object-contain rounded-md" />
           ) : (
             <div className="w-full h-full bg-muted rounded-md" />
           )}

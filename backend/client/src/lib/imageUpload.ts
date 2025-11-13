@@ -1,6 +1,8 @@
+import { API_BASE } from "./queryClient";
+
 export async function uploadImage(file: File): Promise<string | null> {
   if (!file) return null;
-  const backendBase = 'http://localhost:5001';
+  const backendBase = API_BASE;
   const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
   const presignHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) presignHeaders['Authorization'] = `Bearer ${token}`;

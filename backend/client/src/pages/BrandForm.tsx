@@ -10,6 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Brand, InsertBrand } from "@shared/schema";
+import { API_BASE } from "@/lib/queryClient";
 
 export default function BrandForm() {
   const { id } = useParams<{ id: string }>();
@@ -146,7 +147,7 @@ export default function BrandForm() {
     if (!logoFile) return formData.logo || null;
     try {
       // 1) Presign
-      const presign = await fetch('/api/uploads/presign', {
+      const presign = await fetch(`${API_BASE}/api/uploads/presign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -169,9 +170,10 @@ export default function BrandForm() {
       try {
         const formDataUpload = new FormData();
         formDataUpload.append('logo', logoFile);
-        const response = await fetch('http://localhost:5001/api/upload/logo', {
+        const response = await fetch(`${API_BASE}/api/upload/logo`, {
           method: 'POST',
           body: formDataUpload,
+          credentials: 'include',
         });
         if (!response.ok) throw new Error(await response.text());
         const result = await response.json();

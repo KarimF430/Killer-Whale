@@ -39,9 +39,32 @@ app.use(pinoHttp({
 }));
 app.use(compression());
 const isProd = process.env.NODE_ENV === 'production';
+
+// Build a production-safe, permissive CSP to support admin app uploads (R2/S3), images and APIs
+const accountId = process.env.R2_ACCOUNT_ID;
+const r2Endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+const extraConnect: string[] = [
+  process.env.FRONTEND_URL || '',
+  process.env.NEXT_PUBLIC_API_URL || '',
+  r2Endpoint || '',
+].filter(Boolean) as string[];
+
 app.use(helmet({
   // Disable CSP in development to allow dev toolchains (Vite/Next) to inject preambles
-  contentSecurityPolicy: isProd ? undefined : false,
+  contentSecurityPolicy: isProd
+    ? {
+        useDefaults: true,
+        directives: {
+          defaultSrc: ["'self'"],
+          connectSrc: ["'self'", 'https:', 'http:', ...extraConnect],
+          imgSrc: ["'self'", 'data:', 'blob:', 'https:', 'http:'],
+          mediaSrc: ["'self'", 'data:', 'blob:', 'https:', 'http:'],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+          scriptSrc: ["'self'", "'unsafe-inline'", 'https:'],
+          frameSrc: ["'self'", 'https:'],
+        },
+      }
+    : false,
   // COEP can interfere with dev HMR; disable in dev
   crossOriginEmbedderPolicy: isProd ? undefined : false,
   // Allow cross-origin embedding of resources (images) in development

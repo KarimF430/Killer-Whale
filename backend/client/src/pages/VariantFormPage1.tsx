@@ -8,7 +8,7 @@ import { Upload, X } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { useLocation, useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, API_BASE } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Brand, Model, Variant } from "@shared/schema";
 
@@ -95,7 +95,7 @@ export default function VariantFormPage1() {
 
     try {
       // 1) Presign
-      const presignRes = await fetch('/api/uploads/presign', {
+      const presignRes = await fetch(`${API_BASE}/api/uploads/presign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -122,7 +122,7 @@ export default function VariantFormPage1() {
       try {
         const formDataLocal = new FormData();
         formDataLocal.append('image', file);
-        const res = await fetch('http://localhost:5001/api/upload/image', {
+        const res = await fetch(`${API_BASE}/api/upload/image`, {
           method: 'POST',
           body: formDataLocal,
         });
