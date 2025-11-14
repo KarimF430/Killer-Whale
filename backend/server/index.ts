@@ -237,6 +237,17 @@ app.use((req, res, next) => {
   // Register API routes FIRST before Vite
   registerRoutes(app, storageImpl as unknown as IStorage, backupService);
   
+  // Initialize Scheduled API Fetcher
+  try {
+    const SchedulerIntegration = require('./schedulerIntegration');
+    const schedulerIntegration = new SchedulerIntegration(app);
+    await schedulerIntegration.init();
+    console.log('✅ Scheduled API fetcher initialized (1:00 PM & 8:00 PM IST)');
+  } catch (error) {
+    console.error('❌ Failed to initialize scheduler:', error);
+    console.warn('⚠️  Continuing without scheduler...');
+  }
+  
   const server = createServer(app);
 
   // Error handler for API routes
