@@ -132,6 +132,7 @@ const allowedOrigins = [
   'https://motoroctane.com',
   'https://www.motoroctane.com',
   'https://killer-whale101.vercel.app', // Vercel deployment
+  'https://killer-whale.onrender.com', // Render backend (for internal API calls)
   'http://localhost:3000',
   'http://localhost:5001',
   'http://192.168.1.23:3000', // Mobile testing

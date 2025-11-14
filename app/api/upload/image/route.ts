@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
     const response = await fetch(uploadEndpoint, {
       method: 'POST',
       body: backendFormData,
+      headers: {
+        'Authorization': request.headers.get('Authorization') || '',
+      },
     });
     
     if (!response.ok) {
