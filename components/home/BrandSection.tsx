@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { FrontendBrand } from '@/lib/brand-api'
+import brandApi, { FrontendBrand } from '@/lib/brand-api'
 
 export default function BrandSection() {
   const [showAllBrands, setShowAllBrands] = useState(false)
@@ -16,35 +16,23 @@ export default function BrandSection() {
     const fetchBrands = async () => {
       try {
         setLoading(true)
-        console.log('🚀 BrandSection: Fetching brands from /api/brands...')
-        
-        const response = await fetch('/api/brands', {
-          cache: 'no-cache',
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
-        })
-        
-        console.log('📡 BrandSection: Response status:', response.status)
-        
-        const result = await response.json()
-        console.log('📊 BrandSection: API result:', result)
-        
-        if (result.success) {
-          // Sort by ranking and get active brands
-          const activeBrands = result.data
-            .filter((brand: FrontendBrand) => brand.status === 'active')
-            .sort((a: FrontendBrand, b: FrontendBrand) => a.ranking - b.ranking)
-          
-          setBrands(activeBrands)
-          console.log(`✅ BrandSection: Loaded ${activeBrands.length} brands:`, activeBrands.map((b: FrontendBrand) => b.name))
-        } else {
-          throw new Error(result.error || 'Failed to fetch brands')
-        }
+        console.log('🚀 BrandSection: Fetching brands from backend using brandApi...')
+
+        const backendBrands = await brandApi.getBrands(false)
+        console.log('📊 BrandSection: Received', backendBrands.length, 'brands from backend')
+
+        // Filter active and sort by ranking
+        const activeSorted = backendBrands
+          .filter((b: any) => b.status === 'active')
+          .sort((a: any, b: any) => (a.ranking ?? 0) - (b.ranking ?? 0))
+
+        // Transform to frontend shape
+        const transformed = activeSorted.map((b: any) => brandApi.transformBrandForFrontend(b))
+        setBrands(transformed)
+        console.log(`✅ BrandSection: Loaded ${transformed.length} brands`)
       } catch (err) {
         console.error('❌ BrandSection: Error fetching brands:', err)
         setError(err instanceof Error ? err.message : 'Failed to load brands')
-        // No fallback - show only backend data
         setBrands([])
       } finally {
         setLoading(false)
