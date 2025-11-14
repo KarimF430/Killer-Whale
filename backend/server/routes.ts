@@ -686,9 +686,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       // Try R2 upload first (server-side upload to avoid CORS issues)
       const bucket = process.env.R2_BUCKET;
       if (bucket) {
+        const accountId = process.env.R2_ACCOUNT_ID;
+        const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+        
         try {
-          const accountId = process.env.R2_ACCOUNT_ID;
-          const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
           
           // Use server-side S3 client (no CORS issues)
           const client = new S3Client({
@@ -788,9 +789,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       // Upload to R2 if configured (server-side upload to avoid CORS issues)
       const bucket = process.env.R2_BUCKET;
       if (bucket) {
+        const accountId = process.env.R2_ACCOUNT_ID;
+        const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+        
         try {
-          const accountId = process.env.R2_ACCOUNT_ID;
-          const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
           
           // Use server-side S3 client (no CORS issues)
           const client = new S3Client({
