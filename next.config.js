@@ -45,7 +45,13 @@ const nextConfig = {
   async headers() {
     const isProd = process.env.NODE_ENV === 'production'
     const connectSrcDev = "http://localhost:* https://localhost:*"
-    const connectSrc = isProd ? "" : connectSrcDev
+    // Derive backend origin for CSP connect-src (Vercel/production)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ''
+    let backendOrigin = ''
+    try {
+      if (apiUrl) backendOrigin = new URL(apiUrl).origin
+    } catch {}
+    const connectSrc = isProd ? backendOrigin : `${connectSrcDev} ${backendOrigin}`.trim()
     const unsafeEval = isProd ? "" : " 'unsafe-eval'"
     const csp = [
       "default-src 'self'",
