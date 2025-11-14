@@ -23,13 +23,15 @@ const remotePatterns = imageHosts.flatMap((hostname) => {
 })
 
 const nextConfig = {
-  // Force dynamic rendering to avoid build issues
-  output: 'standalone',
+  // Enable static export for Vercel deployment
+  output: 'export',
+  trailingSlash: true,
   
   // External packages configuration
   serverExternalPackages: ['sharp'],
   
   images: {
+    unoptimized: true,
     remotePatterns,
     formats: ['image/webp', 'image/avif'],
   },
