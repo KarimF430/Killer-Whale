@@ -125,11 +125,21 @@ class PerformanceManager {
     const totalCacheRequests = this.metrics.cacheHits + this.metrics.cacheMisses;
     const cacheHitRate = totalCacheRequests > 0 ? (this.metrics.cacheHits / totalCacheRequests) * 100 : 0;
     
+    // Safely compute memory usage only in Node.js runtime (not Edge or Browser)
+    let mem: any = undefined;
+    try {
+      const g: any = (globalThis as any);
+      const p: any = g && g.process ? g.process : undefined;
+      if (p && p.versions && p.versions.node && typeof p['memoryUsage'] === 'function') {
+        mem = p['memoryUsage']();
+      }
+    } catch {}
+
     return {
       ...this.metrics,
       cacheSize: this.cache.size,
       cacheHitRate: Math.round(cacheHitRate * 100) / 100,
-      memoryUsage: typeof process !== 'undefined' && process.memoryUsage ? process.memoryUsage() : { rss: 0, heapUsed: 0, heapTotal: 0, external: 0, arrayBuffers: 0 }
+      memoryUsage: mem
     };
   }
 

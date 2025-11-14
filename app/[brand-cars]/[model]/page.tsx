@@ -14,6 +14,10 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const resolvedParams = await params
   const brandSlug = resolvedParams['brand-cars'].replace('-cars', '')
   const modelSlug = resolvedParams.model
+  // Ignore Chrome DevTools /.well-known probes
+  if (brandSlug.startsWith('.well-known') || brandSlug === 'well-known') {
+    return {}
+  }
   
   // Convert slugs to display names
   const brandName = brandSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
@@ -27,7 +31,11 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     // Remove '-cars' suffix from brand slug to get actual brand name
     const brandName = brandSlug.replace('-cars', '')
     
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+    // Guard against /.well-known devtools requests being treated as dynamic routes
+    if (brandSlug.startsWith('.well-known') || brandSlug === 'well-known') {
+      throw new Error('Ignore well-known probe')
+    }
     
     // Get all brands first to match properly
     const brandsResponse = await fetch(`${backendUrl}/api/brands`, { cache: 'no-store' })
@@ -316,6 +324,10 @@ async function getModelData(brandSlug: string, modelSlug: string) {
 
 export default async function ModelPage({ params }: ModelPageProps) {
   const resolvedParams = await params
+  if (resolvedParams['brand-cars'].startsWith('.well-known') || resolvedParams['brand-cars'] === 'well-known') {
+    // Return a minimal fragment instead of trying to resolve data
+    return null as any
+  }
   const modelData = await getModelData(resolvedParams['brand-cars'], resolvedParams.model)
   
   if (!modelData) {

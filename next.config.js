@@ -4,7 +4,16 @@ const extraImageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS || '')
   .split(',')
   .map(h => h.trim())
   .filter(Boolean)
-const r2Host = process.env.R2_PUBLIC_BASE_HOST
+// Support either a hostname or a full URL in env and extract just the hostname
+const rawR2 = process.env.R2_PUBLIC_BASE_HOST || process.env.R2_PUBLIC_BASE_URL || ''
+let r2Host = ''
+try {
+  if (rawR2) {
+    r2Host = rawR2.includes('://')
+      ? new URL(rawR2).hostname
+      : rawR2.replace(/^https?:\/\//, '').replace(/\/.*/, '')
+  }
+} catch {}
 const baseImageHosts = [
   'images.unsplash.com',
   'motoroctane.com',
@@ -15,9 +24,9 @@ const baseImageHosts = [
 const devImageHosts = ['localhost', '127.0.0.1']
 const imageHosts = isProdEnv ? baseImageHosts : [...baseImageHosts, ...devImageHosts]
 const remotePatterns = imageHosts.flatMap((hostname) => {
-  const patterns = [{ protocol: 'https', hostname }]
+  const patterns = [{ protocol: 'https', hostname, pathname: '/**' }]
   if (!isProdEnv && (hostname === 'localhost' || hostname === '127.0.0.1')) {
-    patterns.push({ protocol: 'http', hostname })
+    patterns.push({ protocol: 'http', hostname, pathname: '/**' })
   }
   return patterns
 })
@@ -30,6 +39,7 @@ const nextConfig = {
   serverExternalPackages: ['sharp'],
   
   images: {
+    unoptimized: true,
     remotePatterns,
     formats: ['image/webp', 'image/avif'],
   },
