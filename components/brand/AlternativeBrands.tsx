@@ -52,7 +52,7 @@ export default function AlternativeBrands({ currentBrand }: AlternativeBrandsPro
             return {
               id: brand.id,
               name: brand.name,
-              logo: brand.logo ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${brand.logo}` : '/brands/default.png',
+              logo: brand.logo ? (brand.logo.startsWith('http') ? brand.logo : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${brand.logo}`) : '/brands/default.png',
               slug: brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
             }
           })

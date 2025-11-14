@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       .map((brand: any) => ({
         id: brand.id,
         name: brand.name,
-        logo: brand.logo ? `${backendUrl}${brand.logo}` : `/brands/${brand.name.toLowerCase().replace(/\s+/g, '-')}.png`,
+        logo: brand.logo ? (brand.logo.startsWith('http') ? brand.logo : `${backendUrl}${brand.logo}`) : `/brands/${brand.name.toLowerCase().replace(/\s+/g, '-')}.png`,
         ranking: brand.ranking,
         status: brand.status,
         summary: brand.summary || `${brand.name} - Premium automotive brand`,

@@ -116,9 +116,9 @@ export default function PopularCars() {
             ? model.transmissions
             : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
           
-          // Get hero image from model
+          // Get hero image from model (handle both full URLs and relative paths)
           const heroImage = model.heroImage
-            ? `${backendUrl}${model.heroImage}`
+            ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
             : ''
           
           return {

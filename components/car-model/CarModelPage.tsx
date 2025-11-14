@@ -757,7 +757,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             ? m.fuelTypes
             : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
           
-          const heroImage = m.heroImage ? `${backendUrl}${m.heroImage}` : ''
+          const heroImage = m.heroImage ? (m.heroImage.startsWith('http') ? m.heroImage : `${backendUrl}${m.heroImage}`) : ''
           
           return {
             id: m.id,
@@ -1049,7 +1049,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                       alt={`${model?.brand || 'Car'} ${model?.name || 'Model'}`}
                       className="w-full h-full object-contain rounded-2xl"
                       loading="eager"
-                      fetchpriority="high"
+                      fetchPriority="high"
                       decoding="async"
                     />
                   </div>

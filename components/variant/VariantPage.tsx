@@ -637,11 +637,11 @@ export default function VariantPage({
                     {model?.heroImage && (
                       <div className="w-full h-full flex-shrink-0 snap-center relative">
                         <img
-                          src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}`}
+                          src={model.heroImage.startsWith('http') ? model.heroImage : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}`}
                           alt={`${displayBrandName || 'Car'} ${displayModelName || 'Model'}`}
                           className="w-full h-full object-contain rounded-2xl"
                           loading="eager"
-                          fetchpriority="high"
+                          fetchPriority="high"
                           decoding="async"
                         />
                       </div>

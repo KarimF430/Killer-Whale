@@ -150,7 +150,7 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
               rating: 4.5, // Default rating
               reviews: 1247, // Default reviews
               power: '120 PS',
-              image: model.heroImage ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}` : '/car-placeholder.jpg',
+              image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}`) : '/car-placeholder.jpg',
               isNew: model.isNewModel || false,
               seating: '5',
               fuelType: model.fuelTypes ? model.fuelTypes.join('/') : 'Petrol',
