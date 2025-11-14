@@ -5,55 +5,28 @@ export async function uploadImage(file: File): Promise<string | null> {
   const backendBase = API_BASE;
   const rawToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
   const token = rawToken && (rawToken === 'dev-access-token' || rawToken.split('.').length === 3) ? rawToken : null;
-  const presignHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) presignHeaders['Authorization'] = `Bearer ${token}`;
+  
   try {
-    // 1) Ask backend for a presigned PUT URL
-    const presignRes = await fetch(`${backendBase}/api/uploads/presign`, {
+    // Use direct server-side upload (no CORS issues)
+    const formData = new FormData();
+    formData.append('image', file);
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    
+    const res = await fetch(`${backendBase}/api/upload/image`, {
       method: 'POST',
-      headers: presignHeaders,
+      headers: headers,
       credentials: 'include',
-      body: JSON.stringify({ filename: file.name, contentType: file.type || 'application/octet-stream' })
+      body: formData,
     });
-    if (!presignRes.ok) {
-      const t = await presignRes.text();
-      throw new Error(`presign failed: ${t}`);
-    }
-    const { uploadUrl, publicUrl } = await presignRes.json();
-
-    // 2) Upload bytes directly to R2 via signed URL
-    const putRes = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
-      body: file,
-    });
-    if (!putRes.ok) {
-      const t = await putRes.text();
-      throw new Error(`upload failed: ${t}`);
-    }
-
-    // 3) Return public URL for storage in DB
-    return publicUrl as string;
+    
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    console.log('✅ Image uploaded successfully:', data.url);
+    return data.url as string;
   } catch (error) {
-    console.warn('R2 upload failed, falling back to local endpoint:', error);
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-      const localHeaders: Record<string, string> = {};
-      if (token) localHeaders['Authorization'] = `Bearer ${token}`;
-      const res = await fetch(`${backendBase}/api/upload/image`, {
-        method: 'POST',
-        headers: localHeaders,
-        credentials: 'include',
-        body: formData,
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      return data.url as string;
-    } catch (e) {
-      console.error('Local upload fallback failed:', e);
-      return null;
-    }
+    console.error('Image upload failed:', error);
+    return null;
   }
 }
 

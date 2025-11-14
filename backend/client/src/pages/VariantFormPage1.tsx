@@ -94,50 +94,38 @@ export default function VariantFormPage1() {
     if (!file) return;
 
     try {
-      // 1) Presign
-      const presignRes = await fetch(`${API_BASE}/api/uploads/presign`, {
+      // Get auth token
+      const rawToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = rawToken && (rawToken === 'dev-access-token' || rawToken.split('.').length === 3) ? rawToken : null;
+      
+      // Use direct server-side upload (no CORS issues)
+      const formData = new FormData();
+      formData.append('image', file);
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      
+      const response = await fetch(`${API_BASE}/api/upload/image`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         credentials: 'include',
-        body: JSON.stringify({ filename: file.name, contentType: file.type || 'application/octet-stream' })
+        body: formData,
       });
-      if (!presignRes.ok) throw new Error(await presignRes.text());
-      const { uploadUrl, publicUrl } = await presignRes.json();
+      
+      if (!response.ok) throw new Error(await response.text());
+      const result = await response.json();
 
-      // 2) Upload bytes to R2
-      const putRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type || 'application/octet-stream' },
-        body: file,
-      });
-      if (!putRes.ok) throw new Error(await putRes.text());
-
-      setHighlightImages(prev => [...prev, { url: publicUrl, caption: '' }]);
+      setHighlightImages(prev => [...prev, { url: result.url, caption: '' }]);
       toast({
         title: "Image uploaded",
         description: "Image has been successfully uploaded.",
       });
     } catch (error) {
-      // Fallback to local backend endpoint
-      try {
-        const formDataLocal = new FormData();
-        formDataLocal.append('image', file);
-        const res = await fetch(`${API_BASE}/api/upload/image`, {
-          method: 'POST',
-          credentials: 'include',
-          body: formDataLocal,
-        });
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
-        setHighlightImages(prev => [...prev, { url: data.url, caption: '' }]);
-        toast({ title: 'Image uploaded (local fallback)', description: 'R2 was unavailable; used local storage.' });
-      } catch (e) {
-        toast({
-          title: "Upload failed",
-          description: "Failed to upload image via R2 and local fallback.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      console.error('Image upload error:', error);
     }
   };
 

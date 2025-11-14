@@ -145,53 +145,35 @@ export default function BrandForm() {
 
   const uploadLogo = async (): Promise<string | null> => {
     if (!logoFile) return formData.logo || null;
+    
+    // Get auth token
+    const rawToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = rawToken && (rawToken === 'dev-access-token' || rawToken.split('.').length === 3) ? rawToken : null;
+    const authHeader: Record<string, string> = {};
+    if (token) authHeader['Authorization'] = `Bearer ${token}`;
+    
     try {
-      // 1) Presign
-      const rawToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
-      const token = rawToken && (rawToken === 'dev-access-token' || rawToken.split('.').length === 3) ? rawToken : null;
-      const authHeader: Record<string, string> = {};
-      if (token) authHeader['Authorization'] = `Bearer ${token}`;
-      const presign = await fetch(`${API_BASE}/api/uploads/presign`, {
+      // Use direct server-side upload (no CORS issues)
+      const formDataUpload = new FormData();
+      formDataUpload.append('logo', logoFile);
+      const response = await fetch(`${API_BASE}/api/upload/logo`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeader },
+        headers: authHeader,
+        body: formDataUpload,
         credentials: 'include',
-        body: JSON.stringify({ filename: logoFile.name, contentType: logoFile.type || 'image/png' })
       });
-      if (!presign.ok) throw new Error(await presign.text());
-      const { uploadUrl, publicUrl } = await presign.json();
-
-      // 2) Upload bytes
-      const putRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': logoFile.type || 'image/png' },
-        body: logoFile,
-      });
-      if (!putRes.ok) throw new Error(await putRes.text());
-
-      return publicUrl as string;
+      if (!response.ok) throw new Error(await response.text());
+      const result = await response.json();
+      toast({ title: 'Logo uploaded successfully', description: 'Logo uploaded to R2 storage.' });
+      return result.url as string;
     } catch (error) {
-      // Fallback to local backend endpoint
-      try {
-        const formDataUpload = new FormData();
-        formDataUpload.append('logo', logoFile);
-        const response = await fetch(`${API_BASE}/api/upload/logo`, {
-          method: 'POST',
-          headers: authHeader,
-          body: formDataUpload,
-          credentials: 'include',
-        });
-        if (!response.ok) throw new Error(await response.text());
-        const result = await response.json();
-        toast({ title: 'Logo uploaded (local fallback)', description: 'R2 was unavailable; used local storage.' });
-        return result.url as string;
-      } catch (e) {
-        toast({
-          title: "Upload failed",
-          description: "Failed to upload logo via R2 and local fallback.",
-          variant: "destructive",
-        });
-        return null;
-      }
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload logo. Please try again.",
+        variant: "destructive",
+      });
+      console.error('Logo upload error:', error);
+      return null;
     }
   };
 
