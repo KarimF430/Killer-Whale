@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const startTime = Date.now();
     
     // Direct fetch to backend instead of using brandApi
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5001';
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
     const backendResponse = await fetch(`${backendUrl}/api/brands`, {
       headers: {
         'Accept': 'application/json',

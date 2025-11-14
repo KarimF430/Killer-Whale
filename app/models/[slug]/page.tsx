@@ -13,7 +13,8 @@ async function getModelData(slug: string) {
     // We need to handle multi-word brand names like "maruti-suzuki"
     
     // Get all brands first to match properly
-    const brandsResponse = await fetch('http://localhost:5001/api/brands')
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+    const brandsResponse = await fetch(`${backendUrl}/api/brands`)
     if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
     
     const brands = await brandsResponse.json()
@@ -34,7 +35,7 @@ async function getModelData(slug: string) {
     if (!brandData || !model) throw new Error('Brand or model not found in slug')
     
     // Get models for this brand
-    const modelsResponse = await fetch(`http://localhost:5001/api/frontend/brands/${brandData.id}/models`)
+    const modelsResponse = await fetch(`${backendUrl}/api/frontend/brands/${brandData.id}/models`)
     if (!modelsResponse.ok) throw new Error('Failed to fetch models')
     
     const modelsData = await modelsResponse.json()
@@ -45,7 +46,7 @@ async function getModelData(slug: string) {
     let detailedModelData = null
     try {
       // Fetch directly using model ID
-      const detailResponse = await fetch(`http://localhost:5001/api/models/${modelData.id}`, { cache: 'no-store' })
+      const detailResponse = await fetch(`${backendUrl}/api/models/${modelData.id}`, { cache: 'no-store' })
       if (detailResponse.ok) {
         detailedModelData = await detailResponse.json()
         console.log('✅ Successfully fetched detailed model data:', detailedModelData)
@@ -66,14 +67,14 @@ async function getModelData(slug: string) {
     // Add hero image first
     const heroImageUrl = detailedModelData?.heroImage || modelData.image
     if (heroImageUrl) {
-      galleryImages.push(heroImageUrl.startsWith('/uploads/') ? `http://localhost:5001${heroImageUrl}` : heroImageUrl)
+      galleryImages.push(heroImageUrl.startsWith('/uploads/') ? `${backendUrl}${heroImageUrl}` : heroImageUrl)
     }
     
     // Add gallery images from backend
     if (detailedModelData?.galleryImages && Array.isArray(detailedModelData.galleryImages)) {
       detailedModelData.galleryImages.forEach((img: any) => {
         if (img?.url) {
-          const fullUrl = img.url.startsWith('/uploads/') ? `http://localhost:5001${img.url}` : img.url
+          const fullUrl = img.url.startsWith('/uploads/') ? `${backendUrl}${img.url}` : img.url
           if (!galleryImages.includes(fullUrl)) { // Avoid duplicates
             galleryImages.push(fullUrl)
           }
@@ -89,7 +90,7 @@ async function getModelData(slug: string) {
       slug: modelData.slug,
       brand: modelData.brandName,
       name: modelData.name,
-      heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `http://localhost:5001${modelData.image}` : modelData.image),
+      heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : modelData.image),
       gallery: galleryImages,
       rating: modelData.rating,
       reviewCount: modelData.reviews,
