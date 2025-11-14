@@ -5,6 +5,10 @@
  * Quickly diagnose R2 configuration and upload issues
  */
 
+// Load environment variables from .env file
+import dotenv from 'dotenv';
+dotenv.config();
+
 console.log('🔍 R2 STATUS CHECKER\n');
 
 // Check environment variables
