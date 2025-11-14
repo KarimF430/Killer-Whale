@@ -650,7 +650,7 @@ export default function VariantPage({
                     {model?.galleryImages?.map((img: any, index: number) => (
                       <div key={index} className="w-full h-full flex-shrink-0 snap-center relative">
                         <img
-                          src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`}
+                          src={img.url?.startsWith('http') ? img.url : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`}
                           alt={`${displayBrandName || 'Car'} ${displayModelName || 'Model'} - Image ${index + 1}`}
                           className="w-full h-full object-cover rounded-2xl"
                           loading="lazy"
