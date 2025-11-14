@@ -7,6 +7,15 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🖼️ API Route: POST /api/upload/image');
     
+    // Security: Check for authentication
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required',
+      }, { status: 401 });
+    }
+    
     const formData = await request.formData();
     const image = formData.get('image') as File;
     
@@ -14,6 +23,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: 'No image file provided',
+      }, { status: 400 });
+    }
+    
+    // Security: File size limit (10MB)
+    if (image.size > 10 * 1024 * 1024) {
+      return NextResponse.json({
+        success: false,
+        error: 'File too large. Maximum size is 10MB.',
+      }, { status: 413 });
+    }
+    
+    // Security: File type validation
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(image.type)) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
       }, { status: 400 });
     }
     
@@ -67,14 +93,25 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle OPTIONS for CORS
-export async function OPTIONS() {
+// Handle OPTIONS for CORS - Secure configuration
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  const allowedOrigins = [
+    'https://killer-whale101.vercel.app',
+    'https://killer-whale.onrender.com',
+    'http://localhost:3000',
+    'http://localhost:5001'
+  ];
+  
+  const isAllowedOrigin = origin && allowedOrigins.includes(origin);
+  
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': isAllowedOrigin ? origin : 'null',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400', // 24 hours
     },
   });
 }

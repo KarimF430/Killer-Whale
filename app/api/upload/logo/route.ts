@@ -7,6 +7,15 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🏷️ API Route: POST /api/upload/logo');
     
+    // Security: Check for authentication
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required',
+      }, { status: 401 });
+    }
+    
     const formData = await request.formData();
     const logo = formData.get('logo') as File;
     
@@ -14,6 +23,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: 'No logo file provided',
+      }, { status: 400 });
+    }
+    
+    // Security: File size limit (5MB for logos)
+    if (logo.size > 5 * 1024 * 1024) {
+      return NextResponse.json({
+        success: false,
+        error: 'Logo too large. Maximum size is 5MB.',
+      }, { status: 413 });
+    }
+    
+    // Security: File type validation (PNG only for logos)
+    if (logo.type !== 'image/png') {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid file type. Only PNG files are allowed for logos.',
       }, { status: 400 });
     }
     
@@ -67,14 +92,25 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle OPTIONS for CORS
-export async function OPTIONS() {
+// Handle OPTIONS for CORS - Secure configuration
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  const allowedOrigins = [
+    'https://killer-whale101.vercel.app',
+    'https://killer-whale.onrender.com',
+    'http://localhost:3000',
+    'http://localhost:5001'
+  ];
+  
+  const isAllowedOrigin = origin && allowedOrigins.includes(origin);
+  
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': isAllowedOrigin ? origin : 'null',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400', // 24 hours
     },
   });
 }
