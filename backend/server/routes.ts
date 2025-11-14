@@ -678,19 +678,19 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       const processedImages = (req as any).processedImages || [];
       const compressionInfo = processedImages.length > 0 ? {
         originalSize: processedImages[0].originalSize,
-        webpSize: processedImages[0].webpSize,
-        compressionRatio: processedImages[0].compressionRatio
+        compressedSize: processedImages[0].compressedSize,
+        compressionRatio: processedImages[0].compressionRatio,
+        format: processedImages[0].format
       } : null;
-      
-      // Default to local URL
-      let fileUrl = `/uploads/${req.file.filename}`;
-      
-      // Upload to R2 if configured
+
+      // Try R2 upload first (server-side upload to avoid CORS issues)
       const bucket = process.env.R2_BUCKET;
       if (bucket) {
         try {
           const accountId = process.env.R2_ACCOUNT_ID;
           const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+          
+          // Use server-side S3 client (no CORS issues)
           const client = new S3Client({
             region: process.env.R2_REGION || 'auto',
             endpoint,
@@ -706,24 +706,43 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           const key = `uploads/logos/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
           const body = readFileSync(req.file.path);
           
+          // Server-side upload (bypasses CORS completely)
           await client.send(new PutObjectCommand({
             Bucket: bucket,
             Key: key,
             Body: body,
-            ContentType: req.file.mimetype || 'image/webp',
+            ContentType: 'image/webp',
+            Metadata: {
+              'original-name': req.file.originalname,
+              'upload-date': now.toISOString(),
+              ...(compressionInfo && {
+                'original-size': compressionInfo.originalSize.toString(),
+                'compressed-size': compressionInfo.compressedSize.toString(),
+                'compression-ratio': compressionInfo.compressionRatio.toString()
+              })
+            }
           }));
+
+          const publicBase = process.env.R2_PUBLIC_BASE_URL || `${endpoint}/${bucket}`;
+          const publicUrl = `${publicBase}/${key}`;
           
-          const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '');
-          if (publicBase) {
-            fileUrl = `${publicBase}/${key}`;
-          }
+          // Clean up temp file
+          unlinkSync(req.file.path);
           
-          console.log(`✅ Logo uploaded to R2: ${fileUrl}`);
-        } catch (e) {
-          console.error('R2 logo upload failed, serving local URL:', e);
-          // Keep local URL as fallback
+          console.log(`✅ Logo uploaded to R2 (server-side): ${publicUrl}`);
+          return res.json({ 
+            url: publicUrl, 
+            filename: safeName,
+            compression: compressionInfo
+          });
+        } catch (error) {
+          console.error('❌ R2 server-side upload failed:', error);
+          // Fall through to local storage
         }
       }
+
+      // Default to local URL
+      let fileUrl = `/uploads/${req.file.filename}`;
       
       res.json({ 
         url: fileUrl,
@@ -734,6 +753,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   );
 
+// ...
   // Generic image upload endpoint for model images with WebP conversion and R2 support
   app.post("/api/upload/image", 
     authenticateToken,
@@ -756,12 +776,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       // Default to local URL
       let fileUrl = `/uploads/${req.file.filename}`;
       
-      // Upload to R2 if configured
+      // Upload to R2 if configured (server-side upload to avoid CORS issues)
       const bucket = process.env.R2_BUCKET;
       if (bucket) {
         try {
           const accountId = process.env.R2_ACCOUNT_ID;
           const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+          
+          // Use server-side S3 client (no CORS issues)
           const client = new S3Client({
             region: process.env.R2_REGION || 'auto',
             endpoint,
@@ -777,11 +799,21 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           const key = `uploads/images/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
           const body = readFileSync(req.file.path);
           
+          // Server-side upload (bypasses CORS completely)
           await client.send(new PutObjectCommand({
             Bucket: bucket,
             Key: key,
             Body: body,
             ContentType: req.file.mimetype || 'image/webp',
+            Metadata: {
+              'original-name': req.file.originalname,
+              'upload-date': new Date().toISOString(),
+              ...(compressionInfo && {
+                'original-size': compressionInfo.originalSize.toString(),
+                'webp-size': compressionInfo.webpSize.toString(),
+                'compression-ratio': compressionInfo.compressionRatio.toString()
+              })
+            }
           }));
           
           const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '');
@@ -789,7 +821,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             fileUrl = `${publicBase}/${key}`;
           }
           
-          console.log(`✅ Image uploaded to R2: ${fileUrl}`);
+          // Clean up temp file
+          unlinkSync(req.file.path);
+          
+          console.log(`✅ Image uploaded to R2 (server-side): ${fileUrl}`);
         } catch (e) {
           console.error('R2 image upload failed, serving local URL:', e);
           // Keep local URL as fallback
