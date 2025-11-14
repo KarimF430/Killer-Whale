@@ -29,7 +29,7 @@ export default function PopularComparisons() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
   // Helper function to calculate on-road price
   const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {

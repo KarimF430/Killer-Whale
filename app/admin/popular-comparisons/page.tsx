@@ -28,7 +28,7 @@ export default function PopularComparisonsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
   // Fetch brands, models, and existing comparisons
   useEffect(() => {
