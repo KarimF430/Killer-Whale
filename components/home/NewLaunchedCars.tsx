@@ -18,6 +18,7 @@ interface Car {
   launchDate: string
   slug: string
   isNew: boolean
+  isPopular: boolean
   newRank: number | null
 }
 
@@ -115,9 +116,9 @@ export default function NewLaunchedCars() {
             ? model.transmissions
             : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
           
-          // Get hero image from model
+          // Get hero image from model (handle both full URLs and relative paths)
           const heroImage = model.heroImage
-            ? `${backendUrl}${model.heroImage}`
+            ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
             : ''
           
           return {
@@ -133,6 +134,7 @@ export default function NewLaunchedCars() {
             launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
             slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
             isNew: model.isNew || false,
+            isPopular: model.isPopular || false,
             newRank: model.newRank || null
           }
         })

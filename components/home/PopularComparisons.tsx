@@ -102,7 +102,7 @@ export default function PopularComparisons() {
               id: model1.id,
               name: model1.name,
               brand: brandMap[model1.brandId] || 'Unknown',
-              heroImage: model1.heroImage ? `${backendUrl}${model1.heroImage}` : '',
+              heroImage: model1.heroImage ? (model1.heroImage.startsWith('http') ? model1.heroImage : `${backendUrl}${model1.heroImage}`) : '',
               startingPrice: model1Price,
               fuelTypes: model1.fuelTypes || ['Petrol']
             },
@@ -110,7 +110,7 @@ export default function PopularComparisons() {
               id: model2.id,
               name: model2.name,
               brand: brandMap[model2.brandId] || 'Unknown',
-              heroImage: model2.heroImage ? `${backendUrl}${model2.heroImage}` : '',
+              heroImage: model2.heroImage ? (model2.heroImage.startsWith('http') ? model2.heroImage : `${backendUrl}${model2.heroImage}`) : '',
               startingPrice: model2Price,
               fuelTypes: model2.fuelTypes || ['Petrol']
             }

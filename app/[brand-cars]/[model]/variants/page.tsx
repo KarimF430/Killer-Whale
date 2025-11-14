@@ -10,7 +10,8 @@ interface VariantsPageProps {
 
 async function getModelData(brandSlug: string, modelSlug: string) {
   try {
-    const brandsResponse = await fetch('http://localhost:5001/api/brands', { cache: 'no-store' })
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+    const brandsResponse = await fetch(`${backendUrl}/api/brands`, { cache: 'no-store' })
     if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
     
     const brands = await brandsResponse.json()
@@ -22,7 +23,7 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     
     if (!brandData) throw new Error('Brand not found')
     
-    const modelsResponse = await fetch(`http://localhost:5001/api/frontend/brands/${brandData.id}/models`, { cache: 'no-store' })
+    const modelsResponse = await fetch(`${backendUrl}/api/frontend/brands/${brandData.id}/models`, { cache: 'no-store' })
     if (!modelsResponse.ok) throw new Error('Failed to fetch models')
     
     const modelsData = await modelsResponse.json()
