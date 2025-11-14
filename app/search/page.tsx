@@ -9,6 +9,8 @@ interface CarModel {
   id: string
   name: string
   brandName: string
+  brandSlug: string
+  modelSlug: string
   slug: string
   heroImage: string
   startingPrice: number
@@ -51,14 +53,20 @@ export default function SearchPage() {
         }, {})
         
         // Process models
-        const processedModels = models.map((model: any) => ({
-          id: model.id,
-          name: model.name,
-          brandName: brandMap[model.brandId] || 'Unknown',
-          slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
-          heroImage: model.heroImage ? `${backendUrl}${model.heroImage}` : '',
-          startingPrice: 0
-        }))
+        const processedModels = models.map((model: any) => {
+          const brandSlug = (brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')
+          const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-')
+          return {
+            id: model.id,
+            name: model.name,
+            brandName: brandMap[model.brandId] || 'Unknown',
+            brandSlug: brandSlug,
+            modelSlug: modelSlug,
+            slug: `${brandSlug}-${modelSlug}`,
+            heroImage: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`) : '',
+            startingPrice: 0
+          }
+        })
         
         setAllModels(processedModels)
       } catch (error) {
@@ -187,7 +195,7 @@ export default function SearchPage() {
               {searchResults.map((car) => (
                 <Link
                   key={car.id}
-                  href={`/models/${car.slug}`}
+                  href={`/${car.brandSlug}-cars/${car.modelSlug}`}
                   className="group block bg-white rounded-xl border border-gray-200 hover:border-red-500 hover:shadow-md transition-all duration-200"
                 >
                   <div className="p-3 flex items-center gap-3">
