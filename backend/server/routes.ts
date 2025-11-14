@@ -736,9 +736,18 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             compression: compressionInfo
           });
         } catch (error) {
-          console.error('❌ R2 server-side upload failed:', error);
+          console.error('❌ R2 logo upload failed:', {
+            error: error instanceof Error ? error.message : String(error),
+            bucket: bucket,
+            endpoint: endpoint,
+            hasCredentials: !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY)
+          });
+          console.error('📋 Full error details:', error);
+          console.warn('⚠️  Logo upload falling back to local storage (will be lost on restart!)');
           // Fall through to local storage
         }
+      } else {
+        console.warn('⚠️  R2 not configured for logo upload, using local storage (files will be lost on restart!)');
       }
 
       // Default to local URL
@@ -826,9 +835,18 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           
           console.log(`✅ Image uploaded to R2 (server-side): ${fileUrl}`);
         } catch (e) {
-          console.error('R2 image upload failed, serving local URL:', e);
-          // Keep local URL as fallback
+          console.error('❌ R2 image upload failed:', {
+            error: e.message,
+            bucket: bucket,
+            endpoint: endpoint,
+            hasCredentials: !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY)
+          });
+          console.error('📋 Full error details:', e);
+          // Keep local URL as fallback but warn user
+          console.warn(`⚠️  Using local fallback URL: ${fileUrl} (will be lost on restart!)`);
         }
+      } else {
+        console.warn('⚠️  R2 not configured, using local storage (files will be lost on restart!)');
       }
       
       res.json({ 
