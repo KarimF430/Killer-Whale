@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Enable Edge Runtime for better performance
-export const runtime = 'edge';
+// Use Node.js runtime for Vercel Free plan compatibility
+export const runtime = 'nodejs';
 
 export async function GET(
   request: NextRequest,

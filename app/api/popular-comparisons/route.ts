@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Use Node.js runtime for Vercel Free plan compatibility
+export const runtime = 'nodejs';
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
 
 // GET - Fetch popular comparisons

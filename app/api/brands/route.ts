@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Use Node.js runtime for better compatibility
-// export const runtime = 'edge';
+// Use Node.js runtime for Vercel Free plan compatibility
+export const runtime = 'nodejs';
 
 // Cache configuration - disabled for development to ensure fresh data
 const CACHE_HEADERS = {

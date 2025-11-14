@@ -10,7 +10,6 @@
   "env": {
     "NODE_ENV": "production"
   },
-  "regions": ["bom1", "sin1"],
   "framework": "nextjs",
   "outputDirectory": ".next",
   "installCommand": "npm install",

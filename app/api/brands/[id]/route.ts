@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { brandApi } from '@/lib/brand-api';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 const CACHE_HEADERS = {
   'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200', // 10min cache, 20min stale
