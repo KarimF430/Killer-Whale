@@ -18,8 +18,9 @@ import { warmUpCache } from "./middleware/redis-cache";
 import compression from "compression";
 import pinoHttp from "pino-http";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (force backend/.env to override any pre-set vars)
+const envPath = path.resolve(process.cwd(), '.env');
+dotenv.config({ path: envPath, override: true });
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);

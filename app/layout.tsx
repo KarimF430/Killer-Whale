@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
 
 export const viewport = {
   width: 'device-width',

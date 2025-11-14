@@ -35,14 +35,6 @@ const nextConfig = {
     remotePatterns,
     formats: ['image/webp', 'image/avif'],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/sitemap.xml',
-        destination: '/api/sitemap',
-      },
-    ];
-  },
   // Security headers for production
   async headers() {
     const isProd = process.env.NODE_ENV === 'production'
