@@ -1613,7 +1613,12 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         >
                           <div className="w-32 h-24 bg-gray-100">
                             <img
-                              src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${color.url}`}
+                              src={(() => {
+                                if (!color.url) return '';
+                                if (color.url.startsWith('http://') || color.url.startsWith('https://')) return color.url;
+                                if (color.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${color.url}`;
+                                return color.url;
+                              })()}
                               alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${color.caption}`}
                               className="w-full h-full object-cover rounded-lg"
                               loading="lazy"
