@@ -1314,10 +1314,18 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               <img
                                 src={
                                   // Backend format: { url: string, caption: string }
-                                  highlight.url ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}` :
+                                  highlight.url ? (
+                                    highlight.url.startsWith('http://') || highlight.url.startsWith('https://') ? highlight.url :
+                                    highlight.url.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}` :
+                                    highlight.url
+                                  ) :
                                   // Fallback format: { image: string, title: string }
-                                  highlight.image && highlight.image.startsWith('http') ? highlight.image : 
-                                  `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.image || '/highlights/placeholder.jpg'}`
+                                  highlight.image ? (
+                                    highlight.image.startsWith('http://') || highlight.image.startsWith('https://') ? highlight.image :
+                                    highlight.image.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.image}` :
+                                    highlight.image
+                                  ) :
+                                  `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
                                 }
                                 alt={highlight.caption || highlight.title || 'Car Feature'}
                                 className="w-full h-full object-cover rounded-lg"
@@ -1569,7 +1577,13 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     <div className="flex items-center justify-center">
                       <div className="relative max-w-2xl w-full">
                         <img
-                          src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.colorImages.find(c => c.caption === selectedColor)?.url || model.colorImages[0]?.url}`}
+                          src={(() => {
+                            const imageUrl = model.colorImages.find(c => c.caption === selectedColor)?.url || model.colorImages[0]?.url;
+                            if (!imageUrl) return '';
+                            if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) return imageUrl;
+                            if (imageUrl.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${imageUrl}`;
+                            return imageUrl;
+                          })()}
                           alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${selectedColor || 'default color'}`}
                           className="w-full h-auto object-contain"
                           loading="lazy"

@@ -61,29 +61,62 @@ async function getModelData(slug: string) {
     console.log('Detailed model data:', detailedModelData)
     console.log('Header SEO:', detailedModelData?.headerSeo)
     
+    // Helper function to format image URLs
+    const formatImageUrl = (url: string | undefined): string | undefined => {
+      if (!url) return undefined
+      if (url.startsWith('http://') || url.startsWith('https://')) return url
+      if (url.startsWith('/uploads/')) return `${backendUrl}${url}`
+      return url
+    }
+
     // Build gallery array from backend data
     const galleryImages: string[] = []
     
     // Add hero image first
     const heroImageUrl = detailedModelData?.heroImage || modelData.image
     if (heroImageUrl) {
-      galleryImages.push(heroImageUrl.startsWith('/uploads/') ? `${backendUrl}${heroImageUrl}` : heroImageUrl)
+      const fullUrl = formatImageUrl(heroImageUrl)
+      if (fullUrl) galleryImages.push(fullUrl)
     }
     
     // Add gallery images from backend
     if (detailedModelData?.galleryImages && Array.isArray(detailedModelData.galleryImages)) {
       detailedModelData.galleryImages.forEach((img: any) => {
         if (img?.url) {
-          const fullUrl = img.url.startsWith('/uploads/') ? `${backendUrl}${img.url}` : img.url
-          if (!galleryImages.includes(fullUrl)) { // Avoid duplicates
+          const fullUrl = formatImageUrl(img.url)
+          if (fullUrl && !galleryImages.includes(fullUrl)) { // Avoid duplicates
             galleryImages.push(fullUrl)
           }
         }
       })
     }
+
+    // Format highlight images
+    const formatHighlightImages = (images: any[] | undefined) => {
+      if (!images || !Array.isArray(images)) return []
+      return images.map((img: any) => ({
+        url: formatImageUrl(img.url),
+        caption: img.caption || ''
+      })).filter((img: any) => img.url)
+    }
+
+    // Format color images
+    const formatColorImages = (images: any[] | undefined) => {
+      if (!images || !Array.isArray(images)) return []
+      return images.map((img: any) => ({
+        url: formatImageUrl(img.url),
+        caption: img.caption || ''
+      })).filter((img: any) => img.url)
+    }
     
     console.log('Gallery images from backend:', detailedModelData?.galleryImages)
     console.log('Final gallery array:', galleryImages)
+    console.log('✅ Highlight images:', {
+      keyFeatureImages: formatHighlightImages(detailedModelData?.keyFeatureImages),
+      spaceComfortImages: formatHighlightImages(detailedModelData?.spaceComfortImages),
+      storageConvenienceImages: formatHighlightImages(detailedModelData?.storageConvenienceImages),
+      colorImages: formatColorImages(detailedModelData?.colorImages)
+    })
     
     const enhancedModelData = {
       id: modelData.id,
@@ -141,12 +174,12 @@ async function getModelData(slug: string) {
         seatingCapacity: parseInt(modelData.seating.split(' ')[0]),
         safetyRating: '4 Star'
       },
-      // Backend highlight images
-      keyFeatureImages: detailedModelData?.keyFeatureImages || [],
-      spaceComfortImages: detailedModelData?.spaceComfortImages || [],
-      storageConvenienceImages: detailedModelData?.storageConvenienceImages || [],
-      // Backend color images
-      colorImages: detailedModelData?.colorImages || [],
+      // Backend highlight images (with proper URL formatting)
+      keyFeatureImages: formatHighlightImages(detailedModelData?.keyFeatureImages),
+      spaceComfortImages: formatHighlightImages(detailedModelData?.spaceComfortImages),
+      storageConvenienceImages: formatHighlightImages(detailedModelData?.storageConvenienceImages),
+      // Backend color images (with proper URL formatting)
+      colorImages: formatColorImages(detailedModelData?.colorImages),
       // Backend pros, cons, and summary data
       pros: detailedModelData?.pros || [],
       cons: detailedModelData?.cons || [],

@@ -28,7 +28,7 @@ import path from "path";
 import fs from "fs";
 import { readFileSync } from "fs";
 import { randomUUID } from "crypto";
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // Import news routes
@@ -76,6 +76,51 @@ function formatBrandSummary(summary: string, brandName: string): {
           title: currentSection,
           content: currentContent.join(' ').trim()
         });
+
+  // R2 diagnostics endpoint (auth required). Helps verify effective configuration on the server
+  app.get('/api/uploads/diagnostics', authenticateToken, modifyLimiter, async (req, res) => {
+    try {
+      const bucket = process.env.R2_BUCKET as string | undefined;
+      const accountId = process.env.R2_ACCOUNT_ID as string | undefined;
+      const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+      const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint && bucket ? `${endpoint}/${bucket}` : '');
+      const hasCredentials = !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
+
+      const summary: any = {
+        configured: !!(bucket && endpoint && hasCredentials),
+        bucket: bucket || null,
+        endpoint: endpoint || null,
+        publicBase: publicBase || null,
+        hasCredentials,
+      };
+
+      if (!summary.configured) {
+        return res.json(summary);
+      }
+
+      const client = new S3Client({
+        region: process.env.R2_REGION || 'auto',
+        endpoint,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID as string,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY as string,
+        },
+        forcePathStyle: true,
+      });
+
+      try {
+        await client.send(new ListObjectsV2Command({ Bucket: bucket as string, MaxKeys: 1 }));
+        summary.r2Ok = true;
+      } catch (err: any) {
+        summary.r2Ok = false;
+        summary.error = err?.message || String(err);
+      }
+
+      return res.json(summary);
+    } catch (err) {
+      return res.status(500).json({ error: 'Diagnostics failed' });
+    }
+  });
       }
       
       // Start new section
@@ -745,6 +790,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           });
           console.error('📋 Full error details:', error);
           console.warn('⚠️  Logo upload falling back to local storage (will be lost on restart!)');
+          // In production, optionally fail hard instead of falling back to local storage
+          if (process.env.REQUIRE_R2 === 'true') {
+            return res.status(500).json({ error: 'Cloud storage unavailable. Please try again later.' });
+          }
           // Fall through to local storage
         }
       } else {
@@ -844,6 +893,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             hasCredentials: !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY)
           });
           console.error('📋 Full error details:', e);
+          // In production, optionally fail hard instead of falling back to local storage
+          if (process.env.REQUIRE_R2 === 'true') {
+            return res.status(500).json({ error: 'Cloud storage unavailable. Please try again later.' });
+          }
           // Keep local URL as fallback but warn user
           console.warn(`⚠️  Using local fallback URL: ${fileUrl} (will be lost on restart!)`);
         }
