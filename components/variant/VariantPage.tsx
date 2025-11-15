@@ -637,7 +637,12 @@ export default function VariantPage({
                     {model?.heroImage && (
                       <div className="w-full h-full flex-shrink-0 snap-center relative">
                         <img
-                          src={model.heroImage.startsWith('http') ? model.heroImage : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}`}
+                          src={(() => {
+                            if (!model.heroImage) return '';
+                            if (model.heroImage.startsWith('http://') || model.heroImage.startsWith('https://')) return model.heroImage;
+                            if (model.heroImage.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}`;
+                            return model.heroImage;
+                          })()}
                           alt={`${displayBrandName || 'Car'} ${displayModelName || 'Model'}`}
                           className="w-full h-full object-contain rounded-2xl"
                           loading="eager"
@@ -650,7 +655,12 @@ export default function VariantPage({
                     {model?.galleryImages?.map((img: any, index: number) => (
                       <div key={index} className="w-full h-full flex-shrink-0 snap-center relative">
                         <img
-                          src={img.url?.startsWith('http') ? img.url : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`}
+                          src={(() => {
+                            if (!img.url) return '';
+                            if (img.url.startsWith('http://') || img.url.startsWith('https://')) return img.url;
+                            if (img.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`;
+                            return img.url;
+                          })()}
                           alt={`${displayBrandName || 'Car'} ${displayModelName || 'Model'} - Image ${index + 1}`}
                           className="w-full h-full object-cover rounded-2xl"
                           loading="lazy"
@@ -908,7 +918,12 @@ export default function VariantPage({
                           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                             <div className="aspect-[4/3] bg-gray-200 relative">
                               <img
-                                src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}`}
+                                src={(() => {
+                                  if (!highlight.url) return '';
+                                  if (highlight.url.startsWith('http://') || highlight.url.startsWith('https://')) return highlight.url;
+                                  if (highlight.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}`;
+                                  return highlight.url;
+                                })()}
                                 alt={highlight.caption || `${displayBrandName} ${displayModelName} Feature ${index + 1}`}
                                 className="w-full h-full object-cover rounded-lg"
                                 loading="lazy"

@@ -136,7 +136,12 @@ export default function SimpleModelsList({ brand }: SimpleModelsListProps) {
                 <div className="relative w-48 h-32 bg-gradient-to-br from-blue-400 to-purple-600 flex-shrink-0">
                   {model.image && (
                     <Image
-                      src={model.image?.startsWith('http') ? model.image : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.image}`}
+                      src={(() => {
+                        if (!model.image) return '';
+                        if (model.image.startsWith('http://') || model.image.startsWith('https://')) return model.image;
+                        if (model.image.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.image}`;
+                        return model.image;
+                      })()}
                       alt={model.name}
                       fill
                       className="object-cover"

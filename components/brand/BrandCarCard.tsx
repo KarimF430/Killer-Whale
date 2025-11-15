@@ -47,7 +47,12 @@ export default function BrandCarCard({ car, brandSlug, brandName }: BrandCarCard
           {/* Car Image - Compact */}
           <div className="w-44 flex-shrink-0 relative overflow-hidden rounded-l-lg">
             <img 
-              src={car.image.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${car.image}` : car.image}
+              src={(() => {
+                if (!car.image) return '';
+                if (car.image.startsWith('http://') || car.image.startsWith('https://')) return car.image;
+                if (car.image.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${car.image}`;
+                return car.image;
+              })()}
               alt={car.name}
               className="w-full h-full object-contain"
               onError={(e) => {
