@@ -11,6 +11,22 @@ const CACHE_HEADERS = {
   'Vary': 'Accept-Encoding',
 };
 
+const normalizeUploadsPath = (value: string) => {
+  if (!value) return ''
+  return value.startsWith('/') ? value : `/${value}`
+}
+
+const resolveLogoUrl = (logo: string | null, backendUrl: string) => {
+  if (!logo) return ''
+  if (logo.startsWith('http://') || logo.startsWith('https://')) return logo
+  const uploadsPath = normalizeUploadsPath(logo)
+  const r2Base = process.env.R2_PUBLIC_BASE_URL || ''
+  if (r2Base) {
+    return `${r2Base.replace(/\/$/, '')}${uploadsPath}`
+  }
+  return `${backendUrl}${uploadsPath}`
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -45,7 +61,9 @@ export async function GET(request: NextRequest) {
       .map((brand: any) => ({
         id: brand.id,
         name: brand.name,
-        logo: brand.logo ? (brand.logo.startsWith('http') ? brand.logo : `${backendUrl}${brand.logo}`) : `/brands/${brand.name.toLowerCase().replace(/\s+/g, '-')}.png`,
+        logo: brand.logo
+          ? resolveLogoUrl(brand.logo, backendUrl)
+          : `/brands/${brand.name.toLowerCase().replace(/\s+/g, '-')}.png`,
         ranking: brand.ranking,
         status: brand.status,
         summary: brand.summary || `${brand.name} - Premium automotive brand`,

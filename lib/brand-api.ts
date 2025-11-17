@@ -152,11 +152,22 @@ class BrandApiClient {
     const defaultModels = this.getDefaultModels(backendBrand.name);
     const defaultPrice = this.getDefaultPrice(backendBrand.name);
     
+    const resolveLogoUrl = (logo: string | null) => {
+      if (!logo) return ''
+      if (logo.startsWith('http://') || logo.startsWith('https://')) return logo
+      const normalized = logo.startsWith('/') ? logo : `/${logo}`
+      const r2Base = process.env.R2_PUBLIC_BASE_URL || ''
+      if (r2Base) {
+        return `${r2Base.replace(/\/$/, '')}${normalized}`
+      }
+      return `${this.baseUrl}${normalized}`
+    }
+    
     return {
       id: backendBrand.id,
       name: backendBrand.name,
       logo: backendBrand.logo
-        ? (backendBrand.logo.startsWith('http') ? backendBrand.logo : `${this.baseUrl}${backendBrand.logo}`)
+        ? resolveLogoUrl(backendBrand.logo)
         : `/brands/${slug}.png`,
       ranking: backendBrand.ranking,
       status: backendBrand.status,
