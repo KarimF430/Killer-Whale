@@ -83,21 +83,19 @@ export default function BrandSection() {
                 {/* Brand Logo */}
                 <div className="h-16 flex items-center justify-center mb-3">
                   {brand.logo && brand.logo.startsWith('http') ? (
-                  <Image
-                    src={brand.logo}
-                    alt={`${brand.name} logo`}
-                    width={48}
-                    height={48}
-                    className="w-12 h-12 object-contain"
-                    onError={(e) => {
-                      const target = e.target as any;
-                      if (target && target.currentTarget) {
-                        (target.currentTarget as HTMLElement).style.display = 'none';
-                        (target.currentTarget as HTMLElement).nextElementSibling?.classList.remove('hidden');
-                      }
-                    }}
-                  />
-                ) : null}
+                    <Image
+                      src={brand.logo}
+                      alt={`${brand.name} logo`}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 object-contain"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = 'none'
+                        target.nextElementSibling?.classList.remove('hidden')
+                      }}
+                    />
+                  ) : null}
                   <div className={`w-12 h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-lg flex items-center justify-center ${brand.logo && brand.logo.startsWith('http') ? 'hidden' : ''}`}>
                     <span className="text-sm font-bold text-white">
                       {brand.name.split(' ').map((word: string) => word.charAt(0)).join('')}
