@@ -4,6 +4,9 @@
 import { performantFetch, performanceManager } from './performance';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+const SERVER_R2_BASE = process.env.R2_PUBLIC_BASE_URL || ''
+const CLIENT_R2_BASE = process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || ''
+const PUBLIC_R2_BASE = typeof window === 'undefined' ? SERVER_R2_BASE : CLIENT_R2_BASE
 
 // Backend Brand Interface (matching your Express backend)
 export interface BackendBrand {
@@ -156,7 +159,7 @@ class BrandApiClient {
       if (!logo) return ''
       if (logo.startsWith('http://') || logo.startsWith('https://')) return logo
       const normalized = logo.startsWith('/') ? logo : `/${logo}`
-      const r2Base = process.env.R2_PUBLIC_BASE_URL || ''
+      const r2Base = PUBLIC_R2_BASE || ''
       if (r2Base) {
         return `${r2Base.replace(/\/$/, '')}${normalized}`
       }
