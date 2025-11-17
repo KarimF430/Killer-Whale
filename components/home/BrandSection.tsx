@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import brandApi, { FrontendBrand } from '@/lib/brand-api'
