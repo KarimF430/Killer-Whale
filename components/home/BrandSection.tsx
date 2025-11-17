@@ -83,14 +83,15 @@ export default function BrandSection() {
                 {/* Brand Logo */}
                 <div className="h-16 flex items-center justify-center mb-3">
                   {brand.logo && brand.logo.startsWith('http') ? (
-                    <Image
+                    <img
                       src={brand.logo}
                       alt={`${brand.name} logo`}
                       width={48}
                       height={48}
+                      loading="lazy"
                       className="w-12 h-12 object-contain"
                       onError={(e) => {
-                        const target = e.target as HTMLImageElement
+                        const target = e.currentTarget
                         target.style.display = 'none'
                         target.nextElementSibling?.classList.remove('hidden')
                       }}
