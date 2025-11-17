@@ -14,11 +14,22 @@ try {
       : rawR2.replace(/^https?:\/\//, '').replace(/\/.*/, '')
   }
 } catch {}
+// Extract backend host (Render) so brand logos served from backend pass Next/Image allow-list
+const rawBackend = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ''
+let backendHost = ''
+try {
+  if (rawBackend) {
+    backendHost = rawBackend.includes('://')
+      ? new URL(rawBackend).hostname
+      : rawBackend.replace(/^https?:\/\//, '').replace(/\/.*/, '')
+  }
+} catch {}
 const baseImageHosts = [
   'images.unsplash.com',
   'motoroctane.com',
   'www.motoroctane.com',
   r2Host,
+  backendHost,
   ...extraImageHosts,
 ].filter(Boolean)
 const devImageHosts = ['localhost', '127.0.0.1']
