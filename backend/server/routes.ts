@@ -1076,6 +1076,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       
       // Backup after create
       await triggerBackup('brands');
+      await invalidateRedisCache('/api/brands');
       
       res.status(201).json(brand);
     } catch (error) {
@@ -1097,6 +1098,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       
       // Backup after update
       await triggerBackup('brands');
+      await invalidateRedisCache('/api/brands');
       
       res.json(brand);
     } catch (error) {
@@ -1119,6 +1121,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
       console.log(`✅ Brand deleted successfully: ${req.params.id}`);
       await triggerBackup('brands');
+      await invalidateRedisCache('/api/brands');
       res.status(204).send();
     } catch (error) {
       console.error(`❌ Error deleting brand ${req.params.id}:`, error);
