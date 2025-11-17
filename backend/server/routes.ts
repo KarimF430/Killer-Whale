@@ -77,50 +77,6 @@ function formatBrandSummary(summary: string, brandName: string): {
           content: currentContent.join(' ').trim()
         });
 
-  // R2 diagnostics endpoint (auth required). Helps verify effective configuration on the server
-  app.get('/api/uploads/diagnostics', authenticateToken, modifyLimiter, async (req, res) => {
-    try {
-      const bucket = process.env.R2_BUCKET as string | undefined;
-      const accountId = process.env.R2_ACCOUNT_ID as string | undefined;
-      const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
-      const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint && bucket ? `${endpoint}/${bucket}` : '');
-      const hasCredentials = !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
-
-      const summary: any = {
-        configured: !!(bucket && endpoint && hasCredentials),
-        bucket: bucket || null,
-        endpoint: endpoint || null,
-        publicBase: publicBase || null,
-        hasCredentials,
-      };
-
-      if (!summary.configured) {
-        return res.json(summary);
-      }
-
-      const client = new S3Client({
-        region: process.env.R2_REGION || 'auto',
-        endpoint,
-        credentials: {
-          accessKeyId: process.env.R2_ACCESS_KEY_ID as string,
-          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY as string,
-        },
-        forcePathStyle: true,
-      });
-
-      try {
-        await client.send(new ListObjectsV2Command({ Bucket: bucket as string, MaxKeys: 1 }));
-        summary.r2Ok = true;
-      } catch (err: any) {
-        summary.r2Ok = false;
-        summary.error = err?.message || String(err);
-      }
-
-      return res.json(summary);
-    } catch (err) {
-      return res.status(500).json({ error: 'Diagnostics failed' });
-    }
-  });
       }
       
       // Start new section
@@ -220,6 +176,71 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
     }
   };
+
+  // R2 diagnostics endpoint (auth required) to verify storage config
+  app.get('/api/uploads/diagnostics', authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
+    try {
+      const bucket = process.env.R2_BUCKET as string | undefined;
+      const accountId = process.env.R2_ACCOUNT_ID as string | undefined;
+      const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+      const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint && bucket ? `${endpoint}/${bucket}` : '');
+      const hasCredentials = !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
+
+      const summary: Record<string, any> = {
+        configured: !!(bucket && endpoint && hasCredentials),
+        bucket: bucket || null,
+        endpoint: endpoint || null,
+        publicBase: publicBase || null,
+        hasCredentials,
+      };
+
+      if (!summary.configured) {
+        return res.json(summary);
+      }
+
+      const client = new S3Client({
+        region: process.env.R2_REGION || 'auto',
+        endpoint,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID as string,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY as string,
+        },
+        forcePathStyle: true,
+      });
+
+      try {
+        await client.send(new ListObjectsV2Command({ Bucket: bucket as string, MaxKeys: 1 }));
+        summary.r2Ok = true;
+      } catch (error: any) {
+        summary.r2Ok = false;
+        summary.error = error?.message || String(error);
+      }
+
+      return res.json(summary);
+    } catch (error) {
+      return res.status(500).json({ error: 'Diagnostics failed' });
+    }
+  });
+
+  const buildPublicAssetUrl = (assetPath: string | null | undefined, req: Request): string | null => {
+    if (!assetPath) return null
+    if (assetPath.startsWith('http://') || assetPath.startsWith('https://')) {
+      return assetPath
+    }
+    const normalized = assetPath.startsWith('/') ? assetPath : `/${assetPath}`
+    const publicBase =
+      process.env.R2_PUBLIC_BASE_URL ||
+      process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ||
+      (process.env.R2_PUBLIC_BASE_HOST ? `https://${process.env.R2_PUBLIC_BASE_HOST}` : '')
+    if (publicBase) {
+      return `${publicBase.replace(/\/$/, '')}${normalized}`
+    }
+    const backendOrigin =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      process.env.BACKEND_URL ||
+      `${req.protocol}://${req.get('host')}`
+    return `${(backendOrigin || '').replace(/\/$/, '')}${normalized}`
+  }
   
   // ============================================
   // AUTHENTICATION ROUTES (Public)
@@ -773,7 +794,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           const publicUrl = `${publicBase}/${key}`;
           
           // Clean up temp file
-          unlinkSync(req.file.path);
+          fs.unlinkSync(req.file.path);
           
           console.log(`✅ Logo uploaded to R2 (server-side): ${publicUrl}`);
           return res.json({ 
@@ -882,17 +903,17 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           }
           
           // Clean up temp file
-          unlinkSync(req.file.path);
+          fs.unlinkSync(req.file.path);
           
           console.log(`✅ Image uploaded to R2 (server-side): ${fileUrl}`);
-        } catch (e) {
+        } catch (error: any) {
           console.error('❌ R2 image upload failed:', {
-            error: e.message,
+            error: error.message,
             bucket: bucket,
             endpoint: endpoint,
             hasCredentials: !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY)
           });
-          console.error('📋 Full error details:', e);
+          console.error('📋 Full error details:', error);
           // In production, optionally fail hard instead of falling back to local storage
           if (process.env.REQUIRE_R2 === 'true') {
             return res.status(500).json({ error: 'Cloud storage unavailable. Please try again later.' });
@@ -1025,7 +1046,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       const includeInactive = req.query.includeInactive === 'true';
       const brands = await storage.getBrands(includeInactive);
-      res.json(brands);
+      const transformed = brands.map(brand => ({
+        ...brand,
+        logo: buildPublicAssetUrl(brand.logo, req)
+      }));
+      res.json(transformed);
     } catch (error) {
       console.error('Error getting brands:', error);
       res.status(500).json({ error: "Failed to get brands" });
@@ -1051,6 +1076,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       
       res.json({
         ...brand,
+        logo: buildPublicAssetUrl(brand.logo, req),
         formattedSummary
       });
     } catch (error) {
@@ -1064,7 +1090,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     if (!brand) {
       return res.status(404).json({ error: "Brand not found" });
     }
-    res.json(brand);
+    res.json({
+      ...brand,
+      logo: buildPublicAssetUrl(brand.logo, req)
+    });
   });
 
   app.post("/api/brands", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
@@ -1078,7 +1107,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       await triggerBackup('brands');
       await invalidateRedisCache('/api/brands');
       
-      res.status(201).json(brand);
+      res.status(201).json({
+        ...brand,
+        logo: buildPublicAssetUrl(brand.logo, req)
+      });
     } catch (error) {
       console.error('Brand creation error:', error);
       if (error instanceof Error) {
@@ -1100,7 +1132,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       await triggerBackup('brands');
       await invalidateRedisCache('/api/brands');
       
-      res.json(brand);
+      res.json({
+        ...brand,
+        logo: buildPublicAssetUrl(brand.logo, req)
+      });
     } catch (error) {
       console.error('Brand update error:', error);
       if (error instanceof Error) {
@@ -1298,7 +1333,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       console.log('✅ Variant updated successfully');
       
       // Invalidate variants cache
-      invalidateCache('/api/variants');
+      invalidateRedisCache('/api/variants');
       
       res.json(variant);
     } catch (error) {
@@ -1321,7 +1356,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       console.log('✅ Variant deleted successfully, invalidating cache...');
       
       // Invalidate variants cache
-      invalidateCache('/api/variants');
+      invalidateRedisCache('/api/variants');
       
       res.status(204).send();
     } catch (error) {
