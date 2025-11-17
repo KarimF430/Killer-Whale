@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { ChevronDown, Share2, Heart, Calendar, Fuel, Users } from 'lucide-react'
 import { formatPrice } from '@/utils/priceFormatter'
 import { calculateOnRoadPrice, OnRoadPriceBreakup } from '@/lib/rto-data-optimized'
-import { truncateCarName } from '@/lib/text-utils'
 import PageSection from '../common/PageSection'
 import AdBanner from '../home/AdBanner'
 import Footer from '../Footer'
@@ -1088,75 +1087,15 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   {similarCars.map((car) => (
-                    <Link
+                    <CarCard
                       key={car.id}
-                      href={`/${car.brandName.toLowerCase().replace(/\s+/g, '-')}-cars/${car.name.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden block"
-                    >
-                      {/* Car Image with Badges */}
-                      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
-                        {/* NEW Badge */}
-                        {car.isNew && (
-                          <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
-                            NEW
-                          </div>
-                        )}
-                        
-                        {/* Heart Icon */}
-                        <button className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
-                          <Heart className="h-5 w-5 text-gray-600" />
-                        </button>
-
-                        {/* Car Image */}
-                        <div className="w-full h-full flex items-center justify-center">
-                          {car.image ? (
-                            <img 
-                              src={car.image}
-                              alt={`${car.brandName} ${car.name}`}
-                              className="w-full h-full object-contain object-center transition-transform duration-300"
-                              onError={(e) => {
-                                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
-                              }}
-                            />
-                          ) : (
-                            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#374151' className="w-3/4 h-3/4">
-                              <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/>
-                              <circle cx='100' cy='220' r='25' fill='#111827'/>
-                              <circle cx='300' cy='220' r='25' fill='#111827'/>
-                              <path d='M80 110h240l-20-30H100z' fill='#6B7280'/>
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-
-                    {/* Car Info */}
-                    <div className="p-5">
-                      <h3 className="font-bold text-gray-900 mb-2 text-lg">{truncateCarName(car.brandName, car.name, 18)}</h3>
-                      
-                      <div className="flex items-center text-red-600 font-bold text-xl mb-4">
-                        <span>₹ {(car.startingPrice / 100000).toFixed(2)} Lakh</span>
-                      </div>
-
-                      <div className="space-y-3 text-sm text-gray-600 mb-4">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-3 text-gray-400" />
-                          <span>{car.launchDate}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Fuel className="h-4 w-4 mr-3 text-gray-400" />
-                          <span>{car.fuelTypes?.join('/') || 'Petrol'}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-3 text-gray-400" />
-                          <span>{car.seating} Seater</span>
-                        </div>
-                      </div>
-
-                      <button className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-3 rounded-lg transition-all duration-200 text-sm font-semibold">
-                        View Details
-                      </button>
-                    </div>
-                    </Link>
+                      car={car}
+                      onClick={() => {
+                        const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                        const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                        router.push(`/${brandSlug}-cars/${modelSlug}`)
+                      }}
+                    />
                   ))}
                 </div>
               )}
