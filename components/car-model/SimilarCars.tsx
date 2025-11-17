@@ -18,98 +18,8 @@ export default function SimilarCars({ carData }: SimilarCarsProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [wishlistItems, setWishlistItems] = useState<Set<number>>(new Set())
 
-  const similarCars = [
-    {
-      id: 1,
-      brand: 'Hyundai',
-      model: 'i20',
-      fullName: 'Hyundai i20',
-      image: '/api/placeholder/300/200',
-      priceRange: '₹7.04 - 11.21 Lakh',
-      startingPrice: 704000,
-      rating: 4.3,
-      reviewCount: 1247,
-      mileage: '20.35 kmpl',
-      seating: 5,
-      fuelType: 'Petrol',
-      transmission: 'Manual/AMT',
-      keyFeatures: ['Touchscreen Infotainment', 'Wireless Charging', 'Sunroof'],
-      badge: 'Premium',
-      similarity: 92
-    },
-    {
-      id: 2,
-      brand: 'Tata',
-      model: 'Altroz',
-      fullName: 'Tata Altroz',
-      image: '/api/placeholder/300/200',
-      priceRange: '₹6.60 - 10.74 Lakh',
-      startingPrice: 660000,
-      rating: 4.1,
-      reviewCount: 892,
-      mileage: '25.11 kmpl',
-      seating: 5,
-      fuelType: 'Petrol/Diesel',
-      transmission: 'Manual/DCT',
-      keyFeatures: ['90° Opening Doors', 'Harman Audio', '5-Star Safety'],
-      badge: 'Safety',
-      similarity: 89
-    },
-    {
-      id: 3,
-      brand: 'Honda',
-      model: 'Jazz',
-      fullName: 'Honda Jazz',
-      image: '/api/placeholder/300/200',
-      priceRange: '₹7.89 - 10.29 Lakh',
-      startingPrice: 789000,
-      rating: 4.2,
-      reviewCount: 654,
-      mileage: '18.2 kmpl',
-      seating: 5,
-      fuelType: 'Petrol',
-      transmission: 'Manual/CVT',
-      keyFeatures: ['Magic Seats', 'CVT Transmission', 'Honda Sensing'],
-      badge: 'Spacious',
-      similarity: 85
-    },
-    {
-      id: 4,
-      brand: 'Volkswagen',
-      model: 'Polo',
-      fullName: 'Volkswagen Polo',
-      image: '/api/placeholder/300/200',
-      priceRange: '₹6.79 - 10.99 Lakh',
-      startingPrice: 679000,
-      rating: 4.4,
-      reviewCount: 543,
-      mileage: '18.78 kmpl',
-      seating: 5,
-      fuelType: 'Petrol',
-      transmission: 'Manual/AT',
-      keyFeatures: ['German Engineering', 'Solid Build', 'TSI Engine'],
-      badge: 'Performance',
-      similarity: 83
-    },
-    {
-      id: 5,
-      brand: 'Nissan',
-      model: 'Micra',
-      fullName: 'Nissan Micra',
-      image: '/api/placeholder/300/200',
-      priceRange: '₹5.99 - 8.49 Lakh',
-      startingPrice: 599000,
-      rating: 3.9,
-      reviewCount: 432,
-      mileage: '19.34 kmpl',
-      seating: 5,
-      fuelType: 'Petrol',
-      transmission: 'Manual/CVT',
-      keyFeatures: ['Compact Design', 'Easy Parking', 'Fuel Efficient'],
-      badge: 'Affordable',
-      similarity: 78
-    }
-  ]
+  // Mock similar cars removed - will fetch real data from backend
+  const similarCars: any[] = []
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -139,6 +49,11 @@ export default function SimilarCars({ carData }: SimilarCarsProps) {
     'Spacious': 'bg-blue-100 text-blue-700',
     'Performance': 'bg-red-100 text-red-700',
     'Affordable': 'bg-orange-100 text-orange-700'
+  }
+
+  // Don't render if no similar cars
+  if (similarCars.length === 0) {
+    return null
   }
 
   return (

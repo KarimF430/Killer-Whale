@@ -7,9 +7,11 @@ import VariantCard from './VariantCard'
 
 interface AllVariantsClientProps {
   model: any
+  brandSlug?: string
+  modelSlug?: string
 }
 
-export default function AllVariantsClient({ model }: AllVariantsClientProps) {
+export default function AllVariantsClient({ model, brandSlug, modelSlug }: AllVariantsClientProps) {
   const router = useRouter()
   const [modelVariants, setModelVariants] = useState<any[]>([])
   const [loadingVariants, setLoadingVariants] = useState(true)
@@ -110,10 +112,23 @@ export default function AllVariantsClient({ model }: AllVariantsClientProps) {
   const filteredVariants = getFilteredVariants()
 
   const handleVariantClick = (variant: any) => {
-    const brandSlug = model?.brandName?.toLowerCase().replace(/\s+/g, '-')
-    const modelSlug = model?.name?.toLowerCase().replace(/\s+/g, '-')
+    // Use provided slugs first, fallback to constructing from model data
+    const finalBrandSlug = brandSlug || (model?.brandName?.toLowerCase().replace(/\s+/g, '-') + '-cars')
+    const finalModelSlug = modelSlug || model?.name?.toLowerCase().replace(/\s+/g, '-')
     const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
-    router.push(`/${brandSlug}-cars/${modelSlug}/${variantSlug}`)
+    router.push(`/${finalBrandSlug}/${finalModelSlug}/${variantSlug}`)
+  }
+
+  const handleBackClick = () => {
+    // Use provided slugs first, fallback to constructing from model data
+    const finalBrandSlug = brandSlug || (model?.brandName?.toLowerCase().replace(/\s+/g, '-') + '-cars')
+    const finalModelSlug = modelSlug || model?.name?.toLowerCase().replace(/\s+/g, '-')
+    
+    if (finalBrandSlug && finalModelSlug) {
+      router.push(`/${finalBrandSlug}/${finalModelSlug}`)
+    } else {
+      router.push('/')
+    }
   }
 
   return (
@@ -122,7 +137,7 @@ export default function AllVariantsClient({ model }: AllVariantsClientProps) {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
-            onClick={() => router.back()}
+            onClick={handleBackClick}
             className="flex items-center text-gray-600 hover:text-gray-900 mb-2"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />

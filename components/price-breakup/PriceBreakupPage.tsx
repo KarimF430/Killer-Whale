@@ -224,12 +224,17 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         if (foundModel) {
           setModel(foundModel)
           
-          // Fetch hero image
+          // Fetch hero image - handle full URLs and relative paths
           if (foundModel.heroImage) {
-            const imageUrl = foundModel.heroImage.startsWith('/uploads/') 
-              ? `${backendUrl}${foundModel.heroImage}` 
-              : foundModel.heroImage
+            const imageUrl = foundModel.heroImage.startsWith('http') 
+              ? foundModel.heroImage 
+              : foundModel.heroImage.startsWith('/uploads/') || foundModel.heroImage.startsWith('/')
+              ? `${backendUrl}${foundModel.heroImage}`
+              : `${backendUrl}/uploads/${foundModel.heroImage}`
+            console.log('✅ Setting hero image to:', imageUrl)
             setHeroImage(imageUrl)
+          } else {
+            console.warn('⚠️ No hero image found for model:', foundModel.name)
           }
           
           // Fetch variants for this model
@@ -345,9 +350,13 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
             ? model.transmissions
             : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
           
-          // Get hero image
-          const heroImage = model.heroImage
-            ? `${backendUrl}${model.heroImage}`
+          // Get hero image - handle full URLs and relative paths
+          const heroImage = model.heroImage 
+            ? (model.heroImage.startsWith('http') 
+                ? model.heroImage 
+                : model.heroImage.startsWith('/uploads/') || model.heroImage.startsWith('/')
+                ? `${backendUrl}${model.heroImage}`
+                : `${backendUrl}/uploads/${model.heroImage}`)
             : ''
           
           return {
@@ -399,19 +408,36 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     'Chennai, Tamil Nadu'
   ]
 
-  // Similar cars data - dynamically fetched based on body type and sub-body type
+  // Similar cars data - using exact same logic as CarModelPage
   const [similarCars, setSimilarCars] = useState<any[]>([])
   const [loadingSimilarCars, setLoadingSimilarCars] = useState(true)
-  const [currentModelData, setCurrentModelData] = useState<any>(null)
 
-  // Fetch current model data and similar cars
+  // Helper function to format launch date (same as CarModelPage)
+  const formatLaunchDateForSimilar = (date: string): string => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const parts = date.split('-')
+    if (parts.length === 2) {
+      const year = parts[0]
+      const monthIndex = parseInt(parts[1]) - 1
+      return `${months[monthIndex]} ${year}`
+    }
+    return date
+  }
+
+  // Fetch similar cars using exact same logic as CarModelPage
   useEffect(() => {
     const fetchSimilarCars = async () => {
+      if (!model?.id) {
+        setSimilarCars([])
+        setLoadingSimilarCars(false)
+        return
+      }
+
       try {
         setLoadingSimilarCars(true)
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
         
-        // Fetch all models, brands, and variants
+        // Fetch all models, brands, and variants (same as CarModelPage)
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models`),
           fetch(`${backendUrl}/api/brands`),
@@ -429,73 +455,58 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         const brands = await brandsRes.json()
         const variants = await variantsRes.json()
         
-        // Create brand map
+        // Create a map of brand IDs to brand names (same as CarModelPage)
         const brandMap = brands.reduce((acc: any, brand: any) => {
           acc[brand.id] = brand.name
           return acc
         }, {})
         
-        // Find current model by matching brand and model name
-        const currentModel = models.find((m: any) => {
-          const mBrandName = brandMap[m.brandId]?.toLowerCase().replace(/\s+/g, '-')
-          const mModelName = m.name.toLowerCase().replace(/\s+/g, '-')
-          return mBrandName === brandSlug && mModelName === modelSlug
-        })
-        
-        if (!currentModel || !currentModel.bodyType) {
-          setSimilarCars([])
-          setLoadingSimilarCars(false)
-          return
-        }
-        
-        setCurrentModelData(currentModel)
-        
-        // Filter models with matching body type and sub-body type, excluding current model
-        const matchingModels = models.filter((m: any) => 
-          m.id !== currentModel.id && // Exclude current model
-          m.bodyType === currentModel.bodyType && // Match body type
-          m.subBodyType === currentModel.subBodyType // Match sub-body type
-        )
-        
-        // Process matching models
-        const processedCars = matchingModels.map((m: any) => {
-          const modelVariants = variants.filter((v: any) => v.modelId === m.id)
-          const lowestPrice = modelVariants.length > 0
-            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-            : m.price || 0
-          
-          const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
-            ? m.fuelTypes
-            : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-          
-          const heroImage = m.heroImage ? `${backendUrl}${m.heroImage}` : ''
-          
-          const formatLaunchDate = (date: string): string => {
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            const parts = date.split('-')
-            if (parts.length === 2) {
-              const year = parts[0]
-              const monthIndex = parseInt(parts[1]) - 1
-              return `${months[monthIndex]} ${year}`
+        // Process each model to find lowest variant price (same as CarModelPage)
+        const processedCars = models
+          .filter((m: any) => m.id !== model.id) // Exclude current model
+          .map((m: any) => {
+            // Find all variants for this model
+            const modelVariants = variants.filter((v: any) => v.modelId === m.id)
+            
+            // Find lowest price variant
+            const lowestPrice = modelVariants.length > 0
+              ? Math.min(...modelVariants.map((v: any) => v.price || 0))
+              : m.price || 0
+            
+            // Get unique fuel types and transmissions from model or variants
+            const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
+              ? m.fuelTypes
+              : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
+            
+            const transmissions = m.transmissions && m.transmissions.length > 0
+              ? m.transmissions
+              : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
+            
+            // Get hero image from model (same as CarModelPage)
+            const heroImage = m.heroImage 
+              ? (m.heroImage.startsWith('http') 
+                  ? m.heroImage 
+                  : `${backendUrl}${m.heroImage}`)
+              : ''
+            
+            return {
+              id: m.id,
+              name: m.name,
+              brand: m.brandId,
+              brandName: brandMap[m.brandId] || 'Unknown',
+              image: heroImage,
+              startingPrice: lowestPrice,
+              fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
+              transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+              seating: m.seating || 5,
+              launchDate: m.launchDate ? `Launched ${formatLaunchDateForSimilar(m.launchDate)}` : 'Launched',
+              slug: `${(brandMap[m.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
+              isNew: m.isNew || false,
+              isPopular: m.isPopular || false
             }
-            return date
-          }
-          
-          return {
-            id: m.id,
-            name: m.name,
-            brand: brandMap[m.brandId] || 'Unknown',
-            image: heroImage,
-            startingPrice: lowestPrice,
-            fuelType: fuelTypes.length > 0 ? fuelTypes.join('/') : 'Petrol',
-            seating: m.seatingCapacity || 5,
-            launchDate: m.launchDate ? `Launched ${formatLaunchDate(m.launchDate)}` : 'New Launch',
-            slug: `${brandMap[m.brandId]?.toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
-            isNew: m.isNew || false
-          }
-        })
+          })
         
-        setSimilarCars(processedCars.slice(0, 6)) // Limit to 6 cars
+        setSimilarCars(processedCars)
         setLoadingSimilarCars(false)
       } catch (error) {
         console.error('Error fetching similar cars:', error)
@@ -505,7 +516,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     }
 
     fetchSimilarCars()
-  }, [brandSlug, modelSlug])
+  }, [model?.id])
 
 
   // Use real variants from backend, fallback to empty array if loading
@@ -567,48 +578,8 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     router.push(`/${brandSlug}-cars/${modelSlug}/${variantSlug}`)
   }
 
-  // Fetch hero image from backend
-  useEffect(() => {
-    const fetchModelImage = async () => {
-      try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-        console.log('🖼️ Fetching model image from:', backendUrl)
-        
-        // Fetch all models to find the matching one
-        const response = await fetch(`${backendUrl}/api/models`)
-        
-        if (response.ok) {
-          const models = await response.json()
-          console.log('📦 Fetched models:', models.length)
-          
-          // Find the model by name (case-insensitive)
-          const model = models.find((m: any) => 
-            m.name.toLowerCase() === modelName.toLowerCase()
-          )
-          
-          console.log('🔍 Found model:', model?.name, 'Hero image:', model?.heroImage)
-          
-          if (model && model.heroImage) {
-            // Prepend backend URL to the image path
-            const imageUrl = `${backendUrl}${model.heroImage}`
-            console.log('✅ Setting hero image to:', imageUrl)
-            setHeroImage(imageUrl)
-          } else {
-            console.warn('⚠️ No hero image found for model:', modelName)
-          }
-        } else {
-          console.error('❌ Failed to fetch models:', response.status)
-        }
-      } catch (error) {
-        console.error('❌ Error fetching model image:', error)
-        // Keep default image on error
-      }
-    }
-
-    if (modelName) {
-      fetchModelImage()
-    }
-  }, [modelName])
+  // Note: Model image is now fetched in the main fetchData useEffect above
+  // This separate useEffect is no longer needed as it duplicates the logic
 
   // Listen for city changes from localStorage (when user returns from location page)
   useEffect(() => {
@@ -789,11 +760,25 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                 href={`/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars/${modelName.toLowerCase().replace(/\s+/g, '-')}`}
                 className="block bg-gray-100 rounded-2xl overflow-hidden mb-4 cursor-pointer hover:opacity-90 transition-opacity"
               >
-                <img
-                  src={heroImage}
-                  alt={`${brandName} ${modelName}`}
-                  className="w-full h-auto object-contain"
-                />
+                {heroImage ? (
+                  <img
+                    src={heroImage}
+                    alt={`${brandName} ${modelName}`}
+                    className="w-full h-auto object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-64 flex items-center justify-center bg-gray-200">
+                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#374151' className="w-3/4 h-3/4">
+                      <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/>
+                      <circle cx='100' cy='220' r='25' fill='#111827'/>
+                      <circle cx='300' cy='220' r='25' fill='#111827'/>
+                      <path d='M80 110h240l-20-30H100z' fill='#6B7280'/>
+                    </svg>
+                  </div>
+                )}
               </Link>
 
               {/* Car Name with Icons */}
@@ -1076,43 +1061,77 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
             
             {/* Cars Horizontal Scroll */}
             <div className="relative">
-              <div
-                className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {similarCars.map((car) => (
-                  <Link
-                    key={car.id}
-                    href={`/${car.brand.toLowerCase().replace(/\s+/g, '-')}-cars/${car.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden block"
-                  >
-                    {/* Car Image with Badges */}
-                    <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
-                      {/* NEW Badge */}
-                      {car.isNew && (
-                        <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
-                          NEW
+              {loadingSimilarCars ? (
+                <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="h-48 bg-gray-200 animate-pulse"></div>
+                      <div className="p-5 space-y-3">
+                        <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+                        <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
                         </div>
-                      )}
-                      
-                      {/* Heart Icon */}
-                      <button className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
-                        <Heart className="h-5 w-5 text-gray-600" />
-                      </button>
-
-                      {/* Car Image */}
-                      <div className="w-full h-full flex items-center justify-center">
-                        <img 
-                          src={car.image}
-                          alt={`${car.brand} ${car.name}`}
-                          className="w-full h-full object-contain object-center transition-transform duration-300"
-                        />
                       </div>
                     </div>
+                  ))}
+                </div>
+              ) : similarCars.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p>No similar cars found.</p>
+                </div>
+              ) : (
+                <div
+                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {similarCars.map((car) => (
+                    <Link
+                      key={car.id}
+                      href={`/${car.brandName.toLowerCase().replace(/\s+/g, '-')}-cars/${car.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden block"
+                    >
+                      {/* Car Image with Badges */}
+                      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
+                        {/* NEW Badge */}
+                        {car.isNew && (
+                          <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
+                            NEW
+                          </div>
+                        )}
+                        
+                        {/* Heart Icon */}
+                        <button className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
+                          <Heart className="h-5 w-5 text-gray-600" />
+                        </button>
+
+                        {/* Car Image */}
+                        <div className="w-full h-full flex items-center justify-center">
+                          {car.image ? (
+                            <img 
+                              src={car.image}
+                              alt={`${car.brandName} ${car.name}`}
+                              className="w-full h-full object-contain object-center transition-transform duration-300"
+                              onError={(e) => {
+                                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
+                              }}
+                            />
+                          ) : (
+                            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#374151' className="w-3/4 h-3/4">
+                              <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/>
+                              <circle cx='100' cy='220' r='25' fill='#111827'/>
+                              <circle cx='300' cy='220' r='25' fill='#111827'/>
+                              <path d='M80 110h240l-20-30H100z' fill='#6B7280'/>
+                            </svg>
+                          )}
+                        </div>
+                      </div>
 
                     {/* Car Info */}
                     <div className="p-5">
-                      <h3 className="font-bold text-gray-900 mb-2 text-lg">{truncateCarName(car.brand, car.name, 18)}</h3>
+                      <h3 className="font-bold text-gray-900 mb-2 text-lg">{truncateCarName(car.brandName, car.name, 18)}</h3>
                       
                       <div className="flex items-center text-red-600 font-bold text-xl mb-4">
                         <span>₹ {(car.startingPrice / 100000).toFixed(2)} Lakh</span>
@@ -1125,7 +1144,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                         </div>
                         <div className="flex items-center">
                           <Fuel className="h-4 w-4 mr-3 text-gray-400" />
-                          <span>{car.fuelType}</span>
+                          <span>{car.fuelTypes?.join('/') || 'Petrol'}</span>
                         </div>
                         <div className="flex items-center">
                           <Users className="h-4 w-4 mr-3 text-gray-400" />
@@ -1137,9 +1156,10 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                         View Details
                       </button>
                     </div>
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

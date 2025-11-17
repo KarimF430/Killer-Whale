@@ -12,6 +12,7 @@ import Footer from '../Footer'
 import { truncateCarName } from '@/lib/text-utils'
 import { formatPrice, formatPriceRange } from '@/utils/priceFormatter'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
+import CarCard from '../home/CarCard'
 
 interface ModelData {
   id: string
@@ -639,20 +640,11 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   // Similar cars data - dynamically fetched based on body type and sub-body type
   const [similarCars, setSimilarCars] = useState<any[]>([])
   const [loadingSimilarCars, setLoadingSimilarCars] = useState(true)
-  const [similarCarsType, setSimilarCarsType] = useState<'exact' | 'bodyType' | 'popular'>('exact')
 
-  // Fetch similar cars based on matching body type and sub-body type
+  // Fetch similar cars using exact same logic as CarsByBudget
   useEffect(() => {
     const fetchSimilarCars = async () => {
-      console.log('🔍 Similar Cars: Checking model data:', {
-        modelId: model?.id,
-        bodyType: model?.bodyType,
-        subBodyType: model?.subBodyType,
-        hasModel: !!model
-      })
-
-      if (!model?.bodyType) {
-        console.log('⚠️ Similar Cars: No body type found, skipping fetch')
+      if (!model?.id) {
         setSimilarCars([])
         setLoadingSimilarCars(false)
         return
@@ -660,11 +652,9 @@ export default function CarModelPage({ model }: CarModelPageProps) {
 
       try {
         setLoadingSimilarCars(true)
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
         
-        console.log('🚗 Similar Cars: Fetching for body type:', model.bodyType, 'sub-body type:', model.subBodyType)
-        
-        // Fetch all models, brands, and variants
+        // Fetch all models, brands, and variants (same as CarsByBudget)
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models`),
           fetch(`${backendUrl}/api/brands`),
@@ -682,99 +672,58 @@ export default function CarModelPage({ model }: CarModelPageProps) {
         const brands = await brandsRes.json()
         const variants = await variantsRes.json()
         
-        // Create brand map
+        // Create a map of brand IDs to brand names (same as CarsByBudget)
         const brandMap = brands.reduce((acc: any, brand: any) => {
           acc[brand.id] = brand.name
           return acc
         }, {})
         
-        // Filter models with matching body type and sub-body type, excluding current model
-        console.log('🔍 All models:', models.length)
-        console.log('🎯 Current model:', { 
-          id: model.id, 
-          name: model.name,
-          bodyType: model.bodyType, 
-          subBodyType: model.subBodyType 
-        })
-        
-        // First try: Match both bodyType and subBodyType
-        let matchingModels = models.filter((m: any) => {
-          const matches = m.id !== model.id && // Exclude current model
-            m.bodyType && // Has body type
-            m.bodyType === model.bodyType && // Match body type
-            m.subBodyType === model.subBodyType // Match sub-body type
-          
-          if (matches) {
-            console.log('✅ Found exact match:', { name: m.name, bodyType: m.bodyType, subBodyType: m.subBodyType })
-          }
-          
-          return matches
-        })
-        
-        console.log('📊 Exact matches (bodyType + subBodyType):', matchingModels.length)
-        
-        // Determine which type of similar cars we're showing
-        let carsType: 'exact' | 'bodyType' | 'popular' = 'exact'
-        
-        // If no exact matches, try matching just bodyType
-        if (matchingModels.length === 0 && model.bodyType) {
-          console.log('⚠️ No exact matches, trying bodyType only...')
-          matchingModels = models.filter((m: any) => {
-            const matches = m.id !== model.id && // Exclude current model
-              m.bodyType && // Has body type
-              m.bodyType === model.bodyType // Match body type only
+        // Process each model to find lowest variant price (same as CarsByBudget)
+        const processedCars = models
+          .filter((m: any) => m.id !== model.id) // Exclude current model
+          .map((m: any) => {
+            // Find all variants for this model
+            const modelVariants = variants.filter((v: any) => v.modelId === m.id)
             
-            if (matches) {
-              console.log('✅ Found bodyType match:', { name: m.name, bodyType: m.bodyType, subBodyType: m.subBodyType })
+            // Find lowest price variant
+            const lowestPrice = modelVariants.length > 0
+              ? Math.min(...modelVariants.map((v: any) => v.price || 0))
+              : m.price || 0
+            
+            // Get unique fuel types and transmissions from model or variants
+            const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
+              ? m.fuelTypes
+              : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
+            
+            const transmissions = m.transmissions && m.transmissions.length > 0
+              ? m.transmissions
+              : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
+            
+            // Get hero image from model (same as CarsByBudget)
+            const heroImage = m.heroImage 
+              ? (m.heroImage.startsWith('http') 
+                  ? m.heroImage 
+                  : `${backendUrl}${m.heroImage}`)
+              : ''
+            
+            return {
+              id: m.id,
+              name: m.name,
+              brand: m.brandId,
+              brandName: brandMap[m.brandId] || 'Unknown',
+              image: heroImage,
+              startingPrice: lowestPrice,
+              fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
+              transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+              seating: m.seating || 5,
+              launchDate: m.launchDate ? `Launched ${formatLaunchDate(m.launchDate)}` : 'Launched',
+              slug: `${(brandMap[m.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
+              isNew: m.isNew || false,
+              isPopular: m.isPopular || false
             }
-            
-            return matches
           })
-          console.log('📊 BodyType-only matches:', matchingModels.length)
-          carsType = 'bodyType'
-        }
         
-        // If still no matches, show popular cars instead
-        if (matchingModels.length === 0) {
-          console.log('⚠️ No matches found, showing popular cars...')
-          matchingModels = models
-            .filter((m: any) => m.id !== model.id && m.isPopular)
-            .slice(0, 6)
-          console.log('📊 Popular cars:', matchingModels.length)
-          carsType = 'popular'
-        }
-        
-        setSimilarCarsType(carsType)
-        
-        // Process matching models
-        const processedCars = matchingModels.map((m: any) => {
-          const modelVariants = variants.filter((v: any) => v.modelId === m.id)
-          const lowestPrice = modelVariants.length > 0
-            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-            : m.price || 0
-          
-          const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
-            ? m.fuelTypes
-            : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-          
-          const heroImage = m.heroImage ? (m.heroImage.startsWith('http') ? m.heroImage : `${backendUrl}${m.heroImage}`) : ''
-          
-          return {
-            id: m.id,
-            name: m.name,
-            brand: brandMap[m.brandId] || 'Unknown',
-            image: heroImage,
-            startingPrice: lowestPrice,
-            fuelType: fuelTypes.length > 0 ? fuelTypes.join('/') : 'Petrol',
-            fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
-            seating: m.seatingCapacity || 5,
-            launchDate: m.launchDate ? `Launched ${formatLaunchDate(m.launchDate)}` : 'New Launch',
-            slug: `${brandMap[m.brandId]?.toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
-            isNew: m.isNew || false
-          }
-        })
-        
-        setSimilarCars(processedCars.slice(0, 6)) // Limit to 6 cars
+        setSimilarCars(processedCars)
         setLoadingSimilarCars(false)
       } catch (error) {
         console.error('Error fetching similar cars:', error)
@@ -784,7 +733,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
     }
 
     fetchSimilarCars()
-  }, [model?.id, model?.bodyType, model?.subBodyType])
+  }, [model?.id])
 
   // Helper function to format launch date
   const formatLaunchDate = (date: string): string => {
@@ -2141,71 +2090,16 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
                     {similarCars.map((car) => (
-                      <Link
+                      <CarCard
                         key={car.id}
-                        href={`/${car.brand.toLowerCase().replace(/\s+/g, '-')}-cars/${car.name.toLowerCase().replace(/\s+/g, '-')}`}
-                        className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden block"
-                      >
-                      {/* Car Image with Badges */}
-                      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
-                        {/* NEW Badge */}
-                        {car.isNew && (
-                          <div className="absolute top-4 left-4 bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
-                            NEW
-                          </div>
-                        )}
-                        
-                        {/* Heart Icon */}
-                        <button className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
-                          <Heart className="h-5 w-5 text-gray-600" />
-                        </button>
-
-                        {/* Car Image */}
-                        <div className="w-full h-full flex items-center justify-center">
-                          <img 
-                            src={car.image}
-                            alt={`${car.brand} ${car.name}`}
-                            className="w-full h-full object-contain object-center transition-transform duration-300"
-                            loading="lazy"
-                            decoding="async"
-                            onError={(e) => {
-                              // Fallback to a car silhouette if image fails to load
-                              e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Car Info */}
-                      <div className="p-5">
-                        <h3 className="font-bold text-gray-900 mb-2 text-lg">{truncateCarName(car.brand, car.name, 18)}</h3>
-                        
-                        <div className="flex items-center text-red-600 font-bold text-xl mb-4">
-                          <span>₹ {(getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol') / 100000).toFixed(2)} Lakh</span>
-                        </div>
-                        <div className="text-xs text-gray-500 -mt-3 mb-4">On-Road Price</div>
-
-                        <div className="space-y-3 text-sm text-gray-600 mb-4">
-                          <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-3 text-gray-400" />
-                            <span>{car.launchDate}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Fuel className="h-4 w-4 mr-3 text-gray-400" />
-                            <span>{car.fuelType}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Users className="h-4 w-4 mr-3 text-gray-400" />
-                            <span>{car.seating} Seater</span>
-                          </div>
-                        </div>
-
-                        <button className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-3 rounded-lg transition-all duration-200 text-sm font-semibold">
-                          View Details
-                        </button>
-                      </div>
-                    </Link>
-                  ))}
+                        car={car}
+                        onClick={() => {
+                          const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                          const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                          window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                        }}
+                      />
+                    ))}
                   </div>
                 )}
               </div>

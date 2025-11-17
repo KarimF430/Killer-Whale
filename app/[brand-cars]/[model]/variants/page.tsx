@@ -50,5 +50,5 @@ export default async function VariantsPage({ params }: VariantsPageProps) {
     notFound()
   }
   
-  return <AllVariantsClient model={modelData} />
+  return <AllVariantsClient model={modelData} brandSlug={resolvedParams['brand-cars']} modelSlug={modelSlug} />
 }

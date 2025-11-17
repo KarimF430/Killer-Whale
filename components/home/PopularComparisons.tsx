@@ -29,7 +29,7 @@ export default function PopularComparisons() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
   // Helper function to calculate on-road price
   const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
@@ -102,7 +102,11 @@ export default function PopularComparisons() {
               id: model1.id,
               name: model1.name,
               brand: brandMap[model1.brandId] || 'Unknown',
-              heroImage: model1.heroImage ? (model1.heroImage.startsWith('http') ? model1.heroImage : `${backendUrl}${model1.heroImage}`) : '',
+              heroImage: model1.heroImage 
+                ? (model1.heroImage.startsWith('http') 
+                    ? model1.heroImage 
+                    : `${backendUrl}${model1.heroImage}`)
+                : '',
               startingPrice: model1Price,
               fuelTypes: model1.fuelTypes || ['Petrol']
             },
@@ -110,7 +114,11 @@ export default function PopularComparisons() {
               id: model2.id,
               name: model2.name,
               brand: brandMap[model2.brandId] || 'Unknown',
-              heroImage: model2.heroImage ? (model2.heroImage.startsWith('http') ? model2.heroImage : `${backendUrl}${model2.heroImage}`) : '',
+              heroImage: model2.heroImage 
+                ? (model2.heroImage.startsWith('http') 
+                    ? model2.heroImage 
+                    : `${backendUrl}${model2.heroImage}`)
+                : '',
               startingPrice: model2Price,
               fuelTypes: model2.fuelTypes || ['Petrol']
             }
@@ -119,6 +127,15 @@ export default function PopularComparisons() {
         .filter(Boolean)
       
       setComparisons(processedComparisons)
+      
+      // Debug: Log first comparison image URLs
+      if (processedComparisons.length > 0) {
+        console.log('🔍 PopularComparisons - First comparison images:', {
+          model1: processedComparisons[0].model1.heroImage,
+          model2: processedComparisons[0].model2.heroImage,
+          backendUrl
+        })
+      }
     } catch (error) {
       console.error('Error fetching comparisons:', error)
       setComparisons([])
@@ -188,11 +205,14 @@ export default function PopularComparisons() {
                       <div className="flex-1">
                         <div className="relative mb-2">
                           <img
-                            src={comparison.model1.heroImage}
+                            src={comparison.model1.heroImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"}
                             alt={`${comparison.model1.brand} ${comparison.model1.name}`}
                             className="w-full h-20 object-contain"
                             onError={(e) => {
-                              e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
+                              if (e.currentTarget.src !== "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E") {
+                                console.error('❌ Failed to load image:', comparison.model1.heroImage)
+                                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
+                              }
                             }}
                           />
                         </div>
@@ -217,11 +237,14 @@ export default function PopularComparisons() {
                       <div className="flex-1">
                         <div className="relative mb-2">
                           <img
-                            src={comparison.model2.heroImage}
+                            src={comparison.model2.heroImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"}
                             alt={`${comparison.model2.brand} ${comparison.model2.name}`}
                             className="w-full h-20 object-contain"
                             onError={(e) => {
-                              e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
+                              if (e.currentTarget.src !== "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E") {
+                                console.error('❌ Failed to load image:', comparison.model2.heroImage)
+                                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
+                              }
                             }}
                           />
                         </div>

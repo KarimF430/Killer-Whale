@@ -35,68 +35,13 @@ export default function CarComparisonSection({ comparisonCars = [], currentCar }
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards')
   const [currentIndex, setCurrentIndex] = useState(0)
 
-  // Mock data for better demonstration
-  const mockComparisonCars: ComparisonCar[] = [
-    {
-      id: '1',
-      name: 'Creta',
-      brand: 'Hyundai',
-      price: '11.00 Lakh',
-      priceRange: '₹11.00 - ₹20.15 Lakh',
-      image: '/api/placeholder/300/200',
-      rating: 4.4,
-      reviewCount: 1245,
-      mileage: '17.0 kmpl',
-      engine: '1.5L Petrol',
-      fuelType: 'Petrol/Diesel',
-      transmission: 'Manual/Auto',
-      seating: 5,
-      safetyRating: 4,
-      keyFeatures: ['Sunroof', 'Wireless Charging', 'Cruise Control'],
-      pros: ['Spacious cabin', 'Good build quality', 'Feature rich'],
-      cons: ['Average mileage', 'Road noise at high speeds']
-    },
-    {
-      id: '2',
-      name: 'Seltos',
-      brand: 'Kia',
-      price: '10.90 Lakh',
-      priceRange: '₹10.90 - ₹19.65 Lakh',
-      image: '/api/placeholder/300/200',
-      rating: 4.3,
-      reviewCount: 987,
-      mileage: '16.8 kmpl',
-      engine: '1.5L Petrol',
-      fuelType: 'Petrol/Diesel',
-      transmission: 'Manual/Auto',
-      seating: 5,
-      safetyRating: 4,
-      keyFeatures: ['10.25" Touchscreen', 'Air Purifier', 'UVO Connect'],
-      pros: ['Premium interiors', 'Good performance', 'Tech loaded'],
-      cons: ['Expensive maintenance', 'Firm suspension']
-    },
-    {
-      id: '3',
-      name: 'Harrier',
-      brand: 'Tata',
-      price: '15.49 Lakh',
-      priceRange: '₹15.49 - ₹26.44 Lakh',
-      image: '/api/placeholder/300/200',
-      rating: 4.2,
-      reviewCount: 756,
-      mileage: '14.6 kmpl',
-      engine: '2.0L Diesel',
-      fuelType: 'Diesel',
-      transmission: 'Manual/Auto',
-      seating: 5,
-      safetyRating: 5,
-      keyFeatures: ['12.3" Touchscreen', 'JBL Audio', 'Drive Modes'],
-      pros: ['Excellent safety', 'Premium feel', 'Powerful engine'],
-      cons: ['Higher price', 'Only diesel option']
-    }
-  ]
+  // Mock comparison cars removed - using real data from backend only
+  const carsToShow = comparisonCars
 
-  const carsToShow = comparisonCars.length > 0 ? comparisonCars : mockComparisonCars
+  // Don't render if no comparison cars
+  if (carsToShow.length === 0) {
+    return null
+  }
 
   const toggleCarSelection = (carId: string) => {
     setSelectedCars(prev => 

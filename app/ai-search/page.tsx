@@ -5,105 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import { Search, Bot, Car, Fuel, Users, Calendar, IndianRupee, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
-// Sample car database
-const carDatabase = [
-  {
-    id: 1,
-    brand: 'Maruti Suzuki',
-    model: 'Swift',
-    variant: 'VXI',
-    price: '₹6.49 Lakh',
-    priceValue: 649000,
-    type: 'Hatchback',
-    fuelType: 'Petrol',
-    mileage: '23.20 kmpl',
-    seating: '5',
-    year: '2024',
-    image: '/api/placeholder/300/200',
-    features: ['ABS', 'Airbags', 'Power Steering', 'AC'],
-    description: 'Popular hatchback with excellent fuel efficiency and reliability.'
-  },
-  {
-    id: 2,
-    brand: 'Hyundai',
-    model: 'Creta',
-    variant: 'SX',
-    price: '₹12.18 Lakh',
-    priceValue: 1218000,
-    type: 'SUV',
-    fuelType: 'Petrol',
-    mileage: '17.4 kmpl',
-    seating: '5',
-    year: '2024',
-    image: '/api/placeholder/300/200',
-    features: ['Sunroof', 'Touchscreen', 'Cruise Control', 'Wireless Charging'],
-    description: 'Premium compact SUV with advanced features and spacious interior.'
-  },
-  {
-    id: 3,
-    brand: 'Tata',
-    model: 'Nexon',
-    variant: 'XZ+',
-    price: '₹9.99 Lakh',
-    priceValue: 999000,
-    type: 'SUV',
-    fuelType: 'Petrol',
-    mileage: '17.57 kmpl',
-    seating: '5',
-    year: '2024',
-    image: '/api/placeholder/300/200',
-    features: ['5-Star Safety', 'Harman Audio', 'iRA Connected Car'],
-    description: 'Safest compact SUV in India with premium features.'
-  },
-  {
-    id: 4,
-    brand: 'Honda',
-    model: 'City',
-    variant: 'VX',
-    price: '₹13.16 Lakh',
-    priceValue: 1316000,
-    type: 'Sedan',
-    fuelType: 'Petrol',
-    mileage: '17.8 kmpl',
-    seating: '5',
-    year: '2024',
-    image: '/api/placeholder/300/200',
-    features: ['Honda SENSING', 'Sunroof', 'Alexa Remote'],
-    description: 'Premium sedan with advanced safety and connectivity features.'
-  },
-  {
-    id: 5,
-    brand: 'Maruti Suzuki',
-    model: 'Alto K10',
-    variant: 'VXI',
-    price: '₹4.99 Lakh',
-    priceValue: 499000,
-    type: 'Hatchback',
-    fuelType: 'Petrol',
-    mileage: '24.39 kmpl',
-    seating: '5',
-    year: '2024',
-    image: '/api/placeholder/300/200',
-    features: ['Dual Airbags', 'ABS with EBD', 'Touchscreen'],
-    description: 'Most affordable car with excellent fuel efficiency.'
-  },
-  {
-    id: 6,
-    brand: 'Mahindra',
-    model: 'XUV700',
-    variant: 'AX7',
-    price: '₹18.99 Lakh',
-    priceValue: 1899000,
-    type: 'SUV',
-    fuelType: 'Petrol',
-    mileage: '13.0 kmpl',
-    seating: '7',
-    year: '2024',
-    image: '/api/placeholder/300/200',
-    features: ['ADAS', 'Sky Roof', 'Sony 3D Sound', 'Wireless Charging'],
-    description: 'Premium 7-seater SUV with advanced driver assistance systems.'
-  }
-]
+// Sample car database removed - will fetch real data from backend
+const carDatabase: any[] = []
 
 function AISearchContent() {
   const searchParams = useSearchParams()
@@ -113,8 +16,16 @@ function AISearchContent() {
   const [aiResponse, setAiResponse] = useState('')
 
   useEffect(() => {
-    // Simulate AI processing
+    // AI search will fetch real data from backend
     setIsLoading(true)
+    
+    // Since carDatabase is now empty, show message that real data will be fetched
+    if (carDatabase.length === 0) {
+      setAiResponse('Real car data will be fetched from the backend. This feature is being connected to the database.')
+      setIsLoading(false)
+      setSearchResults([])
+      return
+    }
     
     setTimeout(() => {
       // Filter cars based on query

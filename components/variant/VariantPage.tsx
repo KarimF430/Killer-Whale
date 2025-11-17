@@ -47,45 +47,7 @@ interface VariantPageProps {
   variantName: string
 }
 
-// Mock variant data
-const mockVariantData = {
-  brand: "Renault",
-  model: "Kwid",
-  variant: "LXI",
-  fullName: "Renault Kwid LXI",
-  price: 8.00,
-  originalPrice: 9.50,
-  savings: 1.50,
-  fuelType: "Petrol",
-  transmission: "Manual",
-  seating: 5,
-  mileage: 22.3,
-  engine: "1.0L",
-  power: "68 PS",
-  torque: "91 Nm",
-  launchYear: 2015,
-  rating: 4.2,
-  reviewCount: 1234,
-  description: "The Renault Kwid is a compact hatchback that offers excellent fuel efficiency, modern features, and a spacious interior. Perfect for city driving with its compact dimensions and easy maneuverability.",
-  images: [
-    "/api/placeholder/800/600",
-    "/api/placeholder/800/600", 
-    "/api/placeholder/800/600",
-    "/api/placeholder/800/600"
-  ],
-  highlights: [
-    'Best-in-class fuel efficiency',
-    'Spacious cabin design',
-    'Advanced safety features',
-    'Modern infotainment system'
-  ],
-  cities: [
-    { id: 1, name: "Delhi" },
-    { id: 2, name: "Mumbai" },
-    { id: 3, name: "Bangalore" },
-    { id: 4, name: "Chennai" }
-  ]
-}
+// Mock variant data removed - using real data from backend
 
 const navigationSections = [
   { id: 'overview', label: 'Overview' },
@@ -97,7 +59,7 @@ const navigationSections = [
 ]
 
 export default function VariantPage({ 
-  variantData = mockVariantData,
+  variantData,
   brandName,
   modelName,
   variantName
@@ -461,45 +423,7 @@ export default function VariantPage({
   
   const displayEMI = calculateDisplayEMI(displayPrice)
 
-  // Mock variants data for the more variants section
-  const mockVariants = [
-    {
-      id: 1,
-      name: "Smart (O) 1.2 Revotron",
-      fuel: "Petrol",
-      transmission: "Manual",
-      power: "86 Bhp",
-      price: 8.00,
-      features: "Dual Airbags, ABS with EBD, Reverse Parking Sensors, Central Locking, Power Steering"
-    },
-    {
-      id: 2,
-      name: "Smart Plus 1.2 Revotron",
-      fuel: "Petrol",
-      transmission: "Manual",
-      power: "86 Bhp",
-      price: 9.25,
-      features: "All Smart features plus Touchscreen Infotainment, Steering Mounted Controls, Height Adjustable Driver Seat"
-    },
-    {
-      id: 3,
-      name: "Smart (O) 1.2 Revotron",
-      fuel: "Petrol",
-      transmission: "Manual",
-      power: "86 Bhp",
-      price: 8.00,
-      features: "Dual Airbags, ABS with EBD, Reverse Parking Sensors, Central Locking, Power Steering"
-    },
-    {
-      id: 4,
-      name: "Smart Plus 1.2 Revotron",
-      fuel: "Petrol",
-      transmission: "Manual",
-      power: "86 Bhp",
-      price: 9.25,
-      features: "All Smart features plus Touchscreen Infotainment, Steering Mounted Controls, Height Adjustable Driver Seat"
-    }
-  ]
+  // Mock variants data removed - using real data from backend
 
   // Handle variant click function
   const handleVariantChange = (variant: typeof availableVariants[0]) => {

@@ -64,7 +64,7 @@ export default function PopularCars() {
     const fetchPopularCars = async () => {
       try {
         setLoading(true)
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
         
         // Fetch all models, brands, and variants
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
@@ -116,9 +116,11 @@ export default function PopularCars() {
             ? model.transmissions
             : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
           
-          // Get hero image from model (handle both full URLs and relative paths)
-          const heroImage = model.heroImage
-            ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
+          // Get hero image from model (handle full URLs and relative paths)
+          const heroImage = model.heroImage 
+            ? (model.heroImage.startsWith('http') 
+                ? model.heroImage 
+                : `${backendUrl}${model.heroImage}`)
             : ''
           
           return {
@@ -147,6 +149,15 @@ export default function PopularCars() {
         })
         
         setPopularCars(sortedCars)
+        
+        // Debug: Log first car image URL
+        if (sortedCars.length > 0) {
+          console.log('🔍 PopularCars - First car image:', {
+            car: `${sortedCars[0].brandName} ${sortedCars[0].name}`,
+            image: sortedCars[0].image,
+            backendUrl
+          })
+        }
       } catch (error) {
         console.error('Error fetching popular cars:', error)
       } finally {

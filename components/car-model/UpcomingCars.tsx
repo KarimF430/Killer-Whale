@@ -13,56 +13,8 @@ interface UpcomingCarsProps {
 export default function UpcomingCars({ carData }: UpcomingCarsProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const upcomingCars = [
-    {
-      id: 1,
-      name: `${carData.brand} XUV400 Pro`,
-      image: '/api/placeholder/300/200',
-      expectedPrice: '₹15.99 - 21.99 Lakh',
-      launchDate: 'March 2024',
-      status: 'Confirmed',
-      fuelType: 'Electric',
-      bodyType: 'SUV',
-      city: 'New Delhi',
-      keyFeatures: ['360° Camera', 'Wireless Charging', 'Sunroof', 'Connected Car Tech']
-    },
-    {
-      id: 2,
-      name: `${carData.brand} Scorpio Coupe`,
-      image: '/api/placeholder/300/200',
-      expectedPrice: '₹13.99 - 18.99 Lakh',
-      launchDate: 'April 2024',
-      status: 'Expected',
-      fuelType: 'Petrol/Diesel',
-      bodyType: 'SUV Coupe',
-      city: 'Mumbai',
-      keyFeatures: ['4WD', 'Terrain Modes', 'Premium Interior', 'Advanced Safety']
-    },
-    {
-      id: 3,
-      name: `${carData.brand} XUV300 Facelift`,
-      image: '/api/placeholder/300/200',
-      expectedPrice: '₹8.99 - 14.99 Lakh',
-      launchDate: 'May 2024',
-      status: 'Confirmed',
-      fuelType: 'Petrol/Diesel',
-      bodyType: 'Compact SUV',
-      city: 'Bangalore',
-      keyFeatures: ['New Design', 'Updated Infotainment', 'ADAS Level 2', 'Improved Mileage']
-    },
-    {
-      id: 4,
-      name: `${carData.brand} Bolero Neo Plus`,
-      image: '/api/placeholder/300/200',
-      expectedPrice: '₹10.99 - 15.99 Lakh',
-      launchDate: 'June 2024',
-      status: 'Expected',
-      fuelType: 'Diesel',
-      bodyType: '7-Seater SUV',
-      city: 'Chennai',
-      keyFeatures: ['7 Seats', 'Rugged Build', 'High Ground Clearance', 'Affordable Price']
-    }
-  ]
+  // Mock upcoming cars removed - will fetch real data from backend
+  const upcomingCars: any[] = []
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -72,6 +24,11 @@ export default function UpcomingCars({ carData }: UpcomingCarsProps) {
         behavior: 'smooth'
       })
     }
+  }
+
+  // Don't render if no upcoming cars
+  if (upcomingCars.length === 0) {
+    return null
   }
 
   return (

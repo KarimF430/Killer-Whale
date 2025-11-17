@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { ChevronDown, Plus, Share2, X, TrendingUp, TrendingDown, Award } from 'lucide-react'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 import Footer from '@/components/Footer'
+import PopularComparisons from '@/components/home/PopularComparisons'
+import PopularCars from '@/components/home/PopularCars'
+import UpcomingCars from '@/components/home/UpcomingCars'
 
 interface Variant {
   id: string
@@ -39,14 +42,15 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const [similarCars, setSimilarCars] = useState<any[]>([])
   const [loadingSimilarCars, setLoadingSimilarCars] = useState(false)
-  const [popularComparisons, setPopularComparisons] = useState<any[]>([])
-  const [loadingPopularComparisons, setLoadingPopularComparisons] = useState(false)
-  const [popularCars, setPopularCars] = useState<any[]>([])
-  const [loadingPopularCars, setLoadingPopularCars] = useState(false)
-  const [upcomingCars, setUpcomingCars] = useState<any[]>([])
-  const [loadingUpcomingCars, setLoadingUpcomingCars] = useState(false)
 
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+
+  const resolveImageUrl = (image?: string) => {
+    if (!image) return ''
+    if (image.startsWith('http')) return image
+    if (image.startsWith('/uploads/') || image.startsWith('/')) return `${backendUrl}${image}`
+    return `${backendUrl}/uploads/${image}`
+  }
 
   useEffect(() => {
     params.then(p => setSlug(p.slug))
@@ -55,9 +59,6 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
   useEffect(() => {
     if (!slug) return
     fetchComparisonData()
-    fetchPopularComparisons()
-    fetchPopularCars()
-    fetchUpcomingCars()
   }, [slug])
 
   useEffect(() => {
@@ -105,7 +106,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
             id: foundModel.id,
             name: foundModel.name,
             brandName: brandMap[foundModel.brandId],
-            heroImage: foundModel.heroImage ? `${backendUrl}${foundModel.heroImage}` : '',
+            heroImage: resolveImageUrl(foundModel.heroImage),
             variants: modelVariants
           }
 
@@ -166,7 +167,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
             id: m.id,
             name: m.name,
             brand: brandMap[m.brandId],
-            image: m.heroImage ? `${backendUrl}${m.heroImage}` : '',
+            image: resolveImageUrl(m.heroImage),
             startingPrice: lowestPrice,
             fuelTypes: m.fuelTypes || ['Petrol']
           }
@@ -180,197 +181,6 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
     }
   }
 
-  const fetchPopularComparisons = async () => {
-    try {
-      setLoadingPopularComparisons(true)
-      
-      const comparisonsRes = await fetch(`${backendUrl}/api/popular-comparisons`)
-      if (!comparisonsRes.ok) {
-        setPopularComparisons([])
-        return
-      }
-      
-      const comparisonsData = await comparisonsRes.json()
-      
-      const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-        fetch(`${backendUrl}/api/models`),
-        fetch(`${backendUrl}/api/brands`),
-        fetch(`${backendUrl}/api/variants`)
-      ])
-
-      const models = await modelsRes.json()
-      const brands = await brandsRes.json()
-      const variants = await variantsRes.json()
-
-      const brandMap: Record<string, string> = {}
-      brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
-
-      const processedComparisons = comparisonsData
-        .filter((comp: any) => comp.model1Id && comp.model2Id)
-        .map((comp: any) => {
-          const model1 = models.find((m: any) => m.id === comp.model1Id)
-          const model2 = models.find((m: any) => m.id === comp.model2Id)
-          
-          if (!model1 || !model2) return null
-          
-          const model1Variants = variants.filter((v: any) => v.modelId === model1.id)
-          const model2Variants = variants.filter((v: any) => v.modelId === model2.id)
-          
-          const model1Price = model1Variants.length > 0
-            ? Math.min(...model1Variants.map((v: any) => v.price || 0))
-            : 0
-            
-          const model2Price = model2Variants.length > 0
-            ? Math.min(...model2Variants.map((v: any) => v.price || 0))
-            : 0
-          
-          return {
-            id: comp.id,
-            model1: {
-              id: model1.id,
-              name: model1.name,
-              brand: brandMap[model1.brandId] || 'Unknown',
-              heroImage: model1.heroImage ? `${backendUrl}${model1.heroImage}` : '',
-              startingPrice: model1Price,
-              fuelTypes: model1.fuelTypes || ['Petrol']
-            },
-            model2: {
-              id: model2.id,
-              name: model2.name,
-              brand: brandMap[model2.brandId] || 'Unknown',
-              heroImage: model2.heroImage ? `${backendUrl}${model2.heroImage}` : '',
-              startingPrice: model2Price,
-              fuelTypes: model2.fuelTypes || ['Petrol']
-            }
-          }
-        })
-        .filter(Boolean)
-      
-      setPopularComparisons(processedComparisons)
-    } catch (error) {
-      console.error('Error fetching popular comparisons:', error)
-      setPopularComparisons([])
-    } finally {
-      setLoadingPopularComparisons(false)
-    }
-  }
-
-  const fetchPopularCars = async () => {
-    try {
-      setLoadingPopularCars(true)
-      
-      const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-        fetch(`${backendUrl}/api/models`),
-        fetch(`${backendUrl}/api/brands`),
-        fetch(`${backendUrl}/api/variants`)
-      ])
-      
-      if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
-        setPopularCars([])
-        return
-      }
-      
-      const models = await modelsRes.json()
-      const brands = await brandsRes.json()
-      const variants = await variantsRes.json()
-      
-      const brandMap = brands.reduce((acc: any, brand: any) => {
-        acc[brand.id] = brand.name
-        return acc
-      }, {})
-      
-      const popularModels = models.filter((model: any) => model.isPopular === true)
-      
-      const processedCars = popularModels.map((model: any) => {
-        const modelVariants = variants.filter((v: any) => v.modelId === model.id)
-        const lowestPrice = modelVariants.length > 0
-          ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-          : 0
-        
-        const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
-          ? model.fuelTypes
-          : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-        
-        const transmissions = model.transmissions && model.transmissions.length > 0
-          ? model.transmissions
-          : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-        
-        return {
-          id: model.id,
-          name: model.name,
-          brandName: brandMap[model.brandId] || 'Unknown',
-          image: model.heroImage ? `${backendUrl}${model.heroImage}` : '',
-          startingPrice: lowestPrice,
-          fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
-          transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
-          seating: model.seating || 5,
-          launchDate: model.launchDate || '',
-          isNew: model.isNew || false,
-          popularRank: model.popularRank || null
-        }
-      }).sort((a: any, b: any) => (a.popularRank || 999) - (b.popularRank || 999))
-      
-      setPopularCars(processedCars)
-    } catch (error) {
-      console.error('Error fetching popular cars:', error)
-      setPopularCars([])
-    } finally {
-      setLoadingPopularCars(false)
-    }
-  }
-
-  const fetchUpcomingCars = async () => {
-    // Using static data like home page since backend might not have isUpcoming flag
-    const staticUpcomingCars = [
-      {
-        id: 1,
-        name: 'Grand Vitara',
-        brandName: 'Maruti Suzuki',
-        image: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&h=300&fit=crop&crop=center',
-        startingPrice: 1099000,
-        fuelType: 'Petrol/Hybrid',
-        seating: 5,
-        launchDate: 'Launched January 2024',
-        isNew: true
-      },
-      {
-        id: 2,
-        name: 'Safari',
-        brandName: 'Tata',
-        image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=300&fit=crop&crop=center',
-        startingPrice: 2999000,
-        fuelType: 'Petrol/Diesel',
-        seating: 7,
-        launchDate: 'Launched March 2024',
-        isNew: true
-      },
-      {
-        id: 3,
-        name: 'Creta',
-        brandName: 'Hyundai',
-        image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop&crop=center',
-        startingPrice: 1199000,
-        fuelType: 'Petrol/Diesel',
-        seating: 5,
-        launchDate: 'Launched February 2024',
-        isNew: false
-      },
-      {
-        id: 4,
-        name: 'Nexon',
-        brandName: 'Tata',
-        image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop&crop=center',
-        startingPrice: 799000,
-        fuelType: 'Petrol/Electric',
-        seating: 5,
-        launchDate: 'Launched April 2024',
-        isNew: true
-      }
-    ]
-    
-    setUpcomingCars(staticUpcomingCars)
-    setLoadingUpcomingCars(false)
-  }
 
   const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
     const selectedCity = typeof window !== 'undefined' ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra' : 'Mumbai, Maharashtra'
@@ -690,99 +500,148 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           </button>
         </div>
 
-        {/* Quick Comparison Stats */}
+        {/* Quick Comparison Stats - Enhanced */}
         {stats && (
-          <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 mb-6 border border-orange-200">
+          <div className="bg-gradient-to-r from-orange-50 via-red-50 to-orange-50 rounded-2xl p-5 mb-6 border-2 border-orange-200 shadow-md">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-orange-600" />
-                <span className="font-semibold text-gray-900">Quick Comparison</span>
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-lg shadow-md">
+                  <Award className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <span className="font-bold text-gray-900 text-lg block">Quick Comparison</span>
+                  <span className="text-xs text-gray-600">Price analysis</span>
+                </div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-600">Price Difference</div>
-                <div className="text-lg font-bold text-orange-600">
-                  ₹{(stats.priceDiff / 100000).toFixed(2)}L ({stats.priceDiffPercent}%)
+                <div className="text-xs text-gray-600 font-medium mb-1">Price Difference</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                  ₹{(stats.priceDiff / 100000).toFixed(2)}L
+                </div>
+                <div className="text-sm font-semibold text-orange-600 mt-0.5">
+                  ({stats.priceDiffPercent}%)
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Comparison Cards */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* Comparison Cards - Side by Side, Mobile Friendly */}
+        <div className="flex gap-3 md:gap-6 overflow-x-auto scrollbar-hide pb-2 mb-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {comparisonItems.map((item, index) => {
             const onRoadPrice = getOnRoadPrice(item.variant.price, item.variant.fuelType)
             const isCheaper = stats && stats.cheaperIndex === index
 
             return (
-              <div key={index} className={`bg-white rounded-2xl p-4 border-2 transition-all ${isCheaper ? 'border-orange-400 shadow-lg' : 'border-gray-200'}`}>
-                {/* Best Value Badge */}
+              <div 
+                key={index} 
+                className={`relative bg-white rounded-xl md:rounded-2xl border-2 transition-all duration-300 flex-shrink-0 w-[calc(50%-6px)] md:w-full md:flex-1 ${
+                  isCheaper 
+                    ? 'border-orange-500 shadow-xl shadow-orange-100' 
+                    : 'border-gray-200 hover:border-gray-300 shadow-md'
+                }`}
+                style={{ overflow: 'visible' }}
+              >
+                {/* Best Value Badge - Enhanced */}
                 {isCheaper && (
-                  <div className="flex items-center gap-1 mb-2 bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-semibold w-fit">
-                    <TrendingDown className="h-3 w-3" />
+                  <div className="absolute top-2 md:top-4 left-2 md:left-4 z-20 flex items-center gap-1 md:gap-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs font-bold shadow-lg">
+                    <Award className="h-3 w-3 md:h-3.5 md:w-3.5" />
                     <span>Best Value</span>
                   </div>
                 )}
 
-                <div className="mb-3 bg-gray-50 rounded-xl p-2">
-                  <img
-                    src={item.model.heroImage}
-                    alt={`${item.model.brandName} ${item.model.name}`}
-                    className="w-full h-32 object-contain"
-                    onError={(e) => {
-                      e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3C/svg%3E"
-                    }}
-                  />
-                </div>
-
-                <h3 className="font-bold text-gray-900 text-base mb-2">
-                  {item.model.brandName} {item.model.name}
-                </h3>
-
-                {/* Variant Dropdown */}
-                <div className="relative mb-3">
-                  <button
-                    onClick={() => setShowVariantDropdown(showVariantDropdown === index ? null : index)}
-                    className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:border-gray-300 transition-colors"
-                  >
-                    <span className="text-gray-700 truncate">{item.variant.name}</span>
-                    <ChevronDown className="h-4 w-4 text-gray-500 flex-shrink-0 ml-2" />
-                  </button>
-                  
-                  {showVariantDropdown === index && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto z-30">
-                      {item.model.variants.map((v) => (
-                        <button
-                          key={v.id}
-                          onClick={() => handleVariantChange(index, v)}
-                          className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm border-b border-gray-100 last:border-0"
-                        >
-                          <div className="font-medium text-gray-900">{v.name}</div>
-                          <div className="text-xs text-gray-500 mt-0.5">₹{(v.price / 100000).toFixed(2)} Lakhs</div>
-                        </button>
-                      ))}
+                {/* Car Image Section - Enhanced */}
+                <div className={`relative h-32 md:h-48 ${isCheaper ? 'bg-gradient-to-br from-orange-50 to-red-50' : 'bg-gradient-to-br from-gray-50 to-gray-100'} flex items-center justify-center p-2 md:p-4`}>
+                  {item.model.heroImage ? (
+                    <img
+                      src={item.model.heroImage}
+                      alt={`${item.model.brandName} ${item.model.name}`}
+                      className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3C/svg%3E"
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#374151' className="w-3/4 h-3/4 opacity-50">
+                        <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/>
+                        <circle cx='100' cy='220' r='25' fill='#111827'/>
+                        <circle cx='300' cy='220' r='25' fill='#111827'/>
+                      </svg>
                     </div>
                   )}
                 </div>
 
-                <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-3">
-                  <div className="text-xl font-bold text-red-600 mb-0.5">
-                    ₹{(onRoadPrice / 100000).toFixed(2)} L
+                {/* Car Info Section */}
+                <div className="p-3 md:p-5">
+                  {/* Brand and Model Name */}
+                  <h3 className="font-bold text-gray-900 text-sm md:text-lg mb-2 md:mb-3 leading-tight line-clamp-2">
+                    {item.model.brandName} {item.model.name}
+                  </h3>
+
+                  {/* Variant Dropdown - Enhanced */}
+                  <div className="relative mb-3 md:mb-4">
+                    <button
+                      onClick={() => setShowVariantDropdown(showVariantDropdown === index ? null : index)}
+                      className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 bg-white border-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${
+                        isCheaper
+                          ? 'border-orange-300 hover:border-orange-400 text-gray-900'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      <span className="truncate pr-2">{item.variant.name}</span>
+                      <ChevronDown className={`h-4 w-4 md:h-5 md:w-5 flex-shrink-0 transition-transform ${showVariantDropdown === index ? 'rotate-180' : ''} ${isCheaper ? 'text-orange-600' : 'text-gray-500'}`} />
+                    </button>
+                    
+                    {/* Dropdown Menu - Properly positioned */}
+                    {showVariantDropdown === index && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg md:rounded-xl shadow-2xl max-h-64 overflow-y-auto z-[100]">
+                        {item.model.variants.map((v) => (
+                          <button
+                            key={v.id}
+                            onClick={() => handleVariantChange(index, v)}
+                            className={`w-full text-left px-3 md:px-4 py-2.5 md:py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${
+                              v.id === item.variant.id ? 'bg-orange-50' : ''
+                            }`}
+                          >
+                            <div className="font-semibold text-gray-900 text-xs md:text-sm">{v.name}</div>
+                            <div className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1">₹{(v.price / 100000).toFixed(2)} Lakhs</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xs text-gray-600">On-Road Price</div>
+
+                  {/* Price Section - Enhanced */}
+                  <div className={`rounded-lg md:rounded-xl p-3 md:p-4 ${
+                    isCheaper 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500' 
+                      : 'bg-gradient-to-r from-red-50 to-orange-50 border-2 border-gray-100'
+                  }`}>
+                    <div className={`text-lg md:text-2xl font-bold mb-0.5 md:mb-1 ${
+                      isCheaper ? 'text-white' : 'text-red-600'
+                    }`}>
+                      ₹{(onRoadPrice / 100000).toFixed(2)} L
+                    </div>
+                    <div className={`text-[10px] md:text-xs font-medium ${
+                      isCheaper ? 'text-orange-50' : 'text-gray-600'
+                    }`}>
+                      On-Road Price
+                    </div>
+                  </div>
                 </div>
               </div>
             )
           })}
         </div>
 
-        {/* Add More Button */}
+        {/* Add More Button - Enhanced */}
         <button 
           onClick={handleAddMore}
-          className="w-full bg-gray-200 rounded-2xl py-4 mb-4 flex items-center justify-center gap-2 text-gray-700 font-semibold text-lg hover:bg-gray-300 transition-colors"
+          className="w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl py-4 mb-6 flex items-center justify-center gap-2 text-gray-700 font-bold text-lg hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-md hover:shadow-lg border-2 border-gray-200 hover:border-gray-300"
         >
-          <span>Add more</span>
           <Plus className="h-6 w-6" />
+          <span>Add more</span>
         </button>
 
         {/* EMI Section - Compact Refined */}
@@ -985,154 +844,14 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
         </div>
 
-        {/* Popular Comparison */}
+        {/* Popular Comparison - Using Homepage Component */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Popular Comparison</h2>
-          
-          {loadingPopularComparisons ? (
-            <div className="flex gap-4 overflow-x-auto pb-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3">
-                  <div className="h-48 bg-gray-200 animate-pulse rounded"></div>
-                </div>
-              ))}
-            </div>
-          ) : popularComparisons.length === 0 ? null : (
-            <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
-              {popularComparisons.map((comparison) => {
-                const model1OnRoad = getOnRoadPrice(comparison.model1.startingPrice, comparison.model1.fuelTypes[0] || 'Petrol')
-                const model2OnRoad = getOnRoadPrice(comparison.model2.startingPrice, comparison.model2.fuelTypes[0] || 'Petrol')
-
-                return (
-                  <div key={comparison.id} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all">
-                    <div className="flex items-start gap-2 mb-3">
-                      <div className="flex-1">
-                        <div className="relative mb-2">
-                          <img
-                            src={comparison.model1.heroImage}
-                            alt={`${comparison.model1.brand} ${comparison.model1.name}`}
-                            className="w-full h-20 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3C/svg%3E"
-                            }}
-                          />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-xs text-gray-500">{comparison.model1.brand}</div>
-                          <div className="font-bold text-sm text-gray-900 mb-1">{comparison.model1.name}</div>
-                          <div className="text-red-600 font-bold text-sm">
-                            ₹ {(model1OnRoad / 100000).toFixed(2)} Lakh
-                          </div>
-                          <div className="text-xs text-gray-500">On-Road Price</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-center" style={{ marginTop: '30px' }}>
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center shadow-md">
-                          <span className="text-white text-xs font-bold">VS</span>
-                        </div>
-                      </div>
-
-                      <div className="flex-1">
-                        <div className="relative mb-2">
-                          <img
-                            src={comparison.model2.heroImage}
-                            alt={`${comparison.model2.brand} ${comparison.model2.name}`}
-                            className="w-full h-20 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3C/svg%3E"
-                            }}
-                          />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-xs text-gray-500">{comparison.model2.brand}</div>
-                          <div className="font-bold text-sm text-gray-900 mb-1">{comparison.model2.name}</div>
-                          <div className="text-red-600 font-bold text-sm">
-                            ₹ {(model2OnRoad / 100000).toFixed(2)} Lakh
-                          </div>
-                          <div className="text-xs text-gray-500">On-Road Price</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        const slug1 = `${comparison.model1.brand.toLowerCase().replace(/\s+/g, '-')}-${comparison.model1.name.toLowerCase().replace(/\s+/g, '-')}`
-                        const slug2 = `${comparison.model2.brand.toLowerCase().replace(/\s+/g, '-')}-${comparison.model2.name.toLowerCase().replace(/\s+/g, '-')}`
-                        router.push(`/compare/${slug1}-vs-${slug2}`)
-                      }}
-                      className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all text-sm font-semibold shadow-sm"
-                    >
-                      Compare Now
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          )}
+          <PopularComparisons />
         </div>
 
-        {/* Popular Cars */}
+        {/* Popular Cars - Using Homepage Component */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular Cars</h2>
-          
-          {loadingPopularCars ? (
-            <div className="flex gap-6 overflow-x-auto pb-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200">
-                  <div className="h-48 bg-gray-200 animate-pulse"></div>
-                  <div className="p-5 space-y-3">
-                    <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : popularCars.length === 0 ? null : (
-            <div className="flex gap-6 overflow-x-auto pb-4" style={{ scrollbarWidth: 'none' }}>
-              {popularCars.map((car) => {
-                const onRoadPrice = getOnRoadPrice(car.startingPrice, car.fuelTypes[0] || 'Petrol')
-                
-                return (
-                  <div
-                    key={car.id}
-                    className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all cursor-pointer"
-                    onClick={() => {
-                      const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                      const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                      router.push(`/${brandSlug}-cars/${modelSlug}`)
-                    }}
-                  >
-                    <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden rounded-t-xl">
-                      {car.isNew && (
-                        <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
-                          NEW
-                        </div>
-                      )}
-                      <img 
-                        src={car.image}
-                        alt={`${car.brandName} ${car.name}`}
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3C/svg%3E"
-                        }}
-                      />
-                    </div>
-                    <div className="p-5">
-                      <h3 className="font-bold text-gray-900 mb-2 text-lg">{car.brandName} {car.name}</h3>
-                      <div className="text-red-600 font-bold text-xl mb-1">
-                        ₹ {(onRoadPrice / 100000).toFixed(2)} Lakh
-                      </div>
-                      <div className="text-xs text-gray-500 mb-4">On-Road Price</div>
-                      <button className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-3 rounded-lg transition-all text-sm font-semibold">
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
+          <PopularCars />
         </div>
 
         {/* Ad Banner */}
@@ -1140,86 +859,9 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
         </div>
 
-        {/* Upcoming Cars - EXACT from home page */}
+        {/* Upcoming Cars - reuse homepage component */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Upcoming Cars</h2>
-          
-          <div className="relative">
-            <div
-              className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {upcomingCars.map((car) => (
-                <div
-                  key={car.id}
-                  className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
-                >
-                  {/* Car Image with Badges */}
-                  <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
-                    {/* NEW Badge */}
-                    {car.isNew && (
-                      <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
-                        NEW
-                      </div>
-                    )}
-                    
-                    {/* Heart Icon */}
-                    <button className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
-                      <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
-                    </button>
-
-                    {/* Car Image */}
-                    <div className="w-full h-full flex items-center justify-center">
-                      <img 
-                        src={car.image}
-                        alt={`${car.brandName} ${car.name}`}
-                        className="w-full h-full object-contain object-center transition-transform duration-300"
-                        onError={(e) => {
-                          e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Car Info */}
-                  <div className="p-5">
-                    <h3 className="font-bold text-gray-900 mb-2 text-lg">{car.brandName} {car.name}</h3>
-                    
-                    <div className="flex items-center text-red-600 font-bold text-xl mb-4">
-                      <span>₹ {(car.startingPrice / 100000).toFixed(2)} Lakh</span>
-                    </div>
-
-                    <div className="space-y-3 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center">
-                        <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>{car.launchDate}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        <span>{car.fuelType}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <span>{car.seating} Seater</span>
-                      </div>
-                    </div>
-
-                    <button className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-3 rounded-lg transition-all duration-200 text-sm font-semibold">
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <UpcomingCars />
         </div>
       </div>
 
