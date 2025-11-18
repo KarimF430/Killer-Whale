@@ -749,33 +749,16 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         format: processedImages[0].format
       } : null;
 
-      // Try R2 upload first (server-side upload to avoid CORS issues)
+      // Default to local URL (same pattern as model images)
+      let fileUrl = `/uploads/${req.file.filename}`;
+
+      // Upload to R2 if configured (mirror /api/upload/image behaviour)
       const bucket = process.env.R2_BUCKET;
       if (bucket) {
         const accountId = process.env.R2_ACCOUNT_ID;
         const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
         
         try {
-          // Determine which file to upload (processed WebP or original)
-          let filePathToUpload = req.file.path;
-          let fileBody: Buffer;
-          
-          // Use processed WebP file if available, otherwise use original
-          if (processedImages.length > 0 && processedImages[0].webpPath) {
-            filePathToUpload = processedImages[0].webpPath;
-            console.log(`📦 Using processed WebP file: ${filePathToUpload}`);
-          } else {
-            console.log(`📦 Using original file: ${filePathToUpload}`);
-          }
-          
-          // Check if file exists before reading
-          if (!fs.existsSync(filePathToUpload)) {
-            throw new Error(`File not found at path: ${filePathToUpload}`);
-          }
-          
-          fileBody = readFileSync(filePathToUpload);
-          console.log(`📊 File size: ${fileBody.length} bytes`);
-          
           // Use server-side S3 client (no CORS issues)
           const client = new S3Client({
             region: process.env.R2_REGION || 'auto',
@@ -790,14 +773,13 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           const now = new Date();
           const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
           const key = `uploads/logos/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
-          
-          console.log(`🚀 Uploading to R2: bucket=${bucket}, key=${key}`);
+          const body = readFileSync(req.file.path);
           
           // Server-side upload (bypasses CORS completely)
           await client.send(new PutObjectCommand({
             Bucket: bucket,
             Key: key,
-            Body: fileBody,
+            Body: body,
             ContentType: 'image/webp',
             Metadata: {
               'original-name': req.file.originalname,
@@ -810,39 +792,21 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             }
           }));
 
-          const publicBase = process.env.R2_PUBLIC_BASE_URL || `${endpoint}/${bucket}`;
-          const publicUrl = `${publicBase}/${key}`;
-          
-          console.log(`✅ Logo uploaded to R2 successfully: ${publicUrl}`);
-          
-          // Clean up temp files
-          try {
-            if (fs.existsSync(filePathToUpload)) {
-              fs.unlinkSync(filePathToUpload);
-              console.log(`🗑️ Cleaned up temp file: ${filePathToUpload}`);
-            }
-            // Also clean up original if it exists and is different
-            if (req.file.path !== filePathToUpload && fs.existsSync(req.file.path)) {
-              fs.unlinkSync(req.file.path);
-            }
-          } catch (cleanupError) {
-            console.warn('⚠️ Failed to cleanup temp files:', cleanupError);
+          const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '');
+          if (publicBase) {
+            fileUrl = `${publicBase}/${key}`;
           }
           
-          return res.json({ 
-            url: publicUrl, 
-            filename: safeName,
-            compression: compressionInfo
-          });
+          // Clean up temp file
+          fs.unlinkSync(req.file.path);
+          
+          console.log(`✅ Logo uploaded to R2 (server-side): ${fileUrl}`);
         } catch (error) {
           console.error('❌ R2 logo upload failed:', {
             error: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined,
             bucket: bucket,
             endpoint: endpoint,
-            hasCredentials: !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY),
-            filePath: req.file.path,
-            processedImages: (req as any).processedImages
+            hasCredentials: !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY)
           });
           console.error('📋 Full error details:', error);
           console.warn('⚠️  Logo upload falling back to local storage (will be lost on restart!)');
@@ -860,9 +824,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         console.warn('⚠️  R2 not configured for logo upload, using local storage (files will be lost on restart!)');
       }
 
-      // Default to local URL
-      let fileUrl = `/uploads/${req.file.filename}`;
-      
+      // Final response mirrors /api/upload/image
       res.json({ 
         url: fileUrl,
         processed: true,
