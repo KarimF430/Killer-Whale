@@ -776,20 +776,29 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           const body = readFileSync(req.file.path);
           
           // Server-side upload (bypasses CORS completely)
+          const metadata: Record<string, string> = {
+            'original-name': req.file.originalname,
+            'upload-date': now.toISOString(),
+          };
+
+          if (compressionInfo) {
+            if (typeof compressionInfo.originalSize === 'number') {
+              metadata['original-size'] = compressionInfo.originalSize.toString();
+            }
+            if (typeof compressionInfo.compressedSize === 'number') {
+              metadata['compressed-size'] = compressionInfo.compressedSize.toString();
+            }
+            if (typeof compressionInfo.compressionRatio === 'number') {
+              metadata['compression-ratio'] = compressionInfo.compressionRatio.toString();
+            }
+          }
+
           await client.send(new PutObjectCommand({
             Bucket: bucket,
             Key: key,
             Body: body,
             ContentType: 'image/webp',
-            Metadata: {
-              'original-name': req.file.originalname,
-              'upload-date': now.toISOString(),
-              ...(compressionInfo && {
-                'original-size': compressionInfo.originalSize.toString(),
-                'compressed-size': compressionInfo.compressedSize.toString(),
-                'compression-ratio': compressionInfo.compressionRatio.toString()
-              })
-            }
+            Metadata: metadata
           }));
 
           const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '');
