@@ -848,7 +848,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           console.warn('⚠️  Logo upload falling back to local storage (will be lost on restart!)');
           // In production, optionally fail hard instead of falling back to local storage
           if (process.env.REQUIRE_R2 === 'true') {
-            return res.status(500).json({ error: 'Cloud storage unavailable. Please try again later.' });
+            const message = error instanceof Error ? error.message : String(error);
+            return res.status(500).json({ 
+              error: 'Cloud storage unavailable. Please try again later.',
+              details: message
+            });
           }
           // Fall through to local storage
         }
