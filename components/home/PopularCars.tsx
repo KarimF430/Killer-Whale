@@ -80,7 +80,7 @@ export default function PopularCars() {
 
         // Map backend data to component state
         const processedCars: Car[] = data.map((car: any) => ({
-          id: car.id,
+          id: car.id, // Use the actual database ID from backend
           name: car.name,
           brand: car.brandId,
           brandName: car.brandName,

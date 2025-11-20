@@ -13,6 +13,7 @@ import { truncateCarName } from '@/lib/text-utils'
 import { formatPrice, formatPriceRange } from '@/utils/priceFormatter'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import CarCard from '../home/CarCard'
+import { useViewTracker } from '@/lib/use-view-tracker'
 
 interface ModelData {
   id: string
@@ -276,6 +277,25 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   }, [])
   const [selectedVariant, setSelectedVariant] = useState(model?.variants?.[0]?.name || 'Base Variant')
   const [modelVariants, setModelVariants] = useState<any[]>([])
+
+  // Track page view for smart favourites algorithm
+  const carDataForTracking = model ? {
+    id: model.id,
+    name: model.name,
+    brand: model.brand,
+    brandName: model.brand,
+    image: model.heroImage,
+    startingPrice: model.startingPrice,
+    fuelTypes: model.variants?.map(v => v.fuelType).filter((v, i, a) => a.indexOf(v) === i) || ['Petrol'],
+    transmissions: model.variants?.map(v => v.transmission).filter((v, i, a) => a.indexOf(v) === i) || ['Manual'],
+    seating: model.keySpecs?.seatingCapacity || 5,
+    launchDate: new Date().toISOString(),
+    slug: model.slug,
+    isNew: false,
+    isPopular: false
+  } : null
+
+  useViewTracker(carDataForTracking)
 
   // Get on-road prices for starting and ending prices
   const startingPriceData = useOnRoadPrice({
@@ -970,8 +990,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
                 className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeSection === section.id
-                    ? 'border-red-600 text-red-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 {section.name}
@@ -1228,8 +1248,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 <button
                   onClick={() => handleHighlightTabChange('keyFeatures')}
                   className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeHighlightTab === 'keyFeatures'
-                      ? 'border-red-600 text-red-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-red-600 text-red-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                 >
                   Key & Features
@@ -1237,8 +1257,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 <button
                   onClick={() => handleHighlightTabChange('spaceComfort')}
                   className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeHighlightTab === 'spaceComfort'
-                      ? 'border-red-600 text-red-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-red-600 text-red-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                 >
                   Space & Comfort
@@ -1246,8 +1266,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 <button
                   onClick={() => handleHighlightTabChange('storageConvenience')}
                   className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeHighlightTab === 'storageConvenience'
-                      ? 'border-red-600 text-red-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-red-600 text-red-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                 >
                   Storage & Convenience
@@ -1460,8 +1480,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
                     className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
-                        ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
                     {filter}
@@ -1567,8 +1587,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           key={index}
                           onClick={() => setSelectedColor(color.caption)}
                           className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${selectedColor === color.caption
-                              ? 'ring-4 ring-red-500 shadow-lg scale-105'
-                              : 'hover:shadow-md hover:scale-102'
+                            ? 'ring-4 ring-red-500 shadow-lg scale-105'
+                            : 'hover:shadow-md hover:scale-102'
                             }`}
                         >
                           <div className="w-32 h-24 bg-gray-100">
@@ -1626,8 +1646,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           key={color.id}
                           onClick={() => setSelectedColor(color.name)}
                           className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${selectedColor === color.name
-                              ? 'ring-4 ring-red-500 shadow-lg scale-105'
-                              : 'hover:shadow-md hover:scale-102'
+                            ? 'ring-4 ring-red-500 shadow-lg scale-105'
+                            : 'hover:shadow-md hover:scale-102'
                             }`}
                         >
                           <div className="w-32 h-24 bg-gray-100">
@@ -2051,8 +2071,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                       }
                     }}
                     className={`w-3 h-3 rounded-full transition-all duration-300 ${selectedMileageEngine === index
-                        ? 'bg-gradient-to-r from-red-600 to-orange-500 w-8'
-                        : 'bg-gray-300 hover:bg-gray-400'
+                      ? 'bg-gradient-to-r from-red-600 to-orange-500 w-8'
+                      : 'bg-gray-300 hover:bg-gray-400'
                       }`}
                   />
                 ))}

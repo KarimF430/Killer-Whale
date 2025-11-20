@@ -49,7 +49,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
   // Get on-road price (lightning fast with caching)
   const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
     exShowroomPrice: car.startingPrice,
-    fuelType: car.fuelTypes[0] || 'Petrol'
+    fuelType: car.fuelTypes?.[0] || 'Petrol'
   })
 
   // Use on-road price if mode is enabled, otherwise ex-showroom
@@ -79,11 +79,11 @@ export default function CarCard({ car, onClick }: CarCardProps) {
         <button
           onClick={(e) => {
             e.stopPropagation()
-            toggleFavourite(car.id)
+            toggleFavourite(car)
           }}
           className={`absolute top-3 right-3 p-2.5 sm:p-2 rounded-full shadow-md transition-all duration-200 z-10 ${isFav
-              ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
-              : 'bg-white hover:bg-red-50 active:bg-red-100'
+            ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
+            : 'bg-white hover:bg-red-50 active:bg-red-100'
             }`}
         >
           <Heart
@@ -137,11 +137,11 @@ export default function CarCard({ car, onClick }: CarCardProps) {
           </div>
           <div className="flex items-center">
             <Fuel className="h-4 w-4 mr-3 text-gray-400" />
-            <span>{car.fuelTypes.map(f => formatFuelType(f)).join('/')}</span>
+            <span>{(car.fuelTypes || ['Petrol']).map(f => formatFuelType(f)).join('/')}</span>
           </div>
           <div className="flex items-center">
             <Gauge className="h-4 w-4 mr-3 text-gray-400" />
-            <span>{car.transmissions.map(t => formatTransmission(t)).join('/')}</span>
+            <span>{(car.transmissions || ['Manual']).map(t => formatTransmission(t)).join('/')}</span>
           </div>
         </div>
 
