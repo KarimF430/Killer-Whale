@@ -1181,12 +1181,12 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(models);
   });
 
-  // Optimized endpoint: Models with aggregated pricing data (MongoDB aggregation - NO variant fetching!)
+  // Optimized endpoint: Models with aggregated pricing data (Single MongoDB pipeline - FASTEST!)
   app.get("/api/models-with-pricing", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
     try {
       const brandId = req.query.brandId as string | undefined;
 
-      // Use MongoDB aggregation to calculate pricing WITHOUT fetching all variants
+      // Use optimized MongoDB aggregation with $lookup sub-pipeline
       const mongoose = (await import('mongoose')).default;
       const db = mongoose.connection.db;
 
@@ -1194,34 +1194,51 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Step 1: Aggregate variant pricing by modelId
-      const variantAggregation = await db.collection('variants').aggregate([
+      // Single optimized aggregation pipeline
+      const modelsWithPricing = await db.collection('models').aggregate([
+        // Filter by brandId if provided
+        ...(brandId ? [{ $match: { brandId, status: 'active' } }] : [{ $match: { status: 'active' } }]),
+
+        // Lookup variants and calculate pricing in one operation
         {
-          $group: {
-            _id: '$modelId',
-            lowestPrice: { $min: '$price' },
-            variantCount: { $sum: 1 }
+          $lookup: {
+            from: 'variants',
+            localField: 'id',
+            foreignField: 'modelId',
+            pipeline: [
+              { $match: { status: 'active' } },
+              {
+                $group: {
+                  _id: null,
+                  lowestPrice: { $min: '$price' },
+                  count: { $sum: 1 }
+                }
+              }
+            ],
+            as: 'pricing'
+          }
+        },
+
+        // Add pricing fields to model document
+        {
+          $addFields: {
+            lowestPrice: {
+              $ifNull: [{ $arrayElemAt: ['$pricing.lowestPrice', 0] }, 0]
+            },
+            variantCount: {
+              $ifNull: [{ $arrayElemAt: ['$pricing.count', 0] }, 0]
+            }
+          }
+        },
+
+        // Remove temporary pricing array and _id
+        {
+          $project: {
+            pricing: 0,
+            _id: 0
           }
         }
       ]).toArray();
-
-      // Create a map for quick lookup
-      const pricingMap = new Map(
-        variantAggregation.map(item => [item._id, { lowestPrice: item.lowestPrice, variantCount: item.variantCount }])
-      );
-
-      // Step 2: Fetch models (with optional brand filter)
-      const models = await storage.getModels(brandId);
-
-      // Step 3: Merge pricing data with models
-      const modelsWithPricing = models.map(model => {
-        const pricing = pricingMap.get(model.id) || { lowestPrice: 0, variantCount: 0 };
-        return {
-          ...model,
-          lowestPrice: pricing.lowestPrice,
-          variantCount: pricing.variantCount
-        };
-      });
 
       res.json(modelsWithPricing);
     } catch (error) {
@@ -1463,7 +1480,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         if (modelId) filter.modelId = modelId;
         if (brandId) filter.brandId = brandId;
 
-        // Only fetch fields needed for display (id, name, price, fuel, transmission)
+        // Only fetch fields needed for display (id, name, price, fuel, transmission, power, features)
         const variants = await db.collection('variants')
           .find(filter)
           .project({
@@ -1474,12 +1491,22 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             transmission: 1,
             modelId: 1,
             brandId: 1,
+            enginePower: 1,
+            keyFeatures: 1,
             _id: 0
           })
           .sort({ price: 1 })
           .toArray();
 
-        return res.json(variants);
+        // Map database fields to frontend expected fields
+        const mappedVariants = variants.map(v => ({
+          ...v,
+          power: v.enginePower,
+          features: v.keyFeatures
+        }));
+
+        res.json(mappedVariants);
+        return;
       } catch (error) {
         console.error('Error fetching minimal variants:', error);
         return res.status(500).json({ error: "Failed to fetch variants" });

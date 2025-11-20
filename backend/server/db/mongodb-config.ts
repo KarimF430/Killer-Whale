@@ -12,19 +12,19 @@ import mongoose from 'mongoose';
  */
 
 export const mongoConfig = {
-  // OPTIMIZED: Connection pooling for 1M+ users
-  maxPoolSize: 100, // Increased from 10 to handle high concurrency
-  minPoolSize: 10,  // Keep connections warm
-  maxIdleTimeMS: 30000, // Close idle connections after 30s
-  serverSelectionTimeoutMS: 5000, // Faster timeout for production
+  // OPTIMIZED: Connection pooling for high performance
+  maxPoolSize: 200, // Increased from 100 for better concurrency
+  minPoolSize: 20,  // Increased from 10 to keep more connections warm
+  maxIdleTimeMS: 60000, // Increased from 30000 to keep connections alive longer
+  serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
-  
+
   // Write Concern for Performance
   writeConcern: {
     w: 'majority' as const, // Use majority for Atlas reliability
     wtimeout: 5000 // Increased timeout
   },
-  
+
   // Additional optimizations
   retryWrites: true, // Retry failed writes
   retryReads: true,  // Retry failed reads
@@ -40,39 +40,39 @@ export async function initializeMongoDBOptimized(uri: string) {
     mongoose.set('strictQuery', false);
     mongoose.set('autoIndex', false); // Don't build indexes on every connection
     mongoose.set('bufferCommands', false); // Disable mongoose buffering
-    
+
     // Connect with optimized configuration
     await mongoose.connect(uri, mongoConfig);
-    
+
     console.log('✅ MongoDB connected with high-performance configuration');
-    
+
     // Setup connection event handlers
     mongoose.connection.on('error', (error) => {
       console.error('❌ MongoDB connection error:', error);
     });
-    
+
     mongoose.connection.on('disconnected', () => {
       console.warn('⚠️  MongoDB disconnected');
     });
-    
+
     mongoose.connection.on('reconnected', () => {
       console.log('✅ MongoDB reconnected');
     });
-    
+
     // Monitor connection pool
     mongoose.connection.on('connectionPoolCreated', () => {
       console.log('🏊 MongoDB connection pool created');
     });
-    
+
     mongoose.connection.on('connectionPoolClosed', () => {
       console.log('🏊 MongoDB connection pool closed');
     });
-    
+
     // Build indexes in background for production
     if (process.env.NODE_ENV === 'production') {
       await buildIndexesInBackground();
     }
-    
+
   } catch (error) {
     console.error('❌ Failed to connect to MongoDB:', error);
     throw error;
@@ -85,9 +85,9 @@ export async function initializeMongoDBOptimized(uri: string) {
 async function buildIndexesInBackground() {
   try {
     console.log('🔨 Building indexes in background...');
-    
+
     const db = mongoose.connection.db;
-    
+
     // Build indexes for each collection
     await Promise.all([
       buildBrandIndexes(db),
@@ -96,7 +96,7 @@ async function buildIndexesInBackground() {
       buildAdminUserIndexes(db),
       buildPopularComparisonIndexes(db)
     ]);
-    
+
     console.log('✅ All indexes built successfully');
   } catch (error) {
     console.error('❌ Error building indexes:', error);
@@ -175,7 +175,7 @@ export const cacheConfig = {
     enableOfflineQueue: false,
     lazyConnect: true,
   },
-  
+
   // Cache TTL settings (in seconds)
   ttl: {
     brands: 3600, // 1 hour
@@ -192,13 +192,13 @@ export const cacheConfig = {
 export const performanceConfig = {
   // Enable slow query logging
   slowQueryThreshold: 100, // Log queries taking more than 100ms
-  
+
   // Connection monitoring
   monitorConnections: true,
-  
+
   // Query profiling
   enableProfiling: process.env.NODE_ENV === 'development',
-  
+
   // Metrics collection
   collectMetrics: true,
 };

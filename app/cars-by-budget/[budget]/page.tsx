@@ -41,7 +41,7 @@ const formatLaunchDate = (date: string): string => {
     return date
 }
 
-// BrandCarCard component (exact copy from brand page)
+// BrandCarCard component (exact copy from brand page) - MOBILE OPTIMIZED
 function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLabel: string }) {
     const exShowroomPrice = car.startingPrice
 
@@ -59,9 +59,9 @@ function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLabel: string }) 
             className="block group"
         >
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200">
-                <div className="flex h-40">
-                    {/* Car Image */}
-                    <div className="w-44 flex-shrink-0 relative overflow-hidden rounded-l-lg">
+                <div className="flex h-36 sm:h-44">
+                    {/* Car Image - Responsive */}
+                    <div className="w-32 sm:w-48 flex-shrink-0 relative overflow-hidden rounded-l-lg">
                         <img
                             src={car.image}
                             alt={car.name}
@@ -71,59 +71,59 @@ function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLabel: string }) 
                                 const parent = e.currentTarget.parentElement
                                 if (parent) {
                                     const fallback = document.createElement('div')
-                                    fallback.className = 'bg-gray-200 text-gray-600 text-sm font-semibold text-center flex items-center justify-center h-full'
+                                    fallback.className = 'bg-gray-200 text-gray-600 text-xs sm:text-sm font-semibold text-center flex items-center justify-center h-full p-1'
                                     fallback.innerHTML = car.name
                                     parent.appendChild(fallback)
                                 }
                             }}
                         />
                         {car.isNew && (
-                            <span className="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded z-10">
+                            <span className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-green-600 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded z-10">
                                 NEW
                             </span>
                         )}
                         {car.isPopular && !car.isNew && (
-                            <span className="absolute top-2 left-2 bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded z-10">
+                            <span className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-orange-600 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded z-10">
                                 POPULAR
                             </span>
                         )}
                     </div>
 
-                    {/* Car Details */}
-                    <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between">
+                    {/* Car Details - Responsive */}
+                    <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col justify-between min-w-0">
                         {/* Top Section */}
                         <div>
-                            <div className="flex items-start justify-between mb-2">
-                                <div className="flex-1 pr-2">
-                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
+                            <div className="flex items-start justify-between mb-1 sm:mb-2">
+                                <div className="flex-1 pr-1 sm:pr-2 min-w-0">
+                                    <h3 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight truncate">
                                         <span className="text-gray-600 font-semibold">{car.brandName} </span>
                                         {car.name}
                                     </h3>
                                 </div>
-                                <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0 mt-1" />
+                                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0 mt-0.5 sm:mt-1" />
                             </div>
 
-                            {/* Rating */}
-                            <div className="flex items-center gap-1 mb-2">
-                                <Star className="h-4 w-4 text-green-600 fill-current" />
-                                <span className="font-semibold text-gray-900 text-sm">{car.rating || 4.5}/5</span>
-                                <span className="text-gray-500 text-sm">{car.reviews || 1247} Ratings</span>
+                            {/* Rating - Responsive */}
+                            <div className="flex items-center gap-0.5 sm:gap-1 mb-1 sm:mb-2">
+                                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 fill-current flex-shrink-0" />
+                                <span className="font-semibold text-gray-900 text-sm sm:text-base whitespace-nowrap">{car.rating || 4.5}/5</span>
+                                <span className="text-gray-500 text-sm sm:text-base whitespace-nowrap">{car.reviews || 1247} Ratings</span>
                             </div>
 
-                            {/* Variants */}
-                            <div className="text-gray-600 text-sm mb-3">
+                            {/* Variants - Responsive */}
+                            <div className="text-gray-600 text-sm sm:text-base mb-1 sm:mb-3">
                                 {car.variants || 0} Variants
                             </div>
                         </div>
 
-                        {/* Bottom Section: Price */}
+                        {/* Bottom Section: Price - Responsive */}
                         <div>
-                            <div className="flex items-baseline gap-2 flex-wrap">
-                                <span className="text-xl sm:text-2xl font-bold text-red-600">₹ {displayPrice}</span>
-                                <span className="text-base sm:text-lg font-semibold text-red-600">Lakh</span>
-                                <span className="text-gray-500 text-sm">Onwards</span>
+                            <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
+                                <span className="text-lg sm:text-2xl md:text-3xl font-bold text-red-600">₹ {displayPrice}</span>
+                                <span className="text-base sm:text-lg md:text-xl font-semibold text-red-600">Lakh</span>
+                                <span className="text-gray-500 text-sm sm:text-base">Onwards</span>
                             </div>
-                            <span className="text-xs text-gray-500">{priceLabel} Price</span>
+                            <span className="text-xs sm:text-sm text-gray-500">{priceLabel} Price</span>
                         </div>
                     </div>
                 </div>

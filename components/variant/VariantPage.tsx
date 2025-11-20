@@ -181,6 +181,19 @@ export default function VariantPage({
 
         console.log('Found variant:', foundVariant?.name)
 
+        // Now fetch the FULL variant details (not minimal) for the current variant
+        if (foundVariant?.id) {
+          console.log('Fetching full variant details for:', foundVariant.id)
+          const fullVariantResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants/${foundVariant.id}`)
+          if (fullVariantResponse.ok) {
+            const fullVariant = await fullVariantResponse.json()
+            console.log('Got full variant details:', fullVariant.name)
+            foundVariant = fullVariant // Replace minimal variant with full details
+          } else {
+            console.error('Failed to fetch full variant details')
+          }
+        }
+
         setBrand(foundBrand)
         setModel(foundModel)
         setVariant(foundVariant)
