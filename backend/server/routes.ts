@@ -3,9 +3,9 @@ import express from "express";
 import type { IStorage } from "./storage";
 import type { BackupService } from "./backup-service";
 import { insertBrandSchema, insertModelSchema } from "./validation/schemas";
-import { 
-  comparePassword, 
-  generateAccessToken, 
+import {
+  comparePassword,
+  generateAccessToken,
   generateRefreshToken,
   authenticateToken,
   isValidEmail,
@@ -13,12 +13,12 @@ import {
   sanitizeUser,
   hashPassword
 } from "./auth";
-import { 
-  apiLimiter, 
-  authLimiter, 
-  modifyLimiter, 
-  publicLimiter, 
-  bulkLimiter 
+import {
+  apiLimiter,
+  authLimiter,
+  modifyLimiter,
+  publicLimiter,
+  bulkLimiter
 } from "./middleware/rateLimiter";
 import { redisCacheMiddleware, invalidateRedisCache, CacheTTL as RedisCacheTTL } from "./middleware/redis-cache";
 import { securityMiddleware, validateFileUpload } from "./middleware/sanitize";
@@ -63,13 +63,13 @@ function formatBrandSummary(summary: string, brandName: string): {
 
   for (const line of lines) {
     const trimmedLine = line.trim();
-    
+
     // Check for section headers
-    if (trimmedLine.includes('Start of operations in India:') || 
-        trimmedLine.includes('Market Share:') ||
-        trimmedLine.includes('Key Aspects:') ||
-        trimmedLine.includes('Competitors:')) {
-      
+    if (trimmedLine.includes('Start of operations in India:') ||
+      trimmedLine.includes('Market Share:') ||
+      trimmedLine.includes('Key Aspects:') ||
+      trimmedLine.includes('Competitors:')) {
+
       // Save previous section if exists
       if (currentSection && currentContent.length > 0) {
         sections.push({
@@ -78,13 +78,13 @@ function formatBrandSummary(summary: string, brandName: string): {
         });
 
       }
-      
+
       // Start new section
       currentSection = trimmedLine.replace(':', '');
       currentContent = [];
-    } else if (trimmedLine.includes('car price starts at') || 
-               trimmedLine.includes('cheapest model') ||
-               trimmedLine.includes('most expensive model')) {
+    } else if (trimmedLine.includes('car price starts at') ||
+      trimmedLine.includes('cheapest model') ||
+      trimmedLine.includes('most expensive model')) {
       // Extract price information
       priceInfo = trimmedLine;
     } else if (currentSection) {
@@ -149,12 +149,12 @@ const upload = multer({
 
 export function registerRoutes(app: Express, storage: IStorage, backupService?: BackupService) {
   console.log('🔐 Registering authentication routes...');
-  
+
   // Helper function to trigger backup after mutations
   const triggerBackup = async (type: string) => {
     if (backupService) {
       try {
-        switch(type) {
+        switch (type) {
           case 'brands':
             await backupService.backupBrands();
             break;
@@ -241,11 +241,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       `${req.protocol}://${req.get('host')}`
     return `${(backendOrigin || '').replace(/\/$/, '')}${normalized}`
   }
-  
+
   // ============================================
   // AUTHENTICATION ROUTES (Public)
   // ============================================
-  
+
   // Login endpoint - with strict rate limiting
   app.post("/api/auth/login", authLimiter, async (req: Request, res: Response) => {
     console.log('📝 Login attempt:', req.body.email);
@@ -349,7 +349,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         await storage.invalidateSession(req.user.id);
         console.log('👋 User logged out:', req.user.email);
       }
-      
+
       res.clearCookie('token');
       res.clearCookie('refreshToken');
       res.json({ success: true, message: "Logged out successfully" });
@@ -366,15 +366,15 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       console.log('📦 Starting bulk brand import...');
       const { brands } = req.body;
-      
+
       if (!Array.isArray(brands)) {
         return res.status(400).json({ error: 'Brands must be an array' });
       }
-      
+
       const results = [];
       let successCount = 0;
       let errorCount = 0;
-      
+
       for (const brandData of brands) {
         try {
           const validatedData = insertBrandSchema.parse(brandData);
@@ -389,10 +389,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           errorCount++;
         }
       }
-      
+
       console.log(`📊 Bulk brand import completed: ${successCount} success, ${errorCount} errors`);
       await triggerBackup('brands');
-      
+
       res.json({
         success: true,
         summary: { total: brands.length, success: successCount, errors: errorCount },
@@ -409,15 +409,15 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       console.log('📦 Starting bulk variant import...');
       const { variants } = req.body;
-      
+
       if (!Array.isArray(variants)) {
         return res.status(400).json({ error: 'Variants must be an array' });
       }
-      
+
       const results = [];
       let successCount = 0;
       let errorCount = 0;
-      
+
       for (const variantData of variants) {
         try {
           const variant = await storage.createVariant(variantData);
@@ -431,10 +431,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           errorCount++;
         }
       }
-      
+
       console.log(`📊 Bulk variant import completed: ${successCount} success, ${errorCount} errors`);
       await triggerBackup('variants');
-      
+
       res.json({
         success: true,
         summary: { total: variants.length, success: successCount, errors: errorCount },
@@ -451,15 +451,15 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       console.log('📦 Starting bulk model import...');
       const { models } = req.body;
-      
+
       if (!Array.isArray(models)) {
         return res.status(400).json({ error: 'Models must be an array' });
       }
-      
+
       const results = [];
       let successCount = 0;
       let errorCount = 0;
-      
+
       for (const modelData of models) {
         try {
           const validatedData = insertModelSchema.parse(modelData);
@@ -474,10 +474,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           errorCount++;
         }
       }
-      
+
       console.log(`📊 Bulk model import completed: ${successCount} success, ${errorCount} errors`);
       await triggerBackup('models');
-      
+
       res.json({
         success: true,
         summary: { total: models.length, success: successCount, errors: errorCount },
@@ -493,7 +493,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.post("/api/cleanup/clear-models", authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting models cleanup...');
-      
+
       // Delete all variants first (cascade)
       const variants = await storage.getVariants();
       let deletedVariants = 0;
@@ -501,7 +501,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         await storage.deleteVariant(variant.id);
         deletedVariants++;
       }
-      
+
       // Delete all models
       const models = await storage.getModels();
       let deletedModels = 0;
@@ -509,10 +509,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         await storage.deleteModel(model.id);
         deletedModels++;
       }
-      
+
       console.log(`✅ Models cleanup completed: ${deletedModels} models, ${deletedVariants} variants deleted`);
       await triggerBackup('models');
-      
+
       res.json({
         success: true,
         deleted: { models: deletedModels, variants: deletedVariants },
@@ -528,7 +528,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.post("/api/cleanup/clear-all", authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting complete database cleanup...');
-      
+
       // Delete all variants
       const variants = await storage.getVariants();
       let deletedVariants = 0;
@@ -536,7 +536,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         const success = await storage.deleteVariant(variant.id);
         if (success) deletedVariants++;
       }
-      
+
       // Delete all models
       const models = await storage.getModels();
       let deletedModels = 0;
@@ -544,7 +544,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         const success = await storage.deleteModel(model.id);
         if (success) deletedModels++;
       }
-      
+
       // Delete all brands
       const brands = await storage.getBrands();
       let deletedBrands = 0;
@@ -552,9 +552,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         const success = await storage.deleteBrand(brand.id);
         if (success) deletedBrands++;
       }
-      
+
       console.log(`✅ Cleanup completed: ${deletedBrands} brands, ${deletedModels} models, ${deletedVariants} variants deleted`);
-      
+
       res.json({
         success: true,
         deleted: {
@@ -574,42 +574,42 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.post("/api/cleanup/orphaned-data", authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting orphaned data cleanup...');
-      
+
       // Get all data
       const brands = await storage.getBrands();
       const models = await storage.getModels();
       const variants = await storage.getVariants();
-      
+
       const brandIds = brands.map(b => b.id);
       const modelIds = models.map(m => m.id);
-      
+
       // Find orphaned data
       const orphanedModels = models.filter(m => !brandIds.includes(m.brandId));
-      const orphanedVariants = variants.filter(v => 
+      const orphanedVariants = variants.filter(v =>
         !modelIds.includes(v.modelId) || !brandIds.includes(v.brandId)
       );
-      
+
       console.log(`📊 Found ${orphanedModels.length} orphaned models, ${orphanedVariants.length} orphaned variants`);
-      
+
       let deletedModels = 0;
       let deletedVariants = 0;
-      
+
       // Delete orphaned models
       for (const model of orphanedModels) {
         console.log(`🗑️ Deleting orphaned model: ${model.name} (${model.id})`);
         const success = await storage.deleteModel(model.id);
         if (success) deletedModels++;
       }
-      
+
       // Delete orphaned variants
       for (const variant of orphanedVariants) {
         console.log(`🗑️ Deleting orphaned variant: ${variant.name} (${variant.id})`);
         const success = await storage.deleteVariant(variant.id);
         if (success) deletedVariants++;
       }
-      
+
       console.log(`✅ Cleanup completed: ${deletedModels} models, ${deletedVariants} variants deleted`);
-      
+
       res.json({
         success: true,
         deleted: {
@@ -709,7 +709,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       // Hash new password
       const hashedPassword = await hashPassword(newPassword);
-      
+
       // Update password (you'll need to add this method to storage)
       // For now, we'll return success
       res.json({
@@ -728,9 +728,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   // ============================================
   // FILE UPLOAD ROUTES
   // ============================================
-  
+
   // File upload endpoint for logos with WebP conversion and R2 support
-  app.post("/api/upload/logo", 
+  app.post("/api/upload/logo",
     authenticateToken,
     modifyLimiter,
     upload.single('logo'),
@@ -740,7 +740,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
-      
+
       const processedImages = (req as any).processedImages || [];
       const compressionInfo = processedImages.length > 0 ? {
         originalSize: processedImages[0].originalSize,
@@ -757,7 +757,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       if (bucket) {
         const accountId = process.env.R2_ACCOUNT_ID;
         const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
-        
+
         try {
           // Use server-side S3 client (no CORS issues)
           const client = new S3Client({
@@ -772,9 +772,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
           const now = new Date();
           const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-          const key = `uploads/logos/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
+          const key = `uploads/logos/${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
           const body = readFileSync(req.file.path);
-          
+
           // Server-side upload (bypasses CORS completely)
           const metadata: Record<string, string> = {
             'original-name': req.file.originalname,
@@ -805,10 +805,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           if (publicBase) {
             fileUrl = `${publicBase}/${key}`;
           }
-          
+
           // Clean up temp file
           fs.unlinkSync(req.file.path);
-          
+
           console.log(`✅ Logo uploaded to R2 (server-side): ${fileUrl}`);
         } catch (error) {
           console.error('❌ R2 logo upload failed:', {
@@ -822,7 +822,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           // In production, optionally fail hard instead of falling back to local storage
           if (process.env.REQUIRE_R2 === 'true') {
             const message = error instanceof Error ? error.message : String(error);
-            return res.status(500).json({ 
+            return res.status(500).json({
               error: 'Cloud storage unavailable. Please try again later.',
               details: message
             });
@@ -834,7 +834,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
 
       // Final response mirrors /api/upload/image
-      res.json({ 
+      res.json({
         url: fileUrl,
         processed: true,
         format: 'webp',
@@ -843,9 +843,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   );
 
-// ...
+  // ...
   // Generic image upload endpoint for model images with WebP conversion and R2 support
-  app.post("/api/upload/image", 
+  app.post("/api/upload/image",
     authenticateToken,
     modifyLimiter,
     upload.single('image'),
@@ -855,25 +855,25 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       if (!req.file) {
         return res.status(400).json({ error: "No image uploaded" });
       }
-      
+
       const processedImages = (req as any).processedImages || [];
       const compressionInfo = processedImages.length > 0 ? {
         originalSize: processedImages[0].originalSize,
         webpSize: processedImages[0].webpSize,
         compressionRatio: processedImages[0].compressionRatio
       } : null;
-    
+
       // Default to local URL
       let fileUrl = `/uploads/${req.file.filename}`;
-      
+
       // Upload to R2 if configured (server-side upload to avoid CORS issues)
       const bucket = process.env.R2_BUCKET;
       if (bucket) {
         const accountId = process.env.R2_ACCOUNT_ID;
         const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
-        
+
         try {
-          
+
           // Use server-side S3 client (no CORS issues)
           const client = new S3Client({
             region: process.env.R2_REGION || 'auto',
@@ -887,9 +887,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
           const now = new Date();
           const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-          const key = `uploads/images/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
+          const key = `uploads/images/${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`;
           const body = readFileSync(req.file.path);
-          
+
           // Server-side upload (bypasses CORS completely)
           await client.send(new PutObjectCommand({
             Bucket: bucket,
@@ -906,15 +906,15 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
               })
             }
           }));
-          
+
           const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '');
           if (publicBase) {
             fileUrl = `${publicBase}/${key}`;
           }
-          
+
           // Clean up temp file
           fs.unlinkSync(req.file.path);
-          
+
           console.log(`✅ Image uploaded to R2 (server-side): ${fileUrl}`);
         } catch (error: any) {
           console.error('❌ R2 image upload failed:', {
@@ -934,9 +934,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       } else {
         console.warn('⚠️  R2 not configured, using local storage (files will be lost on restart!)');
       }
-      
-      res.json({ 
-        url: fileUrl, 
+
+      res.json({
+        url: fileUrl,
         filename: req.file.filename,
         processed: true,
         format: 'webp',
@@ -976,7 +976,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
       const now = new Date();
-      const key = `uploads/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName}`;
+      const key = `uploads/${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}/${randomUUID()}-${safeName}`;
 
       const cmd = new PutObjectCommand({
         Bucket: bucket,
@@ -1083,7 +1083,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       // Format the summary with proper sections
       const formattedSummary = formatBrandSummary(brand.summary || '', brand.name);
-      
+
       res.json({
         ...brand,
         logo: buildPublicAssetUrl(brand.logo, req),
@@ -1112,11 +1112,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       const validatedData = insertBrandSchema.parse(req.body);
       console.log('Validated data:', JSON.stringify(validatedData, null, 2));
       const brand = await storage.createBrand(validatedData);
-      
+
       // Backup after create
       await triggerBackup('brands');
       await invalidateRedisCache('/api/brands');
-      
+
       res.status(201).json({
         ...brand,
         logo: buildPublicAssetUrl(brand.logo, req)
@@ -1137,11 +1137,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       if (!brand) {
         return res.status(404).json({ error: "Brand not found" });
       }
-      
+
       // Backup after update
       await triggerBackup('brands');
       await invalidateRedisCache('/api/brands');
-      
+
       res.json({
         ...brand,
         logo: buildPublicAssetUrl(brand.logo, req)
@@ -1211,18 +1211,18 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       console.log('🔄 PUT - Updating model:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
-      
+
       const model = await storage.updateModel(req.params.id, req.body);
       if (!model) {
         return res.status(404).json({ error: "Model not found" });
       }
-      
+
       console.log('✅ Model updated successfully via PUT');
-      
+
       // Invalidate models cache so frontend sees updated data
       await invalidateRedisCache('/api/models');
       console.log('🗑️ Models cache invalidated');
-      
+
       res.json(model);
     } catch (error) {
       console.error('❌ Model PUT update error:', error);
@@ -1236,12 +1236,12 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
       console.log('🎨 Color Images in request:', req.body.colorImages);
       console.log('🎨 Color Images length:', req.body.colorImages?.length || 0);
-      
+
       const model = await storage.updateModel(req.params.id, req.body);
       if (!model) {
         return res.status(404).json({ error: "Model not found" });
       }
-      
+
       console.log('✅ Model updated successfully via PATCH');
       console.log('📊 Updated model image data:');
       console.log('- Hero Image:', model.heroImage);
@@ -1251,11 +1251,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       console.log('- Storage Convenience Images:', model.storageConvenienceImages?.length || 0, 'images');
       console.log('- Color Images:', model.colorImages?.length || 0, 'images');
       console.log('🎨 Color Images saved:', JSON.stringify(model.colorImages, null, 2));
-      
+
       // Invalidate models cache
       await invalidateRedisCache('/api/models');
       console.log('🗑️ Models cache invalidated');
-      
+
       res.json(model);
     } catch (error) {
       console.error('❌ Model PATCH update error:', error);
@@ -1280,6 +1280,56 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
+  // Get popular cars (optimized endpoint)
+  app.get("/api/cars/popular", publicLimiter, async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const models = await storage.getPopularModels(limit);
+
+      // Enrich with brand names and variant info (optimized)
+      const brands = await storage.getBrands();
+      const brandMap = new Map(brands.map(b => [b.id, b.name]));
+
+      const allVariants = await storage.getVariants();
+
+      const enrichedModels = models.map(model => {
+        const modelVariants = allVariants.filter(v => v.modelId === model.id);
+        const lowestPrice = modelVariants.length > 0
+          ? Math.min(...modelVariants.map(v => v.price || 0))
+          : 0;
+
+        const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
+          ? model.fuelTypes
+          : Array.from(new Set(modelVariants.map(v => v.fuelType).filter(Boolean)));
+
+        const transmissions = model.transmissions && model.transmissions.length > 0
+          ? model.transmissions
+          : Array.from(new Set(modelVariants.map(v => v.transmission).filter(Boolean)));
+
+        return {
+          id: model.id,
+          name: model.name,
+          brandId: model.brandId,
+          brandName: brandMap.get(model.brandId) || 'Unknown',
+          image: model.heroImage,
+          startingPrice: lowestPrice,
+          fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
+          transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+          seating: 5,
+          launchDate: model.launchDate,
+          isNew: model.isNew,
+          isPopular: model.isPopular,
+          popularRank: model.popularRank
+        };
+      });
+
+      res.json(enrichedModels);
+    } catch (error) {
+      console.error('Get popular cars error:', error);
+      res.status(500).json({ error: "Failed to fetch popular cars" });
+    }
+  });
+
   // Variants (public endpoint + caching)
   app.get("/api/variants", publicLimiter, redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
     const modelId = req.query.modelId as string | undefined;
@@ -1299,7 +1349,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.post("/api/variants", async (req, res) => {
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
-      
+
       // Validate required fields
       if (!req.body.brandId || !req.body.modelId || !req.body.name || !req.body.price) {
         console.error('❌ Missing required fields:', {
@@ -1308,17 +1358,17 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           name: !!req.body.name,
           price: !!req.body.price
         });
-        return res.status(400).json({ 
-          error: "Missing required fields: brandId, modelId, name, and price are required" 
+        return res.status(400).json({
+          error: "Missing required fields: brandId, modelId, name, and price are required"
         });
       }
-      
+
       const variant = await storage.createVariant(req.body);
       console.log('✅ Variant created successfully:', variant.id);
-      
+
       // Invalidate variants cache
       await invalidateRedisCache('/api/variants');
-      
+
       res.status(201).json(variant);
     } catch (error) {
       console.error('❌ Variant creation error:', error);
@@ -1334,17 +1384,17 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
-      
+
       const variant = await storage.updateVariant(req.params.id, req.body);
       if (!variant) {
         return res.status(404).json({ error: "Variant not found" });
       }
-      
+
       console.log('✅ Variant updated successfully');
-      
+
       // Invalidate variants cache
       invalidateRedisCache('/api/variants');
-      
+
       res.json(variant);
     } catch (error) {
       console.error('❌ Variant update error:', error);
@@ -1355,19 +1405,19 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.delete("/api/variants/:id", async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
-      
+
       const success = await storage.deleteVariant(req.params.id);
-      
+
       if (!success) {
         console.log('❌ Variant not found or delete failed');
         return res.status(404).json({ error: "Variant not found" });
       }
-      
+
       console.log('✅ Variant deleted successfully, invalidating cache...');
-      
+
       // Invalidate variants cache
       invalidateRedisCache('/api/variants');
-      
+
       res.status(204).send();
     } catch (error) {
       console.error('❌ Delete variant route error:', error);
@@ -1380,10 +1430,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       const { brandId } = req.params;
       console.log('🚗 Frontend: Getting models for brand:', brandId);
-      
+
       const models = await storage.getModels(brandId);
       const brand = await storage.getBrand(brandId);
-      
+
       if (!brand) {
         return res.status(404).json({ error: "Brand not found" });
       }
@@ -1426,18 +1476,18 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       const { slug } = req.params;
       console.log('🚗 Frontend: Getting model by slug:', slug);
-      
+
       const models = await storage.getModels();
-      const model = models.find(m => 
+      const model = models.find(m =>
         m.name.toLowerCase().replace(/\s+/g, '-') === slug
       );
-      
+
       if (!model) {
         return res.status(404).json({ error: "Model not found" });
       }
 
       const brand = await storage.getBrand(model.brandId);
-      
+
       // Transform model for frontend display
       const frontendModel = {
         id: model.id,
@@ -1488,7 +1538,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.post("/api/popular-comparisons", async (req, res) => {
     try {
       const comparisons = req.body;
-      
+
       if (!Array.isArray(comparisons)) {
         return res.status(400).json({ error: "Expected array of comparisons" });
       }
@@ -1506,10 +1556,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // ==================== NEWS ROUTES ====================
-  
+
   // Public news routes
   app.use('/api/news', newsRoutes);
-  
+
   // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
   app.use('/api/admin/articles', adminArticlesRoutes);
   app.use('/api/admin/categories', adminCategoriesRoutes);
@@ -1517,7 +1567,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.use('/api/admin/authors', adminAuthorsRoutes);
   app.use('/api/admin/media', adminMediaRoutes);
   app.use('/api/admin/analytics', adminAnalyticsRoutes);
-  
+
   // Admin authentication routes (with rate limiting) - MUST come AFTER specific routes
   app.use('/api/admin', authLimiter, adminAuthRoutes);
 

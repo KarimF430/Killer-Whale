@@ -15,6 +15,7 @@ import Card from '@/components/common/Card'
 import { staticPageSEO } from '@/lib/seo'
 
 export const metadata: Metadata = staticPageSEO.home
+export const revalidate = 3600 // Revalidate every hour
 
 export default function HomePage() {
   return (
@@ -22,25 +23,25 @@ export default function HomePage() {
       <main>
         <AdBanner />
         <HeroSection />
-        
+
         <PageSection background="gray">
           <CarsByBudget />
         </PageSection>
-        
+
         <AdBanner />
-        
+
         <PageSection background="white">
           <PopularCars />
         </PageSection>
-        
+
         <PageSection background="gray">
           <BrandSection />
         </PageSection>
-        
+
         <PageSection background="white">
           <UpcomingCars />
         </PageSection>
-        
+
         <PageSection background="gray">
           <Card className="text-center">
             <div className="bg-gradient-to-r from-red-600 to-orange-500 rounded-lg p-6 text-white">
@@ -49,24 +50,24 @@ export default function HomePage() {
             </div>
           </Card>
         </PageSection>
-        
+
         <PageSection background="white">
           <NewLaunchedCars />
         </PageSection>
-        
+
         <PageSection background="white">
           <PopularComparisons />
         </PageSection>
-        
+
         <PageSection background="white">
           <LatestCarNews />
         </PageSection>
-        
+
         <PageSection background="white">
           <YouTubeVideoPlayer />
         </PageSection>
       </main>
-      
+
       <Footer />
     </div>
   )

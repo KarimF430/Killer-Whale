@@ -5,8 +5,6 @@ import Header from '@/components/Header'
 
 const inter = Inter({ subsets: ['latin'] })
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export const viewport = {
@@ -75,14 +73,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   const GA_ID = process.env.NEXT_PUBLIC_GA_ID
-  
+
   return (
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#dc2626" />
-        
+
         {/* Google Analytics */}
         {GA_ID && (
           <>
@@ -101,7 +99,7 @@ export default function RootLayout({
             />
           </>
         )}
-        
+
         {/* Schema.org structured data */}
         <script
           type="application/ld+json"

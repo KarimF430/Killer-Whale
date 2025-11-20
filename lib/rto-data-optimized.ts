@@ -3,6 +3,8 @@
 // Format: [0-5L, 5-10L, 10-20L, 20-30L, 30-40L, 40L+]
 // Value types: number (%) or string (fixed amount like "5000")
 
+import { getRTOStateFromCity } from './city-database';
+
 export type RTOValue = number | string;
 export type PriceRange = '0-5' | '5-10' | '10-20' | '20-30' | '30-40' | '40+';
 
@@ -257,25 +259,36 @@ function calculateRTOValue(value: RTOValue, exShowroomPrice: number): number {
   return (exShowroomPrice * value) / 100;
 }
 
-// Get RTO charges for a state, fuel type, and price
+// Get RTO charges for a city/state, fuel type, and price
 export function getRTOCharges(
-  state: string,
+  cityOrState: string,
   fuelType: string,
   exShowroomPrice: number
 ): number {
-  const stateKey = state.toUpperCase();
-  const stateData = RTO_DATA[stateKey];
-  
+  // Try to get RTO state name from city database first
+  let rtoStateName = getRTOStateFromCity(cityOrState);
+
+  // If city lookup failed, try direct state lookup
+  if (rtoStateName === 'MAHARASHTRA' && cityOrState.toUpperCase() !== 'MAHARASHTRA') {
+    // Check if input is already a valid RTO state name
+    const upperInput = cityOrState.toUpperCase();
+    if (RTO_DATA[upperInput]) {
+      rtoStateName = upperInput;
+    }
+  }
+
+  const stateData = RTO_DATA[rtoStateName];
+
   if (!stateData) {
-    console.warn(`State "${state}" not found, using Maharashtra default`);
-    return getRTOCharges('MAHARASHTRA', fuelType, exShowroomPrice);
+    console.warn(`State "${rtoStateName}" not found in RTO_DATA, using Maharashtra default`);
+    return getRTOCharges('Maharashtra', fuelType, exShowroomPrice);
   }
 
   const priceIndex = getPriceRangeIndex(exShowroomPrice);
   const fuelKey = fuelType.toLowerCase();
-  
+
   let rtoValues: RTOValue[];
-  
+
   if (fuelKey.includes('petrol') || fuelKey.includes('gasoline')) {
     rtoValues = stateData.petrol;
   } else if (fuelKey.includes('diesel')) {
@@ -332,10 +345,10 @@ export interface OnRoadPriceBreakup {
 // Calculate complete on-road price
 export function calculateOnRoadPrice(
   exShowroomPrice: number,
-  state: string,
+  cityOrState: string,
   fuelType: string
 ): OnRoadPriceBreakup {
-  const rtoCharges = getRTOCharges(state, fuelType, exShowroomPrice);
+  const rtoCharges = getRTOCharges(cityOrState, fuelType, exShowroomPrice);
   const roadSafetyTax = calculateRoadSafetyTax(rtoCharges);
   const insurance = calculateInsurance(exShowroomPrice);
   const tcs = calculateTCS(exShowroomPrice);

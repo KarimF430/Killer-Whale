@@ -18,6 +18,7 @@ export interface IStorage {
   createModel(model: InsertModel): Promise<Model>;
   updateModel(id: string, model: Partial<InsertModel>): Promise<Model | undefined>;
   deleteModel(id: string): Promise<boolean>;
+  getPopularModels(limit?: number): Promise<Model[]>;
 
   // Variants
   getVariants(modelId?: string, brandId?: string): Promise<Variant[]>;
@@ -35,7 +36,7 @@ export interface IStorage {
   getAdminUserById(id: string): Promise<AdminUser | undefined>;
   createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
   updateAdminUserLogin(id: string): Promise<void>;
-  
+
   // Session Management
   createSession(userId: string, token: string): Promise<void>;
   getActiveSession(userId: string): Promise<string | null>;
@@ -71,12 +72,12 @@ export class PersistentStorage implements IStorage {
     this.variantsFile = path.join(this.dataDir, 'variants.json');
     this.popularComparisonsFile = path.join(this.dataDir, 'popular-comparisons.json');
     this.adminUsersFile = path.join(this.dataDir, 'admin-users.json');
-    
+
     // Create data directory if it doesn't exist
     if (!fs.existsSync(this.dataDir)) {
       fs.mkdirSync(this.dataDir, { recursive: true });
     }
-    
+
     // Load existing data
     this.loadData();
   }
@@ -89,28 +90,28 @@ export class PersistentStorage implements IStorage {
         this.brands = JSON.parse(brandsData);
         console.log(`Loaded ${this.brands.length} brands from storage`);
       }
-      
+
       // Load models
       if (fs.existsSync(this.modelsFile)) {
         const modelsData = fs.readFileSync(this.modelsFile, 'utf-8');
         this.models = JSON.parse(modelsData);
         console.log(`Loaded ${this.models.length} models from storage`);
       }
-      
+
       // Load variants
       if (fs.existsSync(this.variantsFile)) {
         const variantsData = fs.readFileSync(this.variantsFile, 'utf-8');
         this.variants = JSON.parse(variantsData);
         console.log(`Loaded ${this.variants.length} variants from storage`);
       }
-      
+
       // Load popular comparisons
       if (fs.existsSync(this.popularComparisonsFile)) {
         const comparisonsData = fs.readFileSync(this.popularComparisonsFile, 'utf-8');
         this.popularComparisons = JSON.parse(comparisonsData);
         console.log(`Loaded ${this.popularComparisons.length} popular comparisons from storage`);
       }
-      
+
       // Load admin users
       if (fs.existsSync(this.adminUsersFile)) {
         const usersData = fs.readFileSync(this.adminUsersFile, 'utf-8');
@@ -130,7 +131,7 @@ export class PersistentStorage implements IStorage {
       this.adminUsers = [];
     }
   }
-  
+
   private async createDefaultAdmin(): Promise<void> {
     try {
       const defaultAdmin: InsertAdminUser = {
@@ -140,7 +141,7 @@ export class PersistentStorage implements IStorage {
         role: 'super_admin',
         isActive: true,
       };
-      
+
       await this.createAdminUser(defaultAdmin);
       console.log('✅ Default admin user created: admin@motoroctane.com / Admin@123');
     } catch (error) {
@@ -152,19 +153,19 @@ export class PersistentStorage implements IStorage {
     try {
       // Save brands
       fs.writeFileSync(this.brandsFile, JSON.stringify(this.brands, null, 2));
-      
+
       // Save models
       fs.writeFileSync(this.modelsFile, JSON.stringify(this.models, null, 2));
-      
+
       // Save variants
       fs.writeFileSync(this.variantsFile, JSON.stringify(this.variants, null, 2));
-      
+
       // Save popular comparisons
       fs.writeFileSync(this.popularComparisonsFile, JSON.stringify(this.popularComparisons, null, 2));
-      
+
       // Save admin users
       fs.writeFileSync(this.adminUsersFile, JSON.stringify(this.adminUsers, null, 2));
-      
+
       console.log('Data saved to persistent storage');
     } catch (error) {
       console.error('Error saving data:', error);
@@ -210,8 +211,8 @@ export class PersistentStorage implements IStorage {
     }
 
     // Auto-assign ranking based on creation order (next available position)
-    const maxRanking = this.brands.length > 0 
-      ? Math.max(...this.brands.map(b => b.ranking)) 
+    const maxRanking = this.brands.length > 0
+      ? Math.max(...this.brands.map(b => b.ranking))
       : 0;
     const autoRanking = maxRanking + 1;
 
@@ -233,11 +234,11 @@ export class PersistentStorage implements IStorage {
   async updateBrand(id: string, brand: Partial<InsertBrand>): Promise<Brand | undefined> {
     const index = this.brands.findIndex(b => b.id === id);
     if (index === -1) return undefined;
-    
+
     // Don't allow manual ranking changes - ranking is auto-managed by creation order
     const updateData = { ...brand };
-    delete updateData.ranking; // Remove ranking from update data
-    
+    // ranking is not in InsertBrand, so no need to delete it
+
     this.brands[index] = { ...this.brands[index], ...updateData };
     this.saveData(); // Save to persistent storage
     return this.brands[index];
@@ -246,7 +247,7 @@ export class PersistentStorage implements IStorage {
   async deleteBrand(id: string): Promise<boolean> {
     const index = this.brands.findIndex(b => b.id === id);
     if (index === -1) return false;
-    
+
     this.brands.splice(index, 1);
     // Also delete related models
     this.models = this.models.filter(m => m.brandId !== id);
@@ -298,6 +299,7 @@ export class PersistentStorage implements IStorage {
       spaceComfortImages: (model.spaceComfortImages as any) || null,
       storageConvenienceImages: (model.storageConvenienceImages as any) || null,
       colorImages: (model.colorImages as any) || null,
+      keySpecs: (model.keySpecs as any) || [],
       createdAt: new Date(),
     };
     this.models.push(newModel);
@@ -308,7 +310,7 @@ export class PersistentStorage implements IStorage {
   async updateModel(id: string, model: Partial<InsertModel>): Promise<Model | undefined> {
     const index = this.models.findIndex(m => m.id === id);
     if (index === -1) return undefined;
-    
+
     this.models[index] = { ...this.models[index], ...model };
     this.saveData(); // Save to persistent storage
     return this.models[index];
@@ -317,24 +319,31 @@ export class PersistentStorage implements IStorage {
   async deleteModel(id: string): Promise<boolean> {
     const index = this.models.findIndex(m => m.id === id);
     if (index === -1) return false;
-    
+
     this.models.splice(index, 1);
     this.saveData(); // Save to persistent storage
     return true;
   }
 
+  async getPopularModels(limit: number = 20): Promise<Model[]> {
+    return this.models
+      .filter(m => m.isPopular)
+      .sort((a, b) => (a.popularRank || 999) - (b.popularRank || 999))
+      .slice(0, limit);
+  }
+
   // Variant methods
   async getVariants(modelId?: string, brandId?: string): Promise<Variant[]> {
     let filtered = this.variants;
-    
+
     if (modelId) {
       filtered = filtered.filter(v => v.modelId === modelId);
     }
-    
+
     if (brandId) {
       filtered = filtered.filter(v => v.brandId === brandId);
     }
-    
+
     return filtered;
   }
 
@@ -347,34 +356,34 @@ export class PersistentStorage implements IStorage {
     // Get brand and model
     const brand = this.brands.find(b => b.id === brandId);
     const model = this.models.find(m => m.id === modelId);
-    
+
     if (!brand || !model) {
       throw new Error('Brand or Model not found');
     }
-    
+
     // Extract first 2 letters of brand name (e.g., "Honda" -> "HO")
     const brandPrefix = brand.name.substring(0, 2).toUpperCase();
-    
+
     // Extract first 2 letters of model name (e.g., "City" -> "CI")
     const modelPrefix = model.name.substring(0, 2).toUpperCase();
-    
+
     // Extract first 2 letters of variant name (e.g., "VXI" -> "VX")
     const variantPrefix = variantName.substring(0, 2).toUpperCase();
-    
+
     // Count existing variants for this model to generate counter
-    const existingVariants = this.variants.filter(v => 
+    const existingVariants = this.variants.filter(v =>
       v.brandId === brandId && v.modelId === modelId
     );
     const counter = (existingVariants.length + 1).toString().padStart(5, '0');
-    
+
     return `${brandPrefix}${modelPrefix}${variantPrefix}${counter}`;
   }
 
   async createVariant(variant: InsertVariant): Promise<Variant> {
     const id = this.generateVariantId(variant.brandId, variant.modelId, variant.name);
-    
+
     const newVariant: Variant = {
-      ...variant,
+      ...(variant as any),
       id,
       status: variant.status || 'active',
       highlightImages: (variant.highlightImages as any) || null,
@@ -388,7 +397,7 @@ export class PersistentStorage implements IStorage {
   async updateVariant(id: string, variant: Partial<InsertVariant>): Promise<Variant | undefined> {
     const index = this.variants.findIndex(v => v.id === id);
     if (index === -1) return undefined;
-    
+
     this.variants[index] = { ...this.variants[index], ...variant };
     this.saveData(); // Save to persistent storage
     return this.variants[index];
@@ -397,7 +406,7 @@ export class PersistentStorage implements IStorage {
   async deleteVariant(id: string): Promise<boolean> {
     const index = this.variants.findIndex(v => v.id === id);
     if (index === -1) return false;
-    
+
     this.variants.splice(index, 1);
     this.saveData(); // Save to persistent storage
     return true;
@@ -408,7 +417,7 @@ export class PersistentStorage implements IStorage {
     const takenRankings = this.brands
       .filter(b => excludeBrandId ? b.id !== excludeBrandId : true)
       .map(b => b.ranking);
-    
+
     const allRankings = Array.from({ length: 50 }, (_, i) => i + 1);
     return allRankings.filter(ranking => !takenRankings.includes(ranking));
   }
@@ -421,7 +430,7 @@ export class PersistentStorage implements IStorage {
   async savePopularComparisons(comparisons: InsertPopularComparison[]): Promise<PopularComparison[]> {
     // Clear existing comparisons
     this.popularComparisons = [];
-    
+
     // Create new comparisons with IDs
     const newComparisons: PopularComparison[] = comparisons.map((comp, index) => ({
       id: `comparison-${Date.now()}-${index}`,
@@ -431,7 +440,7 @@ export class PersistentStorage implements IStorage {
       isActive: comp.isActive ?? true,
       createdAt: new Date(),
     }));
-    
+
     this.popularComparisons = newComparisons;
     this.saveData();
     return this.popularComparisons;

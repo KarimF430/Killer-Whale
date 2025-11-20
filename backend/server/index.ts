@@ -17,6 +17,9 @@ import { apiLimiter } from "./middleware/rateLimiter";
 import { warmUpCache } from "./middleware/redis-cache";
 import compression from "compression";
 import pinoHttp from "pino-http";
+import session from "express-session";
+import { RedisStore } from "connect-redis";
+import { createClient } from "redis";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -57,17 +60,17 @@ app.use(helmet({
   // Disable CSP in development to allow dev toolchains (Vite/Next) to inject preambles
   contentSecurityPolicy: isProd
     ? {
-        useDefaults: true,
-        directives: {
-          defaultSrc: ["'self'"],
-          connectSrc: ["'self'", 'https:', 'http:', ...extraConnect],
-          imgSrc: ["'self'", 'data:', 'blob:', 'https:', 'http:'],
-          mediaSrc: ["'self'", 'data:', 'blob:', 'https:', 'http:'],
-          styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
-          scriptSrc: ["'self'", "'unsafe-inline'", 'https:'],
-          frameSrc: ["'self'", 'https:'],
-        },
-      }
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: ["'self'", 'https:', 'http:', ...extraConnect],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:', 'http:'],
+        mediaSrc: ["'self'", 'data:', 'blob:', 'https:', 'http:'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https:'],
+        frameSrc: ["'self'", 'https:'],
+      },
+    }
     : false,
   // COEP can interfere with dev HMR; disable in dev
   crossOriginEmbedderPolicy: isProd ? undefined : false,
@@ -145,7 +148,7 @@ const allowedOrigins = [
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  
+
   // Only allow whitelisted origins
   if (origin && allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
@@ -155,11 +158,11 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', origin || '*');
     res.header('Access-Control-Allow-Credentials', 'true');
   }
-  
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie');
   res.header('Access-Control-Expose-Headers', 'RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-Cache, X-Cache-TTL');
-  
+
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
   } else {
@@ -179,7 +182,7 @@ app.use((req, res, next) => {
       try {
         const preview = JSON.stringify(bodyJson);
         capturedJsonResponse = preview.length > 200 ? preview.slice(0, 200) + '…' : preview;
-      } catch {}
+      } catch { }
     }
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
@@ -203,91 +206,130 @@ app.use((req, res, next) => {
   next();
 });
 
+// Redis Client for Sessions
+const redisClient = createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  socket: {
+    reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
+  },
+});
+
+redisClient.connect().catch(console.error);
+
+// Initialize Redis Store
+const redisStore = new RedisStore({
+  client: redisClient,
+  prefix: "sess:",
+});
+
+// Session Middleware
+app.use(
+  session({
+    store: redisStore,
+    secret: process.env.SESSION_SECRET || "motoroctane_secret_key_2024",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: isProd, // true in production
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      sameSite: isProd ? 'lax' : 'lax', // lax is better for auth flows
+      domain: isProd ? '.motoroctane.com' : undefined
+    },
+    name: 'sid', // Custom session ID name
+  })
+);
+
+// Initialize services
 (async () => {
-  // Initialize MongoDB storage
-  const storageImpl = new MongoDBStorage();
-  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/motoroctane';
-  
   try {
-    await storageImpl.connect(mongoUri);
+    // Initialize MongoDB storage
+    const storage = new MongoDBStorage();
+    const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/motoroctane";
+
+    try {
+      await storage.connect(mongoUri);
+    } catch (error) {
+      console.error('❌ Failed to connect to MongoDB. Please check:');
+      console.error('   1. MongoDB is running (brew services start mongodb-community)');
+      console.error('   2. MONGODB_URI in .env file is correct');
+      console.error('   3. Network connection is available');
+      process.exit(1);
+    }
+
+    // Initialize news storage
+    await newsStorage.initialize();
+
+    // Warm up Redis cache for hot endpoints
+    try {
+      await warmUpCache(storage);
+    } catch (e) {
+      console.warn('Cache warmup skipped:', e instanceof Error ? e.message : e);
+    }
+
+    // Initialize backup service
+    if (isProd) {
+      const backupService = createBackupService(storage);
+      backupService.startAutoBackup(30);
+    }
+
+    // Register monitoring routes (no auth required)
+    app.use('/api/monitoring', monitoringRoutes);
+
+    // Register API routes FIRST before Vite
+    registerRoutes(app, storage);
+
+    const server = createServer(app);
+
+    // Initialize Scheduled API Fetcher
+    try {
+      // Dynamic import to avoid circular dependencies if any
+      // @ts-ignore
+      const SchedulerIntegration = (await import('./schedulerIntegration')).default;
+      const schedulerIntegration = new SchedulerIntegration(app);
+      await schedulerIntegration.init();
+      console.log('✅ Scheduled API fetcher initialized (1:00 PM & 8:00 PM IST)');
+    } catch (error) {
+      // console.error('❌ Failed to initialize scheduler:', error);
+      console.warn('⚠️  Continuing without scheduler...');
+    }
+
+    // Error handling middleware
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      console.error('Global error handler:', err);
+      res.status(status).json({ message });
+    });
+
+    // Setup Vite or static serving
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
+
+    // Start server
+    const PORT = parseInt(process.env.PORT || "5001", 10);
+    server.listen(PORT, "0.0.0.0", () => {
+      log(`Server running on port ${PORT}`);
+    });
+
+    // Graceful shutdown
+    const shutdown = () => {
+      log('received shutdown signal, closing server');
+      server.close(() => {
+        log('server closed');
+        process.exit(0);
+      });
+      // Force exit if not closed in time
+      setTimeout(() => process.exit(1), 10000).unref();
+    };
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
+
   } catch (error) {
-    console.error('❌ Failed to connect to MongoDB. Please check:');
-    console.error('   1. MongoDB is running (brew services start mongodb-community)');
-    console.error('   2. MONGODB_URI in .env file is correct');
-    console.error('   3. Network connection is available');
+    console.error("Failed to start server:", error);
     process.exit(1);
   }
-  
-  // Initialize news storage
-  await newsStorage.initialize();
-  // Warm up Redis cache for hot endpoints
-  try {
-    await warmUpCache(storageImpl);
-  } catch (e) {
-    console.warn('Cache warmup skipped:', e instanceof Error ? e.message : e);
-  }
-  
-  // Initialize backup service
-  const backupService = createBackupService(storageImpl as unknown as IStorage);
-  
-  // Start automatic backups every 30 minutes
-  backupService.startAutoBackup(30);
-  
-  // Register monitoring routes (no auth required)
-  app.use('/api/monitoring', monitoringRoutes);
-  
-  // Register API routes FIRST before Vite
-  registerRoutes(app, storageImpl as unknown as IStorage, backupService);
-  
-  // Initialize Scheduled API Fetcher
-  try {
-    const SchedulerIntegration = require('./schedulerIntegration');
-    const schedulerIntegration = new SchedulerIntegration(app);
-    await schedulerIntegration.init();
-    console.log('✅ Scheduled API fetcher initialized (1:00 PM & 8:00 PM IST)');
-  } catch (error) {
-    console.error('❌ Failed to initialize scheduler:', error);
-    console.warn('⚠️  Continuing without scheduler...');
-  }
-  
-  const server = createServer(app);
-
-  // Error handler for API routes
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    console.error(err);
-  });
-
-  // Setup Vite AFTER all API routes are registered
-  // This ensures API routes take precedence over Vite's catch-all
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5001 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5001', 10);
-  server.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
-  });
-
-  // Graceful shutdown
-  const shutdown = () => {
-    log('received shutdown signal, closing server');
-    server.close(() => {
-      log('server closed');
-      process.exit(0);
-    });
-    // Force exit if not closed in time
-    setTimeout(() => process.exit(1), 10000).unref();
-  };
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
 })();
