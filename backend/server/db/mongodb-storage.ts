@@ -30,7 +30,7 @@ function mapBrand(doc: any): Brand {
 
 function mapModel(doc: any): Model {
   return {
-    id: doc._id.toString(), // Use _id from MongoDB and convert to string
+    id: doc.id,
     brandId: doc.brandId,
     name: doc.name,
     isPopular: doc.isPopular || false,
@@ -66,7 +66,7 @@ function mapModel(doc: any): Model {
 
 function mapVariant(doc: any): Variant {
   return {
-    id: doc._id.toString(), // Use _id from MongoDB and convert to string
+    id: doc.id,
     brandId: doc.brandId,
     modelId: doc.modelId,
     name: doc.name,
