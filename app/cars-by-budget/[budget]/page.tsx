@@ -188,10 +188,11 @@ export default function BudgetCarsPage() {
                 setLoading(true)
                 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
+                // Fetch with large limit to get all data for budget filtering
                 const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-                    fetch(`${backendUrl}/api/models`),
+                    fetch(`${backendUrl}/api/models?limit=100`),
                     fetch(`${backendUrl}/api/brands`),
-                    fetch(`${backendUrl}/api/variants`)
+                    fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
                 ])
 
                 if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
@@ -201,9 +202,13 @@ export default function BudgetCarsPage() {
                     return
                 }
 
-                const models = await modelsRes.json()
+                const modelsResponse = await modelsRes.json()
                 const brands = await brandsRes.json()
-                const variants = await variantsRes.json()
+                const variantsResponse = await variantsRes.json()
+
+                // Extract data from pagination responses
+                const models = modelsResponse.data || modelsResponse
+                const variants = variantsResponse.data || variantsResponse
 
                 const brandMap = brands.reduce((acc: any, brand: any) => {
                     acc[brand.id] = brand.name

@@ -9,15 +9,15 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2 group">
-              <img 
-                src="/assets/mo-logo-original.svg" 
-                alt="MotorOctane - Aapka Auto Expert" 
+              <img
+                src="/motoroctane-logo.png"
+                alt="MotorOctane - Aapka Auto Expert"
                 className="h-10 w-auto group-hover:scale-105 transition-transform duration-300"
               />
               <span className="text-xl font-bold group-hover:text-orange-300 transition-colors">MotorOctane</span>
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed">
-              Your trusted partner for finding the perfect new car in India. Compare prices, 
+              Your trusted partner for finding the perfect new car in India. Compare prices,
               specifications, reviews, and get the best deals from authorized dealers.
             </p>
             <div className="flex space-x-4">

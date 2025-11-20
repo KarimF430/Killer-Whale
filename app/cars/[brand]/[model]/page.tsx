@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { brand: brandSlug, model: modelSlug } = await params
   const { brand, model } = parseCarFromUrl(brandSlug, modelSlug)
   const fullName = `${brand} ${model}`
-  
+
   // In a real app, you would fetch car data here
   const carData = {
     brand,
@@ -57,45 +57,47 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ModelPage({ params }: PageProps) {
   const { brand: brandSlug, model: modelSlug } = await params
   const { brand, model } = parseCarFromUrl(brandSlug, modelSlug)
-  
+
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-  
+
   try {
     // Fetch all models and brands to find the matching one
     const [modelsRes, brandsRes] = await Promise.all([
-      fetch(`${backendUrl}/api/models`, { cache: 'no-store' }),
+      fetch(`${backendUrl}/api/models?limit=100`, { cache: 'no-store' }),
       fetch(`${backendUrl}/api/brands`, { cache: 'no-store' })
     ])
-    
-    const models = await modelsRes.json()
+
+    const modelsResponse = await modelsRes.json()
     const brands = await brandsRes.json()
-    
+
+    const models = modelsResponse.data || modelsResponse
+
     // Find the brand by slug
-    const foundBrand = brands.find((b: any) => 
+    const foundBrand = brands.find((b: any) =>
       b.name.toLowerCase().replace(/\s+/g, '-') === brandSlug
     )
-    
+
     if (!foundBrand) {
       throw new Error('Brand not found')
     }
-    
+
     // Find the model by slug and brand
-    const foundModel = models.find((m: any) => 
-      m.brandId === foundBrand.id && 
+    const foundModel = models.find((m: any) =>
+      m.brandId === foundBrand.id &&
       m.name.toLowerCase().replace(/\s+/g, '-') === modelSlug
     )
-    
+
     if (!foundModel) {
       throw new Error('Model not found')
     }
-    
+
     // Add brand name to model data
     const modelWithBrand = {
       ...foundModel,
       brand: foundBrand.name,
       brandName: foundBrand.name
     }
-    
+
     // Pass the real model data to CarModelPage
     return (
       <div className="min-h-screen bg-gray-50">
@@ -104,7 +106,7 @@ export default async function ModelPage({ params }: PageProps) {
     )
   } catch (error) {
     console.error('Error fetching model data:', error)
-    
+
     // Fallback to a not found page or error message
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

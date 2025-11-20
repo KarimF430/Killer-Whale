@@ -74,14 +74,17 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
       if (parts.length < 2) return
 
       const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-        fetch(`${backendUrl}/api/models`),
+        fetch(`${backendUrl}/api/models?limit=100`),
         fetch(`${backendUrl}/api/brands`),
-        fetch(`${backendUrl}/api/variants`)
+        fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
       ])
 
-      const allModels = await modelsRes.json()
+      const modelsResponse = await modelsRes.json()
       const brands = await brandsRes.json()
-      const allVariants = await variantsRes.json()
+      const variantsResponse = await variantsRes.json()
+
+      const allModels = modelsResponse.data || modelsResponse
+      const allVariants = variantsResponse.data || variantsResponse
 
       const brandMap: Record<string, string> = {}
       brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
@@ -111,7 +114,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           }
 
           if (modelVariants.length > 0) {
-            const lowestVariant = modelVariants.reduce((prev: Variant, curr: Variant) => 
+            const lowestVariant = modelVariants.reduce((prev: Variant, curr: Variant) =>
               (curr.price < prev.price && curr.price > 0) ? curr : prev
             )
             items.push({ model, variant: lowestVariant })
@@ -134,20 +137,23 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
   const fetchSimilarCars = async () => {
     if (comparisonItems.length === 0) return
-    
+
     try {
       setLoadingSimilarCars(true)
       const firstModel = comparisonItems[0].model
-      
+
       const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-        fetch(`${backendUrl}/api/models`),
+        fetch(`${backendUrl}/api/models?limit=100`),
         fetch(`${backendUrl}/api/brands`),
-        fetch(`${backendUrl}/api/variants`)
+        fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
       ])
 
-      const allModels = await modelsRes.json()
+      const modelsResponse = await modelsRes.json()
       const brands = await brandsRes.json()
-      const allVariants = await variantsRes.json()
+      const variantsResponse = await variantsRes.json()
+
+      const allModels = modelsResponse.data || modelsResponse
+      const allVariants = variantsResponse.data || variantsResponse
 
       const brandMap: Record<string, string> = {}
       brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
@@ -237,17 +243,17 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
   // Calculate comparison stats
   const getComparisonStats = () => {
     if (comparisonItems.length !== 2) return null
-    
+
     const item1 = comparisonItems[0]
     const item2 = comparisonItems[1]
-    
+
     const price1 = getOnRoadPrice(item1.variant.price, item1.variant.fuelType)
     const price2 = getOnRoadPrice(item2.variant.price, item2.variant.fuelType)
-    
+
     const priceDiff = Math.abs(price1 - price2)
     const priceDiffPercent = ((priceDiff / Math.min(price1, price2)) * 100).toFixed(1)
     const cheaperIndex = price1 < price2 ? 0 : 1
-    
+
     return {
       priceDiff,
       priceDiffPercent,
@@ -533,13 +539,12 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
             const isCheaper = stats && stats.cheaperIndex === index
 
             return (
-              <div 
-                key={index} 
-                className={`relative bg-white rounded-xl md:rounded-2xl border-2 transition-all duration-300 flex-shrink-0 w-[calc(50%-6px)] md:w-full md:flex-1 ${
-                  isCheaper 
-                    ? 'border-orange-500 shadow-xl shadow-orange-100' 
+              <div
+                key={index}
+                className={`relative bg-white rounded-xl md:rounded-2xl border-2 transition-all duration-300 flex-shrink-0 w-[calc(50%-6px)] md:w-full md:flex-1 ${isCheaper
+                    ? 'border-orange-500 shadow-xl shadow-orange-100'
                     : 'border-gray-200 hover:border-gray-300 shadow-md'
-                }`}
+                  }`}
                 style={{ overflow: 'visible' }}
               >
                 {/* Best Value Badge - Enhanced */}
@@ -564,9 +569,9 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#374151' className="w-3/4 h-3/4 opacity-50">
-                        <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/>
-                        <circle cx='100' cy='220' r='25' fill='#111827'/>
-                        <circle cx='300' cy='220' r='25' fill='#111827'/>
+                        <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z' />
+                        <circle cx='100' cy='220' r='25' fill='#111827' />
+                        <circle cx='300' cy='220' r='25' fill='#111827' />
                       </svg>
                     </div>
                   )}
@@ -583,16 +588,15 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                   <div className="relative mb-3 md:mb-4">
                     <button
                       onClick={() => setShowVariantDropdown(showVariantDropdown === index ? null : index)}
-                      className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 bg-white border-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${
-                        isCheaper
+                      className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 bg-white border-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${isCheaper
                           ? 'border-orange-300 hover:border-orange-400 text-gray-900'
                           : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                      }`}
+                        }`}
                     >
                       <span className="truncate pr-2">{item.variant.name}</span>
                       <ChevronDown className={`h-4 w-4 md:h-5 md:w-5 flex-shrink-0 transition-transform ${showVariantDropdown === index ? 'rotate-180' : ''} ${isCheaper ? 'text-orange-600' : 'text-gray-500'}`} />
                     </button>
-                    
+
                     {/* Dropdown Menu - Properly positioned */}
                     {showVariantDropdown === index && (
                       <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg md:rounded-xl shadow-2xl max-h-64 overflow-y-auto z-[100]">
@@ -600,9 +604,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                           <button
                             key={v.id}
                             onClick={() => handleVariantChange(index, v)}
-                            className={`w-full text-left px-3 md:px-4 py-2.5 md:py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${
-                              v.id === item.variant.id ? 'bg-orange-50' : ''
-                            }`}
+                            className={`w-full text-left px-3 md:px-4 py-2.5 md:py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${v.id === item.variant.id ? 'bg-orange-50' : ''
+                              }`}
                           >
                             <div className="font-semibold text-gray-900 text-xs md:text-sm">{v.name}</div>
                             <div className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1">₹{(v.price / 100000).toFixed(2)} Lakhs</div>
@@ -613,19 +616,16 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                   </div>
 
                   {/* Price Section - Enhanced */}
-                  <div className={`rounded-lg md:rounded-xl p-3 md:p-4 ${
-                    isCheaper 
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500' 
+                  <div className={`rounded-lg md:rounded-xl p-3 md:p-4 ${isCheaper
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500'
                       : 'bg-gradient-to-r from-red-50 to-orange-50 border-2 border-gray-100'
-                  }`}>
-                    <div className={`text-lg md:text-2xl font-bold mb-0.5 md:mb-1 ${
-                      isCheaper ? 'text-white' : 'text-red-600'
                     }`}>
+                    <div className={`text-lg md:text-2xl font-bold mb-0.5 md:mb-1 ${isCheaper ? 'text-white' : 'text-red-600'
+                      }`}>
                       ₹{(onRoadPrice / 100000).toFixed(2)} L
                     </div>
-                    <div className={`text-[10px] md:text-xs font-medium ${
-                      isCheaper ? 'text-orange-50' : 'text-gray-600'
-                    }`}>
+                    <div className={`text-[10px] md:text-xs font-medium ${isCheaper ? 'text-orange-50' : 'text-gray-600'
+                      }`}>
                       On-Road Price
                     </div>
                   </div>
@@ -636,7 +636,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         </div>
 
         {/* Add More Button - Enhanced */}
-        <button 
+        <button
           onClick={handleAddMore}
           className="w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl py-4 mb-6 flex items-center justify-center gap-2 text-gray-700 font-bold text-lg hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-md hover:shadow-lg border-2 border-gray-200 hover:border-gray-300"
         >
@@ -751,7 +751,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         {/* Compare With Similar Cars */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Compare With Similar Cars</h2>
-          
+
           {loadingSimilarCars ? (
             <div className="flex gap-4 overflow-x-auto pb-4">
               {[1, 2, 3].map((i) => (
@@ -769,13 +769,13 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
               {similarCars.map((car) => {
                 const currentModelOnRoad = getOnRoadPrice(comparisonItems[0].variant.price, comparisonItems[0].variant.fuelType)
                 const compareCarOnRoad = getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol')
-                
+
                 return (
                   <div key={car.id} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all">
                     <div className="flex items-start gap-2 mb-3">
                       <div className="flex-1">
                         <div className="relative mb-2">
-                          <img 
+                          <img
                             src={comparisonItems[0].model.heroImage}
                             alt={`${comparisonItems[0].model.brandName} ${comparisonItems[0].model.name}`}
                             className="w-full h-20 object-contain"
@@ -802,7 +802,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
                       <div className="flex-1">
                         <div className="relative mb-2">
-                          <img 
+                          <img
                             src={car.image}
                             alt={`${car.brand} ${car.name}`}
                             className="w-full h-20 object-contain"
@@ -822,7 +822,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                       </div>
                     </div>
 
-                    <button 
+                    <button
                       onClick={() => {
                         const currentModelSlug = `${comparisonItems[0].model.brandName.toLowerCase().replace(/\s+/g, '-')}-${comparisonItems[0].model.name.toLowerCase().replace(/\s+/g, '-')}`
                         const compareModelSlug = `${car.brand.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`

@@ -67,8 +67,9 @@ export default function NewLaunchedCars() {
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
         // Fetch models with pricing and brands (optimized)
+        // Use a large limit to get all new models
         const [modelsRes, brandsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models-with-pricing`),
+          fetch(`${backendUrl}/api/models-with-pricing?limit=100`),
           fetch(`${backendUrl}/api/brands`)
         ])
 
@@ -82,8 +83,11 @@ export default function NewLaunchedCars() {
           return
         }
 
-        const models = await modelsRes.json()
+        const modelsResponse = await modelsRes.json()
         const brands = await brandsRes.json()
+
+        // Extract data from pagination response
+        const models = modelsResponse.data || modelsResponse
 
         // Create a map of brand IDs to brand names
         const brandMap = brands.reduce((acc: any, brand: any) => {

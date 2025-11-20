@@ -676,9 +676,9 @@ export default function CarModelPage({ model }: CarModelPageProps) {
 
         // Fetch all models, brands, and variants (same as CarsByBudget)
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models`),
+          fetch(`${backendUrl}/api/models?limit=100`),
           fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants?fields=minimal`)
+          fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
         ])
 
         if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
@@ -688,9 +688,12 @@ export default function CarModelPage({ model }: CarModelPageProps) {
           return
         }
 
-        const models = await modelsRes.json()
+        const modelsResponse = await modelsRes.json()
         const brands = await brandsRes.json()
-        const variants = await variantsRes.json()
+        const variantsResponse = await variantsRes.json()
+
+        const models = modelsResponse.data || modelsResponse
+        const variants = variantsResponse.data || variantsResponse
 
         // Create a map of brand IDs to brand names (same as CarsByBudget)
         const brandMap = brands.reduce((acc: any, brand: any) => {

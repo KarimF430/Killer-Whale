@@ -60,8 +60,12 @@ export default function PopularComparisons() {
       const comparisonsData = await comparisonsRes.json()
 
       // Fetch models with pricing and brands (optimized)
-      const modelsRes = await fetch(`${backendUrl}/api/models-with-pricing`)
-      const models = await modelsRes.json()
+      // Use a large limit to get all models for comparisons
+      const modelsRes = await fetch(`${backendUrl}/api/models-with-pricing?limit=100`)
+      const modelsResponse = await modelsRes.json()
+
+      // Extract data from pagination response
+      const models = modelsResponse.data || modelsResponse
 
       const brandsRes = await fetch(`${backendUrl}/api/brands`)
       const brands = await brandsRes.json()

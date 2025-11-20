@@ -176,8 +176,11 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)
         }
 
-        const modelsWithPricing = await response.json()
-        console.log('📊 Models with pricing response:', modelsWithPricing)
+        const responseData = await response.json()
+        console.log('📊 Models with pricing response:', responseData)
+
+        // Extract data from pagination response
+        const modelsWithPricing = responseData.data || responseData
 
         if (modelsWithPricing && Array.isArray(modelsWithPricing)) {
           console.log('🔍 Found models for brand:', modelsWithPricing.length)

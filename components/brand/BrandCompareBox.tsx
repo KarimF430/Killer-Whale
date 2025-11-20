@@ -64,14 +64,16 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
       const comparisonsData = await comparisonsRes.json()
 
       // Fetch all models and brands to populate comparison data
-      const modelsRes = await fetch(`${backendUrl}/api/models`)
-      const models = await modelsRes.json()
+      const modelsRes = await fetch(`${backendUrl}/api/models?limit=100`)
+      const modelsResponse = await modelsRes.json()
+      const models = modelsResponse.data || modelsResponse
 
       const brandsRes = await fetch(`${backendUrl}/api/brands`)
       const brands = await brandsRes.json()
 
-      const variantsRes = await fetch(`${backendUrl}/api/variants?fields=minimal`)
-      const variants = await variantsRes.json()
+      const variantsRes = await fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
+      const variantsResponse = await variantsRes.json()
+      const variants = variantsResponse.data || variantsResponse
 
       // Create brand map
       const brandMap: Record<string, string> = {}

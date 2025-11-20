@@ -15,7 +15,7 @@ export default function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-      
+
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down and past 100px
         setIsHeaderVisible(false)
@@ -23,7 +23,7 @@ export default function Header() {
         // Scrolling up
         setIsHeaderVisible(true)
       }
-      
+
       setLastScrollY(currentScrollY)
     }
 
@@ -32,18 +32,19 @@ export default function Header() {
   }, [lastScrollY])
 
   return (
-    <header className={`bg-white shadow-sm sticky top-0 z-50 transition-transform duration-300 ${
-      isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-    }`}>
+    <header className={`bg-white shadow-sm sticky top-0 z-50 transition-transform duration-300 ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
             <div className="flex items-center">
-              {/* MO Logo with Gradient */}
-              <div className="h-10 w-10 bg-gradient-to-r from-red-600 to-orange-500 rounded-lg flex items-center justify-center group-hover:from-red-700 group-hover:to-orange-600 transition-all duration-300">
-                <span className="text-white font-bold text-lg">MO</span>
-              </div>
+              {/* MotorOctane Logo */}
+              <img
+                src="/motoroctane-logo.png"
+                alt="MotorOctane"
+                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              />
               <span className="text-2xl font-bold text-gray-900 ml-2 group-hover:text-red-600 transition-colors">MotorOctane</span>
             </div>
           </Link>
@@ -58,7 +59,7 @@ export default function Header() {
             >
               <Search className="h-5 w-5" />
             </Link>
-            
+
             {/* Location Icon - Navigate to Location Page */}
             <Link
               href="/location"

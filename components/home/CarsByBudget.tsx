@@ -76,8 +76,9 @@ export default function CarsByBudget() {
         console.log('🚗 CarsByBudget: Fetching data from:', backendUrl)
 
         // Fetch models with pricing and brands (optimized)
+        // Use a large limit to get all models for budget organization
         const [modelsRes, brandsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models-with-pricing`),
+          fetch(`${backendUrl}/api/models-with-pricing?limit=100`),
           fetch(`${backendUrl}/api/brands`)
         ])
 
@@ -96,8 +97,11 @@ export default function CarsByBudget() {
           return
         }
 
-        const models = await modelsRes.json()
+        const modelsResponse = await modelsRes.json()
         const brands = await brandsRes.json()
+
+        // Extract data from pagination response
+        const models = modelsResponse.data || modelsResponse
 
         console.log('✅ Data fetched successfully:', {
           modelsCount: models.length,

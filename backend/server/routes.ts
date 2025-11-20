@@ -1174,17 +1174,39 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Models (public endpoint + caching)
+  // Models (public endpoint + caching + PAGINATION)
   app.get("/api/models", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
     const brandId = req.query.brandId as string | undefined;
-    const models = await storage.getModels(brandId);
-    res.json(models);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100); // Max 100 per page
+    const skip = (page - 1) * limit;
+
+    // Get all models for the brand
+    const allModels = await storage.getModels(brandId);
+
+    // Apply pagination
+    const paginatedModels = allModels.slice(skip, skip + limit);
+
+    // Return with pagination metadata
+    res.json({
+      data: paginatedModels,
+      pagination: {
+        page,
+        limit,
+        total: allModels.length,
+        totalPages: Math.ceil(allModels.length / limit),
+        hasMore: skip + limit < allModels.length
+      }
+    });
   });
 
-  // Optimized endpoint: Models with aggregated pricing data (Single MongoDB pipeline - FASTEST!)
+  // Optimized endpoint: Models with aggregated pricing data + PAGINATION
   app.get("/api/models-with-pricing", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
     try {
       const brandId = req.query.brandId as string | undefined;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+      const skip = (page - 1) * limit;
 
       // Use optimized MongoDB aggregation with $lookup sub-pipeline
       const mongoose = (await import('mongoose')).default;
@@ -1194,10 +1216,19 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Single optimized aggregation pipeline
+      // Get total count first
+      const totalCount = await db.collection('models').countDocuments(
+        brandId ? { brandId, status: 'active' } : { status: 'active' }
+      );
+
+      // Single optimized aggregation pipeline with pagination
       const modelsWithPricing = await db.collection('models').aggregate([
         // Filter by brandId if provided
         ...(brandId ? [{ $match: { brandId, status: 'active' } }] : [{ $match: { status: 'active' } }]),
+
+        // Pagination: Skip and Limit
+        { $skip: skip },
+        { $limit: limit },
 
         // Lookup variants and calculate pricing in one operation
         {
@@ -1240,7 +1271,17 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         }
       ]).toArray();
 
-      res.json(modelsWithPricing);
+      // Return with pagination metadata
+      res.json({
+        data: modelsWithPricing,
+        pagination: {
+          page,
+          limit,
+          total: totalCount,
+          totalPages: Math.ceil(totalCount / limit),
+          hasMore: skip + limit < totalCount
+        }
+      });
     } catch (error) {
       console.error('Error getting models with pricing:', error);
       res.status(500).json({ error: "Failed to get models with pricing" });
@@ -1543,11 +1584,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Variants (public endpoint + caching)
+  // Variants (public endpoint + caching + PAGINATION)
   app.get("/api/variants", publicLimiter, redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
     const modelId = req.query.modelId as string | undefined;
     const brandId = req.query.brandId as string | undefined;
     const fields = req.query.fields as string | undefined; // 'minimal' for list views
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const skip = (page - 1) * limit;
 
     // If minimal fields requested, use MongoDB projection for faster response
     if (fields === 'minimal') {
@@ -1562,6 +1606,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         const filter: any = {};
         if (modelId) filter.modelId = modelId;
         if (brandId) filter.brandId = brandId;
+
+        // Get total count
+        const totalCount = await db.collection('variants').countDocuments(filter);
 
         // Only fetch fields needed for display (id, name, price, fuel, transmission, power, features)
         const variants = await db.collection('variants')
@@ -1579,6 +1626,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             _id: 0
           })
           .sort({ price: 1 })
+          .skip(skip)
+          .limit(limit)
           .toArray();
 
         // Map database fields to frontend expected fields
@@ -1588,7 +1637,17 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           features: v.keyFeatures
         }));
 
-        res.json(mappedVariants);
+        // Return with pagination metadata
+        res.json({
+          data: mappedVariants,
+          pagination: {
+            page,
+            limit,
+            total: totalCount,
+            totalPages: Math.ceil(totalCount / limit),
+            hasMore: skip + limit < totalCount
+          }
+        });
         return;
       } catch (error) {
         console.error('Error fetching minimal variants:', error);
@@ -1596,9 +1655,21 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
     }
 
-    // Default: fetch all fields (for variant detail pages)
-    const variants = await storage.getVariants(modelId, brandId);
-    res.json(variants);
+    // Default: fetch all fields (for variant detail pages) with pagination
+    const allVariants = await storage.getVariants(modelId, brandId);
+    const totalCount = allVariants.length;
+    const paginatedVariants = allVariants.slice(skip, skip + limit);
+
+    res.json({
+      data: paginatedVariants,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        hasMore: skip + limit < totalCount
+      }
+    });
   });
 
   app.get("/api/variants/:id", async (req, res) => {
