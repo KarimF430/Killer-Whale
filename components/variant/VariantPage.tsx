@@ -58,12 +58,12 @@ const navigationSections = [
   { id: 'expert-review', label: 'Expert Review' }
 ]
 
-export default function VariantPage({ 
+export default function VariantPage({
   variantData,
   brandName,
   modelName,
   variantName
-}: { 
+}: {
   variantData?: VariantData,
   brandName?: string,
   modelName?: string,
@@ -92,7 +92,7 @@ export default function VariantPage({
   const [showSummaryExterior, setShowSummaryExterior] = useState(false)
   const [showSummaryComfort, setShowSummaryComfort] = useState(false)
   const [expandedEngine, setExpandedEngine] = useState<boolean>(false)
-  
+
   // Backend data fetching states
   const [variant, setVariant] = useState<any>(null)
   const [model, setModel] = useState<any>(null)
@@ -101,7 +101,7 @@ export default function VariantPage({
   const [error, setError] = useState<string | null>(null)
   const [initialLoad, setInitialLoad] = useState(true)
   const [allModelVariants, setAllModelVariants] = useState<any[]>([])
-  
+
   const variantDropdownRef = useRef<HTMLDivElement>(null)
   const cityDropdownRef = useRef<HTMLDivElement>(null)
 
@@ -112,79 +112,79 @@ export default function VariantPage({
         setLoading(false)
         return
       }
-      
+
       try {
         setLoading(true)
         setError(null)
-        
+
         // First, find the brand to get brandId
         const brandsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/brands`)
         if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
         const brands = await brandsResponse.json()
-        
-        const foundBrand = brands.find((b: any) => 
+
+        const foundBrand = brands.find((b: any) =>
           b.name.toLowerCase().replace(/\s+/g, '-') === brandName.toLowerCase()
         )
-        
+
         if (!foundBrand) {
           setError('Brand not found')
           return
         }
-        
+
         // Then fetch models for this brand only
         const modelsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/models?brandId=${foundBrand.id}`)
         if (!modelsResponse.ok) throw new Error('Failed to fetch models')
         const models = await modelsResponse.json()
-        
-        const foundModel = models.find((m: any) => 
+
+        const foundModel = models.find((m: any) =>
           m.name.toLowerCase().replace(/\s+/g, '-') === modelName.toLowerCase()
         )
-        
+
         if (!foundModel) {
           setError('Model not found')
           return
         }
-        
+
         // Finally fetch variants for this model only
         const variantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${foundModel.id}`)
         if (!variantsResponse.ok) throw new Error('Failed to fetch variants')
         const variants = await variantsResponse.json()
-        
+
         // Store all variants for the More Variants section
         setAllModelVariants(variants)
-        
+
         // Find variant with flexible matching
         // Normalize both the variant name from URL and database for comparison
         const normalizeForMatch = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
         const normalizedVariantName = normalizeForMatch(variantName)
-        
+
         console.log('Looking for variant:', variantName)
         console.log('Normalized variant name:', normalizedVariantName)
         console.log('Available variants:', variants.map((v: any) => ({ name: v.name, normalized: normalizeForMatch(v.name) })))
-        
-        let foundVariant = variants.find((v: any) => 
+
+        let foundVariant = variants.find((v: any) =>
           normalizeForMatch(v.name) === normalizedVariantName
         )
-        
+
         if (!foundVariant) {
           // Try partial matching
-          foundVariant = variants.find((v: any) => 
+          foundVariant = variants.find((v: any) =>
             normalizeForMatch(v.name).includes(normalizedVariantName) ||
             normalizedVariantName.includes(normalizeForMatch(v.name))
           )
         }
-        
+
         if (!foundVariant && variants.length > 0) {
           console.warn('Variant not found, using first variant as fallback')
           foundVariant = variants[0] // Use first variant as fallback
         }
-        
+
         console.log('Found variant:', foundVariant?.name)
 
         setBrand(foundBrand)
         setModel(foundModel)
         setVariant(foundVariant)
-        
+
         if (!foundVariant) {
           setError('Variant not found')
         } else {
@@ -275,9 +275,9 @@ export default function VariantPage({
   }, [brandName, modelName, variantName])
 
   // Extract brand, model, variant names from data (fallback to props or backend data)
-  const displayBrandName = brand?.name || brandName || variantData.brand
-  const displayModelName = model?.name || modelName || variantData.model
-  const displayVariantName = variant?.name || variantName || variantData.variant
+  const displayBrandName = brand?.name || brandName || variantData?.brand
+  const displayModelName = model?.name || modelName || variantData?.model
+  const displayVariantName = variant?.name || variantName || variantData?.variant
 
   // Helper function to check if transmission is automatic type
   const isAutomaticTransmission = (transmission: string) => {
@@ -314,7 +314,7 @@ export default function VariantPage({
 
     fuelTypes.forEach(fuel => filters.push(fuel))
     if (hasAutomatic) filters.push('Automatic')
-    
+
     return filters
   }
 
@@ -330,7 +330,7 @@ export default function VariantPage({
       case 'CNG':
         return transformedVariants.filter(v => v.fuel === 'CNG')
       case 'Automatic':
-        return transformedVariants.filter(v => 
+        return transformedVariants.filter(v =>
           v.transmission && isAutomaticTransmission(v.transmission)
         )
       default:
@@ -357,25 +357,25 @@ export default function VariantPage({
     model: displayModelName,
     variant: displayVariantName,
     fullName: `${displayBrandName} ${displayModelName} ${displayVariantName}`,
-    price: variant.price ? (variant.price / 100000) : variantData.price,
-    originalPrice: variant.price ? (variant.price / 100000) : variantData.originalPrice,
+    price: variant.price ? (variant.price / 100000) : variantData?.price,
+    originalPrice: variant.price ? (variant.price / 100000) : variantData?.originalPrice,
     savings: 0,
-    fuelType: (variant as any).fuel || variant.fuelType || variantData.fuelType,
-    transmission: (variant as any).transmission || variantData.transmission,
+    fuelType: (variant as any).fuel || variant.fuelType || variantData?.fuelType,
+    transmission: (variant as any).transmission || variantData?.transmission,
     seating: 5, // Default or from specifications
-    mileage: parseFloat((variant as any).mileageCompanyClaimed || '0') || variantData.mileage,
-    engine: variant.engineName || (variant as any).engineCapacity || variantData.engine,
-    power: (variant as any).maxPower || variant.enginePower || variantData.power,
-    torque: (variant as any).torque || variant.engineTorque || variantData.torque,
+    mileage: parseFloat((variant as any).mileageCompanyClaimed || '0') || variantData?.mileage,
+    engine: variant.engineName || (variant as any).engineCapacity || variantData?.engine,
+    power: (variant as any).maxPower || variant.enginePower || variantData?.power,
+    torque: (variant as any).torque || variant.engineTorque || variantData?.torque,
     rating: 4.2, // Default or from reviews
     reviewCount: 1234, // Default or from reviews
     launchYear: 2024, // Default or from model data
-    description: variant.headerSummary || variant.description || variant.keyFeatures || variantData.description,
-    images: variant.highlightImages?.map((img: any) => `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`) || 
-            model?.galleryImages?.map((img: any) => `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`) || 
-            variantData.images,
+    description: variant.headerSummary || variant.description || variant.keyFeatures || variantData?.description,
+    images: variant.highlightImages?.map((img: any) => `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`) ||
+      model?.galleryImages?.map((img: any) => `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`) ||
+      variantData?.images,
     highlights: parseBulletPoints(variant.keyFeatures || variant.headerSummary || ''),
-    cities: variantData.cities
+    cities: variantData?.cities
   } : variantData
 
   // Use dynamic data if available, otherwise fallback to mock data
@@ -397,30 +397,30 @@ export default function VariantPage({
 
   // Get on-road price for current variant
   // currentVariantData.price is in lakhs, so convert to rupees for the hook
-  const exShowroomPriceInRupees = (currentVariantData.price || 0) * 100000
-  
+  const exShowroomPriceInRupees = (currentVariantData?.price || 0) * 100000
+
   const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
     exShowroomPrice: exShowroomPriceInRupees,
-    fuelType: currentVariantData.fuelType || 'Petrol'
+    fuelType: currentVariantData?.fuelType || 'Petrol'
   })
-  
+
   // displayPrice should be in rupees for formatPrice to work correctly
   const displayPrice = isOnRoadMode ? onRoadPrice : exShowroomPriceInRupees
   const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-showroom'
-  
+
   // Calculate EMI for display (20% down, 7 years, 8% interest)
   const calculateDisplayEMI = (price: number) => {
     const downPayment = price * 0.2
     const principal = price - downPayment
     const monthlyRate = 8 / 12 / 100
     const months = 7 * 12
-    
-    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
-                (Math.pow(1 + monthlyRate, months) - 1)
-    
+
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+      (Math.pow(1 + monthlyRate, months) - 1)
+
     return Math.round(emi)
   }
-  
+
   const displayEMI = calculateDisplayEMI(displayPrice)
 
   // Mock variants data removed - using real data from backend
@@ -428,7 +428,7 @@ export default function VariantPage({
   // Handle variant click function
   const handleVariantChange = (variant: typeof availableVariants[0]) => {
     if (!displayBrandName || !displayModelName || !variant?.name) return
-    
+
     const brandSlug = displayBrandName.toLowerCase().replace(/\s+/g, '-')
     const modelSlug = displayModelName.toLowerCase().replace(/\s+/g, '-')
     const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
@@ -513,7 +513,7 @@ export default function VariantPage({
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => router.back()}
             className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
@@ -595,10 +595,10 @@ export default function VariantPage({
                   </>
                 )}
               </div>
-              
+
               {/* Gallery Navigation Arrow */}
               {!showSkeleton && ((model?.heroImage && model?.galleryImages && model.galleryImages.length > 0) || (model?.galleryImages && model.galleryImages.length > 1)) && (
-                <button 
+                <button
                   onClick={() => {
                     const gallery = document.getElementById('variant-gallery');
                     if (gallery) {
@@ -619,10 +619,10 @@ export default function VariantPage({
                   {showSkeleton ? (
                     <div className="bg-gray-200 animate-pulse h-9 w-96 rounded"></div>
                   ) : (
-                    currentVariantData.fullName
+                    currentVariantData?.fullName
                   )}
                 </h1>
-                
+
                 {/* Rating */}
                 <div className="flex items-center space-x-4 mb-4">
                   {showSkeleton ? (
@@ -630,8 +630,8 @@ export default function VariantPage({
                   ) : (
                     <div className="flex items-center bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded">
                       <Star className="w-4 h-4 mr-1 fill-current" />
-                      <span className="font-semibold">{currentVariantData.rating || 4.2}</span>
-                      <span className="ml-1">({currentVariantData.reviewCount || 1234})</span>
+                      <span className="font-semibold">{currentVariantData?.rating || 4.2}</span>
+                      <span className="ml-1">({currentVariantData?.reviewCount || 1234})</span>
                     </div>
                   )}
                   <button className="text-red-600 hover:text-orange-600 font-medium">
@@ -639,17 +639,33 @@ export default function VariantPage({
                   </button>
                 </div>
               </div>
-              
+
               {/* Share and Heart Icons */}
               <div className="flex items-center space-x-3">
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <button
+                  onClick={() => {
+                    const shareData = {
+                      title: `${currentVariantData?.fullName || 'Car Variant'} - Check it out!`,
+                      text: `Check out the ${currentVariantData?.fullName || 'car'} on MotorOctane!`,
+                      url: window.location.href
+                    };
+
+                    if (navigator.share) {
+                      navigator.share(shareData).catch(console.error);
+                    } else {
+                      navigator.clipboard.writeText(window.location.href);
+                      alert('Link copied to clipboard!');
+                    }
+                  }}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  title="Share"
+                >
                   <Share2 className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setIsLiked(!isLiked)}
-                  className={`p-2 transition-colors ${
-                    isLiked ? 'text-red-600' : 'text-gray-400 hover:text-red-600'
-                  }`}
+                  className={`p-2 transition-colors ${isLiked ? 'text-red-600' : 'text-gray-400 hover:text-red-600'
+                    }`}
                 >
                   <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
                 </button>
@@ -666,12 +682,12 @@ export default function VariantPage({
               ) : (
                 <>
                   <p>
-                    {showFullDescription ? currentVariantData.description : 
-                      (currentVariantData.description?.length > 150 ? 
-                        `${currentVariantData.description.substring(0, 150)}...` : 
-                        currentVariantData.description)}
+                    {showFullDescription ? currentVariantData?.description :
+                      (currentVariantData?.description?.length > 150 ?
+                        `${currentVariantData?.description.substring(0, 150)}...` :
+                        currentVariantData?.description)}
                   </p>
-                  {currentVariantData.description?.length > 150 && (
+                  {currentVariantData?.description?.length > 150 && (
                     <div className="mt-2">
                       {!showFullDescription ? (
                         <button
@@ -704,8 +720,8 @@ export default function VariantPage({
                 )}
               </div>
               <div className="text-sm text-gray-500">*{priceLabel}</div>
-              
-              <button 
+
+              <button
                 onClick={() => {
                   const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                   const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
@@ -731,7 +747,7 @@ export default function VariantPage({
                   </span>
                   <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showVariantDropdown ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {showVariantDropdown && availableVariants.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-96 overflow-y-auto">
                     {availableVariants.map((variantItem) => (
@@ -779,7 +795,7 @@ export default function VariantPage({
                     <p className="text-gray-600 text-base">Mahindra Bank</p>
                   </div>
                 </div>
-                
+
                 {/* EMI Amount Display */}
                 <div className="text-right">
                   <p className="text-2xl font-bold text-gray-900">
@@ -817,7 +833,7 @@ export default function VariantPage({
             {/* Key Features */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">Key Features</h2>
-              
+
               {/* Highlights Grid - Horizontal Scroll */}
               <div className="relative">
                 <div className="highlights-scroll-container flex gap-4 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -835,7 +851,7 @@ export default function VariantPage({
                     </>
                   ) : (() => {
                     const variantHighlights = variant?.highlightImages || [];
-                    
+
                     return variantHighlights.length > 0 ? (
                       variantHighlights.map((highlight: any, index: number) => (
                         <div key={index} className="flex-shrink-0 w-64">
@@ -868,65 +884,65 @@ export default function VariantPage({
                         </div>
                       ))
                     ) : (
-                    /* Fallback cards if no backend data */
-                    <>
-                      {/* Highlight Card 1 */}
-                      <div className="flex-shrink-0 w-64">
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                          <div className="aspect-[4/3] bg-gray-200 relative">
-                            <img
-                              src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
-                              alt="Advanced Safety Features"
-                              className="w-full h-full object-cover rounded-lg"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {/* Image Caption Overlay */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                              <p className="text-sm font-medium text-center">Advanced Safety Features</p>
+                      /* Fallback cards if no backend data */
+                      <>
+                        {/* Highlight Card 1 */}
+                        <div className="flex-shrink-0 w-64">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="aspect-[4/3] bg-gray-200 relative">
+                              <img
+                                src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
+                                alt="Advanced Safety Features"
+                                className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                              {/* Image Caption Overlay */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                <p className="text-sm font-medium text-center">Advanced Safety Features</p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Highlight Card 2 */}
-                      <div className="flex-shrink-0 w-64">
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                          <div className="aspect-[4/3] bg-gray-200 relative">
-                            <img
-                              src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
-                              alt="Premium Interior"
-                              className="w-full h-full object-cover rounded-lg"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {/* Image Caption Overlay */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                              <p className="text-sm font-medium text-center">Premium Interior</p>
+                        {/* Highlight Card 2 */}
+                        <div className="flex-shrink-0 w-64">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="aspect-[4/3] bg-gray-200 relative">
+                              <img
+                                src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
+                                alt="Premium Interior"
+                                className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                              {/* Image Caption Overlay */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                <p className="text-sm font-medium text-center">Premium Interior</p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Highlight Card 3 */}
-                      <div className="flex-shrink-0 w-64">
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                          <div className="aspect-[4/3] bg-gray-200 relative">
-                            <img
-                              src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop&crop=center"
-                              alt="Fuel Efficiency"
-                              className="w-full h-full object-cover rounded-lg"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {/* Image Caption Overlay */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                              <p className="text-sm font-medium text-center">Fuel Efficiency</p>
+                        {/* Highlight Card 3 */}
+                        <div className="flex-shrink-0 w-64">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="aspect-[4/3] bg-gray-200 relative">
+                              <img
+                                src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop&crop=center"
+                                alt="Fuel Efficiency"
+                                className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                              {/* Image Caption Overlay */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                <p className="text-sm font-medium text-center">Fuel Efficiency</p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </>
+                      </>
                     );
                   })()}
                 </div>
@@ -961,14 +977,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Comfort & Convenience</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('comfort')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['comfort'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -992,7 +1008,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.ventilatedSeats}</span>
                             </div>
                           )}
-                          
+
                           {variant?.sunroof && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Sunroof</span>
@@ -1002,7 +1018,7 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['comfort'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
@@ -1012,203 +1028,203 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.airPurifier}</span>
                           </div>
                         )}
-                        
+
                         {variant?.headsUpDisplay && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Heads Up Display (HUD)</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.headsUpDisplay}</span>
                           </div>
                         )}
-                        
+
                         {variant?.cruiseControl && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Cruise Control</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.cruiseControl}</span>
                           </div>
                         )}
-                        
+
                         {variant?.rainSensingWipers && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Rain Sensing Wipers</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.rainSensingWipers}</span>
                           </div>
                         )}
-                        
+
                         {variant?.automaticHeadlamp && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Automatic Headlamp</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.automaticHeadlamp}</span>
                           </div>
                         )}
-                        
+
                         {variant?.followMeHomeHeadlights && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Follow Me Home Headlights</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.followMeHomeHeadlights}</span>
                           </div>
                         )}
-                        
+
                         {variant?.ignition && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Ignition</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.ignition}</span>
                           </div>
                         )}
-                        
+
                         {variant?.ambientLighting && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Ambient Lighting</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.ambientLighting}</span>
                           </div>
                         )}
-                        
+
                         {variant?.airConditioning && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Air Conditioning</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.airConditioning}</span>
                           </div>
                         )}
-                        
+
                         {variant?.climateZones && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Climate Zones</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.climateZones}</span>
                           </div>
                         )}
-                        
+
                         {variant?.rearACVents && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Rear A/C Vents</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.rearACVents}</span>
                           </div>
                         )}
-                        
+
                         {variant?.frontArmrest && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Front Armrest</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.frontArmrest}</span>
                           </div>
                         )}
-                        
+
                         {variant?.automaticClimateControl && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Automatic Climate Control</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.automaticClimateControl}</span>
                           </div>
                         )}
-                        
+
                         {variant?.airQualityIndexDisplay && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Air Quality Index Display</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.airQualityIndexDisplay}</span>
                           </div>
                         )}
-                        
+
                         {variant?.remoteEngineStartStop && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Remote Engine Start / Stop</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.remoteEngineStartStop}</span>
                           </div>
                         )}
-                        
+
                         {variant?.remoteClimateControl && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Remote Climate Control</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.remoteClimateControl}</span>
                           </div>
                         )}
-                        
+
                         {variant?.steeringAdjustment && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Steering Adjustment</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.steeringAdjustment}</span>
                           </div>
                         )}
-                        
+
                         {variant?.steeringWheelMaterial && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Steering Wheel Material</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.steeringWheelMaterial}</span>
                           </div>
                         )}
-                        
+
                         {variant?.parkingSensors && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Parking Sensors</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.parkingSensors}</span>
                           </div>
                         )}
-                        
+
                         {variant?.keylessEntry && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Keyless Entry</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.keylessEntry}</span>
                           </div>
                         )}
-                        
+
                         {variant?.engineStartStopButton && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Engine Start Stop Button</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.engineStartStopButton}</span>
                           </div>
                         )}
-                        
+
                         {variant?.gloveCompartment && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Glove Compartment</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.gloveCompartment}</span>
                           </div>
                         )}
-                        
+
                         {variant?.centerConsoleArmrest && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Center Console Armrest</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.centerConsoleArmrest}</span>
                           </div>
                         )}
-                        
+
                         {variant?.rearArmrest && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Rear Armrest</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.rearArmrest}</span>
                           </div>
                         )}
-                        
+
                         {variant?.insideRearViewMirror && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Inside Rear View Mirror</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.insideRearViewMirror}</span>
                           </div>
                         )}
-                        
+
                         {variant?.outsideRearViewMirrors && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Outside Rear View Mirrors</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.outsideRearViewMirrors}</span>
                           </div>
                         )}
-                        
+
                         {variant?.steeringMountedControls && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Steering Mounted Controls</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.steeringMountedControls}</span>
                           </div>
                         )}
-                        
+
                         {variant?.rearWindshieldDefogger && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Rear Windshield Defogger</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.rearWindshieldDefogger}</span>
                           </div>
                         )}
-                        
+
                         {variant?.frontWindshieldDefogger && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Front Windshield Defogger</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.frontWindshieldDefogger}</span>
                           </div>
                         )}
-                        
+
                         {variant?.cooledGlovebox && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Cooled Glovebox</span>
@@ -1217,10 +1233,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('comfort')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -1236,14 +1252,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Safety</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('safety')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['safety'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -1267,7 +1283,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.globalNCAPRating}</span>
                             </div>
                           )}
-                          
+
                           {variant?.airbags && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Airbags</span>
@@ -1277,7 +1293,7 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['safety'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
@@ -1288,7 +1304,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm">{variant.airbagsLocation}</span>
                           </div>
                         )}
-                        
+
                         {/* ADAS Level - Only show if data exists */}
                         {variant?.adasLevel && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1296,7 +1312,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.adasLevel}</span>
                           </div>
                         )}
-                        
+
                         {/* ADAS Features - Only show if data exists */}
                         {variant?.adasFeatures && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1304,7 +1320,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm leading-relaxed">{variant.adasFeatures}</span>
                           </div>
                         )}
-                        
+
                         {/* Reverse Camera - Only show if data exists */}
                         {variant?.reverseCamera && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1312,7 +1328,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.reverseCamera}</span>
                           </div>
                         )}
-                        
+
                         {/* Reverse Camera Guidelines - Only show if data exists */}
                         {variant?.reverseCameraGuidelines && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1320,7 +1336,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.reverseCameraGuidelines}</span>
                           </div>
                         )}
-                        
+
                         {/* Tyre Pressure Monitor (TPMS) - Only show if data exists */}
                         {variant?.tyrePressureMonitor && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1328,7 +1344,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.tyrePressureMonitor}</span>
                           </div>
                         )}
-                        
+
                         {/* Hill Hold Assist - Only show if data exists */}
                         {variant?.hillHoldAssist && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1336,7 +1352,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.hillHoldAssist}</span>
                           </div>
                         )}
-                        
+
                         {/* Hill Descent Control - Only show if data exists */}
                         {variant?.hillDescentControl && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1344,7 +1360,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.hillDescentControl}</span>
                           </div>
                         )}
-                        
+
                         {/* Roll Over Mitigation - Only show if data exists */}
                         {variant?.rollOverMitigation && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1352,7 +1368,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.rollOverMitigation}</span>
                           </div>
                         )}
-                        
+
                         {/* Parking Sensor - Only show if data exists */}
                         {variant?.parkingSensor && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1360,7 +1376,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.parkingSensor}</span>
                           </div>
                         )}
-                        
+
                         {/* Disc Brakes - Only show if data exists */}
                         {variant?.discBrakes && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1368,7 +1384,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.discBrakes}</span>
                           </div>
                         )}
-                        
+
                         {/* Electronic Stability Program - Only show if data exists */}
                         {variant?.electronicStabilityProgram && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1376,7 +1392,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.electronicStabilityProgram}</span>
                           </div>
                         )}
-                        
+
                         {/* ABS - Only show if data exists */}
                         {variant?.abs && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1384,7 +1400,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.abs}</span>
                           </div>
                         )}
-                        
+
                         {/* EBD - Only show if data exists */}
                         {variant?.ebd && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1392,7 +1408,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.ebd}</span>
                           </div>
                         )}
-                        
+
                         {/* Brake Assist (BA) - Only show if data exists */}
                         {variant?.brakeAssist && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1400,7 +1416,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.brakeAssist}</span>
                           </div>
                         )}
-                        
+
                         {/* ISOFIX Mounts - Only show if data exists */}
                         {variant?.isofixMounts && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1408,7 +1424,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.isofixMounts}</span>
                           </div>
                         )}
-                        
+
                         {/* Seatbelt Warning - Only show if data exists */}
                         {variant?.seatbeltWarning && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1416,7 +1432,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.seatbeltWarning}</span>
                           </div>
                         )}
-                        
+
                         {/* Speed Alert System - Only show if data exists */}
                         {variant?.speedAlertSystem && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1424,7 +1440,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.speedAlertSystem}</span>
                           </div>
                         )}
-                        
+
                         {/* Speed Sensing Door Locks - Only show if data exists */}
                         {variant?.speedSensingDoorLocks && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1432,7 +1448,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.speedSensingDoorLocks}</span>
                           </div>
                         )}
-                        
+
                         {/* Immobiliser - Only show if data exists */}
                         {variant?.immobiliser && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1442,10 +1458,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('safety')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -1461,14 +1477,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Entertainment & Connectivity</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('entertainment')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['entertainment'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -1492,7 +1508,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.touchScreenInfotainment}</span>
                             </div>
                           )}
-                          
+
                           {variant?.androidAppleCarplay && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Android & Apple CarPlay</span>
@@ -1502,11 +1518,11 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['entertainment'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
-                        
+
                         {/* Speakers - Only show if data exists */}
                         {variant?.speakers && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1514,7 +1530,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.speakers}</span>
                           </div>
                         )}
-                        
+
                         {/* Tweeters - Only show if data exists */}
                         {variant?.tweeters && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1522,7 +1538,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.tweeters}</span>
                           </div>
                         )}
-                        
+
                         {/* Subwoofers - Only show if data exists */}
                         {variant?.subwoofers && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1530,7 +1546,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.subwoofers}</span>
                           </div>
                         )}
-                        
+
                         {/* USB-C Charging Ports - Only show if data exists */}
                         {variant?.usbCChargingPorts && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1538,7 +1554,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.usbCChargingPorts}</span>
                           </div>
                         )}
-                        
+
                         {/* USB-A Charging Ports - Only show if data exists */}
                         {variant?.usbAChargingPorts && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1546,7 +1562,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.usbAChargingPorts}</span>
                           </div>
                         )}
-                        
+
                         {/* 12V Charging Ports - Only show if data exists */}
                         {variant?.twelvevChargingPorts && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1554,7 +1570,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.twelvevChargingPorts}</span>
                           </div>
                         )}
-                        
+
                         {/* Wireless Charging - Only show if data exists */}
                         {variant?.wirelessCharging && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1562,7 +1578,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.wirelessCharging}</span>
                           </div>
                         )}
-                        
+
                         {/* Connected Car Tech - Only show if data exists */}
                         {variant?.connectedCarTech && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1572,10 +1588,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('entertainment')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -1591,14 +1607,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Engine & Transmission</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('engine')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['engine'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -1622,7 +1638,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.engineNamePage4}</span>
                             </div>
                           )}
-                          
+
                           {variant?.engineCapacity && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Engine Capacity</span>
@@ -1632,7 +1648,7 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['engine'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
@@ -1643,7 +1659,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.fuel}</span>
                           </div>
                         )}
-                        
+
                         {/* Transmission - Only show if data exists */}
                         {variant?.transmission && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1651,7 +1667,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.transmission}</span>
                           </div>
                         )}
-                        
+
                         {/* No of Gears - Only show if data exists */}
                         {variant?.noOfGears && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1659,7 +1675,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.noOfGears}</span>
                           </div>
                         )}
-                        
+
                         {/* Paddle Shifter - Only show if data exists */}
                         {variant?.paddleShifter && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1667,7 +1683,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.paddleShifter}</span>
                           </div>
                         )}
-                        
+
                         {/* Max Power - Only show if data exists */}
                         {variant?.maxPower && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1675,7 +1691,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.maxPower}</span>
                           </div>
                         )}
-                        
+
                         {/* Torque - Only show if data exists */}
                         {variant?.torque && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1683,7 +1699,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.torque}</span>
                           </div>
                         )}
-                        
+
                         {/* 0 to 100 Kmph Time - Only show if data exists */}
                         {variant?.zeroToHundredKmphTime && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1691,7 +1707,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.zeroToHundredKmphTime}</span>
                           </div>
                         )}
-                        
+
                         {/* Top Speed - Only show if data exists */}
                         {variant?.topSpeed && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1699,7 +1715,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.topSpeed}</span>
                           </div>
                         )}
-                        
+
                         {/* EV Battery Capacity - Only show if data exists */}
                         {variant?.evBatteryCapacity && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1707,7 +1723,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.evBatteryCapacity}</span>
                           </div>
                         )}
-                        
+
                         {/* Hybrid Battery Capacity - Only show if data exists */}
                         {variant?.hybridBatteryCapacity && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1715,7 +1731,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.hybridBatteryCapacity}</span>
                           </div>
                         )}
-                        
+
                         {/* Battery Type - Only show if data exists */}
                         {variant?.batteryType && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1723,7 +1739,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.batteryType}</span>
                           </div>
                         )}
-                        
+
                         {/* Electric Motor Placement - Only show if data exists */}
                         {variant?.electricMotorPlacement && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1731,7 +1747,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.electricMotorPlacement}</span>
                           </div>
                         )}
-                        
+
                         {/* EV Range - Only show if data exists */}
                         {variant?.evRange && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1739,7 +1755,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.evRange}</span>
                           </div>
                         )}
-                        
+
                         {/* EV Charging Time - Only show if data exists */}
                         {variant?.evChargingTime && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1747,7 +1763,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.evChargingTime}</span>
                           </div>
                         )}
-                        
+
                         {/* Max Electric Motor Power - Only show if data exists */}
                         {variant?.maxElectricMotorPower && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1755,7 +1771,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.maxElectricMotorPower}</span>
                           </div>
                         )}
-                        
+
                         {/* Turbo Charged - Only show if data exists */}
                         {variant?.turboCharged && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1763,7 +1779,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.turboCharged}</span>
                           </div>
                         )}
-                        
+
                         {/* Hybrid Type - Only show if data exists */}
                         {variant?.hybridType && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1771,7 +1787,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.hybridType}</span>
                           </div>
                         )}
-                        
+
                         {/* Drive Train - Only show if data exists */}
                         {variant?.driveTrain && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1779,7 +1795,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.driveTrain}</span>
                           </div>
                         )}
-                        
+
                         {/* Driving Modes - Only show if data exists */}
                         {variant?.drivingModes && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1787,7 +1803,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.drivingModes}</span>
                           </div>
                         )}
-                        
+
                         {/* Off Road Modes - Only show if data exists */}
                         {variant?.offRoadModes && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1795,7 +1811,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.offRoadModes}</span>
                           </div>
                         )}
-                        
+
                         {/* Differential Lock - Only show if data exists */}
                         {variant?.differentialLock && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1803,7 +1819,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.differentialLock}</span>
                           </div>
                         )}
-                        
+
                         {/* Limited Slip Differential - Only show if data exists */}
                         {variant?.limitedSlipDifferential && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
@@ -1813,10 +1829,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('engine')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -1832,14 +1848,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Seating Comfort</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('seating')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['seating'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -1863,7 +1879,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.seatUpholstery}</span>
                             </div>
                           )}
-                          
+
                           {variant?.seatsAdjustment && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Seats Adjustment</span>
@@ -1873,7 +1889,7 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['seating'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
@@ -1883,28 +1899,28 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.driverSeatAdjustment}</span>
                           </div>
                         )}
-                        
+
                         {variant?.passengerSeatAdjustment && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Passenger Seat Adjustment</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.passengerSeatAdjustment}</span>
                           </div>
                         )}
-                        
+
                         {variant?.rearSeatAdjustment && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Rear Seat Adjustment</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.rearSeatAdjustment}</span>
                           </div>
                         )}
-                        
+
                         {variant?.welcomeSeats && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Welcome Seats</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.welcomeSeats}</span>
                           </div>
                         )}
-                        
+
                         {variant?.memorySeats && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Memory Seats</span>
@@ -1913,10 +1929,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('seating')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -1932,14 +1948,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Exteriors</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('exteriors')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['exteriors'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -1963,7 +1979,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.headLights}</span>
                             </div>
                           )}
-                          
+
                           {variant?.tailLight && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Tail Light</span>
@@ -1973,7 +1989,7 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['exteriors'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
@@ -1983,42 +1999,42 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.frontFogLights}</span>
                           </div>
                         )}
-                        
+
                         {variant?.roofRails && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Roof Rails</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.roofRails}</span>
                           </div>
                         )}
-                        
+
                         {variant?.radioAntenna && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Radio Antenna</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.radioAntenna}</span>
                           </div>
                         )}
-                        
+
                         {variant?.outsideRearViewMirror && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Outside Rear View Mirror</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.outsideRearViewMirror}</span>
                           </div>
                         )}
-                        
+
                         {variant?.daytimeRunningLights && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Daytime Running Lights</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.daytimeRunningLights}</span>
                           </div>
                         )}
-                        
+
                         {variant?.sideIndicator && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Side Indicator</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.sideIndicator}</span>
                           </div>
                         )}
-                        
+
                         {variant?.rearWindshieldWiper && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Rear Windshield Wiper</span>
@@ -2027,10 +2043,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('exteriors')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -2046,14 +2062,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Dimensions</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('dimensions')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['dimensions'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -2077,7 +2093,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.groundClearance}</span>
                             </div>
                           )}
-                          
+
                           {variant?.length && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Length</span>
@@ -2087,7 +2103,7 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['dimensions'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
@@ -2097,28 +2113,28 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.width}</span>
                           </div>
                         )}
-                        
+
                         {variant?.height && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Height</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.height}</span>
                           </div>
                         )}
-                        
+
                         {variant?.wheelbase && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Wheelbase</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.wheelbase}</span>
                           </div>
                         )}
-                        
+
                         {variant?.turningRadius && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Turning Radius</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.turningRadius}</span>
                           </div>
                         )}
-                        
+
                         {variant?.kerbWeight && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Kerb Weight</span>
@@ -2127,10 +2143,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('dimensions')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -2146,14 +2162,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Tyre & Suspension</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('tyre')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['tyre'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -2177,7 +2193,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.frontTyreProfile}</span>
                             </div>
                           )}
-                          
+
                           {variant?.rearTyreProfile && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Rear Tyre Profile</span>
@@ -2187,7 +2203,7 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['tyre'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
@@ -2197,21 +2213,21 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.spareTyreProfile}</span>
                           </div>
                         )}
-                        
+
                         {variant?.spareWheelType && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Spare Wheel Type</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.spareWheelType}</span>
                           </div>
                         )}
-                        
+
                         {variant?.frontSuspension && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Front Suspension</span>
                             <span className="text-gray-900 text-sm font-medium">{variant.frontSuspension}</span>
                           </div>
                         )}
-                        
+
                         {variant?.rearSuspension && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Rear Suspension</span>
@@ -2220,10 +2236,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('tyre')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -2239,14 +2255,14 @@ export default function VariantPage({
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4">
                     <h3 className="text-xl font-bold text-gray-900">Storage</h3>
-                    <button 
+                    <button
                       onClick={() => toggleSpecSection('storage')}
                       className="p-1"
                     >
                       <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['storage'] ? 'rotate-90' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {/* Content */}
                   <div className="px-6 pb-6">
                     {/* Always visible specs */}
@@ -2270,7 +2286,7 @@ export default function VariantPage({
                               <span className="text-gray-900 text-sm font-medium">{variant.cupholders}</span>
                             </div>
                           )}
-                          
+
                           {variant?.fuelTankCapacity && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                               <span className="text-gray-500 text-sm">Fuel Tank Capacity</span>
@@ -2280,7 +2296,7 @@ export default function VariantPage({
                         </>
                       )}
                     </div>
-                    
+
                     {/* Expanded content */}
                     {expandedSpecs['storage'] && !showSkeleton && (
                       <div className="mt-4 space-y-4">
@@ -2290,7 +2306,7 @@ export default function VariantPage({
                             <span className="text-gray-900 text-sm font-medium">{variant.bootSpace}</span>
                           </div>
                         )}
-                        
+
                         {variant?.bootSpaceAfterFoldingRearRowSeats && (
                           <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                             <span className="text-gray-500 text-sm">Boot Space After Folding Rear Row Seats</span>
@@ -2299,10 +2315,10 @@ export default function VariantPage({
                         )}
                       </div>
                     )}
-                    
+
                     {/* View More/Less Button */}
                     <div className="mt-6 flex justify-center">
-                      <button 
+                      <button
                         onClick={() => toggleSpecSection('storage')}
                         className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
                       >
@@ -2328,18 +2344,17 @@ export default function VariantPage({
             {/* More Variants Section */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">More {displayBrandName} {displayModelName} {variantName} Variants</h2>
-              
+
               {/* Filter Options - Dynamic based on available variants */}
               <div className="flex flex-wrap gap-3">
                 {availableFilters.map((filter) => (
                   <button
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                      activeFilter === filter
-                        ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
+                      ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                   >
                     {filter}
                   </button>
@@ -2384,7 +2399,7 @@ export default function VariantPage({
               {/* View All Variants Button - Only show if more than 8 variants */}
               {!loading && transformedVariants.length > 8 && (
                 <div className="text-center pt-4">
-                  <button 
+                  <button
                     className="text-red-600 hover:text-orange-600 font-medium text-lg"
                     onClick={() => {
                       const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
@@ -2406,7 +2421,7 @@ export default function VariantPage({
             {/* Variant Summary Section */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{displayBrandName} {displayModelName} {variantName} Summary</h2>
-              
+
               <div className="space-y-6">
                 {/* Description */}
                 <div>
@@ -2432,7 +2447,7 @@ export default function VariantPage({
                     </p>
                   )}
                   {!variant?.description && (
-                    <button 
+                    <button
                       onClick={() => setShowSummaryDescription(!showSummaryDescription)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
                     >
@@ -2465,7 +2480,7 @@ export default function VariantPage({
                     </p>
                   )}
                   {!variant?.exteriorDesign && (
-                    <button 
+                    <button
                       onClick={() => setShowSummaryExterior(!showSummaryExterior)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
                     >
@@ -2498,7 +2513,7 @@ export default function VariantPage({
                     </p>
                   )}
                   {!variant?.comfortConvenience && (
-                    <button 
+                    <button
                       onClick={() => setShowSummaryComfort(!showSummaryComfort)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
                     >
@@ -2517,7 +2532,7 @@ export default function VariantPage({
             {/* Engine Section */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{displayBrandName} {displayModelName} {variantName} Engine</h2>
-              
+
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 {/* Engine Header - Always Visible */}
                 <div className="p-6">
@@ -2530,14 +2545,14 @@ export default function VariantPage({
                         {variant?.engineName || currentVariantData.engine}
                       </h3>
                     </div>
-                    <button 
+                    <button
                       onClick={() => setExpandedEngine(!expandedEngine)}
                       className="text-red-500 hover:text-red-600 font-medium text-sm transition-colors"
                     >
                       {expandedEngine ? 'Show Less' : 'Read More'}
                     </button>
                   </div>
-                  
+
                   {/* Collapsed Preview */}
                   {!expandedEngine && variant?.engineSummary && (
                     <ul className="space-y-1 mt-3">
@@ -2570,7 +2585,7 @@ export default function VariantPage({
                             </li>
                           ))}
                         </ul>
-                        
+
                         {/* Engine Specs from backend */}
                         <div className="bg-gray-50 rounded-lg p-4">
                           {/* Transmission Label */}
@@ -2580,7 +2595,7 @@ export default function VariantPage({
                               return trans.toLowerCase() === 'manual' ? 'Manual' : trans.toUpperCase()
                             })()}
                           </h4>
-                          
+
                           <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Power:</p>
@@ -2602,7 +2617,7 @@ export default function VariantPage({
                         <p className="text-gray-700 text-sm leading-relaxed mb-6">
                           Suitable for both city driving and highway cruising. The {variant?.engineName || currentVariantData.engine} engine offers excellent fuel efficiency with smooth acceleration. It provides a perfect balance between performance and economy, making it ideal for daily commuting and long-distance travel.
                         </p>
-                        
+
                         {/* Engine Specs */}
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-bold text-gray-900 mb-3 text-center">
@@ -2611,7 +2626,7 @@ export default function VariantPage({
                               return trans.toLowerCase() === 'manual' ? 'Manual' : trans.toUpperCase()
                             })()}
                           </h4>
-                          
+
                           <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Power:</p>
@@ -2637,7 +2652,7 @@ export default function VariantPage({
             {/* Mileage Section */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{displayBrandName} {displayModelName} {variantName} Mileage</h2>
-              
+
               <div className="flex justify-center">
                 <div className="w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
                   {/* Engine Header */}
@@ -2656,14 +2671,14 @@ export default function VariantPage({
                         {variant?.mileageCompanyClaimed || currentVariantData.mileage} Kmpl
                       </span>
                     </div>
-                    
+
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <span className="text-gray-600 text-sm">City Real World</span>
                       <span className="text-gray-900 font-bold text-sm">
                         {variant?.mileageCityRealWorld || (currentVariantData.mileage * 0.85).toFixed(1)} Kmpl
                       </span>
                     </div>
-                    
+
                     <div className="flex justify-between items-center py-2">
                       <span className="text-gray-600 text-sm">Highway Real World</span>
                       <span className="text-gray-900 font-bold text-sm">
@@ -2683,7 +2698,7 @@ export default function VariantPage({
             {/* City On-Road Prices */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{brandName} {modelName} {variantName} Price Across India</h2>
-              
+
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 {/* Table Header */}
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
@@ -2692,7 +2707,7 @@ export default function VariantPage({
                     <h3 className="text-lg font-semibold text-gray-900">On-Road Prices</h3>
                   </div>
                 </div>
-                
+
                 {/* City Price List */}
                 <div className="divide-y divide-gray-200">
                   {currentVariantData.cities.map((city, index) => (
@@ -2708,7 +2723,7 @@ export default function VariantPage({
                     </div>
                   ))}
                 </div>
-                
+
                 {/* View More Cities Button */}
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
                   <button className="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center justify-center space-x-1">

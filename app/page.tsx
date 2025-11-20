@@ -6,6 +6,7 @@ import CarsByBudget from '@/components/home/CarsByBudget'
 import PopularCars from '@/components/home/PopularCars'
 import BrandSection from '@/components/home/BrandSection'
 import UpcomingCars from '@/components/home/UpcomingCars'
+import FavouriteCars from '@/components/home/FavouriteCars'
 import NewLaunchedCars from '@/components/home/NewLaunchedCars'
 import LatestCarNews from '@/components/home/LatestCarNews'
 import YouTubeVideoPlayer from '@/components/home/YouTubeVideoPlayer'
@@ -40,6 +41,10 @@ export default function HomePage() {
 
         <PageSection background="white">
           <UpcomingCars />
+        </PageSection>
+
+        <PageSection background="white">
+          <FavouriteCars />
         </PageSection>
 
         <PageSection background="gray">

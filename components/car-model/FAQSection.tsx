@@ -17,7 +17,7 @@ interface FAQSectionProps {
 
 export default function FAQSection({ carName, faqs }: FAQSectionProps) {
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null)
-  
+
   // Load car models for hyperlink generation
   useCarModelsData()
 
@@ -26,10 +26,10 @@ export default function FAQSection({ carName, faqs }: FAQSectionProps) {
   }
 
   return (
-    <section className="py-8 bg-gray-100">
+    <section className="py-12 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Title */}
-        <h2 className="text-2xl font-bold text-gray-700 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-8">
           {carName} FAQ
         </h2>
 
@@ -44,13 +44,12 @@ export default function FAQSection({ carName, faqs }: FAQSectionProps) {
                 <h3 className="font-medium text-gray-900 text-sm">
                   {faq.question}
                 </h3>
-                <ChevronDown 
-                  className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform duration-200 ${
-                    expandedFAQ === faq.id ? 'rotate-180' : ''
-                  }`} 
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform duration-200 ${expandedFAQ === faq.id ? 'rotate-180' : ''
+                    }`}
                 />
               </button>
-              
+
               {expandedFAQ === faq.id && (
                 <div className="px-4 pb-4 border-t border-gray-100">
                   <div className="text-gray-700 text-sm leading-relaxed pt-3">

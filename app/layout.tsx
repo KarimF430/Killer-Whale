@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
+import { FavouritesProvider } from '@/lib/favourites-context'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -120,8 +121,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen bg-gray-50`}>
-        <Header />
-        {children}
+        <FavouritesProvider>
+          <Header />
+          {children}
+        </FavouritesProvider>
       </body>
     </html>
   )

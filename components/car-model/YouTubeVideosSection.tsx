@@ -25,11 +25,11 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
   const moreVideos = videos.slice(1)
 
   return (
-    <section className="py-8 bg-gray-100">
+    <section className="py-12 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-700">
+          <h2 className="text-2xl font-bold text-gray-900">
             {carName} Videos
           </h2>
           <button className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center">
@@ -40,14 +40,14 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
 
         {/* Featured Video */}
         <div className="mb-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Video Thumbnail */}
             <div className="relative h-48 bg-gradient-to-br from-red-400 to-pink-600 flex items-center justify-center">
               {/* Play Button */}
               <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
                 <Play className="w-8 h-8 text-white ml-1" fill="white" />
               </div>
-              
+
               {/* Video Title Overlay */}
               <div className="absolute bottom-4 left-4 right-4">
                 <h3 className="text-white font-bold text-base leading-tight">
@@ -83,8 +83,8 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
 
         {/* More Videos */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-gray-700 mb-4">More Videos</h3>
-          
+          <h3 className="text-lg font-bold text-gray-900 mb-4">More Videos</h3>
+
           <div className="space-y-3">
             {moreVideos.map((video) => (
               <div key={video.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -94,7 +94,7 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
                     <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
                       <Play className="w-4 h-4 text-white ml-0.5" fill="white" />
                     </div>
-                    
+
                     {/* Duration Badge */}
                     <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded">
                       {video.duration}
@@ -106,7 +106,7 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
                     <h4 className="text-gray-900 font-medium text-sm mb-1 line-clamp-2">
                       {video.title}
                     </h4>
-                    
+
                     <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
                       <span className="text-red-500 font-medium">{video.channel}</span>
                       <span>{video.uploadDate}</span>
@@ -124,7 +124,7 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
         </div>
 
         {/* Subscribe Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
           <h3 className="text-lg font-bold text-gray-900 mb-2">Subscribe to MotorOctane</h3>
           <p className="text-gray-600 text-sm mb-4">
             Get the latest car reviews, comparisons, and buying guides

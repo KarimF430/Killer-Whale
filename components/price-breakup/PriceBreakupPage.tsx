@@ -52,7 +52,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     }
     return searchParams.get('brand') || 'Honda'
   }
-  
+
   const getModelName = () => {
     if (modelSlug) {
       // Convert slug to display name: "elevate" -> "Elevate"
@@ -60,7 +60,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     }
     return searchParams.get('model') || 'Elevate'
   }
-  
+
   const getCityName = () => {
     if (citySlug) {
       // Convert slug to display name: "bangalore" -> "Bangalore, Karnataka"
@@ -80,14 +80,14 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     }
     return searchParams.get('city') || 'Mumbai, Maharashtra'
   }
-  
+
   const brandName = getBrandName()
   const modelName = getModelName()
   const variantParam = searchParams.get('variant')
   const [selectedCity, setSelectedCity] = useState(() => getCityName())
   const [selectedVariantName, setSelectedVariantName] = useState<string>('')
   const [activeSection, setActiveSection] = useState('overview')
-  
+
   // Section navigation data
   const sections = [
     { id: 'overview', name: 'Overview' },
@@ -102,7 +102,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     { id: 'price-cities', name: 'Price Across Cities' },
     { id: 'feedback', name: 'Feedback' }
   ]
-  
+
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -115,17 +115,17 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         top: offsetPosition,
         behavior: 'smooth'
       })
-      
+
       // Update active section after scroll
       setTimeout(() => setActiveSection(sectionId), 100)
     }
   }
-  
+
   // Scroll spy - update active section based on scroll position
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 100 // Offset for better UX
-      
+
       for (let i = sections.length - 1; i >= 0; i--) {
         const section = document.getElementById(sections[i].id)
         if (section) {
@@ -140,10 +140,10 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
     window.addEventListener('scroll', handleScroll)
     handleScroll() // Call once on mount
-    
+
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-  
+
   // Update city when citySlug prop changes
   useEffect(() => {
     console.log('🔍 citySlug changed:', citySlug)
@@ -159,89 +159,89 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
       'ahmedabad': 'Ahmedabad, Gujarat',
       'jaipur': 'Jaipur, Rajasthan'
     }
-    
+
     if (citySlug) {
       const newCity = cityMap[citySlug.toLowerCase()] || `${citySlug.charAt(0).toUpperCase() + citySlug.slice(1)}, India`
       console.log('✅ Setting city to:', newCity)
       setSelectedCity(newCity)
     }
   }, [citySlug])
-  
+
   // Variants state
   const [activeFilter, setActiveFilter] = useState('All')
   const [modelVariants, setModelVariants] = useState<any[]>([])
   const [loadingVariants, setLoadingVariants] = useState(true)
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
-  
+
   // Popular cars state
   const [popularCars, setPopularCars] = useState<any[]>([])
   const [loadingPopularCars, setLoadingPopularCars] = useState(true)
-  
+
   // On-Road Price Calculation
   const [priceBreakup, setPriceBreakup] = useState<OnRoadPriceBreakup | null>(null)
-  
+
   // Calculate EMI for display (20% down, 7 years, 8% interest)
   const calculateDisplayEMI = (price: number) => {
     const downPayment = price * 0.2
     const principal = price - downPayment
     const monthlyRate = 8 / 12 / 100
     const months = 7 * 12
-    
-    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
-                (Math.pow(1 + monthlyRate, months) - 1)
-    
+
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+      (Math.pow(1 + monthlyRate, months) - 1)
+
     return Math.round(emi)
   }
-  
+
   const displayEMI = priceBreakup ? calculateDisplayEMI(priceBreakup.totalOnRoadPrice) : 0
-  
+
   // Hero image from backend
   const [heroImage, setHeroImage] = useState<string>('https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&h=500&fit=crop')
-  
+
   // Model and Brand data
   const [model, setModel] = useState<any>(null)
   const [brand, setBrand] = useState<any>(null)
-  
+
   // Fetch model, brand, and variants from backend
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoadingVariants(true)
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-        
+
         console.log('🔍 PriceBreakup: Fetching data for:', { brandName, modelName, variantParam })
-        
+
         // Fetch all models to find the current model
         const modelsRes = await fetch(`${backendUrl}/api/models`)
         const models = await modelsRes.json()
-        
+
         // Find the model by name (case-insensitive)
-        const foundModel = models.find((m: any) => 
+        const foundModel = models.find((m: any) =>
           m.name.toLowerCase() === modelName.toLowerCase()
         )
-        
+
         if (foundModel) {
           setModel(foundModel)
-          
+
           // Fetch hero image - handle full URLs and relative paths
           if (foundModel.heroImage) {
-            const imageUrl = foundModel.heroImage.startsWith('http') 
-              ? foundModel.heroImage 
+            const imageUrl = foundModel.heroImage.startsWith('http')
+              ? foundModel.heroImage
               : foundModel.heroImage.startsWith('/uploads/') || foundModel.heroImage.startsWith('/')
-              ? `${backendUrl}${foundModel.heroImage}`
-              : `${backendUrl}/uploads/${foundModel.heroImage}`
+                ? `${backendUrl}${foundModel.heroImage}`
+                : `${backendUrl}/uploads/${foundModel.heroImage}`
             console.log('✅ Setting hero image to:', imageUrl)
             setHeroImage(imageUrl)
           } else {
             console.warn('⚠️ No hero image found for model:', foundModel.name)
           }
-          
+
           // Fetch variants for this model
           const variantsRes = await fetch(`${backendUrl}/api/variants?modelId=${foundModel.id}`)
           const variants = await variantsRes.json()
-          
+
           console.log('✅ Fetched variants:', variants.length)
-          
+
           // Transform variants to match the expected format
           const transformedVariants = variants.map((v: any) => ({
             id: v.id,
@@ -252,112 +252,112 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
             features: Array.isArray(v.keyFeatures) ? v.keyFeatures.join(', ') : (v.keyFeatures || 'Standard features'),
             price: v.price // Keep in rupees for exact calculation
           }))
-          
+
           setModelVariants(transformedVariants)
-          
+
           // Set default variant: use URL param if provided, otherwise lowest price variant
           if (variantParam) {
             // Convert slug to name (e.g., "zx-cvt" -> "ZX CVT")
             const variantNameFromSlug = variantParam.split('-').map(word => word.toUpperCase()).join(' ')
-            
+
             // Try to find match by comparing slugified versions
             const matchedVariant = transformedVariants.find((v: any) => {
               const variantSlug = v.name.toLowerCase().replace(/\s+/g, '-')
               const paramSlug = variantParam.toLowerCase()
               return variantSlug === paramSlug || v.name.toLowerCase() === variantParam.toLowerCase()
             })
-            
-            console.log('🔍 Variant matching:', { 
-              variantParam, 
-              variantNameFromSlug, 
+
+            console.log('🔍 Variant matching:', {
+              variantParam,
+              variantNameFromSlug,
               matchedVariant: matchedVariant?.name,
               allVariants: transformedVariants.map((v: any) => v.name)
             })
-            
+
             setSelectedVariantName(matchedVariant?.name || transformedVariants[0]?.name || '')
           } else {
             // Find lowest price variant
             const lowestPriceVariant = transformedVariants.reduce((lowest: any, current: any) => {
               return (current.price < lowest.price) ? current : lowest
             }, transformedVariants[0])
-            
+
             setSelectedVariantName(lowestPriceVariant?.name || '')
             console.log('🎯 Auto-selected lowest price variant:', lowestPriceVariant?.name, '₹', lowestPriceVariant?.price)
           }
         }
-        
+
         setLoadingVariants(false)
       } catch (error) {
         console.error('❌ Error fetching data:', error)
         setLoadingVariants(false)
       }
     }
-    
+
     fetchData()
   }, [brandName, modelName])
-  
+
   // Fetch popular cars from backend
   useEffect(() => {
     const fetchPopularCars = async () => {
       try {
         setLoadingPopularCars(true)
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-        
+
         // Fetch all models, brands, and variants
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models`),
           fetch(`${backendUrl}/api/brands`),
           fetch(`${backendUrl}/api/variants`)
         ])
-        
+
         if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
           console.error('Failed to fetch popular cars data')
           setPopularCars([])
           setLoadingPopularCars(false)
           return
         }
-        
+
         const models = await modelsRes.json()
         const brands = await brandsRes.json()
         const variants = await variantsRes.json()
-        
+
         // Create a map of brand IDs to brand names
         const brandMap = brands.reduce((acc: any, brand: any) => {
           acc[brand.id] = brand.name
           return acc
         }, {})
-        
+
         // Filter only popular models
         const popularModels = models.filter((model: any) => model.isPopular === true)
-        
+
         // Process each popular model
         const processedCars = popularModels.map((model: any) => {
           // Find all variants for this model
           const modelVariants = variants.filter((v: any) => v.modelId === model.id)
-          
+
           // Find lowest price variant
           const lowestPrice = modelVariants.length > 0
             ? Math.min(...modelVariants.map((v: any) => v.price || 0))
             : model.price || 0
-          
+
           // Get unique fuel types and transmissions
           const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
             ? model.fuelTypes
             : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-          
+
           const transmissions = model.transmissions && model.transmissions.length > 0
             ? model.transmissions
             : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-          
+
           // Get hero image - handle full URLs and relative paths
-          const heroImage = model.heroImage 
-            ? (model.heroImage.startsWith('http') 
-                ? model.heroImage 
-                : model.heroImage.startsWith('/uploads/') || model.heroImage.startsWith('/')
+          const heroImage = model.heroImage
+            ? (model.heroImage.startsWith('http')
+              ? model.heroImage
+              : model.heroImage.startsWith('/uploads/') || model.heroImage.startsWith('/')
                 ? `${backendUrl}${model.heroImage}`
                 : `${backendUrl}/uploads/${model.heroImage}`)
             : ''
-          
+
           return {
             id: model.id,
             name: model.name,
@@ -375,14 +375,14 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
             popularRank: model.popularRank || null
           }
         })
-        
+
         // Sort by popularRank
         const sortedCars = processedCars.sort((a, b) => {
           const rankA = a.popularRank || 999
           const rankB = b.popularRank || 999
           return rankA - rankB
         })
-        
+
         setPopularCars(sortedCars)
       } catch (error) {
         console.error('Error fetching popular cars:', error)
@@ -390,10 +390,10 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         setLoadingPopularCars(false)
       }
     }
-    
+
     fetchPopularCars()
   }, [])
-  
+
   const mockVariants = [
     'V Apex Summer Edition',
     'VX',
@@ -435,59 +435,59 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
       try {
         setLoadingSimilarCars(true)
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-        
+
         // Fetch all models, brands, and variants (same as CarModelPage)
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models`),
           fetch(`${backendUrl}/api/brands`),
           fetch(`${backendUrl}/api/variants`)
         ])
-        
+
         if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
           console.error('Failed to fetch similar cars data')
           setSimilarCars([])
           setLoadingSimilarCars(false)
           return
         }
-        
+
         const models = await modelsRes.json()
         const brands = await brandsRes.json()
         const variants = await variantsRes.json()
-        
+
         // Create a map of brand IDs to brand names (same as CarModelPage)
         const brandMap = brands.reduce((acc: any, brand: any) => {
           acc[brand.id] = brand.name
           return acc
         }, {})
-        
+
         // Process each model to find lowest variant price (same as CarModelPage)
         const processedCars = models
           .filter((m: any) => m.id !== model.id) // Exclude current model
           .map((m: any) => {
             // Find all variants for this model
             const modelVariants = variants.filter((v: any) => v.modelId === m.id)
-            
+
             // Find lowest price variant
             const lowestPrice = modelVariants.length > 0
               ? Math.min(...modelVariants.map((v: any) => v.price || 0))
               : m.price || 0
-            
+
             // Get unique fuel types and transmissions from model or variants
             const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
               ? m.fuelTypes
               : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-            
+
             const transmissions = m.transmissions && m.transmissions.length > 0
               ? m.transmissions
               : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-            
+
             // Get hero image from model (same as CarModelPage)
-            const heroImage = m.heroImage 
-              ? (m.heroImage.startsWith('http') 
-                  ? m.heroImage 
-                  : `${backendUrl}${m.heroImage}`)
+            const heroImage = m.heroImage
+              ? (m.heroImage.startsWith('http')
+                ? m.heroImage
+                : `${backendUrl}${m.heroImage}`)
               : ''
-            
+
             return {
               id: m.id,
               name: m.name,
@@ -504,7 +504,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
               isPopular: m.isPopular || false
             }
           })
-        
+
         setSimilarCars(processedCars)
         setLoadingSimilarCars(false)
       } catch (error) {
@@ -542,7 +542,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
     fuelTypes.forEach(fuel => filters.push(fuel))
     if (hasAutomatic) filters.push('Automatic')
-    
+
     return filters
   }
 
@@ -560,7 +560,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
       case 'CNG':
         return allVariants.filter(variant => variant.fuel === 'CNG')
       case 'Automatic':
-        return allVariants.filter(variant => 
+        return allVariants.filter(variant =>
           variant.transmission && isAutomaticTransmission(variant.transmission)
         )
       default:
@@ -596,7 +596,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
     // Listen for storage events
     window.addEventListener('storage', handleStorageChange)
-    
+
     // Check on mount
     handleStorageChange()
 
@@ -609,32 +609,32 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
   useEffect(() => {
     // Only calculate if we have variants loaded and a selected variant
     if (allVariants.length === 0 || !selectedVariantName) {
-      console.log('⏳ Waiting for variants to load...', { 
-        variantsCount: allVariants.length, 
-        selectedVariantName 
+      console.log('⏳ Waiting for variants to load...', {
+        variantsCount: allVariants.length,
+        selectedVariantName
       })
       return
     }
-    
+
     // Find the selected variant from allVariants
     const selectedVariant = allVariants.find(v => v.name === selectedVariantName)
-    
+
     if (selectedVariant) {
       // Price is already in rupees from backend (e.g., 1201150)
       const exShowroomPrice = selectedVariant.price
-      
+
       console.log('💰 Calculating on-road price:', {
         variant: selectedVariantName,
         exShowroomPrice,
         city: selectedCity
       })
-      
+
       // Extract state from city (e.g., "Mumbai, Maharashtra" -> "Maharashtra")
       const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
-      
+
       // Get fuel type
       const fuelType = selectedVariant.fuel || 'Petrol'
-      
+
       // Calculate the breakup
       const breakup = calculateOnRoadPrice(exShowroomPrice, state, fuelType)
       setPriceBreakup(breakup)
@@ -723,11 +723,10 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
-                className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeSection === section.id
+                className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeSection === section.id
                     ? 'border-red-600 text-red-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 {section.name}
               </button>
@@ -745,7 +744,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
               {modelName} Price in {selectedCity.split(',')[0]}
             </h1>
             <p className="text-gray-600 text-base">
-              The on road price of the {modelName} in {selectedCity.split(',')[0]} ranges from Rs. 8.44 Lakh to Rs. 17.06 Lakh. 
+              The on road price of the {modelName} in {selectedCity.split(',')[0]} ranges from Rs. 8.44 Lakh to Rs. 17.06 Lakh.
               The ex-showroom price is between Rs. 7.32 Lakh and Rs. 14.15 Lakh.
               <button className="text-red-600 ml-1 font-medium">...more</button>
             </p>
@@ -755,7 +754,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
             {/* Left: Hero Image */}
             <div>
               {/* Clickable Image - Links to Model Page */}
-              <Link 
+              <Link
                 href={`/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars/${modelName.toLowerCase().replace(/\s+/g, '-')}`}
                 className="block bg-gray-100 rounded-2xl overflow-hidden mb-4 cursor-pointer hover:opacity-90 transition-opacity"
               >
@@ -771,10 +770,10 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                 ) : (
                   <div className="w-full h-64 flex items-center justify-center bg-gray-200">
                     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#374151' className="w-3/4 h-3/4">
-                      <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/>
-                      <circle cx='100' cy='220' r='25' fill='#111827'/>
-                      <circle cx='300' cy='220' r='25' fill='#111827'/>
-                      <path d='M80 110h240l-20-30H100z' fill='#6B7280'/>
+                      <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z' />
+                      <circle cx='100' cy='220' r='25' fill='#111827' />
+                      <circle cx='300' cy='220' r='25' fill='#111827' />
+                      <path d='M80 110h240l-20-30H100z' fill='#6B7280' />
                     </svg>
                   </div>
                 )}
@@ -786,7 +785,24 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                   {brandName} {modelName} {selectedVariantName}
                 </h2>
                 <div className="flex items-center space-x-3">
-                  <button className="p-2 hover:bg-gray-100 rounded-full">
+                  <button
+                    onClick={() => {
+                      const shareData = {
+                        title: `${brandName} ${modelName} Price - MotorOctane`,
+                        text: `Check out the on-road price of ${brandName} ${modelName} in ${selectedCity}`,
+                        url: window.location.href
+                      };
+
+                      if (navigator.share) {
+                        navigator.share(shareData).catch(console.error);
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert('Link copied to clipboard!');
+                      }
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                    title="Share"
+                  >
                     <Share2 className="w-5 h-5 text-gray-600" />
                   </button>
                   <button className="p-2 hover:bg-gray-100 rounded-full">
@@ -804,7 +820,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                   <span className="text-gray-900 font-medium">{selectedVariantName || 'Loading...'}</span>
                   <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showVariantDropdown ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {showVariantDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-96 overflow-y-auto">
                     {allVariants.map((variant) => (
@@ -814,9 +830,8 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                           setSelectedVariantName(variant.name)
                           setShowVariantDropdown(false)
                         }}
-                        className={`block w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                          variant.name === selectedVariantName ? 'bg-blue-50' : ''
-                        }`}
+                        className={`block w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${variant.name === selectedVariantName ? 'bg-blue-50' : ''
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className={`text-gray-900 font-medium ${variant.name === selectedVariantName ? 'text-blue-600' : ''}`}>
@@ -848,7 +863,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                 <div className="bg-gradient-to-r from-red-600 to-orange-500 px-6 py-5">
                   <h3 className="text-2xl font-bold text-white">On-Road Price</h3>
                 </div>
-                
+
                 <div className="p-6">
                   {priceBreakup ? (
                     <>
@@ -858,29 +873,29 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                           <span className="text-gray-700 font-medium">Ex-Showroom Price</span>
                           <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.exShowroomPrice)}</span>
                         </div>
-                        
+
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
                           <span className="text-gray-700 font-medium">RTO Charges</span>
                           <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.rtoCharges)}</span>
                         </div>
-                        
+
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
                           <span className="text-gray-700 font-medium">Road Safety Tax/Cess</span>
                           <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.roadSafetyTax)}</span>
                         </div>
-                        
+
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
                           <span className="text-gray-700 font-medium">Insurance Cost</span>
                           <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.insurance)}</span>
                         </div>
-                        
+
                         {priceBreakup.tcs > 0 && (
                           <div className="flex justify-between items-center py-3 border-b border-gray-200">
                             <span className="text-gray-700 font-medium">Tax Collected at Source (TCS)</span>
                             <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.tcs)}</span>
                           </div>
                         )}
-                        
+
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
                           <span className="text-gray-700 font-medium">Other Charges</span>
                           <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.otherCharges)}</span>
@@ -891,7 +906,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                           <span className="text-gray-500">Hypothecation Charges</span>
                           <span className="font-medium text-gray-500">₹ {formatIndianPrice(priceBreakup.hypothecation)}</span>
                         </div>
-                        
+
                         <div className="flex justify-between items-center py-3 border-b border-gray-200">
                           <span className="text-gray-500">FasTag Charges</span>
                           <span className="font-medium text-gray-500">₹ {formatIndianPrice(priceBreakup.fasTag)}</span>
@@ -958,7 +973,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                 <p className="text-sm text-gray-600">per month</p>
               </div>
             </div>
-            
+
             <Link
               href={`/emi-calculator?brand=${encodeURIComponent(brandName)}&model=${encodeURIComponent(modelName)}&variant=${encodeURIComponent(selectedVariantName)}&price=${priceBreakup?.totalOnRoadPrice || 0}`}
               className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-3 rounded-full font-semibold transition-colors flex items-center justify-center"
@@ -982,11 +997,10 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  activeFilter === filter
+                className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
                     ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {filter}
               </button>
@@ -1031,7 +1045,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
           {/* View All Variants Button - Only show if more than 8 variants */}
           {!loadingVariants && allVariants.length > 8 && (
             <div className="text-center pt-4">
-              <button 
+              <button
                 className="text-red-600 hover:text-orange-600 font-medium text-lg"
                 onClick={() => {
                   const brandSlug = brandName?.toLowerCase().replace(/\s+/g, '-')
@@ -1057,7 +1071,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
           {/* Similar Cars Section */}
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900">Similar Cars to {brandName} {modelName}</h2>
-            
+
             {/* Cars Horizontal Scroll */}
             <div className="relative">
               {loadingSimilarCars ? (
@@ -1105,7 +1119,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
           {/* Popular Cars Section */}
           <div id="popular-cars" className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900">Popular Cars</h2>
-            
+
             {/* Cars Horizontal Scroll */}
             <div className="relative">
               {loadingPopularCars ? (
@@ -1163,7 +1177,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
           {/* Owner Reviews Section */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-8">{brandName} {modelName} Owner Reviews</h2>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Rating Summary */}
               <div className="lg:col-span-1">
@@ -1185,7 +1199,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
                   <div className="space-y-2 mb-6">
                     <h3 className="font-semibold text-gray-900 mb-3">Rating Breakdown</h3>
-                    
+
                     {/* 5 Star */}
                     <div className="flex items-center">
                       <span className="text-sm text-gray-600 w-8">5★</span>
@@ -1194,7 +1208,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                       </div>
                       <span className="text-sm text-gray-600 w-12 text-right">856</span>
                     </div>
-                    
+
                     {/* 4 Star */}
                     <div className="flex items-center">
                       <span className="text-sm text-gray-600 w-8">4★</span>
@@ -1203,7 +1217,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                       </div>
                       <span className="text-sm text-gray-600 w-12 text-right">324</span>
                     </div>
-                    
+
                     {/* 3 Star */}
                     <div className="flex items-center">
                       <span className="text-sm text-gray-600 w-8">3★</span>
@@ -1212,7 +1226,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                       </div>
                       <span className="text-sm text-gray-600 w-12 text-right">189</span>
                     </div>
-                    
+
                     {/* 2 Star */}
                     <div className="flex items-center">
                       <span className="text-sm text-gray-600 w-8">2★</span>
@@ -1221,7 +1235,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                       </div>
                       <span className="text-sm text-gray-600 w-12 text-right">26</span>
                     </div>
-                    
+
                     {/* 1 Star */}
                     <div className="flex items-center">
                       <span className="text-sm text-gray-600 w-8">1★</span>
@@ -1245,7 +1259,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                         <option>1 Star</option>
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Sort by:</label>
                       <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -1395,21 +1409,21 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
           {/* FAQ Section */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-8">{brandName} {modelName} FAQ</h2>
-            
+
             <div className="space-y-4 max-w-4xl mx-auto">
               {faqs.map((faq, index) => (
                 <div key={index} className="bg-gray-50 rounded-lg border border-gray-200">
-                  <button 
+                  <button
                     onClick={() => toggleFAQ(index)}
                     className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-100 transition-colors"
                   >
                     <span className="text-base font-medium text-gray-900">
                       {faq.question}
                     </span>
-                    <svg 
-                      className={`h-5 w-5 text-gray-500 transition-transform flex-shrink-0 ml-4 ${openFAQ === index ? 'rotate-180' : ''}`} 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className={`h-5 w-5 text-gray-500 transition-transform flex-shrink-0 ml-4 ${openFAQ === index ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1474,7 +1488,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
             <h2 className="text-2xl font-bold text-gray-900">
               {brandName} {modelName} {selectedVariantName} Price across India
             </h2>
-            
+
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
               {/* Table Header */}
               <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
@@ -1483,7 +1497,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                   <h3 className="text-lg font-semibold text-gray-900">On-Road Prices</h3>
                 </div>
               </div>
-              
+
               {/* City Price List */}
               <div className="divide-y divide-gray-200">
                 {cityPrices.map((city) => (
@@ -1499,7 +1513,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                   </div>
                 ))}
               </div>
-              
+
               {/* View More Cities Button */}
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
                 <button className="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center justify-center space-x-1 mx-auto">

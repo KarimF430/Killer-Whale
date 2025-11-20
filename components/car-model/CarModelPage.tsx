@@ -261,10 +261,10 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   const [showAllSimilarCars, setShowAllSimilarCars] = useState(false)
   const [showAllCities, setShowAllCities] = useState(false)
   const [selectedCity, setSelectedCity] = useState(model?.cities?.[0]?.name || 'Delhi')
-  
+
   // Load car models for hyperlink generation
   useCarModelsData()
-  
+
   // Load saved city from localStorage after mount to avoid hydration mismatch
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -276,45 +276,45 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   }, [])
   const [selectedVariant, setSelectedVariant] = useState(model?.variants?.[0]?.name || 'Base Variant')
   const [modelVariants, setModelVariants] = useState<any[]>([])
-  
+
   // Get on-road prices for starting and ending prices
   const startingPriceData = useOnRoadPrice({
     exShowroomPrice: model.startingPrice,
     fuelType: model.variants?.[0]?.fuelType || 'Petrol'
   })
-  
+
   const endingPriceData = useOnRoadPrice({
     exShowroomPrice: model.endingPrice,
     fuelType: model.variants?.[0]?.fuelType || 'Petrol'
   })
-  
-  const displayStartPrice = startingPriceData.isOnRoadMode 
-    ? startingPriceData.onRoadPrice 
+
+  const displayStartPrice = startingPriceData.isOnRoadMode
+    ? startingPriceData.onRoadPrice
     : model.startingPrice
-    
-  const displayEndPrice = endingPriceData.isOnRoadMode 
-    ? endingPriceData.onRoadPrice 
+
+  const displayEndPrice = endingPriceData.isOnRoadMode
+    ? endingPriceData.onRoadPrice
     : model.endingPrice
-    
+
   const priceLabel = startingPriceData.isOnRoadMode ? 'On-Road' : 'Ex-showroom'
-  
+
   // Calculate EMI for display (20% down, 7 years, 8% interest)
   const calculateDisplayEMI = (price: number) => {
     const downPayment = price * 0.2
     const principal = price - downPayment
     const monthlyRate = 8 / 12 / 100
     const months = 7 * 12
-    
-    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
-                (Math.pow(1 + monthlyRate, months) - 1)
-    
+
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+      (Math.pow(1 + monthlyRate, months) - 1)
+
     return Math.round(emi)
   }
-  
+
   const displayEMI = calculateDisplayEMI(displayStartPrice)
   const [loadingVariants, setLoadingVariants] = useState(true)
   const mileageScrollRef = useRef<HTMLDivElement>(null)
-  
+
   // Listen for city changes from localStorage (when user returns from location page)
   useEffect(() => {
     const handleStorageChange = () => {
@@ -323,22 +323,22 @@ export default function CarModelPage({ model }: CarModelPageProps) {
         setSelectedCity(savedCity)
       }
     }
-    
+
     // Listen for storage events
     window.addEventListener('storage', handleStorageChange)
-    
+
     // Also check on mount and when page becomes visible
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         handleStorageChange()
       }
     }
-    
+
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    
+
     // Check immediately on mount
     handleStorageChange()
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
@@ -349,7 +349,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   useEffect(() => {
     const fetchVariants = async () => {
       if (!model?.id) return
-      
+
       try {
         setLoadingVariants(true)
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}`)
@@ -432,7 +432,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
       setSelectedColor(model.colorImages[0].caption || '')
     }
   }, [model?.colorImages, selectedColor])
-  
+
   const variantDropdownRef = useRef<HTMLDivElement>(null)
   const cityDropdownRef = useRef<HTMLDivElement>(null)
   const heroSectionRef = useRef<HTMLDivElement>(null)
@@ -466,12 +466,12 @@ export default function CarModelPage({ model }: CarModelPageProps) {
     allVariants.forEach(variant => {
       // Collect fuel types
       if (variant.fuel) fuelTypes.add(variant.fuel)
-      
+
       // Check for automatic transmissions
       if (variant.transmission && isAutomaticTransmission(variant.transmission)) {
         hasAutomatic = true
       }
-      
+
       // Check for value variants (marked as value for money in backend)
       if (variant.isValueForMoney === true) {
         hasValueVariants = true
@@ -480,13 +480,13 @@ export default function CarModelPage({ model }: CarModelPageProps) {
 
     // Add fuel type filters
     fuelTypes.forEach(fuel => filters.push(fuel))
-    
+
     // Add automatic filter if any automatic variants exist
     if (hasAutomatic) filters.push('Automatic')
-    
+
     // Add value for money filter if applicable
     if (hasValueVariants) filters.push('Value for Money Variants')
-    
+
     return filters
   }
 
@@ -502,7 +502,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
       case 'CNG':
         return allVariants.filter(variant => variant.fuel === 'CNG')
       case 'Automatic':
-        return allVariants.filter(variant => 
+        return allVariants.filter(variant =>
           variant.transmission && isAutomaticTransmission(variant.transmission)
         )
       case 'Value for Money Variants':
@@ -626,12 +626,12 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   // Helper function to calculate on-road price using the exact same logic as CarsByBudget
   const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
     // Get selected city from localStorage (same as useOnRoadPrice hook)
-    const selectedCity = typeof window !== 'undefined' 
+    const selectedCity = typeof window !== 'undefined'
       ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
       : 'Mumbai, Maharashtra'
-    
+
     const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
-    
+
     // Use the exact same calculation function as CarsByBudget
     const breakup = calculateOnRoadPrice(exShowroomPrice, state, fuelType)
     return breakup.totalOnRoadPrice
@@ -653,59 +653,59 @@ export default function CarModelPage({ model }: CarModelPageProps) {
       try {
         setLoadingSimilarCars(true)
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-        
+
         // Fetch all models, brands, and variants (same as CarsByBudget)
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models`),
           fetch(`${backendUrl}/api/brands`),
           fetch(`${backendUrl}/api/variants`)
         ])
-        
+
         if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
           console.error('Failed to fetch similar cars data')
           setSimilarCars([])
           setLoadingSimilarCars(false)
           return
         }
-        
+
         const models = await modelsRes.json()
         const brands = await brandsRes.json()
         const variants = await variantsRes.json()
-        
+
         // Create a map of brand IDs to brand names (same as CarsByBudget)
         const brandMap = brands.reduce((acc: any, brand: any) => {
           acc[brand.id] = brand.name
           return acc
         }, {})
-        
+
         // Process each model to find lowest variant price (same as CarsByBudget)
         const processedCars = models
           .filter((m: any) => m.id !== model.id) // Exclude current model
           .map((m: any) => {
             // Find all variants for this model
             const modelVariants = variants.filter((v: any) => v.modelId === m.id)
-            
+
             // Find lowest price variant
             const lowestPrice = modelVariants.length > 0
               ? Math.min(...modelVariants.map((v: any) => v.price || 0))
               : m.price || 0
-            
+
             // Get unique fuel types and transmissions from model or variants
             const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
               ? m.fuelTypes
               : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-            
+
             const transmissions = m.transmissions && m.transmissions.length > 0
               ? m.transmissions
               : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-            
+
             // Get hero image from model (same as CarsByBudget)
-            const heroImage = m.heroImage 
-              ? (m.heroImage.startsWith('http') 
-                  ? m.heroImage 
-                  : `${backendUrl}${m.heroImage}`)
+            const heroImage = m.heroImage
+              ? (m.heroImage.startsWith('http')
+                ? m.heroImage
+                : `${backendUrl}${m.heroImage}`)
               : ''
-            
+
             return {
               id: m.id,
               name: m.name,
@@ -722,7 +722,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
               isPopular: m.isPopular || false
             }
           })
-        
+
         setSimilarCars(processedCars)
         setLoadingSimilarCars(false)
       } catch (error) {
@@ -969,11 +969,10 @@ export default function CarModelPage({ model }: CarModelPageProps) {
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
-                className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeSection === section.id
+                className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeSection === section.id
                     ? 'border-red-600 text-red-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 {section.name}
               </button>
@@ -1016,10 +1015,10 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                   </div>
                 ))}
               </div>
-              
+
               {/* Gallery Navigation Arrow */}
               {model?.gallery && model.gallery.length > 0 && (
-                <button 
+                <button
                   onClick={() => {
                     const gallery = document.getElementById('model-gallery');
                     if (gallery) {
@@ -1039,7 +1038,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                   {model?.brand || 'Car Brand'} {model?.name || 'Car Model'}
                 </h1>
-                
+
                 {/* Rating */}
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="flex items-center bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded">
@@ -1052,17 +1051,34 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                   </button>
                 </div>
               </div>
-              
+
               {/* Share and Heart Icons */}
               <div className="flex items-center space-x-3">
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <button
+                  onClick={() => {
+                    const shareData = {
+                      title: `${model?.brand || 'Car'} ${model?.name || 'Model'} - Check it out!`,
+                      text: `Check out the ${model?.brand || ''} ${model?.name || ''} on MotorOctane!`,
+                      url: window.location.href
+                    };
+
+                    if (navigator.share) {
+                      navigator.share(shareData).catch(console.error);
+                    } else {
+                      navigator.clipboard.writeText(window.location.href);
+                      // You might want to add a toast notification here
+                      alert('Link copied to clipboard!');
+                    }
+                  }}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  title="Share"
+                >
                   <Share2 className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setIsLiked(!isLiked)}
-                  className={`p-2 transition-colors ${
-                    isLiked ? 'text-red-600' : 'text-gray-400 hover:text-red-600'
-                  }`}
+                  className={`p-2 transition-colors ${isLiked ? 'text-red-600' : 'text-gray-400 hover:text-red-600'
+                    }`}
                 >
                   <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
                 </button>
@@ -1098,8 +1114,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 {formatPriceRange(displayStartPrice / 100000, displayEndPrice / 100000)}
               </div>
               <div className="text-sm text-gray-500">*{priceLabel}</div>
-              
-              <button 
+
+              <button
                 onClick={() => {
                   const brandSlug = model.brand.toLowerCase().replace(/\s+/g, '-')
                   const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-')
@@ -1124,7 +1140,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                   </span>
                   <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showVariantDropdown ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {showVariantDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-96 overflow-y-auto">
                     {(model?.variants || []).map((variant) => (
@@ -1189,7 +1205,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                   <p className="text-sm text-gray-600">per month</p>
                 </div>
               </div>
-              
+
               <Link
                 href={`/emi-calculator?brand=${encodeURIComponent(model.brand)}&model=${encodeURIComponent(model.name)}&variant=${encodeURIComponent(model.variants?.[0]?.name || 'Base')}&price=${displayStartPrice}`}
                 className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-3 rounded-full font-semibold transition-colors flex items-center justify-center"
@@ -1206,36 +1222,33 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Model Highlights */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Highlights</h2>
-              
+
               {/* Tab Navigation - Clickable Headers */}
               <div className="flex space-x-8 border-b border-gray-200">
-                <button 
+                <button
                   onClick={() => handleHighlightTabChange('keyFeatures')}
-                  className={`pb-3 px-1 border-b-2 font-medium transition-colors ${
-                    activeHighlightTab === 'keyFeatures' 
-                      ? 'border-red-600 text-red-600' 
+                  className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeHighlightTab === 'keyFeatures'
+                      ? 'border-red-600 text-red-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   Key & Features
                 </button>
-                <button 
+                <button
                   onClick={() => handleHighlightTabChange('spaceComfort')}
-                  className={`pb-3 px-1 border-b-2 font-medium transition-colors ${
-                    activeHighlightTab === 'spaceComfort' 
-                      ? 'border-red-600 text-red-600' 
+                  className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeHighlightTab === 'spaceComfort'
+                      ? 'border-red-600 text-red-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   Space & Comfort
                 </button>
-                <button 
+                <button
                   onClick={() => handleHighlightTabChange('storageConvenience')}
-                  className={`pb-3 px-1 border-b-2 font-medium transition-colors ${
-                    activeHighlightTab === 'storageConvenience' 
-                      ? 'border-red-600 text-red-600' 
+                  className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeHighlightTab === 'storageConvenience'
+                      ? 'border-red-600 text-red-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   Storage & Convenience
                 </button>
@@ -1254,7 +1267,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     } else if (activeHighlightTab === 'storageConvenience') {
                       currentHighlights = model?.storageConvenienceImages || model?.highlights?.storageConvenience || [];
                     }
-                    
+
                     return currentHighlights.length > 0 ? (
                       currentHighlights.map((highlight: any, index: number) => (
                         <div key={index} className="flex-shrink-0 w-64">
@@ -1265,16 +1278,16 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                                   // Backend format: { url: string, caption: string }
                                   highlight.url ? (
                                     highlight.url.startsWith('http://') || highlight.url.startsWith('https://') ? highlight.url :
-                                    highlight.url.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}` :
-                                    highlight.url
+                                      highlight.url.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}` :
+                                        highlight.url
                                   ) :
-                                  // Fallback format: { image: string, title: string }
-                                  highlight.image ? (
-                                    highlight.image.startsWith('http://') || highlight.image.startsWith('https://') ? highlight.image :
-                                    highlight.image.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.image}` :
-                                    highlight.image
-                                  ) :
-                                  `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
+                                    // Fallback format: { image: string, title: string }
+                                    highlight.image ? (
+                                      highlight.image.startsWith('http://') || highlight.image.startsWith('https://') ? highlight.image :
+                                        highlight.image.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.image}` :
+                                          highlight.image
+                                    ) :
+                                      `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
                                 }
                                 alt={highlight.caption || highlight.title || 'Car Feature'}
                                 className="w-full h-full object-cover rounded-lg"
@@ -1296,104 +1309,104 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         </div>
                       ))
                     ) : (
-                    /* Fallback cards if no backend data */
-                    <>
-                      {/* Highlight Card 1 */}
-                      <div className="flex-shrink-0 w-64">
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                          <div className="aspect-[4/3] bg-gray-200 relative">
-                            <img
-                              src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
-                              alt="Advanced Safety Features"
-                              className="w-full h-full object-cover rounded-lg"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {/* Sample Caption */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                              <p className="text-sm font-medium text-center">
-                                {model?.brand} {model?.name} Feature 1
-                              </p>
+                      /* Fallback cards if no backend data */
+                      <>
+                        {/* Highlight Card 1 */}
+                        <div className="flex-shrink-0 w-64">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="aspect-[4/3] bg-gray-200 relative">
+                              <img
+                                src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
+                                alt="Advanced Safety Features"
+                                className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                              {/* Sample Caption */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                <p className="text-sm font-medium text-center">
+                                  {model?.brand} {model?.name} Feature 1
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-4">
+                              <div className="w-12 h-1 bg-gray-300 rounded"></div>
                             </div>
                           </div>
-                          <div className="p-4">
-                            <div className="w-12 h-1 bg-gray-300 rounded"></div>
-                          </div>
                         </div>
-                      </div>
 
-                      {/* Highlight Card 2 */}
-                      <div className="flex-shrink-0 w-64">
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                          <div className="aspect-[4/3] bg-gray-200 relative">
-                            <img
-                              src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
-                              alt="Premium Interior"
-                              className="w-full h-full object-cover rounded-lg"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {/* Sample Caption */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                              <p className="text-sm font-medium text-center">
-                                {model?.brand} {model?.name} Feature 2
-                              </p>
+                        {/* Highlight Card 2 */}
+                        <div className="flex-shrink-0 w-64">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="aspect-[4/3] bg-gray-200 relative">
+                              <img
+                                src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
+                                alt="Premium Interior"
+                                className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                              {/* Sample Caption */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                <p className="text-sm font-medium text-center">
+                                  {model?.brand} {model?.name} Feature 2
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-4">
+                              <div className="w-12 h-1 bg-gray-300 rounded"></div>
                             </div>
                           </div>
-                          <div className="p-4">
-                            <div className="w-12 h-1 bg-gray-300 rounded"></div>
-                          </div>
                         </div>
-                      </div>
 
-                      {/* Highlight Card 3 */}
-                      <div className="flex-shrink-0 w-64">
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                          <div className="aspect-[4/3] bg-gray-200 relative">
-                            <img
-                              src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
-                              alt="Fuel Efficiency"
-                              className="w-full h-full object-cover rounded-lg"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {/* Sample Caption */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                              <p className="text-sm font-medium text-center">
-                                {model?.brand} {model?.name} Feature 3
-                              </p>
+                        {/* Highlight Card 3 */}
+                        <div className="flex-shrink-0 w-64">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="aspect-[4/3] bg-gray-200 relative">
+                              <img
+                                src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center"
+                                alt="Fuel Efficiency"
+                                className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                              {/* Sample Caption */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                <p className="text-sm font-medium text-center">
+                                  {model?.brand} {model?.name} Feature 3
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-4">
+                              <div className="w-12 h-1 bg-gray-300 rounded"></div>
                             </div>
                           </div>
-                          <div className="p-4">
-                            <div className="w-12 h-1 bg-gray-300 rounded"></div>
-                          </div>
                         </div>
-                      </div>
 
-                      {/* Highlight Card 4 */}
-                      <div className="flex-shrink-0 w-64">
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                          <div className="aspect-[4/3] bg-gray-200 relative">
-                            <img
-                              src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
-                              alt="Smart Technology"
-                              className="w-full h-full object-cover rounded-lg"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {/* Sample Caption */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                              <p className="text-sm font-medium text-center">
-                                {model?.brand} {model?.name} Feature 4
-                              </p>
+                        {/* Highlight Card 4 */}
+                        <div className="flex-shrink-0 w-64">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="aspect-[4/3] bg-gray-200 relative">
+                              <img
+                                src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400&h=300&fit=crop&crop=center"
+                                alt="Smart Technology"
+                                className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                              {/* Sample Caption */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                <p className="text-sm font-medium text-center">
+                                  {model?.brand} {model?.name} Feature 4
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-4">
+                              <div className="w-12 h-1 bg-gray-300 rounded"></div>
                             </div>
                           </div>
-                          <div className="p-4">
-                            <div className="w-12 h-1 bg-gray-300 rounded"></div>
-                          </div>
                         </div>
-                      </div>
-                    </>
+                      </>
                     );
                   })()}
                 </div>
@@ -1408,7 +1421,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Model Price Header */}
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">{model?.brand || 'Car'} {model?.name || 'Model'} Price</h2>
-              
+
               {/* SEO Content */}
               <div className="text-gray-700 leading-relaxed">
                 <p>
@@ -1439,18 +1452,17 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Variants Section */}
             <div className="space-y-6">
               <h3 className="text-xl font-bold text-gray-900">Variants</h3>
-              
+
               {/* Filter Options - Dynamic based on available variants */}
               <div className="flex flex-wrap gap-3">
                 {availableFilters.map((filter) => (
                   <button
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                      activeFilter === filter
+                    className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
                         ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {filter}
                   </button>
@@ -1490,7 +1502,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
               {/* View All Variants Button - Only show if more than 8 variants */}
               {!loadingVariants && allVariants.length > 8 && (
                 <div className="text-center pt-4">
-                  <button 
+                  <button
                     className="text-red-600 hover:text-orange-600 font-medium text-lg"
                     onClick={() => {
                       const brandSlug = model?.brand?.toLowerCase().replace(/\s+/g, '-')
@@ -1517,7 +1529,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Color Options Section */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Colours</h2>
-              
+
               {/* Check if backend colorImages exist */}
               {model?.colorImages && model.colorImages.length > 0 ? (
                 <>
@@ -1540,7 +1552,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         />
                       </div>
                     </div>
-                    
+
                     {/* Color Name Display */}
                     <div className="text-center mt-6">
                       <h3 className="text-xl font-bold text-gray-900">{truncateCaption(selectedColor || 'Default Color', 30)}</h3>
@@ -1554,11 +1566,10 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         <button
                           key={index}
                           onClick={() => setSelectedColor(color.caption)}
-                          className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${
-                            selectedColor === color.caption
+                          className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${selectedColor === color.caption
                               ? 'ring-4 ring-red-500 shadow-lg scale-105'
                               : 'hover:shadow-md hover:scale-102'
-                          }`}
+                            }`}
                         >
                           <div className="w-32 h-24 bg-gray-100">
                             <img
@@ -1574,7 +1585,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               decoding="async"
                             />
                           </div>
-                          
+
                           {/* Color name overlay */}
                           <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-xs p-2 text-center">
                             {truncateCaption(color.caption, 15)}
@@ -1600,7 +1611,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         />
                       </div>
                     </div>
-                    
+
                     {/* Color Name Display */}
                     <div className="text-center mt-6">
                       <h3 className="text-xl font-bold text-gray-900">{selectedColor || 'Default Color'}</h3>
@@ -1614,11 +1625,10 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         <button
                           key={color.id}
                           onClick={() => setSelectedColor(color.name)}
-                          className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${
-                            selectedColor === color.name
+                          className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${selectedColor === color.name
                               ? 'ring-4 ring-red-500 shadow-lg scale-105'
                               : 'hover:shadow-md hover:scale-102'
-                          }`}
+                            }`}
                         >
                           <div className="w-32 h-24 bg-gray-100">
                             <img
@@ -1629,15 +1639,15 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               decoding="async"
                             />
                           </div>
-                          
+
                           {/* Color indicator dot */}
                           <div className="absolute bottom-2 left-2">
-                            <div 
+                            <div
                               className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
                               style={{ backgroundColor: color.hexCode }}
                             ></div>
                           </div>
-                          
+
                           {/* Color name overlay */}
                           <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-xs p-2 text-center">
                             {color.name}
@@ -1658,7 +1668,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Pros & Cons Section */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Pros & Cons</h2>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Pros Column */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -1670,7 +1680,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     </div>
                     <h3 className="text-lg font-bold text-gray-900">Pros</h3>
                   </div>
-                  
+
                   <ul className="space-y-4">
                     {(showAllPros ? allPros : allPros.slice(0, 2)).map((pro, index) => (
                       <li key={index} className="flex items-start space-x-3">
@@ -1681,8 +1691,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                       </li>
                     ))}
                   </ul>
-                  
-                  <button 
+
+                  <button
                     onClick={() => setShowAllPros(!showAllPros)}
                     className="text-red-500 hover:text-red-600 text-sm font-medium mt-4"
                   >
@@ -1700,7 +1710,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     </div>
                     <h3 className="text-lg font-bold text-gray-900">Cons</h3>
                   </div>
-                  
+
                   <ul className="space-y-4">
                     {(showAllCons ? allCons : allCons.slice(0, 2)).map((con, index) => (
                       <li key={index} className="flex items-start space-x-3">
@@ -1711,8 +1721,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                       </li>
                     ))}
                   </ul>
-                  
-                  <button 
+
+                  <button
                     onClick={() => setShowAllCons(!showAllCons)}
                     className="text-red-500 hover:text-red-600 text-sm font-medium mt-4"
                   >
@@ -1725,7 +1735,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Model Summary Section */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Summary</h2>
-              
+
               <div className="space-y-6">
                 {/* Description */}
                 <div>
@@ -1751,7 +1761,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     </p>
                   )}
                   {!model?.description && (
-                    <button 
+                    <button
                       onClick={() => setShowSummaryDescription(!showSummaryDescription)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
                     >
@@ -1784,7 +1794,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     </p>
                   )}
                   {!model?.exteriorDesign && (
-                    <button 
+                    <button
                       onClick={() => setShowSummaryExterior(!showSummaryExterior)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
                     >
@@ -1817,7 +1827,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     </p>
                   )}
                   {!model?.comfortConvenience && (
-                    <button 
+                    <button
                       onClick={() => setShowSummaryComfort(!showSummaryComfort)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
                     >
@@ -1841,14 +1851,14 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Engine Highlights */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Engine</h2>
-              
+
               <div className="space-y-4">
                 {/* Use backend engineSummaries if available, otherwise fallback to engineOptions */}
                 {(model?.engineSummaries && model.engineSummaries.length > 0 ? model.engineSummaries : engineOptions).map((engine: any, index: number) => {
                   const engineId = model?.engineSummaries ? `engine-${index}` : engine.id
                   const engineTitle = model?.engineSummaries ? engine.title : engine.name
                   const engineSummary = model?.engineSummaries ? engine.summary : engine.description
-                  
+
                   return (
                     <div key={engineId} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                       {/* Engine Header - Always Visible */}
@@ -1869,7 +1879,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                             {expandedEngine === engineId ? 'Show Less' : 'Read More'}
                           </button>
                         </div>
-                        
+
                         {/* Collapsed Preview */}
                         {expandedEngine !== engineId && model?.engineSummaries && (
                           <ul className="space-y-1 mt-3">
@@ -1902,7 +1912,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                                   </li>
                                 ))}
                               </ul>
-                              
+
                               {/* Engine Specs from backend */}
                               <div className="bg-gray-50 rounded-lg p-4">
                                 {/* Transmission Label - uppercase except Manual */}
@@ -1912,7 +1922,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                                     return trans.toLowerCase() === 'manual' ? 'Manual' : trans.toUpperCase()
                                   })()}
                                 </h4>
-                                
+
                                 <div className="grid grid-cols-3 gap-4 text-center">
                                   <div>
                                     <p className="text-xs text-gray-500 mb-1">Power:</p>
@@ -1935,7 +1945,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                               <p className="text-gray-700 text-sm leading-relaxed mb-6">
                                 {engineSummary}
                               </p>
-                              
+
                               {/* Engine Variants */}
                               <div className="space-y-4">
                                 {(engine as any).variants.map((variant: any, idx: number) => (
@@ -1943,7 +1953,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                                     <h4 className="font-bold text-gray-900 mb-3 text-center">
                                       {variant.type}
                                     </h4>
-                                    
+
                                     <div className="grid grid-cols-3 gap-4 text-center">
                                       <div>
                                         <p className="text-xs text-gray-500 mb-1">Power:</p>
@@ -1979,12 +1989,12 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Mileage Section */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Mileage</h2>
-              
+
               {/* Horizontal Scrollable Mileage Cards */}
               <div className="relative">
-                <div 
+                <div
                   ref={mileageScrollRef}
-                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4" 
+                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   {/* Use backend mileageData if available, otherwise fallback */}
@@ -1993,7 +2003,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                     const companyClaimed = model?.mileageData ? mileage.companyClaimed : mileage.companyClaimed
                     const cityRealWorld = model?.mileageData ? mileage.cityRealWorld : mileage.cityRealWorld
                     const highwayRealWorld = model?.mileageData ? mileage.highwayRealWorld : mileage.highwayRealWorld
-                    
+
                     return (
                       <div
                         key={index}
@@ -2011,12 +2021,12 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                             <span className="text-gray-600 text-sm">Company Claimed</span>
                             <span className="text-gray-900 font-bold text-sm">{companyClaimed}</span>
                           </div>
-                          
+
                           <div className="flex justify-between items-center py-2 border-b border-gray-100">
                             <span className="text-gray-600 text-sm">City Real World</span>
                             <span className="text-gray-900 font-bold text-sm">{cityRealWorld}</span>
                           </div>
-                          
+
                           <div className="flex justify-between items-center py-2">
                             <span className="text-gray-600 text-sm">Highway Real World</span>
                             <span className="text-gray-900 font-bold text-sm">{highwayRealWorld}</span>
@@ -2040,11 +2050,10 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         mileageScrollRef.current.scrollTo({ left: cardWidth * index, behavior: 'smooth' })
                       }
                     }}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      selectedMileageEngine === index
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${selectedMileageEngine === index
                         ? 'bg-gradient-to-r from-red-600 to-orange-500 w-8'
                         : 'bg-gray-300 hover:bg-gray-400'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -2065,7 +2074,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
               <h2 className="text-2xl font-bold text-gray-900">
                 Similar Cars To {model?.name || 'model'}
               </h2>
-              
+
               {/* Cars Horizontal Scroll - Exact copy from home page */}
               <div className="relative">
                 {loadingSimilarCars ? (
@@ -2108,7 +2117,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Compare With Similar Cars Section - Dynamic with body type matching */}
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-gray-900">Compare With Similar Cars</h2>
-              
+
               {/* Comparison Cards - Horizontal Scroll */}
               <div className="relative">
                 {loadingSimilarCars ? (
@@ -2132,7 +2141,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                       // Calculate on-road prices using the same logic as CarsByBudget
                       const currentModelOnRoad = getOnRoadPrice(model?.startingPrice || 0, 'Petrol')
                       const compareCarOnRoad = getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol')
-                      
+
                       return (
                         <div key={car.id} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
                           {/* Side by Side Layout with VS Badge */}
@@ -2140,7 +2149,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                             {/* Current Model */}
                             <div className="flex-1">
                               <div className="relative mb-2">
-                                <img 
+                                <img
                                   src={model?.heroImage || ''}
                                   alt={`${model?.brand} ${model?.name}`}
                                   className="w-full h-20 object-contain"
@@ -2171,7 +2180,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                             {/* Similar Car */}
                             <div className="flex-1">
                               <div className="relative mb-2">
-                                <img 
+                                <img
                                   src={car.image}
                                   alt={`${car.brand} ${car.name}`}
                                   className="w-full h-20 object-contain"
@@ -2193,17 +2202,17 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                             </div>
                           </div>
 
-                        <button 
-                          onClick={() => {
-                            const currentModelSlug = `${model?.brand.toLowerCase().replace(/\s+/g, '-')}-${model?.name.toLowerCase().replace(/\s+/g, '-')}`
-                            const compareModelSlug = `${car.brand.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
-                            router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
-                          }}
-                          className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm"
-                        >
-                          Compare Now
-                        </button>
-                      </div>
+                          <button
+                            onClick={() => {
+                              const currentModelSlug = `${model?.brand.toLowerCase().replace(/\s+/g, '-')}-${model?.name.toLowerCase().replace(/\s+/g, '-')}`
+                              const compareModelSlug = `${car.brand.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
+                              router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
+                            }}
+                            className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm"
+                          >
+                            Compare Now
+                          </button>
+                        </div>
                       )
                     })}
                   </div>
@@ -2227,15 +2236,15 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} News</h2>
-                <Link 
-                  href="/news" 
+                <Link
+                  href="/news"
                   className="flex items-center text-red-600 hover:text-orange-600 font-medium"
                 >
                   View All News
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Link>
               </div>
-              
+
               {/* News Articles Horizontal Scroll */}
               <div className="relative">
                 <div
@@ -2259,7 +2268,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                             {article.title}
                           </h3>
                         </div>
-                        
+
                         {/* Category Badge */}
                         <div className="absolute top-3 left-3">
                           <span className="bg-gradient-to-r from-red-600 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -2282,7 +2291,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         <h3 className="font-bold text-gray-900 mb-2 text-base leading-tight">
                           {article.title}
                         </h3>
-                        
+
                         <p className="text-sm text-gray-600 mb-3 leading-relaxed line-clamp-2">
                           {article.excerpt}
                         </p>
@@ -2292,9 +2301,9 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           <span className="font-medium">{article.author}</span>
                           <span className="mx-2">•</span>
                           <Calendar className="h-3 w-3 mr-1" />
-                          <span>{new Date(article.publishDate).toLocaleDateString('en-IN', { 
-                            day: 'numeric', 
-                            month: 'short' 
+                          <span>{new Date(article.publishDate).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short'
                           })}</span>
                         </div>
 
@@ -2329,8 +2338,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl md:text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Videos</h2>
-                <a 
-                  href="https://www.youtube.com/@motoroctane" 
+                <a
+                  href="https://www.youtube.com/@motoroctane"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center text-red-600 hover:text-red-700 font-medium"
@@ -2345,7 +2354,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 <div className="lg:col-span-2">
                   <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                     {/* Video Thumbnail */}
-                    <div 
+                    <div
                       className="relative h-64 md:h-80 bg-gradient-to-r from-red-500 to-pink-500 cursor-pointer group"
                       onClick={() => handleVideoClick(featuredVideo.id)}
                     >
@@ -2354,7 +2363,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           <Play className="h-8 w-8 text-red-600 fill-current" />
                         </div>
                       </div>
-                      
+
                       {/* Duration Badge */}
                       <div className="absolute bottom-3 right-3 bg-black/80 text-white px-2 py-1 rounded text-sm font-medium">
                         {featuredVideo.duration}
@@ -2362,7 +2371,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
 
                       {/* Video Overlay */}
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                      
+
                       {/* Video Title Overlay */}
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                         <h3 className="text-white font-bold text-lg line-clamp-2">
@@ -2399,9 +2408,9 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 {/* Related Videos */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-gray-900">More Videos</h3>
-                  
+
                   {relatedVideos.map((video) => (
-                    <div 
+                    <div
                       key={video.id}
                       className="bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
                       onClick={() => handleVideoClick(video.id)}
@@ -2412,7 +2421,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           <div className="absolute inset-0 flex items-center justify-center">
                             <Play className="h-4 w-4 text-white fill-current" />
                           </div>
-                          
+
                           {/* Duration Badge */}
                           <div className="absolute bottom-1 right-1 bg-black/80 text-white px-1 py-0.5 rounded text-xs">
                             {video.duration}
@@ -2424,13 +2433,13 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           <h4 className="font-medium text-gray-900 text-sm line-clamp-2 mb-1">
                             {video.title}
                           </h4>
-                          
+
                           <div className="text-xs text-gray-500 space-y-1">
                             <div className="flex items-center justify-between">
                               <span className="text-red-600 font-medium">{video.channelName}</span>
                               <span>{video.publishedAt}</span>
                             </div>
-                            
+
                             <div className="flex items-center space-x-2">
                               <span>{video.views} views</span>
                               <span>•</span>
@@ -2470,7 +2479,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Model FAQ Section - Exact copy from brand page */}
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} FAQ</h2>
-              
+
               <div className="space-y-4 max-w-4xl mx-auto">
                 {/* Dynamic FAQ Items from backend */}
                 {(model?.faqs && model.faqs.length > 0 ? model.faqs : [
@@ -2492,17 +2501,17 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                   }
                 ]).map((faq, index) => (
                   <div key={index} className="bg-gray-50 rounded-lg border border-gray-200">
-                    <button 
+                    <button
                       onClick={() => toggleFAQ(index)}
                       className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-100 transition-colors"
                     >
                       <span className="text-lg font-medium text-gray-900">
                         {faq.question}
                       </span>
-                      <svg 
-                        className={`h-5 w-5 text-gray-500 transition-transform ${openFAQ === index ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        className={`h-5 w-5 text-gray-500 transition-transform ${openFAQ === index ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -2521,7 +2530,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
             {/* Model Owner Reviews Section - Exact copy from brand page */}
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Owner Reviews</h2>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Rating Summary */}
                 <div className="lg:col-span-1">
@@ -2543,7 +2552,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
 
                     <div className="space-y-2 mb-6">
                       <h3 className="font-semibold text-gray-900 mb-3">Rating Breakdown</h3>
-                      
+
                       {/* 5 Star */}
                       <div className="flex items-center">
                         <span className="text-sm text-gray-600 w-8">5★</span>
@@ -2552,7 +2561,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         </div>
                         <span className="text-sm text-gray-600 w-12 text-right">856</span>
                       </div>
-                      
+
                       {/* 4 Star */}
                       <div className="flex items-center">
                         <span className="text-sm text-gray-600 w-8">4★</span>
@@ -2561,7 +2570,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         </div>
                         <span className="text-sm text-gray-600 w-12 text-right">324</span>
                       </div>
-                      
+
                       {/* 3 Star */}
                       <div className="flex items-center">
                         <span className="text-sm text-gray-600 w-8">3★</span>
@@ -2570,7 +2579,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         </div>
                         <span className="text-sm text-gray-600 w-12 text-right">189</span>
                       </div>
-                      
+
                       {/* 2 Star */}
                       <div className="flex items-center">
                         <span className="text-sm text-gray-600 w-8">2★</span>
@@ -2579,7 +2588,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                         </div>
                         <span className="text-sm text-gray-600 w-12 text-right">26</span>
                       </div>
-                      
+
                       {/* 1 Star */}
                       <div className="flex items-center">
                         <span className="text-sm text-gray-600 w-8">1★</span>
@@ -2603,7 +2612,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           <option>1 Star</option>
                         </select>
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Sort by:</label>
                         <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">

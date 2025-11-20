@@ -41,9 +41,8 @@ export default function HeroSection({ carData }: HeroSectionProps) {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-4 w-4 sm:h-5 sm:w-5 ${
-                    i < Math.floor(carData.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                  }`}
+                  className={`h-4 w-4 sm:h-5 sm:w-5 ${i < Math.floor(carData.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                    }`}
                 />
               ))}
             </div>
@@ -52,21 +51,36 @@ export default function HeroSection({ carData }: HeroSectionProps) {
               ({carData.reviewCount.toLocaleString()} reviews)
             </span>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsWishlisted(!isWishlisted)}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
-                isWishlisted
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${isWishlisted
                   ? 'bg-red-50 border-red-200 text-red-700'
                   : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-              }`}
+                }`}
             >
               <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
               <span className="hidden sm:inline">Wishlist</span>
             </button>
-            <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors">
+            <button
+              onClick={() => {
+                const shareData = {
+                  title: `${carData.fullName} - Check it out!`,
+                  text: `Check out the ${carData.fullName} on MotorOctane!`,
+                  url: window.location.href
+                };
+
+                if (navigator.share) {
+                  navigator.share(shareData).catch(console.error);
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('Link copied to clipboard!');
+                }
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors"
+            >
               <Share2 className="h-4 w-4" />
               <span className="hidden sm:inline">Share</span>
             </button>
@@ -86,7 +100,7 @@ export default function HeroSection({ carData }: HeroSectionProps) {
               fetchPriority="high"
               decoding="async"
             />
-            
+
             {/* Navigation Arrows */}
             <button
               onClick={prevImage}
@@ -103,7 +117,7 @@ export default function HeroSection({ carData }: HeroSectionProps) {
 
             {/* Action Buttons Overlay */}
             <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex gap-2">
-              <button 
+              <button
                 onClick={() => setIsFullscreen(true)}
                 className="w-8 h-8 sm:w-10 sm:h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
               >
@@ -126,9 +140,8 @@ export default function HeroSection({ carData }: HeroSectionProps) {
               <button
                 key={index}
                 onClick={() => setSelectedImage(index)}
-                className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                  selectedImage === index ? 'border-orange-500' : 'border-gray-200 hover:border-gray-300'
-                }`}
+                className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-orange-500' : 'border-gray-200 hover:border-gray-300'
+                  }`}
               >
                 <img
                   src={image || '/api/placeholder/80/60'}

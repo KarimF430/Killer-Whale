@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Calendar, Users, Fuel, Heart, Gauge } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
+import { useFavourites } from '@/lib/favourites-context'
 
 interface Car {
   id: string
@@ -42,6 +43,9 @@ const formatFuelType = (fuel: string): string => {
 }
 
 export default function CarCard({ car, onClick }: CarCardProps) {
+  const { isFavourite, toggleFavourite } = useFavourites()
+  const isFav = isFavourite(car.id)
+
   // Get on-road price (lightning fast with caching)
   const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
     exShowroomPrice: car.startingPrice,
@@ -72,9 +76,23 @@ export default function CarCard({ car, onClick }: CarCardProps) {
         )}
 
         {/* Wishlist Button */}
-        <button className="absolute top-3 right-3 p-2.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-red-50 active:bg-red-100 transition-colors z-10">
-          <Heart className="h-5 w-5 sm:h-5 sm:w-5 text-gray-400 hover:text-red-500 transition-colors" />
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleFavourite(car.id)
+          }}
+          className={`absolute top-3 right-3 p-2.5 sm:p-2 rounded-full shadow-md transition-all duration-200 z-10 ${isFav
+              ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
+              : 'bg-white hover:bg-red-50 active:bg-red-100'
+            }`}
+        >
+          <Heart
+            className={`h-5 w-5 sm:h-5 sm:w-5 transition-colors ${isFav ? 'text-white' : 'text-gray-400 hover:text-red-500'
+              }`}
+            fill={isFav ? 'currentColor' : 'none'}
+          />
         </button>
+
 
         {/* Car Image */}
         <div className="w-full h-full flex items-center justify-center">

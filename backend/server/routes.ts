@@ -1298,28 +1298,26 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           ? Math.min(...modelVariants.map(v => v.price || 0))
           : 0;
 
-        const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
-          ? model.fuelTypes
-          : Array.from(new Set(modelVariants.map(v => v.fuelType).filter(Boolean)));
+        const brand = brands.find(b => b.id === model.brandId);
 
-        const transmissions = model.transmissions && model.transmissions.length > 0
-          ? model.transmissions
-          : Array.from(new Set(modelVariants.map(v => v.transmission).filter(Boolean)));
+        // Extract fuel types and transmissions from variants
+        const fuelTypes = Array.from(new Set(modelVariants.map(v => v.fuelType).filter(Boolean)));
+        const transmissions = Array.from(new Set(modelVariants.map(v => v.transmission).filter(Boolean)));
 
         return {
           id: model.id,
           name: model.name,
-          brandId: model.brandId,
-          brandName: brandMap.get(model.brandId) || 'Unknown',
-          image: model.heroImage,
+          brand: brand?.name || 'Unknown',
+          brandName: brand?.name || 'Unknown',
+          image: model.heroImage || '/placeholder-car.jpg',
           startingPrice: lowestPrice,
           fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
           transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
-          seating: 5,
-          launchDate: model.launchDate,
-          isNew: model.isNew,
-          isPopular: model.isPopular,
-          popularRank: model.popularRank
+          seating: 5, // Default
+          launchDate: model.launchDate || new Date().toISOString(),
+          slug: model.id, // Use ID as slug since slug property might be missing
+          isNew: model.isNew || false,
+          isPopular: model.isPopular || false
         };
       });
 
@@ -1327,6 +1325,72 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('Get popular cars error:', error);
       res.status(500).json({ error: "Failed to fetch popular cars" });
+    }
+  });
+
+  // Get single car by ID (for Favourites)
+  app.get("/api/cars/:id", publicLimiter, async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      let model = await storage.getModel(id);
+
+      // If not found by ID, try finding by slug
+      if (!model) {
+        const allModels = await storage.getModels();
+
+        // To match by slug, we need brand names
+        const brands = await storage.getBrands();
+        const brandMap = new Map(brands.map(b => [b.id, b.name]));
+
+        model = allModels.find(m => {
+          // Direct ID match
+          if (m.id === id) return true;
+
+          // Construct slug: brand-model
+          const brandName = brandMap.get(m.brandId);
+          if (!brandName) return false;
+
+          const slug = `${brandName.toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`;
+          return slug === id;
+        });
+      }
+
+      if (!model) {
+        return res.status(404).json({ error: "Car not found" });
+      }
+
+      const brand = await storage.getBrand(model.brandId);
+      // Use getVariants(modelId) instead of getVariantsByModelId
+      const variants = await storage.getVariants(model.id);
+
+      const lowestPrice = variants.length > 0
+        ? Math.min(...variants.map((v: Variant) => v.price || 0))
+        : 0;
+
+      // Extract fuel types and transmissions
+      const fuelTypes = Array.from(new Set(variants.map((v: Variant) => v.fuelType).filter(Boolean)));
+      const transmissions = Array.from(new Set(variants.map((v: Variant) => v.transmission).filter(Boolean)));
+
+      const carData = {
+        id: model.id,
+        name: model.name,
+        brand: brand?.name || 'Unknown',
+        brandName: brand?.name || 'Unknown',
+        image: model.heroImage || '/placeholder-car.jpg',
+        startingPrice: lowestPrice,
+        fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
+        transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+        seating: 5, // Default
+        launchDate: model.launchDate || new Date().toISOString(),
+        slug: model.id, // Use ID as slug
+        isNew: model.isNew || false,
+        isPopular: model.isPopular || false
+      };
+
+      res.json(carData);
+    } catch (error) {
+      console.error(`Error fetching car ${req.params.id}:`, error);
+      res.status(500).json({ error: "Failed to fetch car details" });
     }
   });
 

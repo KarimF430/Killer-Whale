@@ -26,17 +26,33 @@ export default function CarDetailTabs({ activeTab, onTabChange }: CarDetailTabsP
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                className={`py-4 px-6 border-b-3 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
-                  activeTab === tab.id
+                className={`py-4 px-6 border-b-3 font-medium text-sm whitespace-nowrap transition-all duration-200 ${activeTab === tab.id
                     ? 'border-teal-500 text-teal-600 bg-teal-50/50'
                     : 'border-transparent text-gray-600 hover:text-teal-600 hover:border-teal-300 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
             ))}
           </div>
-          <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200">
+          <button
+            onClick={() => {
+              const shareData = {
+                title: document.title || 'MotorOctane',
+                text: 'Check out this car on MotorOctane!',
+                url: window.location.href
+              };
+
+              if (navigator.share) {
+                navigator.share(shareData).catch(console.error);
+              } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link copied to clipboard!');
+              }
+            }}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+            title="Share"
+          >
             <Share2 className="h-5 w-5" />
           </button>
         </div>
