@@ -83,77 +83,51 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
 
         console.log('🔍 Fetching models for brand ID:', brandId)
 
-        // Fetch models filtered by brand ID
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/models?brandId=${brandId}`)
+        // Fetch models with pre-calculated pricing data (optimized endpoint)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/models-with-pricing?brandId=${brandId}`)
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)
         }
 
-        const brandModels = await response.json()
-        console.log('📊 Models response:', brandModels)
+        const modelsWithPricing = await response.json()
+        console.log('📊 Models with pricing response:', modelsWithPricing)
 
-        if (brandModels && Array.isArray(brandModels)) {
-          console.log('🔍 Found models for brand:', brandModels.length)
+        if (modelsWithPricing && Array.isArray(modelsWithPricing)) {
+          console.log('🔍 Found models for brand:', modelsWithPricing.length)
 
-          if (brandModels.length === 0) {
+          if (modelsWithPricing.length === 0) {
             setError(`No models found for brand ID: ${brandId}`)
             return
-          }
-
-          // Fetch all variants to calculate prices and counts
-          const variantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants`)
-          let allVariants: any[] = []
-
-          if (variantsResponse.ok) {
-            allVariants = await variantsResponse.json()
-            console.log('📊 Total variants loaded:', allVariants.length)
           }
 
           // Get brand name for display
           const brandName = brand === 'maruti-suzuki' ? 'Maruti Suzuki' : brand.charAt(0).toUpperCase() + brand.slice(1)
 
-          // Process models with variant data
-          const modelsWithVariants = brandModels.map((model: any) => {
-            // Find variants for this model
-            const modelVariants = allVariants.filter((variant: any) => variant.modelId === model.id)
+          // Convert backend model to frontend format
+          const processedModels = modelsWithPricing.map((model: any) => ({
+            id: model.id,
+            name: model.name,
+            price: model.lowestPrice > 0 ? (model.lowestPrice / 100000).toFixed(2) : '0.00',
+            rating: 4.5, // Default rating
+            reviews: 1247, // Default reviews
+            power: '120 PS',
+            image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}`) : '/car-placeholder.jpg',
+            isNew: model.isNewModel || false,
+            seating: '5',
+            fuelType: model.fuelTypes ? model.fuelTypes.join('/') : 'Petrol',
+            transmission: model.transmissions ? model.transmissions.join('/') : 'Manual',
+            mileage: '18.5 kmpl',
+            variants: model.variantCount || 0,
+            slug: model.name.toLowerCase().replace(/\s+/g, '-'),
+            brandName: brandName
+          }))
 
-            // Calculate lowest price and variant count
-            let lowestPrice = 0
-            let variantCount = modelVariants.length
-
-            if (modelVariants.length > 0) {
-              const prices = modelVariants.map((v: any) => v.price || 0).filter(p => p > 0)
-              if (prices.length > 0) {
-                lowestPrice = Math.min(...prices)
-              }
-            }
-
-            // Convert backend model to frontend format
-            return {
-              id: model.id,
-              name: model.name,
-              price: lowestPrice > 0 ? (lowestPrice / 100000).toFixed(2) : '0.00',
-              rating: 4.5, // Default rating
-              reviews: 1247, // Default reviews
-              power: '120 PS',
-              image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${model.heroImage}`) : '/car-placeholder.jpg',
-              isNew: model.isNewModel || false,
-              seating: '5',
-              fuelType: model.fuelTypes ? model.fuelTypes.join('/') : 'Petrol',
-              transmission: model.transmissions ? model.transmissions.join('/') : 'Manual',
-              mileage: '18.5 kmpl',
-              variants: variantCount || 0,
-              slug: model.name.toLowerCase().replace(/\s+/g, '-'),
-              brandName: brandName
-            }
-          })
-
-          setModels(modelsWithVariants)
+          setModels(processedModels)
           setBrandData({ id: brandId, name: brandName, slug: brand })
-          console.log('✅ Models processed with variant data:', modelsWithVariants.length)
+          console.log('✅ Models processed with variant data:', processedModels.length)
         } else {
-          console.error('❌ Invalid models data structure:', brandModels)
+          console.error('❌ Invalid models data structure:', modelsWithPricing)
           setError('Invalid data structure received')
         }
       } catch (err) {

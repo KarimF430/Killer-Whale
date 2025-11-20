@@ -66,18 +66,16 @@ export default function NewLaunchedCars() {
         setLoading(true)
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
-        // Fetch all models, brands, and variants
-        const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models`),
-          fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants`)
+        // Fetch models with pricing and brands (optimized)
+        const [modelsRes, brandsRes] = await Promise.all([
+          fetch(`${backendUrl}/api/models-with-pricing`),
+          fetch(`${backendUrl}/api/brands`)
         ])
 
-        if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
+        if (!modelsRes.ok || !brandsRes.ok) {
           console.error('Failed to fetch data:', {
             models: modelsRes.status,
-            brands: brandsRes.status,
-            variants: variantsRes.status
+            brands: brandsRes.status
           })
           setNewLaunchedCars([])
           setLoading(false)
@@ -86,7 +84,6 @@ export default function NewLaunchedCars() {
 
         const models = await modelsRes.json()
         const brands = await brandsRes.json()
-        const variants = await variantsRes.json()
 
         // Create a map of brand IDs to brand names
         const brandMap = brands.reduce((acc: any, brand: any) => {
@@ -98,49 +95,30 @@ export default function NewLaunchedCars() {
         const newModels = models.filter((model: any) => model.isNew === true)
 
         // Process each new model
-        const processedCars: Car[] = newModels.map((model: any) => {
-          // Find all variants for this model
-          const modelVariants = variants.filter((v: any) => v.modelId === model.id)
-
-          // Find lowest price variant
-          const lowestPrice = modelVariants.length > 0
-            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-            : model.price || 0
-
-          // Get unique fuel types and transmissions from model or variants
-          const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
-            ? model.fuelTypes
-            : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-
-          const transmissions = model.transmissions && model.transmissions.length > 0
-            ? model.transmissions
-            : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-
-          // Get hero image from model (handle both full URLs and relative paths)
-          const heroImage = model.heroImage
-            ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
-            : ''
+        const processedCars = newModels.map((model: any) => {
+          const brandName = brandMap[model.brandId] || 'Unknown'
+          const slug = `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`
 
           return {
             id: model.id,
             name: model.name,
             brand: model.brandId,
-            brandName: brandMap[model.brandId] || 'Unknown',
-            image: heroImage,
-            startingPrice: lowestPrice,
-            fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
-            transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
-            seating: model.seating || 5,
-            launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
-            slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
-            isNew: model.isNew || false,
+            brandName: brandName,
+            image: model.heroImage || '/car-placeholder.jpg',
+            startingPrice: model.lowestPrice || 0,
+            fuelTypes: model.fuelTypes || ['Petrol'],
+            transmissions: model.transmissions || ['Manual'],
+            seating: 5,
+            launchDate: model.launchDate || 'Recently Launched',
+            slug: slug,
+            isNew: true,
             isPopular: model.isPopular || false,
             newRank: model.newRank || null
           }
         })
 
         // Sort by newRank (ascending order - 1, 2, 3...)
-        const sortedCars = processedCars.sort((a, b) => {
+        const sortedCars = processedCars.sort((a: any, b: any) => {
           const rankA = a.newRank || 999
           const rankB = b.newRank || 999
           return rankA - rankB

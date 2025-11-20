@@ -59,15 +59,12 @@ export default function PopularComparisons() {
 
       const comparisonsData = await comparisonsRes.json()
 
-      // Fetch all models and brands to populate comparison data
-      const modelsRes = await fetch(`${backendUrl}/api/models`)
+      // Fetch models with pricing and brands (optimized)
+      const modelsRes = await fetch(`${backendUrl}/api/models-with-pricing`)
       const models = await modelsRes.json()
 
       const brandsRes = await fetch(`${backendUrl}/api/brands`)
       const brands = await brandsRes.json()
-
-      const variantsRes = await fetch(`${backendUrl}/api/variants`)
-      const variants = await variantsRes.json()
 
       // Create brand map
       const brandMap: Record<string, string> = {}
@@ -84,42 +81,22 @@ export default function PopularComparisons() {
 
           if (!model1 || !model2) return null
 
-          // Get lowest prices
-          const model1Variants = variants.filter((v: any) => v.modelId === model1.id)
-          const model2Variants = variants.filter((v: any) => v.modelId === model2.id)
-
-          const model1Price = model1Variants.length > 0
-            ? Math.min(...model1Variants.map((v: any) => v.price || 0))
-            : model1.price || 0
-
-          const model2Price = model2Variants.length > 0
-            ? Math.min(...model2Variants.map((v: any) => v.price || 0))
-            : model2.price || 0
-
           return {
             id: comp.id,
             model1: {
               id: model1.id,
               name: model1.name,
               brand: brandMap[model1.brandId] || 'Unknown',
-              heroImage: model1.heroImage
-                ? (model1.heroImage.startsWith('http')
-                  ? model1.heroImage
-                  : `${backendUrl}${model1.heroImage}`)
-                : '',
-              startingPrice: model1Price,
+              heroImage: model1.heroImage || '',
+              startingPrice: model1.lowestPrice || 0,
               fuelTypes: model1.fuelTypes || ['Petrol']
             },
             model2: {
               id: model2.id,
               name: model2.name,
               brand: brandMap[model2.brandId] || 'Unknown',
-              heroImage: model2.heroImage
-                ? (model2.heroImage.startsWith('http')
-                  ? model2.heroImage
-                  : `${backendUrl}${model2.heroImage}`)
-                : '',
-              startingPrice: model2Price,
+              heroImage: model2.heroImage || '',
+              startingPrice: model2.lowestPrice || 0,
               fuelTypes: model2.fuelTypes || ['Petrol']
             }
           }

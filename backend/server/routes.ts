@@ -1181,6 +1181,41 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(models);
   });
 
+  // Optimized endpoint: Models with aggregated pricing data (no need to fetch all variants)
+  app.get("/api/models-with-pricing", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
+    try {
+      const brandId = req.query.brandId as string | undefined;
+      const models = await storage.getModels(brandId);
+      const allVariants = await storage.getVariants();
+
+      // Aggregate variant data for each model
+      const modelsWithPricing = models.map(model => {
+        const modelVariants = allVariants.filter(v => v.modelId === model.id);
+
+        let lowestPrice = 0;
+        let variantCount = modelVariants.length;
+
+        if (modelVariants.length > 0) {
+          const prices = modelVariants.map(v => v.price || 0).filter(p => p > 0);
+          if (prices.length > 0) {
+            lowestPrice = Math.min(...prices);
+          }
+        }
+
+        return {
+          ...model,
+          lowestPrice,
+          variantCount
+        };
+      });
+
+      res.json(modelsWithPricing);
+    } catch (error) {
+      console.error('Error getting models with pricing:', error);
+      res.status(500).json({ error: "Failed to get models with pricing" });
+    }
+  });
+
   app.get("/api/models/:id", async (req, res) => {
     const model = await storage.getModel(req.params.id);
     if (!model) {
