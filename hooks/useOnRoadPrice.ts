@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { calculateOnRoadPrice, getRTOCharges } from '@/lib/rto-data-optimized'
+import { subscribeToCityChange } from '@/lib/city-events'
 
 interface PriceConfig {
   exShowroomPrice: number
@@ -28,7 +29,7 @@ const priceCache = new Map<string, number>()
  */
 export function useOnRoadPrice(config: PriceConfig): OnRoadPriceResult {
   const { exShowroomPrice, fuelType, showBreakup = false } = config
-  
+
   const [selectedCity, setSelectedCity] = useState<string>('Mumbai, Maharashtra')
   const [isOnRoadMode, setIsOnRoadMode] = useState<boolean>(false)
 
@@ -43,6 +44,15 @@ export function useOnRoadPrice(config: PriceConfig): OnRoadPriceResult {
 
   // Listen for city changes
   useEffect(() => {
+    const handleCityChange = (newCity: string) => {
+      setSelectedCity(newCity)
+      setIsOnRoadMode(true)
+    }
+
+    // Subscribe to custom event (same tab)
+    const unsubscribe = subscribeToCityChange(handleCityChange)
+
+    // Also listen to storage event (cross-tab)
     const handleStorageChange = () => {
       const savedCity = localStorage.getItem('selectedCity')
       if (savedCity) {
@@ -50,21 +60,24 @@ export function useOnRoadPrice(config: PriceConfig): OnRoadPriceResult {
         setIsOnRoadMode(true)
       }
     }
-
     window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+
+    return () => {
+      unsubscribe()
+      window.removeEventListener('storage', handleStorageChange)
+    }
   }, [])
 
   // Memoized calculation - only recalculates when inputs change
   const result = useMemo(() => {
     const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
-    
+
     // Create cache key
     const cacheKey = `${exShowroomPrice}-${state}-${fuelType}`
-    
+
     // Check cache first
     let onRoadPrice = priceCache.get(cacheKey)
-    
+
     if (!onRoadPrice) {
       // Calculate and cache
       const breakup = calculateOnRoadPrice(exShowroomPrice, state, fuelType)
@@ -73,7 +86,7 @@ export function useOnRoadPrice(config: PriceConfig): OnRoadPriceResult {
     }
 
     // Get RTO for breakup if needed
-    const rtoCharges = showBreakup 
+    const rtoCharges = showBreakup
       ? getRTOCharges(state, fuelType, exShowroomPrice)
       : 0
 
@@ -111,6 +124,15 @@ export function useBatchOnRoadPrice(
 
   // Listen for city changes
   useEffect(() => {
+    const handleCityChange = (newCity: string) => {
+      setSelectedCity(newCity)
+      setIsOnRoadMode(true)
+    }
+
+    // Subscribe to custom event (same tab)
+    const unsubscribe = subscribeToCityChange(handleCityChange)
+
+    // Also listen to storage event (cross-tab)
     const handleStorageChange = () => {
       const savedCity = localStorage.getItem('selectedCity')
       if (savedCity) {
@@ -120,7 +142,10 @@ export function useBatchOnRoadPrice(
     }
 
     window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+    return () => {
+      unsubscribe()
+      window.removeEventListener('storage', handleStorageChange)
+    }
   }, [])
 
   // Batch calculation - memoized
@@ -131,9 +156,9 @@ export function useBatchOnRoadPrice(
 
     items.forEach(item => {
       const cacheKey = `${item.exShowroomPrice}-${state}-${item.fuelType}`
-      
+
       let onRoadPrice = priceCache.get(cacheKey)
-      
+
       if (!onRoadPrice) {
         const breakup = calculateOnRoadPrice(item.exShowroomPrice, state, item.fuelType)
         onRoadPrice = breakup.totalOnRoadPrice

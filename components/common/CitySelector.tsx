@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Search, MapPin, X } from 'lucide-react'
+import { dispatchCityChange } from '@/lib/city-events'
 
 interface City {
   id: string
@@ -55,7 +56,7 @@ export default function CitySelector({ isOpen, onClose, selectedCity, onCitySele
     { id: 'vasai', name: 'Vasai-Virar', state: 'Maharashtra', icon: '🏖️' }
   ]
 
-  const filteredCities = allCities.filter(city => 
+  const filteredCities = allCities.filter(city =>
     city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     city.state.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -64,6 +65,8 @@ export default function CitySelector({ isOpen, onClose, selectedCity, onCitySele
     // Save to localStorage for persistence across pages
     if (typeof window !== 'undefined') {
       localStorage.setItem('selectedCity', cityName)
+      // Dispatch custom event for instant updates
+      dispatchCityChange(cityName)
     }
     onCitySelect(cityName)
     onClose()
