@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Search, ArrowLeft, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useDebounce } from '@/hooks/useDebounce'
 
 interface CarModel {
   id: string
@@ -13,15 +14,25 @@ interface CarModel {
   modelSlug: string
   slug: string
   heroImage: string
-  startingPrice: number
+}
+
+interface SearchResponse {
+  results: CarModel[]
+  count: number
+  took: number
+  query: string
 }
 
 export default function SearchPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<CarModel[]>([])
-  const [allModels, setAllModels] = useState<CarModel[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [searchTime, setSearchTime] = useState<number>(0)
+  const abortControllerRef = useRef<AbortController | null>(null)
+
+  // Debounce search query by 300ms
+  const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
   // Get query parameter from URL on mount
   useEffect(() => {
@@ -32,69 +43,58 @@ export default function SearchPage() {
     }
   }, [])
 
-  // Fetch all models on component mount
+  // Search functionality with debouncing
   useEffect(() => {
-    const fetchModels = async () => {
+    const performSearch = async () => {
+      // Cancel previous request if exists
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+
+      if (debouncedSearchQuery.trim() === '' || debouncedSearchQuery.length < 2) {
+        setSearchResults([])
+        setSearchTime(0)
+        return
+      }
+
       try {
         setLoading(true)
+
+        // Create new abort controller for this request
+        abortControllerRef.current = new AbortController()
+
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-        const [modelsRes, brandsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models`),
-          fetch(`${backendUrl}/api/brands`)
-        ])
-        
-        const models = await modelsRes.json()
-        const brands = await brandsRes.json()
-        
-        // Create brand map
-        const brandMap = brands.reduce((acc: any, brand: any) => {
-          acc[brand.id] = brand.name
-          return acc
-        }, {})
-        
-        // Process models
-        const processedModels = models.map((model: any) => {
-          const brandSlug = (brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')
-          const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-')
-          return {
-            id: model.id,
-            name: model.name,
-            brandName: brandMap[model.brandId] || 'Unknown',
-            brandSlug: brandSlug,
-            modelSlug: modelSlug,
-            slug: `${brandSlug}-${modelSlug}`,
-            heroImage: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`) : '',
-            startingPrice: 0
-          }
-        })
-        
-        setAllModels(processedModels)
-      } catch (error) {
-        console.error('Error fetching models:', error)
+        const response = await fetch(
+          `${backendUrl}/api/search?q=${encodeURIComponent(debouncedSearchQuery)}&limit=20`,
+          { signal: abortControllerRef.current.signal }
+        )
+
+        if (!response.ok) {
+          throw new Error('Search failed')
+        }
+
+        const data: SearchResponse = await response.json()
+        setSearchResults(data.results)
+        setSearchTime(data.took)
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Error searching:', error)
+          setSearchResults([])
+        }
       } finally {
         setLoading(false)
       }
     }
-    
-    fetchModels()
-  }, [])
 
-  // Search functionality
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setSearchResults([])
-      return
+    performSearch()
+
+    // Cleanup function
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
     }
-    
-    const query = searchQuery.toLowerCase()
-    const filtered = allModels.filter(model => 
-      model.name.toLowerCase().includes(query) ||
-      model.brandName.toLowerCase().includes(query) ||
-      `${model.brandName} ${model.name}`.toLowerCase().includes(query)
-    )
-    
-    setSearchResults(filtered)
-  }, [searchQuery, allModels])
+  }, [debouncedSearchQuery])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -133,6 +133,13 @@ export default function SearchPage() {
               )}
             </div>
           </div>
+
+          {/* Search Stats */}
+          {searchTime > 0 && (
+            <div className="mt-2 text-xs text-gray-500">
+              Found {searchResults.length} results in {searchTime}ms
+            </div>
+          )}
         </div>
       </div>
 
@@ -150,14 +157,14 @@ export default function SearchPage() {
               </div>
             ))}
           </div>
-        ) : searchQuery.trim() === '' ? (
+        ) : searchQuery.trim() === '' || searchQuery.length < 2 ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Search className="h-7 w-7 text-red-600" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Search for Cars</h2>
             <p className="text-sm text-gray-500 mb-6">Find cars by name, brand, or model</p>
-            
+
             {/* Popular Searches - Compact */}
             <div className="mt-6">
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Popular Searches</h3>
@@ -213,15 +220,15 @@ export default function SearchPage() {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#9CA3AF' className="w-16 h-16">
-                            <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/>
-                            <circle cx='100' cy='220' r='25' fill='#6B7280'/>
-                            <circle cx='300' cy='220' r='25' fill='#6B7280'/>
-                            <path d='M80 110h240l-20-30H100z' fill='#9CA3AF'/>
+                            <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z' />
+                            <circle cx='100' cy='220' r='25' fill='#6B7280' />
+                            <circle cx='300' cy='220' r='25' fill='#6B7280' />
+                            <path d='M80 110h240l-20-30H100z' fill='#9CA3AF' />
                           </svg>
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Car Info - Compact */}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-sm mb-0.5 group-hover:text-red-600 transition-colors">

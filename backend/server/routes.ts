@@ -1247,6 +1247,89 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
+  // FAST SEARCH API - Optimized for instant search results
+  app.get("/api/search", publicLimiter, async (req, res) => {
+    try {
+      const startTime = Date.now();
+      const query = (req.query.q as string || '').trim();
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+
+      if (!query || query.length < 2) {
+        return res.json({ results: [], count: 0, took: 0 });
+      }
+
+      const mongoose = (await import('mongoose')).default;
+      const db = mongoose.connection.db;
+
+      if (!db) {
+        throw new Error('Database connection not established');
+      }
+
+      // Optimized search with regex (case-insensitive)
+      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+
+      // Search in both models and brands collections
+      const [models, brands] = await Promise.all([
+        db.collection('models').find({
+          $or: [
+            { name: searchRegex },
+            { brandId: searchRegex }
+          ],
+          status: 'active'
+        }, {
+          projection: {
+            _id: 0,
+            id: 1,
+            name: 1,
+            brandId: 1,
+            heroImage: 1,
+            slug: 1
+          }
+        }).limit(limit).toArray(),
+
+        db.collection('brands').find({}, {
+          projection: { _id: 0, id: 1, name: 1 }
+        }).toArray()
+      ]);
+
+      // Create brand map for quick lookup
+      const brandMap = brands.reduce((acc: any, brand: any) => {
+        acc[brand.id] = brand.name;
+        return acc;
+      }, {});
+
+      // Process results with brand names
+      const results = models.map((model: any) => {
+        const brandName = brandMap[model.brandId] || 'Unknown';
+        const brandSlug = brandName.toLowerCase().replace(/\s+/g, '-');
+        const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-');
+
+        return {
+          id: model.id,
+          name: model.name,
+          brandName: brandName,
+          brandSlug: brandSlug,
+          modelSlug: modelSlug,
+          slug: `${brandSlug}-${modelSlug}`,
+          heroImage: model.heroImage || ''
+        };
+      });
+
+      const took = Date.now() - startTime;
+
+      res.json({
+        results,
+        count: results.length,
+        took,
+        query
+      });
+    } catch (error) {
+      console.error('Error in search:', error);
+      res.status(500).json({ error: "Search failed" });
+    }
+  });
+
+
   app.get("/api/models/:id", async (req, res) => {
     const model = await storage.getModel(req.params.id);
     if (!model) {
