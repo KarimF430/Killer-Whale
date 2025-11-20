@@ -14,6 +14,7 @@ export interface IStorage {
 
   // Models
   getModels(brandId?: string): Promise<Model[]>;
+  getModelsWithPricing(brandId?: string): Promise<any[]>;
   getModel(id: string): Promise<Model | undefined>;
   createModel(model: InsertModel): Promise<Model>;
   updateModel(id: string, model: Partial<InsertModel>): Promise<Model | undefined>;

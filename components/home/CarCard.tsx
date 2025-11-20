@@ -42,6 +42,30 @@ const formatFuelType = (fuel: string): string => {
   return fuel
 }
 
+// Helper function to format launch date
+const formatLaunchDate = (dateString: string): string => {
+  if (!dateString || dateString === 'Recently Launched' || dateString === 'Launched') return 'Recently Launched'
+
+  // Remove "Launched " prefix if present to parse the date
+  const cleanDate = dateString.replace(/^Launched\s+/, '')
+
+  try {
+    const date = new Date(cleanDate)
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return dateString.startsWith('Launched') ? dateString : `Launched ${dateString}`
+    }
+
+    const month = date.toLocaleString('default', { month: 'short' })
+    const year = date.getFullYear()
+
+    return `Launched ${month} ${year}`
+  } catch (e) {
+    return dateString.startsWith('Launched') ? dateString : `Launched ${dateString}`
+  }
+}
+
 export default function CarCard({ car, onClick }: CarCardProps) {
   const { isFavourite, toggleFavourite } = useFavourites()
   const isFav = isFavourite(car.id)
@@ -133,7 +157,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
         <div className="space-y-3 text-sm text-gray-600 mb-4">
           <div className="flex items-center">
             <Calendar className="h-4 w-4 mr-3 text-gray-400" />
-            <span>{car.launchDate}</span>
+            <span>{formatLaunchDate(car.launchDate)}</span>
           </div>
           <div className="flex items-center">
             <Fuel className="h-4 w-4 mr-3 text-gray-400" />
