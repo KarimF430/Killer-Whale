@@ -372,7 +372,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
 
       try {
         setLoadingVariants(true)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}&fields=minimal`)
         if (response.ok) {
           const variants = await response.json()
           setModelVariants(variants)
@@ -678,7 +678,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models`),
           fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants`)
+          fetch(`${backendUrl}/api/variants?fields=minimal`)
         ])
 
         if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {

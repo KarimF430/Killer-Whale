@@ -237,7 +237,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
           }
 
           // Fetch variants for this model
-          const variantsRes = await fetch(`${backendUrl}/api/variants?modelId=${foundModel.id}`)
+          const variantsRes = await fetch(`${backendUrl}/api/variants?modelId=${foundModel.id}&fields=minimal`)
           const variants = await variantsRes.json()
 
           console.log('✅ Fetched variants:', variants.length)
@@ -307,7 +307,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models`),
           fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants`)
+          fetch(`${backendUrl}/api/variants?fields=minimal`)
         ])
 
         if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
@@ -440,7 +440,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models`),
           fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants`)
+          fetch(`${backendUrl}/api/variants?fields=minimal`)
         ])
 
         if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
@@ -724,8 +724,8 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
                 className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeSection === section.id
-                    ? 'border-red-600 text-red-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 {section.name}
@@ -998,8 +998,8 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
                 className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
-                    ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
               >
                 {filter}

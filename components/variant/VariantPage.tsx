@@ -146,7 +146,7 @@ export default function VariantPage({
         }
 
         // Finally fetch variants for this model only
-        const variantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${foundModel.id}`)
+        const variantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${foundModel.id}&fields=minimal`)
         if (!variantsResponse.ok) throw new Error('Failed to fetch variants')
         const variants = await variantsResponse.json()
 

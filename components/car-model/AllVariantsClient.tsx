@@ -21,10 +21,10 @@ export default function AllVariantsClient({ model, brandSlug, modelSlug }: AllVa
   useEffect(() => {
     const fetchVariants = async () => {
       if (!model?.id) return
-      
+
       try {
         setLoadingVariants(true)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}&fields=minimal`)
         if (response.ok) {
           const variants = await response.json()
           setModelVariants(variants)
@@ -81,7 +81,7 @@ export default function AllVariantsClient({ model, brandSlug, modelSlug }: AllVa
     fuelTypes.forEach(fuel => filters.push(fuel))
     if (hasAutomatic) filters.push('Automatic')
     if (hasValueVariants) filters.push('Value for Money Variants')
-    
+
     return filters
   }
 
@@ -99,7 +99,7 @@ export default function AllVariantsClient({ model, brandSlug, modelSlug }: AllVa
       case 'CNG':
         return allVariants.filter(variant => variant.fuel === 'CNG')
       case 'Automatic':
-        return allVariants.filter(variant => 
+        return allVariants.filter(variant =>
           variant.transmission && isAutomaticTransmission(variant.transmission)
         )
       case 'Value for Money Variants':
@@ -123,7 +123,7 @@ export default function AllVariantsClient({ model, brandSlug, modelSlug }: AllVa
     // Use provided slugs first, fallback to constructing from model data
     const finalBrandSlug = brandSlug || (model?.brandName?.toLowerCase().replace(/\s+/g, '-') + '-cars')
     const finalModelSlug = modelSlug || model?.name?.toLowerCase().replace(/\s+/g, '-')
-    
+
     if (finalBrandSlug && finalModelSlug) {
       router.push(`/${finalBrandSlug}/${finalModelSlug}`)
     } else {
@@ -156,11 +156,10 @@ export default function AllVariantsClient({ model, brandSlug, modelSlug }: AllVa
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  activeFilter === filter
+                className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
                     ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {filter}
               </button>

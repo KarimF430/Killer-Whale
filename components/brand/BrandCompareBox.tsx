@@ -70,7 +70,7 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
       const brandsRes = await fetch(`${backendUrl}/api/brands`)
       const brands = await brandsRes.json()
 
-      const variantsRes = await fetch(`${backendUrl}/api/variants`)
+      const variantsRes = await fetch(`${backendUrl}/api/variants?fields=minimal`)
       const variants = await variantsRes.json()
 
       // Create brand map

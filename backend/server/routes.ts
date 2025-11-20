@@ -1181,31 +1181,45 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(models);
   });
 
-  // Optimized endpoint: Models with aggregated pricing data (no need to fetch all variants)
+  // Optimized endpoint: Models with aggregated pricing data (MongoDB aggregation - NO variant fetching!)
   app.get("/api/models-with-pricing", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
     try {
       const brandId = req.query.brandId as string | undefined;
-      const models = await storage.getModels(brandId);
-      const allVariants = await storage.getVariants();
 
-      // Aggregate variant data for each model
-      const modelsWithPricing = models.map(model => {
-        const modelVariants = allVariants.filter(v => v.modelId === model.id);
+      // Use MongoDB aggregation to calculate pricing WITHOUT fetching all variants
+      const mongoose = (await import('mongoose')).default;
+      const db = mongoose.connection.db;
 
-        let lowestPrice = 0;
-        let variantCount = modelVariants.length;
+      if (!db) {
+        throw new Error('Database connection not established');
+      }
 
-        if (modelVariants.length > 0) {
-          const prices = modelVariants.map(v => v.price || 0).filter(p => p > 0);
-          if (prices.length > 0) {
-            lowestPrice = Math.min(...prices);
+      // Step 1: Aggregate variant pricing by modelId
+      const variantAggregation = await db.collection('variants').aggregate([
+        {
+          $group: {
+            _id: '$modelId',
+            lowestPrice: { $min: '$price' },
+            variantCount: { $sum: 1 }
           }
         }
+      ]).toArray();
 
+      // Create a map for quick lookup
+      const pricingMap = new Map(
+        variantAggregation.map(item => [item._id, { lowestPrice: item.lowestPrice, variantCount: item.variantCount }])
+      );
+
+      // Step 2: Fetch models (with optional brand filter)
+      const models = await storage.getModels(brandId);
+
+      // Step 3: Merge pricing data with models
+      const modelsWithPricing = models.map(model => {
+        const pricing = pricingMap.get(model.id) || { lowestPrice: 0, variantCount: 0 };
         return {
           ...model,
-          lowestPrice,
-          variantCount
+          lowestPrice: pricing.lowestPrice,
+          variantCount: pricing.variantCount
         };
       });
 
@@ -1433,6 +1447,46 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.get("/api/variants", publicLimiter, redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
     const modelId = req.query.modelId as string | undefined;
     const brandId = req.query.brandId as string | undefined;
+    const fields = req.query.fields as string | undefined; // 'minimal' for list views
+
+    // If minimal fields requested, use MongoDB projection for faster response
+    if (fields === 'minimal') {
+      try {
+        const mongoose = (await import('mongoose')).default;
+        const db = mongoose.connection.db;
+
+        if (!db) {
+          throw new Error('Database connection not established');
+        }
+
+        const filter: any = {};
+        if (modelId) filter.modelId = modelId;
+        if (brandId) filter.brandId = brandId;
+
+        // Only fetch fields needed for display (id, name, price, fuel, transmission)
+        const variants = await db.collection('variants')
+          .find(filter)
+          .project({
+            id: 1,
+            name: 1,
+            price: 1,
+            fuelType: 1,
+            transmission: 1,
+            modelId: 1,
+            brandId: 1,
+            _id: 0
+          })
+          .sort({ price: 1 })
+          .toArray();
+
+        return res.json(variants);
+      } catch (error) {
+        console.error('Error fetching minimal variants:', error);
+        return res.status(500).json({ error: "Failed to fetch variants" });
+      }
+    }
+
+    // Default: fetch all fields (for variant detail pages)
     const variants = await storage.getVariants(modelId, brandId);
     res.json(variants);
   });
