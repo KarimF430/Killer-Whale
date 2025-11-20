@@ -1554,12 +1554,12 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       const variants = await storage.getVariants(model.id);
 
       const lowestPrice = variants.length > 0
-        ? Math.min(...variants.map((v: Variant) => v.price || 0))
+        ? Math.min(...variants.map((v: any) => v.price || 0))
         : 0;
 
       // Extract fuel types and transmissions
-      const fuelTypes = Array.from(new Set(variants.map((v: Variant) => v.fuelType).filter(Boolean)));
-      const transmissions = Array.from(new Set(variants.map((v: Variant) => v.transmission).filter(Boolean)));
+      const fuelTypes = Array.from(new Set(variants.map((v: any) => v.fuelType).filter(Boolean)));
+      const transmissions = Array.from(new Set(variants.map((v: any) => v.transmission).filter(Boolean)));
 
       const carData = {
         id: model.id,

@@ -33,13 +33,13 @@ export default function HeroSection() {
                 value={searchQuery}
                 onClick={handleInputClick}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for cars by brand, model, or features..."
+                placeholder="Search Cars"
                 className="w-full px-6 py-4 text-gray-900 placeholder-gray-500 text-lg bg-gray-100 rounded-2xl border-0 focus:outline-none focus:ring-2 focus:ring-red-500 pr-20 cursor-pointer"
                 aria-label="Search for cars"
                 readOnly
               />
               <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                <button 
+                <button
                   className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                   aria-label="Voice search"
                 >
@@ -49,7 +49,7 @@ export default function HeroSection() {
             </div>
 
             {/* Search Button */}
-            <button 
+            <button
               onClick={handleInputClick}
               className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-200 flex items-center justify-center space-x-3 text-lg"
             >
