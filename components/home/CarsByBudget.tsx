@@ -200,8 +200,8 @@ export default function CarsByBudget() {
             key={budget.id}
             onClick={() => setSelectedBudget(budget.id)}
             className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${selectedBudget === budget.id
-                ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             {budget.label}
@@ -238,36 +238,49 @@ export default function CarsByBudget() {
             className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {currentCars.map((car, index) => (
-              <>
-                <CarCard
-                  key={car.id}
-                  car={car}
-                  onClick={() => {
-                    const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                    const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                    window.location.href = `/${brandSlug}-cars/${modelSlug}`
-                  }}
-                />
-                {/* Insert "See More" tile after every 10th car */}
-                {(index + 1) % 10 === 0 && index !== currentCars.length - 1 && (
-                  <Link
-                    href={`/cars-by-budget/${selectedBudget}`}
-                    key={`see-more-${index}`}
-                    className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center p-8"
-                  >
-                    <div className="text-center">
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        See More
-                      </h3>
-                      <p className="text-xl font-semibold text-white">
-                        {budgetRanges.find(b => b.id === selectedBudget)?.label} Cars
-                      </p>
-                    </div>
-                  </Link>
-                )}
-              </>
+            {currentCars.slice(0, 10).map((car, index) => (
+              <CarCard
+                key={car.id}
+                car={car}
+                onClick={() => {
+                  const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                  const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                  window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                }}
+              />
             ))}
+
+            {/* See More tile - only show if there are more than 10 cars */}
+            {currentCars.length > 10 && (
+              <Link
+                href={`/cars-by-budget/${selectedBudget}`}
+                className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+              >
+                {/* Top section matching image height */}
+                <div className="h-48 flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-500">
+                  <div className="text-center px-6">
+                    <h3 className="text-4xl font-bold text-white mb-2">
+                      See More
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Bottom section matching card info height */}
+                <div className="p-5 bg-gradient-to-br from-orange-500 to-orange-600">
+                  <h4 className="text-2xl font-bold text-white text-center mb-4">
+                    {budgetRanges.find(b => b.id === selectedBudget)?.label} Cars
+                  </h4>
+
+                  {/* Spacer to match card height */}
+                  <div className="h-24"></div>
+
+                  {/* Button matching View Details */}
+                  <div className="w-full bg-white text-orange-600 py-2.5 rounded-lg font-semibold text-center shadow-md">
+                    View All Cars
+                  </div>
+                </div>
+              </Link>
+            )}
           </div>
         )}
       </div>

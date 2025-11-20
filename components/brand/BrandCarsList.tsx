@@ -50,44 +50,31 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
       try {
         setLoading(true)
         setError(null)
-        
+
         console.log('🔍 Fetching models for brand:', brand)
-        
-        // First try known brand IDs for speed (using semantic IDs)
-        const knownBrandIds: { [key: string]: string } = {
-          'honda': 'brand-honda',
-          'maruti-suzuki': 'brand-maruti-suzuki',
-          'maruti': 'brand-maruti-suzuki',
-          'tata': 'brand-tata',
-          'hyundai': 'brand-hyundai',
-          'kia': 'brand-kia'
-        }
-        
-        let brandId = knownBrandIds[brand.toLowerCase()]
-        
-        // If not in known brands, fetch from API dynamically
-        if (!brandId) {
-          console.log('🔍 Brand not in known list, fetching from API...')
-          try {
-            const brandsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/brands`)
-            if (brandsResponse.ok) {
-              const brands = await brandsResponse.json()
-              const foundBrand = brands.find((b: any) => {
-                const normalizedBrandName = b.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-                return normalizedBrandName === brand.toLowerCase()
-              })
-              if (foundBrand) {
-                brandId = foundBrand.id
-                console.log('✅ Found brand ID from API:', brandId, 'for', foundBrand.name)
-              }
+
+        // Fetch brand ID from API
+        let brandId: string | undefined
+
+        try {
+          const brandsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/brands`)
+          if (brandsResponse.ok) {
+            const brands = await brandsResponse.json()
+            const foundBrand = brands.find((b: any) => {
+              const normalizedBrandName = b.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+              return normalizedBrandName === brand.toLowerCase()
+            })
+            if (foundBrand) {
+              brandId = foundBrand.id
+              console.log('✅ Found brand ID from API:', brandId, 'for', foundBrand.name)
             }
-          } catch (apiError) {
-            console.error('❌ Error fetching brands from API:', apiError)
           }
+        } catch (apiError) {
+          console.error('❌ Error fetching brands from API:', apiError)
         }
-        
+
         console.log('🔍 Final brand ID:', brandId)
-        
+
         if (!brandId) {
           console.error('❌ No brand ID found for:', brand)
           setError(`Brand "${brand}" not found`)
@@ -95,53 +82,53 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
         }
 
         console.log('🔍 Fetching models for brand ID:', brandId)
-        
+
         // Fetch models filtered by brand ID
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/models?brandId=${brandId}`)
-        
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)
         }
-        
+
         const brandModels = await response.json()
         console.log('📊 Models response:', brandModels)
-        
+
         if (brandModels && Array.isArray(brandModels)) {
           console.log('🔍 Found models for brand:', brandModels.length)
-          
+
           if (brandModels.length === 0) {
             setError(`No models found for brand ID: ${brandId}`)
             return
           }
-          
+
           // Fetch all variants to calculate prices and counts
           const variantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants`)
           let allVariants: any[] = []
-          
+
           if (variantsResponse.ok) {
             allVariants = await variantsResponse.json()
             console.log('📊 Total variants loaded:', allVariants.length)
           }
-          
+
           // Get brand name for display
           const brandName = brand === 'maruti-suzuki' ? 'Maruti Suzuki' : brand.charAt(0).toUpperCase() + brand.slice(1)
-          
+
           // Process models with variant data
           const modelsWithVariants = brandModels.map((model: any) => {
             // Find variants for this model
             const modelVariants = allVariants.filter((variant: any) => variant.modelId === model.id)
-            
+
             // Calculate lowest price and variant count
             let lowestPrice = 0
             let variantCount = modelVariants.length
-            
+
             if (modelVariants.length > 0) {
               const prices = modelVariants.map((v: any) => v.price || 0).filter(p => p > 0)
               if (prices.length > 0) {
                 lowestPrice = Math.min(...prices)
               }
             }
-            
+
             // Convert backend model to frontend format
             return {
               id: model.id,
@@ -161,7 +148,7 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
               brandName: brandName
             }
           })
-          
+
           setModels(modelsWithVariants)
           setBrandData({ id: brandId, name: brandName, slug: brand })
           console.log('✅ Models processed with variant data:', modelsWithVariants.length)
@@ -187,7 +174,7 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
     // Filter by fuel type
     if (filters.fuelType.length > 0) {
       const modelFuelType = model.fuelType.toLowerCase()
-      const hasMatchingFuel = filters.fuelType.some(filter => 
+      const hasMatchingFuel = filters.fuelType.some(filter =>
         modelFuelType.includes(filter)
       )
       if (!hasMatchingFuel) return false
@@ -223,57 +210,57 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
     <>
       {/* Filters Section */}
       <BrandCarFilters filters={filters} onFilterChange={setFilters} />
-      
+
       <section className="bg-white py-4">
         <div className="max-w-6xl mx-auto px-4">
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex justify-center items-center py-12">
-            <div className="text-gray-500">Loading models...</div>
-          </div>
-        )}
-
-
-        {/* Show error */}
-        {error && (
-          <div className="flex flex-col justify-center items-center py-12 space-y-4">
-            <div className="text-red-500 text-xl font-bold">Error: {error}</div>
-            <div className="text-gray-600 text-sm">
-              <p>Brand slug: {brand}</p>
-              <p>Please check the browser console for more details.</p>
-              <p className="mt-2">Trying to fetch from: {process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/brands</p>
+          {/* Loading State */}
+          {loading && (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-gray-500">Loading models...</div>
             </div>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Retry
-            </button>
-          </div>
-        )}
+          )}
 
-        {/* Car List */}
-        {!loading && !error && (
-          <div className="space-y-3">
-            {models.length === 0 ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="text-gray-500">No models found for {brandName}</div>
+
+          {/* Show error */}
+          {error && (
+            <div className="flex flex-col justify-center items-center py-12 space-y-4">
+              <div className="text-red-500 text-xl font-bold">Error: {error}</div>
+              <div className="text-gray-600 text-sm">
+                <p>Brand slug: {brand}</p>
+                <p>Please check the browser console for more details.</p>
+                <p className="mt-2">Trying to fetch from: {process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/brands</p>
               </div>
-            ) : (
-              sortedModels.map((car) => (
-                <BrandCarCard
-                  key={car.id}
-                  car={car}
-                  brandSlug={brand}
-                  brandName={brandData?.name}
-                />
-              ))
-            )}
-          </div>
-        )}
-      </div>
-    </section>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Car List */}
+          {!loading && !error && (
+            <div className="space-y-3">
+              {models.length === 0 ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="text-gray-500">No models found for {brandName}</div>
+                </div>
+              ) : (
+                sortedModels.map((car) => (
+                  <BrandCarCard
+                    key={car.id}
+                    car={car}
+                    brandSlug={brand}
+                    brandName={brandData?.name}
+                  />
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </section>
     </>
   )
 }
