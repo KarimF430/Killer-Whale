@@ -55,7 +55,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
   return (
     <div
       onClick={onClick}
-      className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer group"
+      className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg active:scale-95 transition-all duration-300 overflow-hidden cursor-pointer group"
     >
       {/* Image Container */}
       <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
@@ -72,8 +72,8 @@ export default function CarCard({ car, onClick }: CarCardProps) {
         )}
 
         {/* Wishlist Button */}
-        <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors z-10">
-          <Heart className="h-5 w-5 text-gray-400 hover:text-red-500 transition-colors" />
+        <button className="absolute top-3 right-3 p-2.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-red-50 active:bg-red-100 transition-colors z-10">
+          <Heart className="h-5 w-5 sm:h-5 sm:w-5 text-gray-400 hover:text-red-500 transition-colors" />
         </button>
 
         {/* Car Image */}
@@ -89,10 +89,10 @@ export default function CarCard({ car, onClick }: CarCardProps) {
             />
           ) : (
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#374151' className="w-3/4 h-3/4">
-              <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/>
-              <circle cx='100' cy='220' r='25' fill='#111827'/>
-              <circle cx='300' cy='220' r='25' fill='#111827'/>
-              <path d='M80 110h240l-20-30H100z' fill='#6B7280'/>
+              <path d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z' />
+              <circle cx='100' cy='220' r='25' fill='#111827' />
+              <circle cx='300' cy='220' r='25' fill='#111827' />
+              <path d='M80 110h240l-20-30H100z' fill='#6B7280' />
             </svg>
           )}
         </div>
@@ -103,7 +103,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
         <h3 className="font-bold text-gray-900 mb-2 text-lg truncate" title={`${car.brandName} ${car.name}`}>
           {car.brandName} {car.name}
         </h3>
-        
+
         <div className="flex flex-col mb-4">
           <div className="flex items-baseline">
             <span className="text-red-600 font-bold text-xl">₹ {(displayPrice / 100000).toFixed(2)} Lakh</span>
@@ -127,7 +127,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
           </div>
         </div>
 
-        <button 
+        <button
           className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform group-hover:scale-105"
         >
           View Details

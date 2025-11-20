@@ -16,7 +16,7 @@ export default function BrandCarCard({ car, brandSlug, brandName }: BrandCarCard
   const cleanPrice = car.price.replace(/[₹,\s]/g, '')
   const priceInLakh = parseFloat(cleanPrice)
   const exShowroomPrice = priceInLakh * 100000
-  
+
   // Debug logging (remove after testing)
   if (car.name === 'Elevate') {
     console.log('🚗 BrandCarCard Elevate:', {
@@ -38,15 +38,15 @@ export default function BrandCarCard({ car, brandSlug, brandName }: BrandCarCard
   const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-Showroom'
 
   return (
-    <Link 
+    <Link
       href={`/${brandSlug}-cars/${car.name.toLowerCase().replace(/\s+/g, '-')}`}
       className="block group"
     >
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200">
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md active:shadow-lg active:scale-[0.99] transition-all duration-200">
         <div className="flex h-40">
           {/* Car Image - Compact */}
           <div className="w-44 flex-shrink-0 relative overflow-hidden rounded-l-lg">
-            <img 
+            <img
               src={(() => {
                 if (!car.image) return '';
                 if (car.image.startsWith('http://') || car.image.startsWith('https://')) return car.image;
@@ -72,7 +72,7 @@ export default function BrandCarCard({ car, brandSlug, brandName }: BrandCarCard
               </span>
             )}
           </div>
-          
+
           {/* Car Details - Improved Layout */}
           <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between">
             {/* Top Section: Name & Arrow */}
@@ -99,20 +99,20 @@ export default function BrandCarCard({ car, brandSlug, brandName }: BrandCarCard
                 </div>
                 <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0 mt-1" />
               </div>
-              
+
               {/* Rating */}
               <div className="flex items-center gap-1 mb-2">
                 <Star className="h-4 w-4 text-green-600 fill-current" />
                 <span className="font-semibold text-gray-900 text-sm">{car.rating}/5</span>
                 <span className="text-gray-500 text-sm">{car.reviews} Ratings</span>
               </div>
-              
+
               {/* Variants */}
               <div className="text-gray-600 text-sm mb-3">
                 {car.variants} Variants
               </div>
             </div>
-            
+
             {/* Bottom Section: Price */}
             <div>
               <div className="flex items-baseline gap-2 flex-wrap">

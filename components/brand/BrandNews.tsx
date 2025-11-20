@@ -142,20 +142,20 @@ export default function BrandNews({ brandName }: BrandNewsProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Latest {brandName.charAt(0).toUpperCase() + brandName.slice(1)} News</h2>
-          <Link 
-            href="/news" 
+          <Link
+            href="/news"
             className="flex items-center text-red-600 hover:text-orange-600 font-medium"
           >
             View All News
             <ArrowRight className="h-4 w-4 ml-1" />
           </Link>
         </div>
-        
+
         {/* News Articles Horizontal Scroll */}
         <div className="relative">
           <div
             id="latest-news-scroll"
-            className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+            className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {newsArticles.map((article) => (
@@ -174,7 +174,7 @@ export default function BrandNews({ brandName }: BrandNewsProps) {
                       {article.title}
                     </h3>
                   </div>
-                  
+
                   {/* Category Badge */}
                   <div className="absolute top-3 left-3">
                     <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -197,7 +197,7 @@ export default function BrandNews({ brandName }: BrandNewsProps) {
                   <h3 className="font-bold text-gray-900 mb-2 text-base leading-tight">
                     {article.title}
                   </h3>
-                  
+
                   <p className="text-sm text-gray-600 mb-3 leading-relaxed line-clamp-2">
                     {article.excerpt}
                   </p>
@@ -207,9 +207,9 @@ export default function BrandNews({ brandName }: BrandNewsProps) {
                     <span className="font-medium">{article.author}</span>
                     <span className="mx-2">•</span>
                     <Calendar className="h-3 w-3 mr-1" />
-                    <span>{new Date(article.publishDate).toLocaleDateString('en-IN', { 
-                      day: 'numeric', 
-                      month: 'short' 
+                    <span>{new Date(article.publishDate).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short'
                     })}</span>
                   </div>
 
@@ -232,8 +232,9 @@ export default function BrandNews({ brandName }: BrandNewsProps) {
               </Link>
             ))}
           </div>
+          <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
         </div>
       </div>
-    </section>
+    </section >
   )
 }

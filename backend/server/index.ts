@@ -276,6 +276,10 @@ app.use(
     // Register monitoring routes (no auth required)
     app.use('/api/monitoring', monitoringRoutes);
 
+    // Register cache management routes
+    const cacheRoutes = (await import('./routes/cache')).default;
+    app.use('/api/cache', cacheRoutes);
+
     // Register API routes FIRST before Vite
     registerRoutes(app, storage);
 

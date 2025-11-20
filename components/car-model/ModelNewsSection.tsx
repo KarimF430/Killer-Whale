@@ -77,90 +77,93 @@ export default function ModelNewsSection({ carName, newsArticles }: ModelNewsSec
         {/* News Container */}
         <div className="relative">
           {/* Navigation Arrows */}
-          <button 
+          <button
             onClick={() => scroll('left')}
             className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
 
-          <button 
+          <button
             onClick={() => scroll('right')}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
           >
             <ChevronRight className="w-5 h-5 text-gray-600" />
           </button>
 
-          {/* Horizontal Scroll Container */}
-          <div 
-            ref={scrollContainerRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {newsArticles.map((article) => {
-              const styles = getCategoryStyles(article.category)
-              return (
-                <div key={article.id} className="flex-none w-72">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    {/* Article Image with Gradient */}
-                    <div className={`relative h-40 bg-gradient-to-br ${styles.gradient} flex flex-col items-center justify-center p-4`}>
-                      {/* Category Badge */}
-                      <div className={`absolute top-3 left-3 ${styles.badge} px-3 py-1 rounded-full text-xs font-medium`}>
-                        {article.category}
+          {/* News Articles Horizontal Scroll */}
+          <div className="relative">
+            <div
+              ref={scrollContainerRef}
+              className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {newsArticles.map((article) => {
+                const styles = getCategoryStyles(article.category)
+                return (
+                  <div key={article.id} className="flex-none w-72">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                      {/* Article Image with Gradient */}
+                      <div className={`relative h-40 bg-gradient-to-br ${styles.gradient} flex flex-col items-center justify-center p-4`}>
+                        {/* Category Badge */}
+                        <div className={`absolute top-3 left-3 ${styles.badge} px-3 py-1 rounded-full text-xs font-medium`}>
+                          {article.category}
+                        </div>
+
+                        {/* Central News Label */}
+                        <div className="bg-white/25 backdrop-blur-sm rounded-xl px-4 py-2 mb-3">
+                          <div className="text-white text-sm font-bold">NEWS</div>
+                        </div>
+
+                        {/* Title in Center */}
+                        <div className="text-center px-3">
+                          <h3 className="text-white font-semibold text-sm leading-tight">
+                            {article.title.length > 50 ? article.title.substring(0, 50) + '...' : article.title}
+                          </h3>
+                        </div>
                       </div>
-                      
-                      {/* Central News Label */}
-                      <div className="bg-white/25 backdrop-blur-sm rounded-xl px-4 py-2 mb-3">
-                        <div className="text-white text-sm font-bold">NEWS</div>
-                      </div>
-                      
-                      {/* Title in Center */}
-                      <div className="text-center px-3">
-                        <h3 className="text-white font-semibold text-sm leading-tight">
-                          {article.title.length > 50 ? article.title.substring(0, 50) + '...' : article.title}
+
+                      {/* Article Content */}
+                      <div className="p-4">
+                        <h3 className="text-gray-900 font-bold text-lg mb-2 line-clamp-2">
+                          {article.title}
                         </h3>
-                      </div>
-                    </div>
 
-                    {/* Article Content */}
-                    <div className="p-4">
-                      <h3 className="text-gray-900 font-bold text-lg mb-2 line-clamp-2">
-                        {article.title}
-                      </h3>
-                      
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {article.excerpt}
-                      </p>
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                          {article.excerpt}
+                        </p>
 
-                      {/* Author and Date */}
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                        <span className="font-medium">{article.author}</span>
-                        <div className="flex items-center">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          <span>{article.date}</span>
+                        {/* Author and Date */}
+                        <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                          <span className="font-medium">{article.author}</span>
+                          <div className="flex items-center">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            <span>{article.date}</span>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Stats */}
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <Clock className="w-3 h-3 mr-1" />
-                          <span>{article.readTime}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Eye className="w-3 h-3 mr-1" />
-                          <span>{article.views}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <MessageCircle className="w-3 h-3 mr-1" />
-                          <span>{article.comments}</span>
+                        {/* Stats */}
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <Clock className="w-3 h-3 mr-1" />
+                            <span>{article.readTime}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Eye className="w-3 h-3 mr-1" />
+                            <span>{article.views}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            <span>{article.comments}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
+            <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
           </div>
         </div>
       </div>

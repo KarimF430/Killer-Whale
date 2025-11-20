@@ -81,69 +81,71 @@ export default function ComparisonBox() {
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-8">Popular Comparison</h2>
-        
-        {/* Comparison Cards - Horizontal Scroll */}
-        <div className="relative mb-8">
-          <div
-            className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {comparisonCards.map((card) => (
-              <div key={card.id} className="flex-shrink-0 w-96 bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                {/* VS Comparison Layout */}
-                <div className="flex items-center justify-between mb-4">
-                  {/* Car 1 */}
-                  <div className="flex-1 text-center">
-                    <img 
-                      src={card.car1.image}
-                      alt={`${card.car1.brand} ${card.car1.name}`}
-                      className="w-20 h-16 object-cover rounded-lg mx-auto mb-2"
-                    />
-                    <div className="text-sm text-gray-600">{card.car1.brand}</div>
-                    <div className="font-semibold text-gray-900">{card.car1.name}</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      Rs. {formatPrice(card.car1.startingPrice)} Lakh
-                    </div>
-                    <div className="text-xs text-gray-500">onwards</div>
-                  </div>
 
-                  {/* VS Badge */}
-                  <div className="mx-4">
-                    <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">VS</span>
-                    </div>
+      {/* Comparison Cards - Horizontal Scroll */}
+      {/* Comparison Cards Horizontal Scroll */}
+      <div className="relative">
+        <div
+          className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {comparisonCards.map((card) => (
+            <div key={card.id} className="flex-shrink-0 w-96 bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              {/* VS Comparison Layout */}
+              <div className="flex items-center justify-between mb-4">
+                {/* Car 1 */}
+                <div className="flex-1 text-center">
+                  <img
+                    src={card.car1.image}
+                    alt={`${card.car1.brand} ${card.car1.name}`}
+                    className="w-20 h-16 object-cover rounded-lg mx-auto mb-2"
+                  />
+                  <div className="text-sm text-gray-600">{card.car1.brand}</div>
+                  <div className="font-semibold text-gray-900">{card.car1.name}</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Rs. {formatPrice(card.car1.startingPrice)} Lakh
                   </div>
+                  <div className="text-xs text-gray-500">onwards</div>
+                </div>
 
-                  {/* Car 2 */}
-                  <div className="flex-1 text-center">
-                    <img 
-                      src={card.car2.image}
-                      alt={`${card.car2.brand} ${card.car2.name}`}
-                      className="w-20 h-16 object-cover rounded-lg mx-auto mb-2"
-                    />
-                    <div className="text-sm text-gray-600">{card.car2.brand}</div>
-                    <div className="font-semibold text-gray-900">{card.car2.name}</div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      Rs. {formatPrice(card.car2.startingPrice)} Lakh
-                    </div>
-                    <div className="text-xs text-gray-500">onwards</div>
+                {/* VS Badge */}
+                <div className="mx-4">
+                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">VS</span>
                   </div>
                 </div>
 
-                <button className="w-full bg-white border border-red-500 text-red-500 py-2 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium">
-                  Compare Now
-                </button>
+                {/* Car 2 */}
+                <div className="flex-1 text-center">
+                  <img
+                    src={card.car2.image}
+                    alt={`${card.car2.brand} ${card.car2.name}`}
+                    className="w-20 h-16 object-cover rounded-lg mx-auto mb-2"
+                  />
+                  <div className="text-sm text-gray-600">{card.car2.brand}</div>
+                  <div className="font-semibold text-gray-900">{card.car2.name}</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Rs. {formatPrice(card.car2.startingPrice)} Lakh
+                  </div>
+                  <div className="text-xs text-gray-500">onwards</div>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Compare Cars of Your Choice Button */}
-        <div className="text-center">
-          <button className="w-full max-w-md bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-3 rounded-lg transition-all duration-200 font-medium">
-            Compare Cars of Your Choice
-          </button>
+              <button className="w-full bg-white border border-red-500 text-red-500 py-2 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium">
+                Compare Now
+              </button>
+            </div>
+          ))}
         </div>
+        <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-gray-50 via-gray-50/80 to-transparent pointer-events-none sm:hidden -z-10" />
+      </div>
+
+      {/* Compare Cars of Your Choice Button */}
+      <div className="text-center mt-8">
+        <button className="w-full max-w-md bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-3 rounded-lg transition-all duration-200 font-medium">
+          Compare Cars of Your Choice
+        </button>
+      </div>
     </div>
   )
 }

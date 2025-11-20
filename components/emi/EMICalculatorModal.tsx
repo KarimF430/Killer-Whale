@@ -26,7 +26,7 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
   const [showPaymentBreakup, setShowPaymentBreakup] = useState(false)
   const [showDownPayment, setShowDownPayment] = useState(false)
   const [showInterest, setShowInterest] = useState(false)
-  
+
   // Loan eligibility form
   const [eligibilityForm, setEligibilityForm] = useState<LoanEligibilityForm>({
     title: 'Mr',
@@ -39,14 +39,14 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
     const principal = loanAmount - downPayment
     const monthlyRate = interestRate / 12 / 100
     const months = tenureMonths
-    
+
     if (monthlyRate === 0) {
       return Math.round(principal / months)
     }
-    
-    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
-                (Math.pow(1 + monthlyRate, months) - 1)
-    
+
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+      (Math.pow(1 + monthlyRate, months) - 1)
+
     return Math.round(emi)
   }
 
@@ -60,15 +60,15 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
     const monthlyRate = interestRate / 12 / 100
     const table = []
     let balance = principal
-    
+
     const periods = [12, 24, 36, 48, 60]
-    
+
     for (const month of periods) {
       if (month <= tenureMonths) {
         let tempBalance = principal
         let totalPrincipal = 0
         let totalInt = 0
-        
+
         for (let i = 1; i <= month; i++) {
           const interest = tempBalance * monthlyRate
           const principalPaid = emi - interest
@@ -76,7 +76,7 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
           totalPrincipal += principalPaid
           totalInt += interest
         }
-        
+
         table.push({
           months: month,
           principal: Math.round(totalPrincipal),
@@ -85,7 +85,7 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
         })
       }
     }
-    
+
     return table
   }
 
@@ -134,21 +134,19 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
         <div className="flex border-b border-gray-200">
           <button
             onClick={() => setActiveTab('standard')}
-            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'standard'
+            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'standard'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             Standard
           </button>
           <button
             onClick={() => setActiveTab('instant')}
-            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'instant'
+            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'instant'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             Instant Loan
           </button>
@@ -162,7 +160,7 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
               <span className="text-2xl font-bold text-gray-900">{formatCurrency(emi)}</span>
               <span className="text-sm text-gray-600">EMI For {tenure} Years</span>
             </div>
-            
+
             {/* View Payment Breakup */}
             <button
               onClick={() => setShowPaymentBreakup(!showPaymentBreakup)}
@@ -212,7 +210,7 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
                 {showDownPayment ? 'Hide' : 'Edit'}
               </button>
             </div>
-            
+
             {showDownPayment && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm text-gray-600">
@@ -297,7 +295,7 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
                 {showInterest ? 'Hide' : 'Edit'}
               </button>
             </div>
-            
+
             {showInterest && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm text-gray-600">
@@ -340,7 +338,7 @@ export default function EMICalculatorModal({ isOpen, onClose, carName = 'Honda E
             {/* Step 1 - Get Started */}
             <div className="space-y-4">
               <h4 className="font-semibold text-gray-900">Step 1 - Get Started</h4>
-              
+
               {/* Title Dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">FULL NAME</label>

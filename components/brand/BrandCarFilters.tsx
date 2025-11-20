@@ -78,70 +78,71 @@ export default function BrandCarFilters({ filters, onFilterChange }: BrandCarFil
   return (
     <div className="bg-white py-2 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Filter Bar - Horizontal Scrollable Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {/* Fuel Type Pills */}
-          {fuelTypes.map((fuel) => (
+        {/* Filter Chips */}
+        <div className="relative">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {/* Fuel Type Pills */}
+            {fuelTypes.map((fuel) => (
+              <button
+                key={fuel.value}
+                onClick={() => {
+                  if (filters.fuelType.includes(fuel.value)) {
+                    setFilters(prev => ({ ...prev, fuelType: prev.fuelType.filter(f => f !== fuel.value) }))
+                  } else {
+                    setFilters(prev => ({ ...prev, fuelType: [...prev.fuelType, fuel.value] }))
+                  }
+                }}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${filters.fuelType.includes(fuel.value)
+                    ? 'bg-red-50 border-red-500 text-red-600'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+              >
+                {fuel.label}
+              </button>
+            ))}
+
+            {/* Transmission Pills */}
+            {transmissionTypes.map((trans) => (
+              <button
+                key={trans.value}
+                onClick={() => {
+                  if (filters.transmission.includes(trans.value)) {
+                    setFilters(prev => ({ ...prev, transmission: prev.transmission.filter(t => t !== trans.value) }))
+                  } else {
+                    setFilters(prev => ({ ...prev, transmission: [...prev.transmission, trans.value] }))
+                  }
+                }}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${filters.transmission.includes(trans.value)
+                    ? 'bg-red-50 border-red-500 text-red-600'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+              >
+                {trans.label}
+              </button>
+            ))}
+
+            {/* Ratings Filter */}
             <button
-              key={fuel.value}
-              onClick={() => {
-                if (filters.fuelType.includes(fuel.value)) {
-                  setFilters(prev => ({ ...prev, fuelType: prev.fuelType.filter(f => f !== fuel.value) }))
-                } else {
-                  setFilters(prev => ({ ...prev, fuelType: [...prev.fuelType, fuel.value] }))
-                }
-              }}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                filters.fuelType.includes(fuel.value)
-                  ? 'bg-red-50 border-red-500 text-red-600'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
+              className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
             >
-              {fuel.label}
+              Ratings 4.0+
             </button>
-          ))}
 
-          {/* Transmission Pills */}
-          {transmissionTypes.map((trans) => (
+            {/* Offer Filter */}
             <button
-              key={trans.value}
-              onClick={() => {
-                if (filters.transmission.includes(trans.value)) {
-                  setFilters(prev => ({ ...prev, transmission: prev.transmission.filter(t => t !== trans.value) }))
-                } else {
-                  setFilters(prev => ({ ...prev, transmission: [...prev.transmission, trans.value] }))
-                }
-              }}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                filters.transmission.includes(trans.value)
-                  ? 'bg-red-50 border-red-500 text-red-600'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
+              className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
             >
-              {trans.label}
+              Offer
             </button>
-          ))}
 
-          {/* Ratings Filter */}
-          <button
-            className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
-          >
-            Ratings 4.0+
-          </button>
-
-          {/* Offer Filter */}
-          <button
-            className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
-          >
-            Offer
-          </button>
-
-          {/* Best Seller Filter */}
-          <button
-            className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
-          >
-            Best Seller
-          </button>
+            {/* Best Seller Filter */}
+            <button
+              className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium border bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
+            >
+              Best Seller
+            </button>
+          </div>
+          <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
         </div>
 
       </div>

@@ -233,54 +233,57 @@ export default function CarsByBudget() {
             <p>No cars found in this budget range.</p>
           </div>
         ) : (
-          <div
-            id={`budget-cars-${selectedBudget}`}
-            className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {currentCars.slice(0, 10).map((car, index) => (
-              <CarCard
-                key={car.id}
-                car={car}
-                onClick={() => {
-                  const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                  const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                  window.location.href = `/${brandSlug}-cars/${modelSlug}`
-                }}
-              />
-            ))}
+          <div className="relative">
+            <div
+              id={`budget-cars-${selectedBudget}`}
+              className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {currentCars.slice(0, 10).map((car, index) => (
+                <CarCard
+                  key={car.id}
+                  car={car}
+                  onClick={() => {
+                    const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                    const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                    window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                  }}
+                />
+              ))}
 
-            {/* See More tile - only show if there are more than 10 cars */}
-            {currentCars.length > 10 && (
-              <Link
-                href={`/cars-by-budget/${selectedBudget}`}
-                className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
-              >
-                {/* Top section matching image height */}
-                <div className="h-48 flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-500">
-                  <div className="text-center px-6">
-                    <h3 className="text-4xl font-bold text-white mb-2">
-                      See More
-                    </h3>
+              {/* See More tile - only show if there are more than 10 cars */}
+              {currentCars.length > 10 && (
+                <Link
+                  href={`/cars-by-budget/${selectedBudget}`}
+                  className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                >
+                  {/* Top section matching image height */}
+                  <div className="h-48 flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-500">
+                    <div className="text-center px-6">
+                      <h3 className="text-4xl font-bold text-white mb-2">
+                        See More
+                      </h3>
+                    </div>
                   </div>
-                </div>
 
-                {/* Bottom section matching card info height */}
-                <div className="p-5 bg-gradient-to-br from-orange-500 to-orange-600">
-                  <h4 className="text-2xl font-bold text-white text-center mb-4">
-                    {budgetRanges.find(b => b.id === selectedBudget)?.label} Cars
-                  </h4>
+                  {/* Bottom section matching card info height */}
+                  <div className="p-5 bg-gradient-to-br from-orange-500 to-orange-600">
+                    <h4 className="text-2xl font-bold text-white text-center mb-4">
+                      {budgetRanges.find(b => b.id === selectedBudget)?.label} Cars
+                    </h4>
 
-                  {/* Spacer to match card height */}
-                  <div className="h-24"></div>
+                    {/* Spacer to match card height */}
+                    <div className="h-24"></div>
 
-                  {/* Button matching View Details */}
-                  <div className="w-full bg-white text-orange-600 py-2.5 rounded-lg font-semibold text-center shadow-md">
-                    View All Cars
+                    {/* Button matching View Details */}
+                    <div className="w-full bg-white text-orange-600 py-2.5 rounded-lg font-semibold text-center shadow-md">
+                      View All Cars
+                    </div>
                   </div>
-                </div>
-              </Link>
-            )}
+                </Link>
+              )}
+            </div>
+            <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-gray-50 via-gray-50/80 to-transparent pointer-events-none sm:hidden -z-10" />
           </div>
         )}
       </div>

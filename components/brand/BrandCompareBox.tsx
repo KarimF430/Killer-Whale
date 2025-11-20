@@ -37,10 +37,10 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
 
   // Helper function to calculate on-road price
   const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
-    const selectedCity = typeof window !== 'undefined' 
+    const selectedCity = typeof window !== 'undefined'
       ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
       : 'Mumbai, Maharashtra'
-    
+
     const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
     const breakup = calculateOnRoadPrice(exShowroomPrice, state, fuelType)
     return breakup.totalOnRoadPrice
@@ -53,62 +53,62 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
   const fetchComparisons = async () => {
     try {
       setLoading(true)
-      
+
       // Fetch popular comparisons
       const comparisonsRes = await fetch(`${backendUrl}/api/popular-comparisons`)
       if (!comparisonsRes.ok) {
         setComparisons([])
         return
       }
-      
+
       const comparisonsData = await comparisonsRes.json()
-      
+
       // Fetch all models and brands to populate comparison data
       const modelsRes = await fetch(`${backendUrl}/api/models`)
       const models = await modelsRes.json()
-      
+
       const brandsRes = await fetch(`${backendUrl}/api/brands`)
       const brands = await brandsRes.json()
-      
+
       const variantsRes = await fetch(`${backendUrl}/api/variants`)
       const variants = await variantsRes.json()
-      
+
       // Create brand map
       const brandMap: Record<string, string> = {}
       brands.forEach((brand: any) => {
         brandMap[brand.id] = brand.name
       })
-      
+
       // Process comparisons with full model data and filter by brand
       const processedComparisons = comparisonsData
         .filter((comp: any) => comp.model1Id && comp.model2Id)
         .map((comp: any) => {
           const model1 = models.find((m: any) => m.id === comp.model1Id)
           const model2 = models.find((m: any) => m.id === comp.model2Id)
-          
+
           if (!model1 || !model2) return null
-          
+
           // Filter: at least one model must be from the specified brand
           const brand1 = brandMap[model1.brandId]?.toLowerCase()
           const brand2 = brandMap[model2.brandId]?.toLowerCase()
           const targetBrand = brandName.toLowerCase()
-          
+
           if (brand1 !== targetBrand && brand2 !== targetBrand) {
             return null
           }
-          
+
           // Get lowest prices
           const model1Variants = variants.filter((v: any) => v.modelId === model1.id)
           const model2Variants = variants.filter((v: any) => v.modelId === model2.id)
-          
+
           const model1Price = model1Variants.length > 0
             ? Math.min(...model1Variants.map((v: any) => v.price || 0))
             : model1.price || 0
-            
+
           const model2Price = model2Variants.length > 0
             ? Math.min(...model2Variants.map((v: any) => v.price || 0))
             : model2.price || 0
-          
+
           return {
             id: comp.id,
             model1: {
@@ -130,7 +130,7 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
           }
         })
         .filter(Boolean)
-      
+
       setComparisons(processedComparisons)
     } catch (error) {
       console.error('Error fetching comparisons:', error)
@@ -153,14 +153,18 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Compare {brandName.charAt(0).toUpperCase() + brandName.slice(1)} Cars
           </h2>
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 animate-pulse">
-                <div className="h-32 bg-gray-200 rounded mb-3"></div>
-                <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded"></div>
-              </div>
-            ))}
+          {/* Comparison Cards Horizontal Scroll */}
+          <div className="relative">
+            <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {[1, 2, 3].map(i => (
+                <div key={i} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 animate-pulse">
+                  <div className="h-32 bg-gray-200 rounded mb-3"></div>
+                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+            <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
           </div>
         </div>
       </section>
@@ -177,7 +181,7 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
           </h2>
           <div className="text-center py-8 bg-white rounded-xl border border-gray-200">
             <p className="text-gray-500">No comparisons available for this brand yet.</p>
-            <button 
+            <button
               onClick={() => router.push('/compare')}
               className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
@@ -196,12 +200,13 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Compare {brandName.charAt(0).toUpperCase() + brandName.slice(1)} Cars
         </h2>
-            
+
         {/* Comparison Cards - Exact same as home page */}
+        {/* Popular Comparisons */}
         <div className="relative">
           <div
-            className="flex gap-4 overflow-x-auto pb-4"
-            style={{ scrollbarWidth: 'thin', msOverflowStyle: 'auto' }}
+            className="flex gap-4 sm:gap-6 overflow-x-auto pb-4"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {comparisons.map((comparison) => {
               const model1OnRoad = getOnRoadPrice(
@@ -282,11 +287,12 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
               )
             })}
           </div>
+          <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
         </div>
 
         {/* Compare Cars of Your Choice Button */}
         <div className="text-center mt-6">
-          <button 
+          <button
             onClick={() => router.push('/compare')}
             className="w-full max-w-md bg-white border-2 border-red-600 text-red-600 hover:bg-red-50 py-3 rounded-lg transition-all duration-200 font-medium"
           >

@@ -28,8 +28,9 @@ export default function MileageInformation({ carName, mileageData }: MileageInfo
         </h2>
 
         {/* Horizontal Scrollable Container */}
+        {/* Mileage Cards Horizontal Scroll */}
         <div className="relative">
-          <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
+          <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {mileageData.map((mileage, index) => (
               <div
                 key={mileage.id}
@@ -54,12 +55,12 @@ export default function MileageInformation({ carName, mileageData }: MileageInfo
                     <span className="text-gray-700 font-medium text-sm">Company Claimed</span>
                     <span className="text-gray-900 font-bold text-sm">{mileage.companyClaimed}</span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-700 font-medium text-sm">City Real World</span>
                     <span className="text-gray-900 font-bold text-sm">{mileage.cityRealWorld}</span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center py-2">
                     <span className="text-gray-700 font-medium text-sm">Highway Real World</span>
                     <span className="text-gray-900 font-bold text-sm">{mileage.highwayRealWorld}</span>
@@ -75,11 +76,10 @@ export default function MileageInformation({ carName, mileageData }: MileageInfo
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                  index === currentIndex
+                className={`w-2 h-2 rounded-full transition-all duration-200 ${index === currentIndex
                     ? 'bg-red-500'
                     : 'bg-gray-400 hover:bg-gray-500'
-                }`}
+                  }`}
               />
             ))}
           </div>

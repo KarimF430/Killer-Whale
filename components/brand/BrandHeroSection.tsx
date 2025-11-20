@@ -51,7 +51,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
           <h1 className="text-4xl font-bold text-gray-900 mb-6">
             {brand.name} Cars
           </h1>
-          
+
           {/* Collapsible SEO Text */}
           <div className="bg-white">
             {/* Collapsed View */}
@@ -71,7 +71,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                   brand.description
                 )}
               </p>
-              
+
               {/* Expanded Content */}
               {isExpanded && (
                 <div className="mt-4 space-y-4">
@@ -88,14 +88,14 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                     <p className="text-gray-700 text-base mb-4">
                       {brand.name} car price starts at Rs. {formatPrice(brand.priceRange.min)} Lakh and goes upto Rs. {formatPrice(brand.priceRange.max)} Lakh (Avg. ex-showroom). The prices for the top 5 popular {brand.name} Cars are:
                     </p>
-                    
+
                     {/* Sample Car Models with Prices */}
                     <div className="space-y-2">
                       <div className="flex justify-between items-center py-2 border-b border-gray-300">
                         <span className="font-bold text-gray-900">MODEL</span>
                         <span className="font-bold text-gray-900">PRICE</span>
                       </div>
-                      
+
                       {brand.slug === 'maruti' && (
                         <>
                           <div className="flex justify-between items-center py-1">
@@ -124,7 +124,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                       <p className="text-gray-700 text-base mb-4">
                         Maruti Suzuki Nexa car price starts at Rs. 5.85 Lakh and goes upto Rs. 24.97 Lakh (Avg. ex-showroom). The prices for the top 2 popular Nexa Cars are:
                       </p>
-                      
+
                       <div className="space-y-2">
                         <div className="flex justify-between items-center py-2 border-b border-gray-300">
                           <span className="font-bold text-gray-900">MODEL</span>
@@ -157,6 +157,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                   </div>
                 </div>
               )}
+              <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
             </div>
           </div>
         </div>
@@ -172,11 +173,12 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
       <section className="py-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">{brand.name} Upcoming Cars</h2>
-          
+
           {/* Cars Horizontal Scroll */}
+          {/* Popular Cars Horizontal Scroll */}
           <div className="relative">
             <div
-              className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+              className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {/* Upcoming Car 1 */}
@@ -187,7 +189,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                   <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
                     NEW
                   </div>
-                  
+
                   {/* Heart Icon */}
                   <button className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
                     <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,7 +199,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
 
                   {/* Car Image */}
                   <div className="w-full h-full flex items-center justify-center">
-                    <img 
+                    <img
                       src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&h=300&fit=crop&crop=center"
                       alt="Grand Vitara"
                       className="w-full h-full object-contain object-center transition-transform duration-300"
@@ -208,7 +210,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                 {/* Car Info */}
                 <div className="p-5">
                   <h3 className="font-bold text-gray-900 mb-2 text-lg">{brand.name} Grand Vitara</h3>
-                  
+
                   <div className="flex items-center text-red-600 font-bold text-xl mb-4">
                     <span>₹ 10.99 Lakh</span>
                   </div>
@@ -248,7 +250,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                   <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
                     NEW
                   </div>
-                  
+
                   {/* Heart Icon */}
                   <button className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
                     <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,7 +260,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
 
                   {/* Car Image */}
                   <div className="w-full h-full flex items-center justify-center">
-                    <img 
+                    <img
                       src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=300&fit=crop&crop=center"
                       alt="Safari"
                       className="w-full h-full object-contain object-center transition-transform duration-300"
@@ -269,7 +271,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                 {/* Car Info */}
                 <div className="p-5">
                   <h3 className="font-bold text-gray-900 mb-2 text-lg">Hyundai i20</h3>
-                  
+
                   <div className="flex items-center text-red-600 font-bold text-xl mb-4">
                     <span>₹ 29.99 Lakh</span>
                   </div>
@@ -324,10 +326,11 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
               </svg>
             </div>
           </div>
-          
+
           {/* News Articles Horizontal Scroll */}
+          {/* Upcoming Cars Horizontal Scroll */}
           <div className="relative">
-            <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {/* News Article 1 */}
               <div className="flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden cursor-pointer">
                 {/* Article Image with Gradient */}
@@ -340,7 +343,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                       {brand.name} Grand Vitara Hybrid Review: Best Fuel Economy in Segment
                     </h3>
                   </div>
-                  
+
                   {/* Category Badge */}
                   <div className="absolute top-3 left-3">
                     <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -361,7 +364,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                   <h3 className="font-bold text-gray-900 mb-2 text-base leading-tight">
                     {brand.name} Grand Vitara Hybrid Review: Best Fuel Economy in Segment
                   </h3>
-                  
+
                   <p className="text-sm text-gray-600 mb-3 leading-relaxed line-clamp-2">
                     We test drive the new Grand Vitara hybrid to see if it lives up to the fuel efficiency claims.
                   </p>
@@ -412,7 +415,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                       Upcoming {brand.name} Cars 2024: Complete List with Expected Prices
                     </h3>
                   </div>
-                  
+
                   <div className="absolute top-3 left-3">
                     <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full text-xs font-medium">
                       News
@@ -476,7 +479,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
       <section className="py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">{brand.name} Owner Reviews</h2>
-          
+
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             {/* Overall Rating */}
             <div className="flex items-center mb-6">
@@ -503,7 +506,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
                   </div>
                   <span className="text-sm text-gray-600 w-8">856</span>
                 </div>
-                
+
                 {/* 4 Star */}
                 <div className="flex items-center">
                   <span className="text-sm font-medium text-gray-700 w-6">4★</span>

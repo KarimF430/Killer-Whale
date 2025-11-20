@@ -112,7 +112,7 @@ export default function ModelMileage({ carData }: ModelMileageProps) {
             </p>
           </div>
         </div>
-        
+
         <div className="flex space-x-2">
           <button
             onClick={() => scroll('left')}
@@ -129,60 +129,62 @@ export default function ModelMileage({ carData }: ModelMileageProps) {
         </div>
       </div>
 
-      {/* Horizontal Scrollable Mileage Options */}
-      <div
-        ref={scrollRef}
-        className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4 mb-6"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {mileageOptions.map((option, index) => {
-          const IconComponent = option.icon
-          const isSelected = selectedMileage === index
-          
-          return (
-            <div
-              key={index}
-              onClick={() => setSelectedMileage(index)}
-              className={`flex-shrink-0 w-72 p-6 rounded-lg border-2 cursor-pointer transition-all ${
-                isSelected 
-                  ? `${colorClasses[option.color as keyof typeof colorClasses]} border-current shadow-lg` 
-                  : 'bg-white border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <IconComponent className={`h-6 w-6 ${isSelected ? 'text-current' : 'text-gray-500'}`} />
-                  <h3 className={`font-semibold ${isSelected ? 'text-current' : 'text-gray-900'}`}>
-                    {option.type}
-                  </h3>
-                </div>
-                <span className={`px-2 py-1 rounded text-xs font-medium ${badgeColors[option.badge as keyof typeof badgeColors]}`}>
-                  {option.badge}
-                </span>
-              </div>
-              
-              <div className="text-center mb-4">
-                <div className="flex items-baseline justify-center space-x-1">
-                  <span className={`text-3xl font-bold ${isSelected ? 'text-current' : 'text-gray-900'}`}>
-                    {option.value}
-                  </span>
-                  <span className={`text-lg font-medium ${isSelected ? 'text-current opacity-80' : 'text-gray-600'}`}>
-                    {option.unit}
+      {/* Horizontal Scrollable Mileage Cards */}
+      <div className="relative">
+        <div
+          ref={scrollRef}
+          className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 mb-6"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {mileageOptions.map((option, index) => {
+            const IconComponent = option.icon
+            const isSelected = selectedMileage === index
+
+            return (
+              <div
+                key={index}
+                onClick={() => setSelectedMileage(index)}
+                className={`flex-shrink-0 w-72 p-6 rounded-lg border-2 cursor-pointer transition-all ${isSelected
+                    ? `${colorClasses[option.color as keyof typeof colorClasses]} border-current shadow-lg`
+                    : 'bg-white border-gray-200 hover:border-gray-300'
+                  }`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <IconComponent className={`h-6 w-6 ${isSelected ? 'text-current' : 'text-gray-500'}`} />
+                    <h3 className={`font-semibold ${isSelected ? 'text-current' : 'text-gray-900'}`}>
+                      {option.type}
+                    </h3>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${badgeColors[option.badge as keyof typeof badgeColors]}`}>
+                    {option.badge}
                   </span>
                 </div>
+
+                <div className="text-center mb-4">
+                  <div className="flex items-baseline justify-center space-x-1">
+                    <span className={`text-3xl font-bold ${isSelected ? 'text-current' : 'text-gray-900'}`}>
+                      {option.value}
+                    </span>
+                    <span className={`text-lg font-medium ${isSelected ? 'text-current opacity-80' : 'text-gray-600'}`}>
+                      {option.unit}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className={`text-sm ${isSelected ? 'text-current opacity-90' : 'text-gray-600'}`}>
+                    {option.description}
+                  </p>
+                  <p className={`text-xs ${isSelected ? 'text-current opacity-75' : 'text-gray-500'}`}>
+                    {option.conditions}
+                  </p>
+                </div>
               </div>
-              
-              <div className="space-y-2">
-                <p className={`text-sm ${isSelected ? 'text-current opacity-90' : 'text-gray-600'}`}>
-                  {option.description}
-                </p>
-                <p className={`text-xs ${isSelected ? 'text-current opacity-75' : 'text-gray-500'}`}>
-                  {option.conditions}
-                </p>
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
+        <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
       </div>
 
       {/* Selected Mileage Details */}
@@ -212,7 +214,7 @@ export default function ModelMileage({ carData }: ModelMileageProps) {
             </p>
             <p className="text-sm text-gray-600">At ₹105/liter petrol</p>
           </div>
-          
+
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h4 className="font-semibold text-gray-900 mb-2">Monthly Fuel Cost</h4>
             <p className="text-2xl font-bold text-green-600">
@@ -220,7 +222,7 @@ export default function ModelMileage({ carData }: ModelMileageProps) {
             </p>
             <p className="text-sm text-gray-600">For 1200km/month</p>
           </div>
-          
+
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h4 className="font-semibold text-gray-900 mb-2">Range per Tank</h4>
             <p className="text-2xl font-bold text-purple-600">
