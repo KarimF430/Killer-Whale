@@ -1,0 +1,46 @@
+# Robots.txt for MotorOctane
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /backend/
+
+# Allow important pages
+Allow: /api/sitemap
+
+# Crawl delay (optional, adjust based on server capacity)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://motoroctane.com/sitemap.xml
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Block bad bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /

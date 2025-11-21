@@ -14,9 +14,14 @@ export default function ModelList() {
   const [selectedBrandId, setSelectedBrandId] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const { data: models = [], isLoading } = useQuery<Model[]>({
-    queryKey: ['/api/models'],
+  const { data: modelsResponse, isLoading } = useQuery<any>({
+    queryKey: ['/api/models?limit=all'],
   });
+
+  // ✅ Handle both new array format and old cached paginated format
+  const models = Array.isArray(modelsResponse)
+    ? modelsResponse
+    : (modelsResponse?.data || []);
 
   const { data: brands = [] } = useQuery<Brand[]>({
     queryKey: ['/api/brands'],
@@ -50,9 +55,9 @@ export default function ModelList() {
 
   // Filter models based on selected brand and status
   const filteredModels = useMemo(() => {
-    return models.filter(model => {
+    return models.filter((model: Model) => {
       const brandMatch = selectedBrandId === 'all' || model.brandId === selectedBrandId;
-      const statusMatch = statusFilter === 'all' || 
+      const statusMatch = statusFilter === 'all' ||
         (statusFilter === 'active' && model.status === 'active') ||
         (statusFilter === 'inactive' && model.status === 'inactive');
       return brandMatch && statusMatch;
@@ -87,10 +92,10 @@ export default function ModelList() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-semibold">Edit Models</h1>
-          
+
           {/* Brand Filter Dropdown */}
           <div className="relative">
-            <select 
+            <select
               value={selectedBrandId}
               onChange={(e) => setSelectedBrandId(e.target.value)}
               className="px-3 py-1.5 pr-8 border rounded-md text-sm bg-white appearance-none cursor-pointer hover:border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -108,7 +113,7 @@ export default function ModelList() {
 
           {/* Status Filter Dropdown */}
           <div className="relative">
-            <select 
+            <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-1.5 pr-8 border rounded-md text-sm bg-white appearance-none cursor-pointer hover:border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -134,13 +139,13 @@ export default function ModelList() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredModels.length === 0 ? (
           <div className="col-span-full text-center py-12 text-muted-foreground">
-            {models.length === 0 
+            {models.length === 0
               ? "No models found. Create your first model to get started."
               : "No models match the selected filters."
             }
           </div>
         ) : (
-          filteredModels.map((model) => (
+          filteredModels.map((model: Model) => (
             <ModelCard
               key={model.id}
               id={model.id}

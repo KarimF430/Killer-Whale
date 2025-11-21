@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Image from 'next/image'
+
 import { Car, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 
 export default function Footer() {
@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2 group">
-              <Image
+              <img
                 src="/motoroctane-logo.png"
                 alt="MotorOctane - Aapka Auto Expert"
                 width={40}

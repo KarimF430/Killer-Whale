@@ -1054,6 +1054,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   // Brands - with active/inactive filter for frontend (public endpoint + Redis caching)
   app.get("/api/brands", publicLimiter, redisCacheMiddleware(RedisCacheTTL.BRANDS), async (req, res) => {
     try {
+      // Set browser cache headers (1 hour)
+      res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+
       const includeInactive = req.query.includeInactive === 'true';
       const brands = await storage.getBrands(includeInactive);
       const transformed = brands.map(brand => ({
@@ -1174,30 +1177,18 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Models (public endpoint + caching + PAGINATION)
+  // Models (public endpoint + caching + NO PAGINATION)
   app.get("/api/models", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
+    // Set browser cache headers (30 minutes)
+    res.set('Cache-Control', 'public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600');
+
     const brandId = req.query.brandId as string | undefined;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100); // Max 100 per page
-    const skip = (page - 1) * limit;
 
     // Get all models for the brand
     const allModels = await storage.getModels(brandId);
 
-    // Apply pagination
-    const paginatedModels = allModels.slice(skip, skip + limit);
-
-    // Return with pagination metadata
-    res.json({
-      data: paginatedModels,
-      pagination: {
-        page,
-        limit,
-        total: allModels.length,
-        totalPages: Math.ceil(allModels.length / limit),
-        hasMore: skip + limit < allModels.length
-      }
-    });
+    // Return all models directly as an array
+    res.json(allModels);
   });
 
   // Optimized endpoint: Models with aggregated pricing data + PAGINATION
@@ -1584,92 +1575,45 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Variants (public endpoint + caching + PAGINATION)
+  // Variants (public endpoint + caching + NO PAGINATION)
   app.get("/api/variants", publicLimiter, redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
+    // Set browser cache headers (15 minutes)
+    res.set('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=1800');
+
     const modelId = req.query.modelId as string | undefined;
     const brandId = req.query.brandId as string | undefined;
-    const fields = req.query.fields as string | undefined; // 'minimal' for list views
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
-    const skip = (page - 1) * limit;
+    const fields = req.query.fields as string | undefined;
 
-    // If minimal fields requested, use MongoDB projection for faster response
-    if (fields === 'minimal') {
-      try {
-        const mongoose = (await import('mongoose')).default;
-        const db = mongoose.connection.db;
+    try {
+      let allVariants = await storage.getVariants(modelId);
 
-        if (!db) {
-          throw new Error('Database connection not established');
-        }
+      // Filter by brand if provided
+      if (brandId) {
+        const models = await storage.getModels(brandId);
+        const modelIds = new Set(models.map(m => m.id));
+        allVariants = allVariants.filter(v => modelIds.has(v.modelId));
+      }
 
-        const filter: any = {};
-        if (modelId) filter.modelId = modelId;
-        if (brandId) filter.brandId = brandId;
-
-        // Get total count
-        const totalCount = await db.collection('variants').countDocuments(filter);
-
-        // Only fetch fields needed for display (id, name, price, fuel, transmission, power, features)
-        const variants = await db.collection('variants')
-          .find(filter)
-          .project({
-            id: 1,
-            name: 1,
-            price: 1,
-            fuelType: 1,
-            transmission: 1,
-            modelId: 1,
-            brandId: 1,
-            enginePower: 1,
-            keyFeatures: 1,
-            _id: 0
-          })
-          .sort({ price: 1 })
-          .skip(skip)
-          .limit(limit)
-          .toArray();
-
-        // Map database fields to frontend expected fields
-        const mappedVariants = variants.map(v => ({
-          ...v,
-          power: v.enginePower,
+      // Minimal fields optimization
+      if (fields === 'minimal') {
+        const minimalVariants = allVariants.map(v => ({
+          id: v.id,
+          name: v.name,
+          price: v.price,
+          fuelType: v.fuelType,
+          transmission: v.transmission,
+          modelId: v.modelId,
           features: v.keyFeatures
         }));
-
-        // Return with pagination metadata
-        res.json({
-          data: mappedVariants,
-          pagination: {
-            page,
-            limit,
-            total: totalCount,
-            totalPages: Math.ceil(totalCount / limit),
-            hasMore: skip + limit < totalCount
-          }
-        });
-        return;
-      } catch (error) {
-        console.error('Error fetching minimal variants:', error);
-        return res.status(500).json({ error: "Failed to fetch variants" });
+        return res.json(minimalVariants);
       }
+
+      // Return all variants directly as an array
+      res.json(allVariants);
+    } catch (error) {
+      console.error('Error fetching variants:', error);
+      res.status(500).json({ error: "Failed to fetch variants" });
     }
-
-    // Default: fetch all fields (for variant detail pages) with pagination
-    const allVariants = await storage.getVariants(modelId, brandId);
-    const totalCount = allVariants.length;
-    const paginatedVariants = allVariants.slice(skip, skip + limit);
-
-    res.json({
-      data: paginatedVariants,
-      pagination: {
-        page,
-        limit,
-        total: totalCount,
-        totalPages: Math.ceil(totalCount / limit),
-        hasMore: skip + limit < totalCount
-      }
-    });
   });
 
   app.get("/api/variants/:id", async (req, res) => {

@@ -25,12 +25,22 @@ const commonOpts = {
   },
 } as const;
 
-const tlsOpt = process.env.REDIS_TLS === 'true' ? { tls: {} as Record<string, unknown> } : {};
+const tlsOpt = process.env.REDIS_TLS === 'true' ? {
+  tls: {
+    rejectUnauthorized: false // Required for Upstash
+  }
+} : {};
 
 let redis: Redis | null = null;
 if (useUrl || hasHost) {
   redis = useUrl
-    ? new Redis(process.env.REDIS_URL as string, { ...commonOpts, ...tlsOpt })
+    ? new Redis(process.env.REDIS_URL as string, {
+      ...commonOpts,
+      ...tlsOpt,
+      family: 6, // Use IPv6 if available, fallback to IPv4
+      lazyConnect: false,
+      showFriendlyErrorStack: true
+    })
     : new Redis({
       host: process.env.REDIS_HOST as string,
       port: parseInt(process.env.REDIS_PORT || '6379'),

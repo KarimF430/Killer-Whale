@@ -211,10 +211,17 @@ const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
   socket: {
     reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
+    ...(process.env.REDIS_TLS === 'true' && {
+      tls: true,
+      rejectUnauthorized: false
+    }),
   },
 });
 
-redisClient.connect().catch(console.error);
+redisClient.connect().catch((err) => {
+  console.error('Redis session client connection error:', err);
+  // Don't crash the server if Redis sessions fail
+});
 
 // Initialize Redis Store
 const redisStore = new RedisStore({

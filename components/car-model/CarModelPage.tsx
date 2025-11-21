@@ -297,24 +297,33 @@ export default function CarModelPage({ model }: CarModelPageProps) {
 
   useViewTracker(carDataForTracking)
 
+  // ✅ Calculate actual starting and ending prices from modelVariants (not allVariants to avoid initialization error)
+  const actualStartingPrice = modelVariants.length > 0
+    ? Math.min(...modelVariants.map(v => v.price || 0)) // Already in paise from database
+    : model.startingPrice
+
+  const actualEndingPrice = modelVariants.length > 0
+    ? Math.max(...modelVariants.map(v => v.price || 0)) // Already in paise from database
+    : model.endingPrice
+
   // Get on-road prices for starting and ending prices
   const startingPriceData = useOnRoadPrice({
-    exShowroomPrice: model.startingPrice,
+    exShowroomPrice: actualStartingPrice,
     fuelType: model.variants?.[0]?.fuelType || 'Petrol'
   })
 
   const endingPriceData = useOnRoadPrice({
-    exShowroomPrice: model.endingPrice,
+    exShowroomPrice: actualEndingPrice,
     fuelType: model.variants?.[0]?.fuelType || 'Petrol'
   })
 
   const displayStartPrice = startingPriceData.isOnRoadMode
     ? startingPriceData.onRoadPrice
-    : model.startingPrice
+    : actualStartingPrice
 
   const displayEndPrice = endingPriceData.isOnRoadMode
     ? endingPriceData.onRoadPrice
-    : model.endingPrice
+    : actualEndingPrice
 
   const priceLabel = startingPriceData.isOnRoadMode ? 'On-Road' : 'Ex-showroom'
 
@@ -374,8 +383,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
         setLoadingVariants(true)
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}&fields=minimal`)
         if (response.ok) {
-          const variantsResponse = await response.json()
-          const variants = variantsResponse.data || variantsResponse
+          const variants = await response.json()
           setModelVariants(variants)
         } else {
           console.error('Failed to fetch variants:', response.statusText)
@@ -2205,12 +2213,12 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                             <div className="flex-1">
                               <div className="relative mb-2">
                                 <img
-                                  src={car.image}
+                                  src={car.image || '/placeholder-car.png'}
                                   alt={`${car.brand} ${car.name}`}
                                   className="w-full h-20 object-contain"
                                   loading="lazy"
                                   decoding="async"
-                                  onError={(e) => {
+                                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                                     e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
                                   }}
                                 />

@@ -17,14 +17,22 @@ export default function VariantFormPage1() {
   const params = useParams();
   const { toast } = useToast();
   const isEditMode = !!params.id;
-  
-  const { data: brands = [] } = useQuery<Brand[]>({
+
+  const { data: brandsResponse } = useQuery<any>({
     queryKey: ['/api/brands'],
   });
 
-  const { data: models = [] } = useQuery<Model[]>({
-    queryKey: ['/api/models'],
+  const brands = Array.isArray(brandsResponse)
+    ? brandsResponse
+    : (brandsResponse?.data || brandsResponse || []);
+
+  const { data: modelsResponse } = useQuery<any>({
+    queryKey: ['/api/models?limit=all'],
   });
+
+  const models = Array.isArray(modelsResponse)
+    ? modelsResponse
+    : (modelsResponse?.data || []);
 
   const { data: existingVariant } = useQuery<Variant>({
     queryKey: ['/api/variants', params.id],
@@ -74,7 +82,7 @@ export default function VariantFormPage1() {
     if (formData.brandId && formData.modelId && formData.name && !isEditMode) {
       const brand = brands.find(b => b.id === formData.brandId);
       const model = models.find(m => m.id === formData.modelId);
-      
+
       if (brand && model) {
         const brandPrefix = brand.name.substring(0, 2).toUpperCase();
         const modelPrefix = model.name.substring(0, 2).toUpperCase();
@@ -97,20 +105,20 @@ export default function VariantFormPage1() {
       // Get auth token
       const rawToken = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
       const token = rawToken && (rawToken === 'dev-access-token' || rawToken.split('.').length === 3) ? rawToken : null;
-      
+
       // Use direct server-side upload (no CORS issues)
       const formData = new FormData();
       formData.append('image', file);
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      
+
       const response = await fetch(`${API_BASE}/api/upload/image`, {
         method: 'POST',
         headers: headers,
         credentials: 'include',
         body: formData,
       });
-      
+
       if (!response.ok) throw new Error(await response.text());
       const result = await response.json();
 
@@ -134,7 +142,7 @@ export default function VariantFormPage1() {
   };
 
   const handleCaptionChange = (index: number, caption: string) => {
-    setHighlightImages(prev => prev.map((img, i) => 
+    setHighlightImages(prev => prev.map((img, i) =>
       i === index ? { ...img, caption } : img
     ));
   };
@@ -169,7 +177,7 @@ export default function VariantFormPage1() {
 
   const handleSave = () => {
     console.log('🔍 handleSave called with formData:', formData);
-    
+
     // Validate required fields
     if (!formData.brandId || !formData.modelId || !formData.name || !formData.price || formData.price.trim() === '') {
       console.error('❌ Validation failed - missing fields:', {
@@ -231,7 +239,7 @@ export default function VariantFormPage1() {
         title: "Success",
         description: "Page 1 data saved. Moving to Page 2.",
       });
-      
+
       // Navigate to page 2 with the variant ID
       if (isEditMode) {
         setLocation(`/variants/${params.id}/edit/page2`);
@@ -293,7 +301,7 @@ export default function VariantFormPage1() {
   };
 
   // Filter models by selected brand
-  const filteredModels = formData.brandId 
+  const filteredModels = formData.brandId
     ? models.filter(m => m.brandId === formData.brandId)
     : [];
 
@@ -362,8 +370,8 @@ export default function VariantFormPage1() {
 
           <div className="space-y-2">
             <Label>Is Variant Value for Money</Label>
-            <RadioGroup 
-              value={formData.isValueForMoney ? 'yes' : 'no'} 
+            <RadioGroup
+              value={formData.isValueForMoney ? 'yes' : 'no'}
               onValueChange={(value) => handleInputChange('isValueForMoney', value === 'yes')}
             >
               <div className="flex items-center space-x-4">
@@ -454,7 +462,7 @@ export default function VariantFormPage1() {
                 </Button>
               </div>
             ))}
-            
+
             <div className="border-2 border-dashed rounded-lg p-8 text-center">
               <input
                 type="file"
@@ -474,7 +482,7 @@ export default function VariantFormPage1() {
         {/* Variant SEO Summary */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Variant SEO Summary</h3>
-          
+
           <div className="space-y-2">
             <Label>Description</Label>
             <RichTextEditor

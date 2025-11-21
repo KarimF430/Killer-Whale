@@ -43,6 +43,12 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
   const [similarCars, setSimilarCars] = useState<any[]>([])
   const [loadingSimilarCars, setLoadingSimilarCars] = useState(false)
 
+  // ✅ OPTIMIZATION: Shared data state - fetch once, reuse everywhere
+  const [allModels, setAllModels] = useState<any[]>([])
+  const [brands, setBrands] = useState<any[]>([])
+  const [allVariants, setAllVariants] = useState<any[]>([])
+  const [dataLoaded, setDataLoaded] = useState(false)
+
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
   const resolveImageUrl = (image?: string) => {
@@ -56,16 +62,48 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
     params.then(p => setSlug(p.slug))
   }, [params])
 
+  // ✅ OPTIMIZATION: Fetch all data once when component mounts
   useEffect(() => {
-    if (!slug) return
-    fetchComparisonData()
-  }, [slug])
+    const fetchAllData = async () => {
+      try {
+        const [modelsRes, brandsRes, variantsRes] = await Promise.all([
+          fetch(`${backendUrl}/api/models?limit=100`),
+          fetch(`${backendUrl}/api/brands`),
+          fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
+        ])
+
+        const modelsResponse = await modelsRes.json()
+        const brandsData = await brandsRes.json()
+        const variantsResponse = await variantsRes.json()
+
+        setAllModels(modelsResponse.data || modelsResponse)
+        setBrands(brandsData)
+        setAllVariants(variantsResponse.data || variantsResponse)
+        setDataLoaded(true)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+        setDataLoaded(true)
+      }
+    }
+
+    fetchAllData()
+  }, [])
 
   useEffect(() => {
-    if (comparisonItems.length > 0) {
+    if (!slug || !dataLoaded) return
+    fetchComparisonData()
+  }, [slug, dataLoaded])
+
+  useEffect(() => {
+    if (comparisonItems.length > 0 && dataLoaded) {
       fetchSimilarCars()
     }
-  }, [comparisonItems])
+  }, [comparisonItems, dataLoaded])
+
+  const generateSeoText = (modelNames: string[]) => {
+    if (modelNames.length === 0) return ''
+    return `Motoroctane brings you comparison of ${modelNames.join(', ')}...`
+  }
 
   const fetchComparisonData = async () => {
     try {
@@ -73,19 +111,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
       const parts = slug.split('-vs-')
       if (parts.length < 2) return
 
-      const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-        fetch(`${backendUrl}/api/models?limit=100`),
-        fetch(`${backendUrl}/api/brands`),
-        fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
-      ])
-
-      const modelsResponse = await modelsRes.json()
-      const brands = await brandsRes.json()
-      const variantsResponse = await variantsRes.json()
-
-      const allModels = modelsResponse.data || modelsResponse
-      const allVariants = variantsResponse.data || variantsResponse
-
+      // ✅ OPTIMIZATION: Use shared state instead of fetching again
       const brandMap: Record<string, string> = {}
       brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
 
@@ -100,8 +126,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
       const items: ComparisonItem[] = []
       const modelNames: string[] = []
 
-      for (let i = 0; i < Math.min(parts.length, 4); i++) {
-        const foundModel = findModel(parts[i])
+      for (const part of parts) {
+        const foundModel = findModel(part)
         if (foundModel) {
           const modelVariants = allVariants.filter((v: any) => v.modelId === foundModel.id)
 
@@ -142,19 +168,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
       setLoadingSimilarCars(true)
       const firstModel = comparisonItems[0].model
 
-      const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-        fetch(`${backendUrl}/api/models?limit=100`),
-        fetch(`${backendUrl}/api/brands`),
-        fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
-      ])
-
-      const modelsResponse = await modelsRes.json()
-      const brands = await brandsRes.json()
-      const variantsResponse = await variantsRes.json()
-
-      const allModels = modelsResponse.data || modelsResponse
-      const allVariants = variantsResponse.data || variantsResponse
-
+      // ✅ OPTIMIZATION: Use shared state instead of fetching again
       const brandMap: Record<string, string> = {}
       brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
 
@@ -172,10 +186,10 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           return {
             id: m.id,
             name: m.name,
-            brand: brandMap[m.brandId],
-            image: resolveImageUrl(m.heroImage),
-            startingPrice: lowestPrice,
-            fuelTypes: m.fuelTypes || ['Petrol']
+            brand: brandMap[m.brandId] || '',
+            price: lowestPrice,
+            image: resolveImageUrl(m.heroImage) || '',
+            slug: `${(brandMap[m.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`
           }
         })
 
@@ -542,8 +556,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
               <div
                 key={index}
                 className={`relative bg-white rounded-xl md:rounded-2xl border-2 transition-all duration-300 flex-shrink-0 w-[calc(50%-6px)] md:w-full md:flex-1 ${isCheaper
-                    ? 'border-orange-500 shadow-xl shadow-orange-100'
-                    : 'border-gray-200 hover:border-gray-300 shadow-md'
+                  ? 'border-orange-500 shadow-xl shadow-orange-100'
+                  : 'border-gray-200 hover:border-gray-300 shadow-md'
                   }`}
                 style={{ overflow: 'visible' }}
               >
@@ -589,8 +603,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                     <button
                       onClick={() => setShowVariantDropdown(showVariantDropdown === index ? null : index)}
                       className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 bg-white border-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${isCheaper
-                          ? 'border-orange-300 hover:border-orange-400 text-gray-900'
-                          : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                        ? 'border-orange-300 hover:border-orange-400 text-gray-900'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
                         }`}
                     >
                       <span className="truncate pr-2">{item.variant.name}</span>
@@ -617,8 +631,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
                   {/* Price Section - Enhanced */}
                   <div className={`rounded-lg md:rounded-xl p-3 md:p-4 ${isCheaper
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500'
-                      : 'bg-gradient-to-r from-red-50 to-orange-50 border-2 border-gray-100'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500'
+                    : 'bg-gradient-to-r from-red-50 to-orange-50 border-2 border-gray-100'
                     }`}>
                     <div className={`text-lg md:text-2xl font-bold mb-0.5 md:mb-1 ${isCheaper ? 'text-white' : 'text-red-600'
                       }`}>
