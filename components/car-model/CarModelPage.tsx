@@ -2224,7 +2224,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                                 />
                               </div>
                               <div className="text-left">
-                                <div className="text-xs text-gray-500">{car.brand}</div>
+                                <div className="text-xs text-gray-500">{car.brandName}</div>
                                 <div className="font-bold text-sm text-gray-900 mb-1">{car.name}</div>
                                 <div className="text-red-600 font-bold text-sm">
                                   ₹ {(compareCarOnRoad / 100000).toFixed(2)} Lakh
@@ -2237,7 +2237,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                           <button
                             onClick={() => {
                               const currentModelSlug = `${model?.brand.toLowerCase().replace(/\s+/g, '-')}-${model?.name.toLowerCase().replace(/\s+/g, '-')}`
-                              const compareModelSlug = `${car.brand.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
+                              const compareModelSlug = `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
                               router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
                             }}
                             className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm"

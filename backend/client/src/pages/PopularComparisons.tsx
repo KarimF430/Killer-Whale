@@ -65,7 +65,7 @@ export default function PopularComparisons() {
       const loaded = existingComparisons.map((comp: any, index: number) => {
         const model1 = models.find(m => m.id === comp.model1Id);
         const model2 = models.find(m => m.id === comp.model2Id);
-        
+
         return {
           model1Id: comp.model1Id || '',
           model2Id: comp.model2Id || '',
@@ -74,7 +74,7 @@ export default function PopularComparisons() {
           order: comp.order || index + 1
         };
       });
-      
+
       // Fill remaining slots
       while (loaded.length < 10) {
         loaded.push({
@@ -85,7 +85,7 @@ export default function PopularComparisons() {
           order: loaded.length + 1
         });
       }
-      
+
       setComparisons(loaded);
     }
   }, [existingComparisons, models]);
@@ -99,13 +99,13 @@ export default function PopularComparisons() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('API Error:', errorText);
         throw new Error(`Failed to save comparisons: ${errorText}`);
       }
-      
+
       const result = await response.json();
       console.log('API Response:', result);
       return result;
@@ -132,13 +132,14 @@ export default function PopularComparisons() {
     // Filter out empty comparisons and format for API
     const validComparisons = comparisons
       .filter(c => c.model1Id && c.model2Id)
-      .map(c => ({
+      .map((c, index) => ({
+        id: `comparison-${c.model1Id}-vs-${c.model2Id}`,
         model1Id: c.model1Id,
         model2Id: c.model2Id,
-        order: c.order,
+        order: index + 1,
         isActive: true
       }));
-    
+
     console.log('Saving comparisons:', validComparisons);
     saveMutation.mutate(validComparisons);
   };

@@ -69,7 +69,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         const [modelsRes, brandsRes, variantsRes] = await Promise.all([
           fetch(`${backendUrl}/api/models?limit=100`),
           fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
+          fetch(`${backendUrl}/api/variants`)  // ✅ Fetch full variant data for specifications
         ])
 
         const modelsResponse = await modelsRes.json()
