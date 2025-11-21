@@ -1183,9 +1183,25 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.set('Cache-Control', 'public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600');
 
     const brandId = req.query.brandId as string | undefined;
+    const fields = req.query.fields as string | undefined;
 
     // Get all models for the brand
     const allModels = await storage.getModels(brandId);
+
+    // Field projection optimization
+    if (fields) {
+      const fieldList = fields.split(',').map(f => f.trim());
+      const projectedModels = allModels.map(m => {
+        const projected: any = {};
+        fieldList.forEach(field => {
+          if (m.hasOwnProperty(field)) {
+            projected[field] = m[field];
+          }
+        });
+        return projected;
+      });
+      return res.json(projectedModels);
+    }
 
     // Return all models directly as an array
     res.json(allModels);
@@ -1361,6 +1377,386 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
+  // OPTIMIZED CARS BY BUDGET API - Server-side filtering with pagination and caching
+  app.get("/api/cars-by-budget/:budget", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
+    try {
+      const startTime = Date.now();
+      const budget = req.query.budget as string || req.params.budget;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+      const skip = (page - 1) * limit;
+
+      // Set browser cache headers (5 minutes)
+      res.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=600');
+
+      // Define budget ranges (same as frontend)
+      const budgetRanges: Record<string, { min: number; max: number; label: string }> = {
+        'under-5-lakh': { min: 0, max: 500000, label: 'Under ₹5 Lakh' },
+        'under-8-lakh': { min: 0, max: 800000, label: 'Under ₹8 Lakh' },
+        'under-8': { min: 100000, max: 800000, label: 'Under ₹8 Lakh' },
+        'under-15': { min: 800001, max: 1500000, label: 'Under ₹15 Lakh' },
+        'under-25': { min: 1500001, max: 2500000, label: 'Under ₹25 Lakh' },
+        'under-50': { min: 2500001, max: 5000000, label: 'Under ₹50 Lakh' },
+        'above-50': { min: 5000001, max: 999999999, label: 'Above ₹50 Lakh' }
+      };
+
+      const currentBudget = budgetRanges[budget] || budgetRanges['under-8'];
+
+      const mongoose = (await import('mongoose')).default;
+      const db = mongoose.connection.db;
+
+      if (!db) {
+        throw new Error('Database connection not established');
+      }
+
+      // Get brands for mapping
+      const brands = await db.collection('brands').find({}, {
+        projection: { _id: 0, id: 1, name: 1 }
+      }).toArray();
+
+      const brandMap = brands.reduce((acc: any, brand: any) => {
+        acc[brand.id] = brand.name;
+        return acc;
+      }, {});
+
+      // Optimized aggregation pipeline with budget filtering
+      const pipeline = [
+        { $match: { status: 'active' } },
+
+        // Lookup variants to get pricing
+        {
+          $lookup: {
+            from: 'variants',
+            localField: 'id',
+            foreignField: 'modelId',
+            pipeline: [
+              { $match: { status: 'active' } },
+              {
+                $group: {
+                  _id: null,
+                  lowestPrice: { $min: '$price' },
+                  fuelTypes: { $addToSet: '$fuel' },
+                  transmissions: { $addToSet: '$transmission' },
+                  count: { $sum: 1 }
+                }
+              }
+            ],
+            as: 'variantData'
+          }
+        },
+
+        // Add computed fields
+        {
+          $addFields: {
+            startingPrice: {
+              $ifNull: [{ $arrayElemAt: ['$variantData.lowestPrice', 0] }, 0]
+            },
+            variantCount: {
+              $ifNull: [{ $arrayElemAt: ['$variantData.count', 0] }, 0]
+            },
+            fuelTypes: {
+              $ifNull: [{ $arrayElemAt: ['$variantData.fuelTypes', 0] }, []]
+            },
+            transmissions: {
+              $ifNull: [{ $arrayElemAt: ['$variantData.transmissions', 0] }, []]
+            }
+          }
+        },
+
+        // Filter by budget range
+        {
+          $match: {
+            startingPrice: {
+              $gte: currentBudget.min,
+              $lte: currentBudget.max
+            }
+          }
+        },
+
+        // Sort by price (ascending)
+        { $sort: { startingPrice: 1 } }
+      ];
+
+      // Get total count for pagination
+      const countPipeline = [...pipeline, { $count: 'total' }];
+      const countResult = await db.collection('models').aggregate(countPipeline).toArray();
+      const totalCount = countResult.length > 0 ? countResult[0].total : 0;
+
+      // Get paginated results
+      const resultsPipeline = [
+        ...pipeline,
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $project: {
+            variantData: 0,
+            _id: 0
+          }
+        }
+      ];
+
+      const cars = await db.collection('models').aggregate(resultsPipeline).toArray();
+
+      // Process cars to match frontend format
+      const processedCars = cars.map((car: any) => {
+        const brandName = brandMap[car.brandId] || 'Unknown';
+        const brandSlug = brandName.toLowerCase().replace(/\s+/g, '-');
+        const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-');
+
+        // Resolve image URL
+        const backendUrl = process.env.BACKEND_URL || 'http://localhost:5001';
+        const heroImage = car.heroImage
+          ? (car.heroImage.startsWith('http') ? car.heroImage : `${backendUrl}${car.heroImage}`)
+          : '';
+
+        return {
+          id: car.id,
+          name: car.name,
+          brand: car.brandId,
+          brandName,
+          image: heroImage,
+          startingPrice: car.startingPrice || 0,
+          fuelTypes: car.fuelTypes && car.fuelTypes.length > 0 ? car.fuelTypes : ['Petrol'],
+          transmissions: car.transmissions && car.transmissions.length > 0 ? car.transmissions : ['Manual'],
+          seating: car.seating || 5,
+          launchDate: car.launchDate || '',
+          slug: `${brandSlug}-${modelSlug}`,
+          isNew: car.isNew || false,
+          isPopular: car.isPopular || false,
+          rating: 4.5,
+          reviews: 1247,
+          variants: car.variantCount || 0
+        };
+      });
+
+      const took = Date.now() - startTime;
+
+      res.json({
+        data: processedCars,
+        budget: {
+          slug: budget,
+          label: currentBudget.label,
+          min: currentBudget.min,
+          max: currentBudget.max
+        },
+        pagination: {
+          page,
+          limit,
+          total: totalCount,
+          totalPages: Math.ceil(totalCount / limit),
+          hasMore: skip + limit < totalCount
+        },
+        performance: {
+          took,
+          cached: false
+        }
+      });
+    } catch (error) {
+      console.error('Error in cars-by-budget:', error);
+      res.status(500).json({ error: "Failed to get cars by budget" });
+    }
+  });
+
+  // OPTIMIZED COMPARE API - Server-side data aggregation for comparison pages
+  app.get("/api/compare/:slug", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
+    try {
+      const startTime = Date.now();
+      const slug = req.params.slug;
+
+      // Set browser cache headers (10 minutes)
+      res.set('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=1200');
+
+      // Parse slug (e.g., "tata-nexon-vs-hyundai-creta")
+      const parts = slug.split('-vs-');
+      if (parts.length < 2) {
+        return res.status(400).json({ error: "Invalid comparison slug. Format: model1-vs-model2" });
+      }
+
+      const mongoose = (await import('mongoose')).default;
+      const db = mongoose.connection.db;
+
+      if (!db) {
+        throw new Error('Database connection not established');
+      }
+
+      // Get all brands for mapping
+      const brands = await db.collection('brands').find({}, {
+        projection: { _id: 0, id: 1, name: 1 }
+      }).toArray();
+
+      const brandMap = brands.reduce((acc: any, brand: any) => {
+        acc[brand.id] = brand.name;
+        return acc;
+      }, {});
+
+      // Get all models to find the comparison models
+      const models = await db.collection('models').find(
+        { status: 'active' },
+        { projection: { _id: 0 } }
+      ).toArray();
+
+      // Function to find model by slug
+      const findModelBySlug = (targetSlug: string) => {
+        return models.find((m: any) => {
+          const brandName = brandMap[m.brandId] || '';
+          const modelSlug = `${brandName.toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`;
+          return modelSlug === targetSlug;
+        });
+      };
+
+      // Find the comparison models
+      const comparisonModels = [];
+      const modelIds = [];
+
+      for (const part of parts) {
+        const model = findModelBySlug(part);
+        if (model) {
+          comparisonModels.push(model);
+          modelIds.push(model.id);
+        }
+      }
+
+      if (comparisonModels.length < 2) {
+        return res.status(404).json({ error: "One or more comparison models not found" });
+      }
+
+      // Get variants for the comparison models
+      const variants = await db.collection('variants').find({
+        modelId: { $in: modelIds },
+        status: 'active'
+      }, {
+        projection: { _id: 0 }
+      }).toArray();
+
+      // Organize variants by model
+      const variantsByModel: Record<string, any[]> = {};
+      modelIds.forEach(id => { variantsByModel[id] = []; });
+      variants.forEach((v: any) => {
+        if (variantsByModel[v.modelId]) {
+          variantsByModel[v.modelId].push(v);
+        }
+      });
+
+      // Build comparison data
+      const backendUrl = process.env.BACKEND_URL || 'http://localhost:5001';
+      const comparisonData = comparisonModels.map((model: any) => {
+        const modelVariants = variantsByModel[model.id] || [];
+        const lowestVariant = modelVariants.length > 0
+          ? modelVariants.reduce((prev, curr) =>
+            (curr.price < prev.price && curr.price > 0) ? curr : prev
+          )
+          : null;
+
+        const heroImage = model.heroImage
+          ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
+          : '';
+
+        return {
+          model: {
+            id: model.id,
+            name: model.name,
+            brandId: model.brandId,
+            brandName: brandMap[model.brandId] || 'Unknown',
+            heroImage,
+            slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+            isNew: model.isNew || false,
+            isPopular: model.isPopular || false
+          },
+          variants: modelVariants,
+          lowestVariant: lowestVariant || (modelVariants.length > 0 ? modelVariants[0] : null)
+        };
+      });
+
+      // Get similar cars (same price range, exclude comparison models)
+      const avgPrice = comparisonData.reduce((sum, item) => {
+        return sum + (item.lowestVariant?.price || 0);
+      }, 0) / comparisonData.length;
+
+      const priceMin = avgPrice * 0.7;
+      const priceMax = avgPrice * 1.3;
+
+      // Get similar cars using aggregation
+      const similarCars = await db.collection('models').aggregate([
+        {
+          $match: {
+            status: 'active',
+            id: { $nin: modelIds }
+          }
+        },
+        {
+          $lookup: {
+            from: 'variants',
+            localField: 'id',
+            foreignField: 'modelId',
+            pipeline: [
+              { $match: { status: 'active' } },
+              {
+                $group: {
+                  _id: null,
+                  lowestPrice: { $min: '$price' }
+                }
+              }
+            ],
+            as: 'pricing'
+          }
+        },
+        {
+          $addFields: {
+            startingPrice: {
+              $ifNull: [{ $arrayElemAt: ['$pricing.lowestPrice', 0] }, 0]
+            }
+          }
+        },
+        {
+          $match: {
+            startingPrice: {
+              $gte: priceMin,
+              $lte: priceMax
+            }
+          }
+        },
+        { $limit: 6 },
+        {
+          $project: {
+            _id: 0,
+            pricing: 0
+          }
+        }
+      ]).toArray();
+
+      const similarCarsFormatted = similarCars.map((car: any) => {
+        const brandName = brandMap[car.brandId] || 'Unknown';
+        const heroImage = car.heroImage
+          ? (car.heroImage.startsWith('http') ? car.heroImage : `${backendUrl}${car.heroImage}`)
+          : '';
+
+        return {
+          id: car.id,
+          name: car.name,
+          brand: brandName,
+          price: car.startingPrice || 0,
+          image: heroImage,
+          slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
+        };
+      });
+
+      const took = Date.now() - startTime;
+
+      res.json({
+        slug,
+        comparison: comparisonData,
+        similarCars: similarCarsFormatted,
+        brands,
+        performance: {
+          took,
+          cached: false
+        }
+      });
+    } catch (error) {
+      console.error('Error in compare endpoint:', error);
+      res.status(500).json({ error: "Failed to get comparison data" });
+    }
+  });
 
   app.get("/api/models/:id", async (req, res) => {
     const model = await storage.getModel(req.params.id);
@@ -1594,18 +1990,34 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         allVariants = allVariants.filter(v => modelIds.has(v.modelId));
       }
 
-      // Minimal fields optimization
-      if (fields === 'minimal') {
-        const minimalVariants = allVariants.map(v => ({
-          id: v.id,
-          name: v.name,
-          price: v.price,
-          fuelType: v.fuelType,
-          transmission: v.transmission,
-          modelId: v.modelId,
-          features: v.keyFeatures
-        }));
-        return res.json(minimalVariants);
+      // Field projection optimization
+      if (fields) {
+        if (fields === 'minimal') {
+          // Minimal fields for list views
+          const minimalVariants = allVariants.map(v => ({
+            id: v.id,
+            name: v.name,
+            price: v.price,
+            fuelType: v.fuelType,
+            transmission: v.transmission,
+            modelId: v.modelId,
+            features: v.keyFeatures
+          }));
+          return res.json(minimalVariants);
+        } else {
+          // Custom field selection (comma-separated)
+          const fieldList = fields.split(',').map(f => f.trim());
+          const projectedVariants = allVariants.map(v => {
+            const projected: any = {};
+            fieldList.forEach(field => {
+              if (v.hasOwnProperty(field)) {
+                projected[field] = v[field];
+              }
+            });
+            return projected;
+          });
+          return res.json(projectedVariants);
+        }
       }
 
       // Return all variants directly as an array
@@ -1832,6 +2244,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       res.status(500).json({ error: "Failed to save popular comparisons" });
     }
   });
+
 
   // ==================== NEWS ROUTES ====================
 

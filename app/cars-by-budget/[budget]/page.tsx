@@ -182,96 +182,101 @@ export default function BudgetCarsPage() {
     const fuelFilters = ['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid']
     const transmissionFilters = ['Manual', 'Automatic']
 
-    // Fetch cars data
+    // Fetch cars data using optimized endpoint
     useEffect(() => {
         const fetchCars = async () => {
             try {
                 setLoading(true)
                 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
-                // Fetch with large limit to get all data for budget filtering
-                const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-                    fetch(`${backendUrl}/api/models?limit=100`),
-                    fetch(`${backendUrl}/api/brands`),
-                    fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
-                ])
+                // Use optimized budget endpoint - single API call with server-side filtering
+                const response = await fetch(`${backendUrl}/api/cars-by-budget/${budgetSlug}?page=1&limit=100`)
 
-                if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
-                    console.error('Failed to fetch data')
+                if (!response.ok) {
+                    console.error('Failed to fetch budget cars')
                     setCars([])
                     setLoading(false)
                     return
                 }
 
-                const modelsResponse = await modelsRes.json()
-                const brands = await brandsRes.json()
-                const variantsResponse = await variantsRes.json()
+                const data = await response.json()
 
-                // Extract data from pagination responses
-                const models = modelsResponse.data || modelsResponse
-                const variants = variantsResponse.data || variantsResponse
-
-                const brandMap = brands.reduce((acc: any, brand: any) => {
-                    acc[brand.id] = brand.name
-                    return acc
-                }, {})
-
-                // Process all models
-                const processedCars: Car[] = models.map((model: any) => {
-                    const modelVariants = variants.filter((v: any) => v.modelId === model.id)
-
-                    const lowestPrice = modelVariants.length > 0
-                        ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-                        : model.price || 0
-
-                    const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
-                        ? model.fuelTypes
-                        : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-
-                    const transmissions = model.transmissions && model.transmissions.length > 0
-                        ? model.transmissions
-                        : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-
-                    const heroImage = model.heroImage
-                        ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
-                        : ''
-
-                    return {
-                        id: model.id,
-                        name: model.name,
-                        brand: model.brandId,
-                        brandName: brandMap[model.brandId] || 'Unknown',
-                        image: heroImage,
-                        startingPrice: lowestPrice,
-                        fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
-                        transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
-                        seating: model.seating || 5,
-                        launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
-                        slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
-                        isNew: model.isNew || false,
-                        isPopular: model.isPopular || false,
-                        rating: 4.5,
-                        reviews: 1247,
-                        variants: modelVariants.length
-                    }
+                console.log('📊 Budget API Response:', {
+                    total: data.pagination.total,
+                    page: data.pagination.page,
+                    took: data.performance.took + 'ms'
                 })
 
-                console.log('📊 Total models processed:', processedCars.length)
-                console.log('💰 Budget slug:', budgetSlug)
-                console.log('💰 Budget range:', currentBudget.min, '-', currentBudget.max)
+                // Set the filtered cars directly from API
+                setCars(data.data || [])
+                console.log('🚗 Cars set:', data.data?.length || 0, 'cars')
+                console.log('🚗 First car:', data.data?.[0])
 
-                // Filter by budget - show cars within the specific price bracket
-                const filteredCars = processedCars.filter(car => {
-                    const price = car.startingPrice
-                    return price >= currentBudget.min && price <= currentBudget.max
-                })
+                // For popular and new cars, we still need to fetch all models
+                // But we can do this in parallel and it's cached
+                const [modelsRes] = await Promise.all([
+                    fetch(`${backendUrl}/api/models?limit=100`)
+                ])
 
-                console.log('✅ Filtered cars for budget:', filteredCars.length)
-                console.log('🚗 Sample prices:', filteredCars.slice(0, 5).map(c => ({ name: c.name, price: c.startingPrice })))
+                if (modelsRes.ok) {
+                    const modelsResponse = await modelsRes.json()
+                    const models = modelsResponse.data || modelsResponse
 
-                setCars(filteredCars)
-                setPopularCars(processedCars.filter(c => c.isPopular).slice(0, 10))
-                setNewLaunchedCars(processedCars.filter(c => c.isNew).slice(0, 10))
+                    // Get brands for mapping
+                    const brandsRes = await fetch(`${backendUrl}/api/brands`)
+                    const brands = await brandsRes.json()
+                    const brandMap = brands.reduce((acc: any, brand: any) => {
+                        acc[brand.id] = brand.name
+                        return acc
+                    }, {})
+
+                    // Get variants for pricing
+                    const variantsRes = await fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
+                    const variantsResponse = await variantsRes.json()
+                    const variants = variantsResponse.data || variantsResponse
+
+                    // Process for popular and new cars
+                    const processedCars: Car[] = models.map((model: any) => {
+                        const modelVariants = variants.filter((v: any) => v.modelId === model.id)
+                        const lowestPrice = modelVariants.length > 0
+                            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
+                            : model.price || 0
+
+                        const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
+                            ? model.fuelTypes
+                            : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
+
+                        const transmissions = model.transmissions && model.transmissions.length > 0
+                            ? model.transmissions
+                            : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
+
+                        const heroImage = model.heroImage
+                            ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
+                            : ''
+
+                        return {
+                            id: model.id,
+                            name: model.name,
+                            brand: model.brandId,
+                            brandName: brandMap[model.brandId] || 'Unknown',
+                            image: heroImage,
+                            startingPrice: lowestPrice,
+                            fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
+                            transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+                            seating: model.seating || 5,
+                            launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
+                            slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+                            isNew: model.isNew || false,
+                            isPopular: model.isPopular || false,
+                            rating: 4.5,
+                            reviews: 1247,
+                            variants: modelVariants.length
+                        }
+                    })
+
+                    setPopularCars(processedCars.filter(c => c.isPopular).slice(0, 10))
+                    setNewLaunchedCars(processedCars.filter(c => c.isNew).slice(0, 10))
+                }
 
             } catch (error) {
                 console.error('Error fetching cars:', error)
@@ -282,6 +287,7 @@ export default function BudgetCarsPage() {
 
         fetchCars()
     }, [budgetSlug])
+
 
     // Apply filters
     const filteredCars = cars.filter(car => {
@@ -300,6 +306,13 @@ export default function BudgetCarsPage() {
         }
 
         return true
+    })
+
+    console.log('🔍 Filter state:', {
+        totalCars: cars.length,
+        filteredCars: filteredCars.length,
+        selectedFuel,
+        selectedTransmission
     })
 
     const toggleFilter = (type: 'fuel' | 'transmission', value: string) => {

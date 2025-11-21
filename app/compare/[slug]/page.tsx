@@ -49,10 +49,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
   const [addCarAtIndex, setAddCarAtIndex] = useState<number | null>(null)
   const [showVariantModal, setShowVariantModal] = useState<number | null>(null)
 
-  // ✅ OPTIMIZATION: Shared data state - fetch once, reuse everywhere
-  const [allModels, setAllModels] = useState<any[]>([])
+  // ✅ OPTIMIZED: Use single API call for all comparison data
   const [brands, setBrands] = useState<any[]>([])
-  const [allVariants, setAllVariants] = useState<any[]>([])
   const [dataLoaded, setDataLoaded] = useState(false)
 
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
@@ -68,43 +66,11 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
     params.then(p => setSlug(p.slug))
   }, [params])
 
-  // ✅ OPTIMIZATION: Fetch all data once when component mounts
+  // ✅ OPTIMIZED: Single API call for all comparison data
   useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models?limit=100`),
-          fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants`)  // ✅ Fetch full variant data for specifications
-        ])
-
-        const modelsResponse = await modelsRes.json()
-        const brandsData = await brandsRes.json()
-        const variantsResponse = await variantsRes.json()
-
-        setAllModels(modelsResponse.data || modelsResponse)
-        setBrands(brandsData)
-        setAllVariants(variantsResponse.data || variantsResponse)
-        setDataLoaded(true)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-        setDataLoaded(true)
-      }
-    }
-
-    fetchAllData()
-  }, [])
-
-  useEffect(() => {
-    if (!slug || !dataLoaded) return
+    if (!slug) return
     fetchComparisonData()
-  }, [slug, dataLoaded])
-
-  useEffect(() => {
-    if (comparisonItems.length > 0 && dataLoaded) {
-      fetchSimilarCars()
-    }
-  }, [comparisonItems, dataLoaded])
+  }, [slug])
 
   const generateSeoText = (modelNames: string[]) => {
     if (modelNames.length === 0) return ''
@@ -114,99 +80,58 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
   const fetchComparisonData = async () => {
     try {
       setLoading(true)
-      const parts = slug.split('-vs-')
-      if (parts.length < 2) return
+      setLoadingSimilarCars(true)
 
-      // ✅ OPTIMIZATION: Use shared state instead of fetching again
-      const brandMap: Record<string, string> = {}
-      brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
+      // ✅ OPTIMIZED: Single API call with all data pre-aggregated
+      const response = await fetch(`${backendUrl}/api/compare/${slug}`)
 
-      const findModel = (targetSlug: string) => {
-        return allModels.find((m: any) => {
-          const brandName = brandMap[m.brandId] || ''
-          const modelSlug = `${brandName.toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`
-          return modelSlug === targetSlug
-        })
+      if (!response.ok) {
+        console.error('Failed to fetch comparison data')
+        setLoading(false)
+        setLoadingSimilarCars(false)
+        return
       }
 
-      const items: ComparisonItem[] = []
-      const modelNames: string[] = []
+      const data = await response.json()
 
-      for (const part of parts) {
-        const foundModel = findModel(part)
-        if (foundModel) {
-          const modelVariants = allVariants.filter((v: any) => v.modelId === foundModel.id)
+      console.log('📊 Compare API Response:', {
+        comparisonCount: data.comparison.length,
+        similarCarsCount: data.similarCars.length,
+        took: data.performance.took + 'ms'
+      })
 
-          const model: Model = {
-            id: foundModel.id,
-            name: foundModel.name,
-            brandName: brandMap[foundModel.brandId],
-            heroImage: resolveImageUrl(foundModel.heroImage),
-            variants: modelVariants
-          }
+      // Set brands for other uses
+      setBrands(data.brands || [])
 
-          if (modelVariants.length > 0) {
-            const lowestVariant = modelVariants.reduce((prev: Variant, curr: Variant) =>
-              (curr.price < prev.price && curr.price > 0) ? curr : prev
-            )
-            items.push({ model, variant: lowestVariant })
-            modelNames.push(`${model.brandName} ${model.name}`)
-          }
-        }
-      }
+      // Build comparison items from API response
+      const items: ComparisonItem[] = data.comparison.map((item: any) => ({
+        model: {
+          id: item.model.id,
+          name: item.model.name,
+          brandName: item.model.brandName,
+          heroImage: item.model.heroImage,
+          variants: item.variants
+        },
+        variant: item.lowestVariant
+      }))
 
       setComparisonItems(items)
+
+      // Set similar cars
+      setSimilarCars(data.similarCars || [])
+
+      // Generate SEO text
+      const modelNames = items.map(item => `${item.model.brandName} ${item.model.name}`)
       if (modelNames.length > 0) {
         setSeoText(`Motoroctane brings you comparison of ${modelNames.join(', ')}...`)
       }
+
+      setDataLoaded(true)
 
     } catch (error) {
       console.error('Error:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchSimilarCars = async () => {
-    if (comparisonItems.length === 0) return
-
-    try {
-      setLoadingSimilarCars(true)
-      const firstItem = comparisonItems[0]
-      if (!firstItem) return
-      const firstModel = firstItem.model
-
-      // ✅ OPTIMIZATION: Use shared state instead of fetching again
-      const brandMap: Record<string, string> = {}
-      brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
-
-      // Filter similar cars (exclude current comparison cars)
-      const currentModelIds = comparisonItems
-        .filter((item): item is ComparisonItem => item !== null)
-        .map(item => item.model.id)
-      const similar = allModels
-        .filter((m: any) => !currentModelIds.includes(m.id))
-        .slice(0, 6)
-        .map((m: any) => {
-          const modelVariants = allVariants.filter((v: any) => v.modelId === m.id)
-          const lowestPrice = modelVariants.length > 0
-            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-            : 0
-
-          return {
-            id: m.id,
-            name: m.name,
-            brand: brandMap[m.brandId] || '',
-            price: lowestPrice,
-            image: resolveImageUrl(m.heroImage) || '',
-            slug: `${(brandMap[m.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`
-          }
-        })
-
-      setSimilarCars(similar)
-    } catch (error) {
-      console.error('Error fetching similar cars:', error)
-    } finally {
       setLoadingSimilarCars(false)
     }
   }

@@ -18,11 +18,11 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   if (brandSlug.startsWith('.well-known') || brandSlug === 'well-known') {
     return {}
   }
-  
+
   // Convert slugs to display names
   const brandName = brandSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
   const modelName = modelSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-  
+
   return generateModelSEO(brandName, modelName)
 }
 
@@ -30,62 +30,75 @@ async function getModelData(brandSlug: string, modelSlug: string) {
   try {
     // Remove '-cars' suffix from brand slug to get actual brand name
     const brandName = brandSlug.replace('-cars', '')
-    
+
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
     // Guard against /.well-known devtools requests being treated as dynamic routes
     if (brandSlug.startsWith('.well-known') || brandSlug === 'well-known') {
       throw new Error('Ignore well-known probe')
     }
-    
-    // Get all brands first to match properly
+
+
+    // OPTIMIZATION: Parallel data fetching where possible
+    console.log('🚀 Starting optimized parallel data fetch...')
+    const startTime = Date.now()
+
+    // Step 1: Fetch brands (required first to get brandId)
     const brandsResponse = await fetch(`${backendUrl}/api/brands`, { cache: 'no-store' })
     if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
-    
+
     const brands = await brandsResponse.json()
-    
+
     // Find the brand by matching slug
     const brandData = brands.find((brand: any) => {
       const slug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       return slug === brandName
     })
-    
+
     if (!brandData) throw new Error('Brand not found')
-    
-    // Get models for this brand
+
+    // Step 2: Fetch models for this brand to get modelId
     const modelsResponse = await fetch(`${backendUrl}/api/frontend/brands/${brandData.id}/models`, { cache: 'no-store' })
     if (!modelsResponse.ok) throw new Error('Failed to fetch models')
-    
+
     const modelsData = await modelsResponse.json()
     const modelData = modelsData.models.find((m: any) => m.slug === modelSlug)
     if (!modelData) throw new Error('Model not found')
-    
-    // Get detailed model data directly from models API
-    let detailedModelData = null
-    try {
-      const detailResponse = await fetch(`${backendUrl}/api/models/${modelData.id}`, { cache: 'no-store' })
-      if (detailResponse.ok) {
-        detailedModelData = await detailResponse.json()
-        console.log('✅ Successfully fetched detailed model data:', detailedModelData)
-      } else {
-        console.log('❌ Failed to fetch model details:', detailResponse.status)
-      }
-    } catch (error) {
-      console.log('❌ Error fetching detailed model data:', error)
-    }
-    
+
+    // Step 3: PARALLEL FETCH - Get detailed model data and variants simultaneously
+    const [detailedModelData, variantsData] = await Promise.all([
+      fetch(`${backendUrl}/api/models/${modelData.id}`, { cache: 'no-store' })
+        .then(res => res.ok ? res.json() : null)
+        .catch(err => {
+          console.log('❌ Error fetching detailed model data:', err)
+          return null
+        }),
+      fetch(`${backendUrl}/api/variants?modelId=${modelData.id}&fields=id,name,price,fuelType,transmission,engine,power,mileage`, { cache: 'no-store' })
+        .then(res => res.ok ? res.json() : [])
+        .catch(err => {
+          console.log('❌ Error fetching variants:', err)
+          return []
+        })
+    ])
+
+    const fetchTime = Date.now() - startTime
+    console.log(`✅ Parallel fetch completed in ${fetchTime}ms`)
+
     console.log('Model ID:', modelData.id)
     console.log('Detailed model data:', detailedModelData)
     console.log('Header SEO:', detailedModelData?.headerSeo)
-    
+
+
+
+
     // Build gallery array from backend data
     const galleryImages: string[] = []
-    
+
     // Add hero image first
     const heroImageUrl = detailedModelData?.heroImage || modelData.image
     if (heroImageUrl) {
       galleryImages.push(heroImageUrl.startsWith('/uploads/') ? `${backendUrl}${heroImageUrl}` : heroImageUrl)
     }
-    
+
     // Add gallery images from backend
     if (detailedModelData?.galleryImages && Array.isArray(detailedModelData.galleryImages)) {
       detailedModelData.galleryImages.forEach((img: any) => {
@@ -97,84 +110,73 @@ async function getModelData(brandSlug: string, modelSlug: string) {
         }
       })
     }
-    
+
     console.log('Gallery images from backend:', detailedModelData?.galleryImages)
     console.log('Final gallery array:', galleryImages)
-    
-    // Fetch variants for this model to get dynamic pricing
-    let variantsData = []
+
+    // Calculate lowest and highest prices from actual variants
     let lowestPrice = 0
     let highestPrice = 0
-    
-    try {
-      const variantsResponse = await fetch(`${backendUrl}/api/variants?modelId=${modelData.id}`, { cache: 'no-store' })
-      if (variantsResponse.ok) {
-        variantsData = await variantsResponse.json()
-        
-        // Calculate lowest and highest prices from actual variants
-        if (variantsData.length > 0) {
-          const prices = variantsData.map((v: any) => v.price).filter((p: number) => p > 0)
-          if (prices.length > 0) {
-            lowestPrice = Math.min(...prices)
-            highestPrice = Math.max(...prices)
-          }
-        }
-        
-        console.log('✅ Fetched variants:', variantsData.length)
-        console.log('💰 Price range:', lowestPrice, '-', highestPrice)
+
+    if (variantsData.length > 0) {
+      const prices = variantsData.map((v: any) => v.price).filter((p: number) => p > 0)
+      if (prices.length > 0) {
+        lowestPrice = Math.min(...prices)
+        highestPrice = Math.max(...prices)
       }
-    } catch (error) {
-      console.log('❌ Error fetching variants:', error)
+
+      console.log('✅ Fetched variants:', variantsData.length)
+      console.log('💰 Price range:', lowestPrice, '-', highestPrice)
     }
-    
+
     // Fallback to model price if no variants found
     if (lowestPrice === 0) {
       lowestPrice = parseFloat(modelData.price.replace('₹', '')) * 100000
       highestPrice = lowestPrice * 1.5
     }
-    
+
     // Transform variants data
-    const transformedVariants = variantsData.length > 0 
+    const transformedVariants = variantsData.length > 0
       ? variantsData.map((variant: any) => ({
-          id: variant.id,
-          name: variant.name,
-          price: variant.price,
-          fuelType: variant.fuelType || modelData.fuelType,
-          transmission: variant.transmission || modelData.transmission,
-          keyFeatures: [
-            variant.engine ? `Engine: ${variant.engine}` : null,
-            variant.power ? `Power: ${variant.power}` : null,
-            variant.mileage ? `Mileage: ${variant.mileage}` : null,
-            'Safety Features'
-          ].filter(Boolean)
-        }))
+        id: variant.id,
+        name: variant.name,
+        price: variant.price,
+        fuelType: variant.fuelType || modelData.fuelType,
+        transmission: variant.transmission || modelData.transmission,
+        keyFeatures: [
+          variant.engine ? `Engine: ${variant.engine}` : null,
+          variant.power ? `Power: ${variant.power}` : null,
+          variant.mileage ? `Mileage: ${variant.mileage}` : null,
+          'Safety Features'
+        ].filter(Boolean)
+      }))
       : [
-          {
-            id: '1',
-            name: `${modelData.name} Base`,
-            price: lowestPrice,
-            fuelType: modelData.fuelType,
-            transmission: modelData.transmission,
-            keyFeatures: ['Dual Airbags', 'ABS with EBD', 'Power Steering', 'Central Locking']
-          },
-          {
-            id: '2',
-            name: `${modelData.name} Mid`,
-            price: lowestPrice * 1.2,
-            fuelType: modelData.fuelType,
-            transmission: modelData.transmission,
-            keyFeatures: ['All Base features', 'Touchscreen Infotainment', 'Steering Controls', 'Rear Parking Sensors']
-          },
-          {
-            id: '3',
-            name: `${modelData.name} Top`,
-            price: highestPrice,
-            fuelType: modelData.fuelType,
-            transmission: modelData.transmission,
-            keyFeatures: ['All Mid features', 'Sunroof', 'Cruise Control', 'Auto Climate Control']
-          }
-        ]
-    
+        {
+          id: '1',
+          name: `${modelData.name} Base`,
+          price: lowestPrice,
+          fuelType: modelData.fuelType,
+          transmission: modelData.transmission,
+          keyFeatures: ['Dual Airbags', 'ABS with EBD', 'Power Steering', 'Central Locking']
+        },
+        {
+          id: '2',
+          name: `${modelData.name} Mid`,
+          price: lowestPrice * 1.2,
+          fuelType: modelData.fuelType,
+          transmission: modelData.transmission,
+          keyFeatures: ['All Base features', 'Touchscreen Infotainment', 'Steering Controls', 'Rear Parking Sensors']
+        },
+        {
+          id: '3',
+          name: `${modelData.name} Top`,
+          price: highestPrice,
+          fuelType: modelData.fuelType,
+          transmission: modelData.transmission,
+          keyFeatures: ['All Mid features', 'Sunroof', 'Cruise Control', 'Auto Climate Control']
+        }
+      ]
+
     const enhancedModelData = {
       id: modelData.id,
       slug: modelData.slug,
@@ -256,15 +258,15 @@ async function getModelData(brandSlug: string, modelSlug: string) {
         { condition: 'Combined', value: parseFloat(modelData.mileage.split(' ')[0]), unit: 'kmpl' }
       ]
     }
-    
+
     return enhancedModelData
   } catch (error) {
     console.error('Error fetching model data:', error)
-    
+
     // Return fallback data instead of null to prevent errors
     const fallbackBrand = brandSlug.replace('-cars', '').split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     const fallbackModel = modelSlug.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-    
+
     return {
       id: 'fallback-id',
       slug: modelSlug,
@@ -329,10 +331,10 @@ export default async function ModelPage({ params }: ModelPageProps) {
     return null as any
   }
   const modelData = await getModelData(resolvedParams['brand-cars'], resolvedParams.model)
-  
+
   if (!modelData) {
     notFound()
   }
-  
+
   return <CarModelPage model={modelData} />
 }
