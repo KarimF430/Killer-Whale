@@ -52,6 +52,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
   // ✅ OPTIMIZED: Use single API call for all comparison data
   const [brands, setBrands] = useState<any[]>([])
   const [dataLoaded, setDataLoaded] = useState(false)
+  const [allModels, setAllModels] = useState<any[]>([])
+  const [loadingAllModels, setLoadingAllModels] = useState(false)
 
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
@@ -165,51 +167,79 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
     setAddCarAtIndex(index ?? null)
     setShowAddCarModal(true)
     setSearchQuery('')
+    if (allModels.length === 0) {
+      fetchAllModels()
+    }
   }
 
-  const handleAddCar = (model: any) => {
-    const modelVariants = allVariants.filter((v: any) => v.modelId === model.id)
-    const brandMap: Record<string, string> = {}
-    brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
-
-    if (modelVariants.length > 0) {
-      const lowestVariant = modelVariants.reduce((prev: Variant, curr: Variant) =>
-        (curr.price < prev.price && curr.price > 0) ? curr : prev
-      )
-
-      const newModel: Model = {
-        id: model.id,
-        name: model.name,
-        brandName: brandMap[model.brandId],
-        heroImage: resolveImageUrl(model.heroImage),
-        variants: modelVariants
+  const fetchAllModels = async () => {
+    try {
+      setLoadingAllModels(true)
+      const response = await fetch(`${backendUrl}/api/models?fields=id,name,brandId,heroImage`)
+      if (response.ok) {
+        const data = await response.json()
+        setAllModels(data)
       }
+    } catch (error) {
+      console.error('Failed to fetch models:', error)
+    } finally {
+      setLoadingAllModels(false)
+    }
+  }
 
-      const newItem = { model: newModel, variant: lowestVariant }
+  const handleAddCar = async (model: any) => {
+    try {
+      // Fetch variants for this model on demand
+      const response = await fetch(`${backendUrl}/api/variants?modelId=${model.id}`)
+      if (!response.ok) throw new Error('Failed to fetch variants')
 
-      let newItems: (ComparisonItem | null)[]
-      if (addCarAtIndex !== null) {
-        // Replace at specific index
-        newItems = [...comparisonItems]
-        newItems[addCarAtIndex] = newItem
-      } else {
-        // Add to end
-        newItems = [...comparisonItems, newItem]
+      const modelVariants = await response.json()
+
+      const brandMap: Record<string, string> = {}
+      brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
+
+      if (modelVariants.length > 0) {
+        const lowestVariant = modelVariants.reduce((prev: Variant, curr: Variant) =>
+          (curr.price < prev.price && curr.price > 0) ? curr : prev
+        )
+
+        const newModel: Model = {
+          id: model.id,
+          name: model.name,
+          brandName: brandMap[model.brandId] || 'Unknown',
+          heroImage: resolveImageUrl(model.heroImage),
+          variants: modelVariants
+        }
+
+        const newItem = { model: newModel, variant: lowestVariant }
+
+        let newItems: (ComparisonItem | null)[]
+        if (addCarAtIndex !== null) {
+          // Replace at specific index
+          newItems = [...comparisonItems]
+          newItems[addCarAtIndex] = newItem
+        } else {
+          // Add to end
+          newItems = [...comparisonItems, newItem]
+        }
+
+        setComparisonItems(newItems)
+
+        // Update URL - only include non-null items
+        const validItems = newItems.filter((item): item is ComparisonItem => item !== null)
+        if (validItems.length > 0) {
+          const newSlug = validItems.map(item =>
+            `${item.model.brandName.toLowerCase().replace(/\s+/g, '-')}-${item.model.name.toLowerCase().replace(/\s+/g, '-')}`
+          ).join('-vs-')
+          router.push(`/compare/${newSlug}`)
+        }
+
+        setShowAddCarModal(false)
+        setAddCarAtIndex(null)
       }
-
-      setComparisonItems(newItems)
-
-      // Update URL - only include non-null items
-      const validItems = newItems.filter((item): item is ComparisonItem => item !== null)
-      if (validItems.length > 0) {
-        const newSlug = validItems.map(item =>
-          `${item.model.brandName.toLowerCase().replace(/\s+/g, '-')}-${item.model.name.toLowerCase().replace(/\s+/g, '-')}`
-        ).join('-vs-')
-        router.push(`/compare/${newSlug}`)
-      }
-
-      setShowAddCarModal(false)
-      setAddCarAtIndex(null)
+    } catch (error) {
+      console.error('Error adding car:', error)
+      alert('Failed to add car. Please try again.')
     }
   }
 

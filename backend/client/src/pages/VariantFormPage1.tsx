@@ -80,8 +80,8 @@ export default function VariantFormPage1() {
   // Generate ID when brand, model, and variant name are selected
   useEffect(() => {
     if (formData.brandId && formData.modelId && formData.name && !isEditMode) {
-      const brand = brands.find(b => b.id === formData.brandId);
-      const model = models.find(m => m.id === formData.modelId);
+      const brand = brands.find((b: any) => b.id === formData.brandId);
+      const model = models.find((m: any) => m.id === formData.modelId);
 
       if (brand && model) {
         const brandPrefix = brand.name.substring(0, 2).toUpperCase();
@@ -302,7 +302,7 @@ export default function VariantFormPage1() {
 
   // Filter models by selected brand
   const filteredModels = formData.brandId
-    ? models.filter(m => m.brandId === formData.brandId)
+    ? models.filter((m: any) => m.brandId === formData.brandId)
     : [];
 
   return (
@@ -326,7 +326,7 @@ export default function VariantFormPage1() {
               required
             >
               <option value="">Choose Brand</option>
-              {brands.map(brand => (
+              {brands.map((brand: any) => (
                 <option key={brand.id} value={brand.id}>{brand.name}</option>
               ))}
             </select>
@@ -343,7 +343,7 @@ export default function VariantFormPage1() {
               disabled={!formData.brandId}
             >
               <option value="">Choose Model</option>
-              {filteredModels.map(model => (
+              {filteredModels.map((model: any) => (
                 <option key={model.id} value={model.id}>{model.name}</option>
               ))}
             </select>

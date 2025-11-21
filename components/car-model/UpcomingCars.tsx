@@ -65,14 +65,13 @@ export default function UpcomingCars({ carData }: UpcomingCarsProps) {
                 {/* Background Pattern */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-16 translate-x-16"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full translate-y-12 -translate-x-12"></div>
-                
+
                 {/* Status Badge */}
                 <div className="flex justify-between items-start mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    car.status === 'Confirmed' 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-yellow-500 text-black'
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${car.status === 'Confirmed'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-yellow-500 text-black'
+                    }`}>
                     {car.status}
                   </span>
                   <button className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors">
@@ -113,7 +112,7 @@ export default function UpcomingCars({ carData }: UpcomingCarsProps) {
                 <div className="mb-4">
                   <h4 className="font-semibold mb-2 text-sm">Key Features:</h4>
                   <div className="flex flex-wrap gap-1">
-                    {car.keyFeatures.slice(0, 3).map((feature, index) => (
+                    {car.keyFeatures.slice(0, 3).map((feature: string, index: number) => (
                       <span key={index} className="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">
                         {feature}
                       </span>
@@ -142,9 +141,8 @@ export default function UpcomingCars({ carData }: UpcomingCarsProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {upcomingCars.map((car, index) => (
             <div key={car.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <div className={`w-3 h-3 rounded-full ${
-                car.status === 'Confirmed' ? 'bg-green-500' : 'bg-yellow-500'
-              }`}></div>
+              <div className={`w-3 h-3 rounded-full ${car.status === 'Confirmed' ? 'bg-green-500' : 'bg-yellow-500'
+                }`}></div>
               <div>
                 <div className="font-medium text-sm">{car.name}</div>
                 <div className="text-xs text-gray-600">{car.launchDate}</div>

@@ -333,6 +333,28 @@ export class PersistentStorage implements IStorage {
       .slice(0, limit);
   }
 
+  async getModelsWithPricing(brandId?: string): Promise<any[]> {
+    let models = await this.getModels(brandId);
+    const results = [];
+
+    for (const model of models) {
+      const variants = await this.getVariants(model.id);
+      const prices = variants.map(v => v.price).filter(p => p > 0);
+      const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+      const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+
+      results.push({
+        ...model,
+        priceRange: {
+          min: minPrice,
+          max: maxPrice
+        }
+      });
+    }
+
+    return results;
+  }
+
   // Variant methods
   async getVariants(modelId?: string, brandId?: string): Promise<Variant[]> {
     let filtered = this.variants;

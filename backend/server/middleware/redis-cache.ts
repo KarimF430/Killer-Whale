@@ -169,7 +169,8 @@ async function handleCacheMissWithStampedePrevention(
             .then(() => {
               console.log(`💾 Cached: ${cacheKey}`);
               // Release lock
-              return redis.del(lockKey);
+              if (redis) return redis.del(lockKey);
+              return Promise.resolve(0);
             })
             .catch(err => console.error('Cache set error:', err));
         }

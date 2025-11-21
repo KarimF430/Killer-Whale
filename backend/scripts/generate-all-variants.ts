@@ -206,7 +206,6 @@ function createVariantObject(
         engineName: `${engineSpecs.capacity} ${template.fuelType.charAt(0).toUpperCase() + template.fuelType.slice(1)}`,
         enginePower: template.enginePower,
         engineTorque: template.engineTorque,
-        engineCapacity: engineSpecs.capacity,
         engineTransmission: template.transmission.charAt(0).toUpperCase() + template.transmission.slice(1),
 
         // Mileage

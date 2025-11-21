@@ -323,7 +323,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         const variants = await variantsRes.json()
 
         // Create a map of brand IDs to brand names
-        const brandMap = brands.reduce((acc: any, brand: any) => {
+        const brandMap = brands.reduce((acc: Record<string, string>, brand: any) => {
           acc[brand.id] = brand.name
           return acc
         }, {})
@@ -456,7 +456,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         const variants = await variantsRes.json()
 
         // Create a map of brand IDs to brand names (same as CarModelPage)
-        const brandMap = brands.reduce((acc: any, brand: any) => {
+        const brandMap = brands.reduce((acc: Record<string, string>, brand: any) => {
           acc[brand.id] = brand.name
           return acc
         }, {})

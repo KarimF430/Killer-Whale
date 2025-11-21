@@ -112,8 +112,8 @@ export default function SimilarCars({ carData }: SimilarCarsProps) {
                 <button
                   onClick={() => toggleWishlist(car.id)}
                   className={`absolute top-3 right-3 p-2 rounded-full transition-colors ${wishlistItems.has(car.id)
-                      ? 'bg-red-500 text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                    ? 'bg-red-500 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-100'
                     }`}
                 >
                   <Heart className={`h-4 w-4 ${wishlistItems.has(car.id) ? 'fill-current' : ''}`} />
@@ -163,7 +163,7 @@ export default function SimilarCars({ carData }: SimilarCarsProps) {
                 <div className="mb-4">
                   <p className="text-xs text-gray-500 mb-2">Key Features:</p>
                   <div className="flex flex-wrap gap-1">
-                    {car.keyFeatures.slice(0, 2).map((feature, index) => (
+                    {car.keyFeatures.slice(0, 2).map((feature: string, index: number) => (
                       <span key={index} className="px-2 py-1 bg-gray-100 text-xs text-gray-700 rounded">
                         {feature}
                       </span>

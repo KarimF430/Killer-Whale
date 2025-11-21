@@ -345,6 +345,36 @@ export class MongoDBStorage implements IStorage {
     }
   }
 
+  async getModelsWithPricing(brandId?: string): Promise<any[]> {
+    try {
+      const filter: any = { status: 'active' };
+      if (brandId) filter.brandId = brandId;
+
+      const models = await MongoModel.find(filter).sort({ name: 1 }).lean();
+      const results = [];
+
+      for (const model of models) {
+        const variants = await MongoVariant.find({ modelId: model.id, status: 'active' }).select('price').lean();
+        const prices = variants.map(v => v.price).filter(p => p > 0);
+        const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+        const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+
+        results.push({
+          ...mapModel(model),
+          priceRange: {
+            min: minPrice,
+            max: maxPrice
+          }
+        });
+      }
+
+      return results;
+    } catch (error) {
+      console.error('getModelsWithPricing error:', error);
+      throw new Error('Failed to fetch models with pricing');
+    }
+  }
+
   // ============================================
   // VARIANTS
   // ============================================
