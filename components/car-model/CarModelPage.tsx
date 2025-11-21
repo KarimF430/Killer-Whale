@@ -98,6 +98,7 @@ interface ModelData {
     value: number
     unit: string
   }>
+  similarCars?: any[] // Added similarCars to interface
 }
 
 interface CarModelPageProps {
@@ -277,7 +278,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
     }
   }, [])
   const [selectedVariant, setSelectedVariant] = useState(model?.variants?.[0]?.name || 'Base Variant')
-  const [modelVariants, setModelVariants] = useState<any[]>([])
+  // Initialize variants from props instead of fetching
+  const [modelVariants, setModelVariants] = useState<any[]>(model.variants || [])
 
   // Track page view for smart favourites algorithm
   const carDataForTracking = model ? {
@@ -342,64 +344,9 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   }
 
   const displayEMI = calculateDisplayEMI(displayStartPrice)
-  const [loadingVariants, setLoadingVariants] = useState(true)
+  // Variants are now passed from server, no need to fetch
+  const loadingVariants = false
   const mileageScrollRef = useRef<HTMLDivElement>(null)
-
-  // Listen for city changes from localStorage (when user returns from location page)
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const savedCity = localStorage.getItem('selectedCity')
-      if (savedCity) {
-        setSelectedCity(savedCity)
-      }
-    }
-
-    // Listen for storage events
-    window.addEventListener('storage', handleStorageChange)
-
-    // Also check on mount and when page becomes visible
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        handleStorageChange()
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    // Check immediately on mount
-    handleStorageChange()
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [])
-
-  // Fetch variants for this model
-  useEffect(() => {
-    const fetchVariants = async () => {
-      if (!model?.id) return
-
-      try {
-        setLoadingVariants(true)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}&fields=minimal`)
-        if (response.ok) {
-          const variants = await response.json()
-          setModelVariants(variants)
-        } else {
-          console.error('Failed to fetch variants:', response.statusText)
-          setModelVariants([])
-        }
-      } catch (error) {
-        console.error('Error fetching variants:', error)
-        setModelVariants([])
-      } finally {
-        setLoadingVariants(false)
-      }
-    }
-
-    fetchVariants()
-  }, [model?.id])
 
   // Function to handle tab switching and reset scroll position
   const handleHighlightTabChange = (tab: 'keyFeatures' | 'spaceComfort' | 'storageConvenience') => {
@@ -667,106 +614,9 @@ export default function CarModelPage({ model }: CarModelPageProps) {
     return breakup.totalOnRoadPrice
   }
 
-  // Similar cars data - dynamically fetched based on body type and sub-body type
-  const [similarCars, setSimilarCars] = useState<any[]>([])
-  const [loadingSimilarCars, setLoadingSimilarCars] = useState(true)
-
-  // Fetch similar cars using exact same logic as CarsByBudget
-  useEffect(() => {
-    const fetchSimilarCars = async () => {
-      if (!model?.id) {
-        setSimilarCars([])
-        setLoadingSimilarCars(false)
-        return
-      }
-
-      try {
-        setLoadingSimilarCars(true)
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-
-        // Fetch all models, brands, and variants (same as CarsByBudget)
-        const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models?limit=100`),
-          fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
-        ])
-
-        if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
-          console.error('Failed to fetch similar cars data')
-          setSimilarCars([])
-          setLoadingSimilarCars(false)
-          return
-        }
-
-        const modelsResponse = await modelsRes.json()
-        const brands = await brandsRes.json()
-        const variantsResponse = await variantsRes.json()
-
-        const models = modelsResponse.data || modelsResponse
-        const variants = variantsResponse.data || variantsResponse
-
-        // Create a map of brand IDs to brand names (same as CarsByBudget)
-        const brandMap = brands.reduce((acc: any, brand: any) => {
-          acc[brand.id] = brand.name
-          return acc
-        }, {})
-
-        // Process each model to find lowest variant price (same as CarsByBudget)
-        const processedCars = models
-          .filter((m: any) => m.id !== model.id) // Exclude current model
-          .map((m: any) => {
-            // Find all variants for this model
-            const modelVariants = variants.filter((v: any) => v.modelId === m.id)
-
-            // Find lowest price variant
-            const lowestPrice = modelVariants.length > 0
-              ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-              : m.price || 0
-
-            // Get unique fuel types and transmissions from model or variants
-            const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
-              ? m.fuelTypes
-              : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-
-            const transmissions = m.transmissions && m.transmissions.length > 0
-              ? m.transmissions
-              : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-
-            // Get hero image from model (same as CarsByBudget)
-            const heroImage = m.heroImage
-              ? (m.heroImage.startsWith('http')
-                ? m.heroImage
-                : `${backendUrl}${m.heroImage}`)
-              : ''
-
-            return {
-              id: m.id,
-              name: m.name,
-              brand: m.brandId,
-              brandName: brandMap[m.brandId] || 'Unknown',
-              image: heroImage,
-              startingPrice: lowestPrice,
-              fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
-              transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
-              seating: m.seating || 5,
-              launchDate: m.launchDate ? `Launched ${formatLaunchDate(m.launchDate)}` : 'Launched',
-              slug: `${(brandMap[m.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
-              isNew: m.isNew || false,
-              isPopular: m.isPopular || false
-            }
-          })
-
-        setSimilarCars(processedCars)
-        setLoadingSimilarCars(false)
-      } catch (error) {
-        console.error('Error fetching similar cars:', error)
-        setSimilarCars([])
-        setLoadingSimilarCars(false)
-      }
-    }
-
-    fetchSimilarCars()
-  }, [model?.id])
+  // Similar cars are now passed from server
+  const similarCars = model.similarCars || []
+  const loadingSimilarCars = false
 
   // Helper function to format launch date
   const formatLaunchDate = (date: string): string => {

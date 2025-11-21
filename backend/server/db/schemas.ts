@@ -26,13 +26,13 @@ const modelSchema = new mongoose.Schema({
   name: { type: String, required: true },
   brandId: { type: String, required: true },
   status: { type: String, default: 'active' },
-  
+
   // Popularity & Rankings
   isPopular: { type: Boolean, default: false },
   isNew: { type: Boolean, default: false },
   popularRank: { type: Number, default: null },
   newRank: { type: Number, default: null },
-  
+
   // Basic Info
   bodyType: { type: String, default: null },
   subBodyType: { type: String, default: null },
@@ -41,7 +41,7 @@ const modelSchema = new mongoose.Schema({
   fuelTypes: { type: [String], default: [] },
   transmissions: { type: [String], default: [] },
   brochureUrl: { type: String, default: null },
-  
+
   // SEO & Content
   headerSeo: { type: String, default: null },
   pros: { type: String, default: null },
@@ -50,7 +50,7 @@ const modelSchema = new mongoose.Schema({
   exteriorDesign: { type: String, default: null },
   comfortConvenience: { type: String, default: null },
   summary: { type: String, default: null },
-  
+
   // Engine Summaries
   engineSummaries: [{
     title: { type: String },
@@ -60,7 +60,7 @@ const modelSchema = new mongoose.Schema({
     torque: { type: String },
     speed: { type: String }
   }],
-  
+
   // Mileage Data
   mileageData: [{
     engineName: { type: String },
@@ -68,13 +68,13 @@ const modelSchema = new mongoose.Schema({
     cityRealWorld: { type: String },
     highwayRealWorld: { type: String }
   }],
-  
+
   // FAQs
   faqs: [{
     question: { type: String, required: true },
     answer: { type: String, required: true }
   }],
-  
+
   // Images
   heroImage: { type: String, default: null },
   galleryImages: [{
@@ -97,12 +97,12 @@ const modelSchema = new mongoose.Schema({
     url: { type: String },
     caption: { type: String }
   }],
-  
+
   createdAt: { type: Date, default: Date.now }
 });
 
 // Add foreign key validation for models
-modelSchema.pre('save', async function() {
+modelSchema.pre('save', async function () {
   const Brand = mongoose.model('Brand');
   const brand = await Brand.findOne({ id: this.brandId });
   if (!brand) {
@@ -126,16 +126,16 @@ const variantSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   status: { type: String, default: 'active' },
   description: { type: String, default: null },
-  
+
   // Key Features
   isValueForMoney: { type: Boolean, default: false },
   keyFeatures: { type: String, default: null },
   headerSummary: { type: String, default: null },
-  
+
   // Design & Styling
   exteriorDesign: { type: String, default: null },
   comfortConvenience: { type: String, default: null },
-  
+
   // Engine Specifications
   engineName: { type: String, default: null },
   engineSummary: { type: String, default: null },
@@ -151,7 +151,7 @@ const variantSchema = new mongoose.Schema({
   driveType: { type: String, default: null },
   fuelType: { type: String, default: null },
   fuel: { type: String, default: null },
-  
+
   // Mileage
   mileageEngineName: { type: String, default: null },
   mileageCompanyClaimed: { type: String, default: null },
@@ -161,7 +161,7 @@ const variantSchema = new mongoose.Schema({
   mileageHighway: { type: String, default: null },
   fuelTankCapacity: { type: String, default: null },
   emissionStandard: { type: String, default: null },
-  
+
   // Dimensions
   groundClearance: { type: String, default: null },
   length: { type: String, default: null },
@@ -179,7 +179,7 @@ const variantSchema = new mongoose.Schema({
   bootSpaceAfterFoldingRearRowSeats: { type: String, default: null },
   seatingCapacity: { type: String, default: null },
   doors: { type: String, default: null },
-  
+
   // Performance
   engineNamePage4: { type: String, default: null },
   engineCapacity: { type: String, default: null },
@@ -203,18 +203,18 @@ const variantSchema = new mongoose.Schema({
   differentialLock: { type: String, default: null },
   limitedSlipDifferential: { type: String, default: null },
   acceleration: { type: String, default: null },
-  
+
   // Suspension & Brakes
   frontSuspension: { type: String, default: null },
   rearSuspension: { type: String, default: null },
   frontBrake: { type: String, default: null },
   rearBrake: { type: String, default: null },
-  
+
   // Wheels & Tyres
   wheelSize: { type: String, default: null },
   tyreSize: { type: String, default: null },
   spareTyre: { type: String, default: null },
-  
+
   // Safety Features
   globalNCAPRating: { type: String, default: null },
   airbags: { type: String, default: null },
@@ -245,7 +245,7 @@ const variantSchema = new mongoose.Schema({
   parkingSensors: { type: String, default: null },
   parkingCamera: { type: String, default: null },
   blindSpotMonitor: { type: String, default: null },
-  
+
   // Comfort & Convenience
   ventilatedSeats: { type: String, default: null },
   sunroof: { type: String, default: null },
@@ -274,7 +274,7 @@ const variantSchema = new mongoose.Schema({
   pushButtonStart: { type: String, default: null },
   powerWindows: { type: String, default: null },
   powerSteering: { type: String, default: null },
-  
+
   // Infotainment
   touchScreenInfotainment: { type: String, default: null },
   androidAppleCarplay: { type: String, default: null },
@@ -291,7 +291,7 @@ const variantSchema = new mongoose.Schema({
   aux: { type: String, default: null },
   androidAuto: { type: String, default: null },
   appleCarPlay: { type: String, default: null },
-  
+
   // Lighting
   headLights: { type: String, default: null },
   tailLight: { type: String, default: null },
@@ -301,7 +301,7 @@ const variantSchema = new mongoose.Schema({
   drl: { type: String, default: null },
   fogLights: { type: String, default: null },
   tailLights: { type: String, default: null },
-  
+
   // Exterior
   roofRails: { type: String, default: null },
   radioAntenna: { type: String, default: null },
@@ -310,7 +310,7 @@ const variantSchema = new mongoose.Schema({
   rearWindshieldWiper: { type: String, default: null },
   orvm: { type: String, default: null },
   alloyWheels: { type: String, default: null },
-  
+
   // Seating
   seatUpholstery: { type: String, default: null },
   seatsAdjustment: { type: String, default: null },
@@ -321,44 +321,44 @@ const variantSchema = new mongoose.Schema({
   memorySeats: { type: String, default: null },
   // seating already exists in model schema at line 40
   // seatingCapacity already exists above at line 168
-  
+
   // Additional Missing Fields (only new ones, avoiding duplicates)
   // mileageCity already exists above at line 148
   // mileageHighway already exists above at line 149
-  
+
   // Warranty
   warranty: { type: String, default: null },
-  
+
   // Images
   highlightImages: [{
     url: { type: String },
     caption: { type: String }
   }],
-  
+
   // Connected Car Tech
   connectedCarTech: { type: String, default: null },
-  
+
   createdAt: { type: Date, default: Date.now }
 });
 
 // Add foreign key validation for variants
-variantSchema.pre('save', async function() {
+variantSchema.pre('save', async function () {
   const Brand = mongoose.model('Brand');
   const Model = mongoose.model('Model');
-  
+
   const [brand, model] = await Promise.all([
     Brand.findOne({ id: this.brandId }),
     Model.findOne({ id: this.modelId })
   ]);
-  
+
   if (!brand) {
     throw new Error(`Invalid brandId: ${this.brandId}. Brand does not exist.`);
   }
-  
+
   if (!model) {
     throw new Error(`Invalid modelId: ${this.modelId}. Model does not exist.`);
   }
-  
+
   if (model.brandId !== this.brandId) {
     throw new Error(`Model ${this.modelId} does not belong to brand ${this.brandId}.`);
   }
@@ -375,7 +375,6 @@ variantSchema.index({ transmission: 1, status: 1 });
 variantSchema.index({ createdAt: -1 }); // For latest variants
 variantSchema.index({ name: 'text', description: 'text' }); // Text search
 variantSchema.index({ price: 1, status: 1 }); // Price filtering
-variantSchema.index({ bodyType: 1, status: 1 }); // Body type filtering
 
 // Admin User Schema
 const adminUserSchema = new mongoose.Schema({

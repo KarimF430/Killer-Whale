@@ -64,21 +64,85 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     const modelData = modelsData.models.find((m: any) => m.slug === modelSlug)
     if (!modelData) throw new Error('Model not found')
 
-    // Step 3: PARALLEL FETCH - Get detailed model data and variants simultaneously
-    const [detailedModelData, variantsData] = await Promise.all([
+    // Step 3: PARALLEL FETCH - Get detailed model data, variants, and similar cars data simultaneously
+    const [detailedModelData, variantsData, similarModelsRes, allVariantsRes] = await Promise.all([
       fetch(`${backendUrl}/api/models/${modelData.id}`, { cache: 'no-store' })
         .then(res => res.ok ? res.json() : null)
         .catch(err => {
           console.log('❌ Error fetching detailed model data:', err)
           return null
         }),
-      fetch(`${backendUrl}/api/variants?modelId=${modelData.id}&fields=id,name,price,fuelType,transmission,engine,power,mileage`, { cache: 'no-store' })
+      fetch(`${backendUrl}/api/variants?modelId=${modelData.id}&fields=id,name,price,fuelType,transmission,engine,power,mileage,isValueForMoney`, { cache: 'no-store' })
         .then(res => res.ok ? res.json() : [])
         .catch(err => {
           console.log('❌ Error fetching variants:', err)
           return []
-        })
+        }),
+      fetch(`${backendUrl}/api/models?limit=20`, { cache: 'no-store' })
+        .then(res => res.ok ? res.json() : { data: [] })
+        .catch(() => ({ data: [] })),
+      fetch(`${backendUrl}/api/variants?fields=minimal&limit=200`, { cache: 'no-store' })
+        .then(res => res.ok ? res.json() : { data: [] })
+        .catch(() => ({ data: [] }))
     ])
+
+    const similarModelsData = similarModelsRes?.data || similarModelsRes || []
+    const allVariantsData = allVariantsRes?.data || allVariantsRes || []
+
+    // Helper function to format launch date
+    const formatLaunchDate = (date: string): string => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const parts = date.split('-')
+      if (parts.length === 2) {
+        const year = parts[0]
+        const monthIndex = parseInt(parts[1]) - 1
+        return `${months[monthIndex]} ${year}`
+      }
+      return date
+    }
+
+    // Process Similar Cars (Server-Side)
+    const brandMap = brands.reduce((acc: any, brand: any) => {
+      acc[brand.id] = brand.name
+      return acc
+    }, {})
+
+    const similarCars = similarModelsData
+      .filter((m: any) => m.id !== modelData.id)
+      .map((m: any) => {
+        const mVariants = allVariantsData.filter((v: any) => v.modelId === m.id)
+        const lowestPrice = mVariants.length > 0
+          ? Math.min(...mVariants.map((v: any) => v.price || 0))
+          : m.price || 0
+
+        const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
+          ? m.fuelTypes
+          : Array.from(new Set(mVariants.map((v: any) => v.fuel || v.fuelType).filter(Boolean)))
+
+        const transmissions = m.transmissions && m.transmissions.length > 0
+          ? m.transmissions
+          : Array.from(new Set(mVariants.map((v: any) => v.transmission).filter(Boolean)))
+
+        const heroImage = m.heroImage
+          ? (m.heroImage.startsWith('http') ? m.heroImage : `${backendUrl}${m.heroImage}`)
+          : ''
+
+        return {
+          id: m.id,
+          name: m.name,
+          brand: m.brandId,
+          brandName: brandMap[m.brandId] || 'Unknown',
+          image: heroImage,
+          startingPrice: lowestPrice,
+          fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
+          transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+          seating: m.seating || 5,
+          launchDate: m.launchDate ? `Launched ${formatLaunchDate(m.launchDate)}` : 'Launched',
+          slug: `${(brandMap[m.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
+          isNew: m.isNew || false,
+          isPopular: m.isPopular || false
+        }
+      })
 
     const fetchTime = Date.now() - startTime
     console.log(`✅ Parallel fetch completed in ${fetchTime}ms`)
@@ -148,7 +212,12 @@ async function getModelData(brandSlug: string, modelSlug: string) {
           variant.power ? `Power: ${variant.power}` : null,
           variant.mileage ? `Mileage: ${variant.mileage}` : null,
           'Safety Features'
-        ].filter(Boolean)
+        ].filter(Boolean),
+        isValueForMoney: variant.isValueForMoney || false,
+        engine: variant.engine,
+        power: variant.power,
+        mileage: variant.mileage,
+        fuel: variant.fuelType || modelData.fuelType // Ensure fuel property exists for CarModelPage
       }))
       : [
         {
@@ -256,7 +325,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
         { condition: 'City', value: 18.6, unit: 'kmpl' },
         { condition: 'Highway', value: 24.2, unit: 'kmpl' },
         { condition: 'Combined', value: parseFloat(modelData.mileage.split(' ')[0]), unit: 'kmpl' }
-      ]
+      ],
+      similarCars: similarCars // Pass the server-fetched similar cars
     }
 
     return enhancedModelData

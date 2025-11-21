@@ -1270,11 +1270,25 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           }
         },
 
-        // Remove temporary pricing array and _id
+        // Project only necessary fields to reduce payload size
         {
           $project: {
-            pricing: 0,
-            _id: 0
+            _id: 0,
+            id: 1,
+            name: 1,
+            brandId: 1,
+            heroImage: 1,
+            lowestPrice: 1,
+            variantCount: 1,
+            fuelTypes: 1,
+            transmissions: 1,
+            seating: 1,
+            launchDate: 1,
+            isNew: 1,
+            isPopular: 1,
+            status: 1,
+            popularRank: 1,
+            newRank: 1
           }
         }
       ]).toArray();
@@ -1878,9 +1892,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
         const brand = brands.find(b => b.id === model.brandId);
 
-        // Extract fuel types and transmissions from variants
-        const fuelTypes = Array.from(new Set(modelVariants.map(v => v.fuelType).filter(Boolean)));
-        const transmissions = Array.from(new Set(modelVariants.map(v => v.transmission).filter(Boolean)));
+        // Use fuel types and transmissions from MODEL, not variants
+        // Only pricing comes from variants
+        const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0 ? model.fuelTypes : ['Petrol'];
+        const transmissions = model.transmissions && model.transmissions.length > 0 ? model.transmissions : ['Manual'];
 
         return {
           id: model.id,
@@ -1889,8 +1904,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           brandName: brand?.name || 'Unknown',
           image: model.heroImage || '/placeholder-car.jpg',
           startingPrice: lowestPrice,
-          fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
-          transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+          fuelTypes: fuelTypes,
+          transmissions: transmissions,
           seating: 5, // Default
           launchDate: model.launchDate || new Date().toISOString(),
           slug: model.id, // Use ID as slug since slug property might be missing

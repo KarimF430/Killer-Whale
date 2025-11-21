@@ -53,10 +53,10 @@ const formatFuelType = (fuel: string): string => {
   return fuel.charAt(0).toUpperCase() + fuel.slice(1).toLowerCase()
 }
 
-export default function CarsByBudget() {
+export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[] }) {
   const [selectedBudget, setSelectedBudget] = useState('under-8')
   const [carsByBudget, setCarsByBudget] = useState<Record<string, Car[]>>({})
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const budgetRanges = [
     { id: 'under-8', label: 'Under ₹8 Lakh', max: 800000 },
@@ -66,95 +66,19 @@ export default function CarsByBudget() {
     { id: 'above-50', label: 'Above ₹50 Lakh', max: Infinity }
   ]
 
-  // Fetch real data from backend
   useEffect(() => {
-    const fetchCarsData = async () => {
-      try {
-        setLoading(true)
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-
-        console.log('🚗 CarsByBudget: Fetching data from:', backendUrl)
-
-        // Fetch models with pricing and brands (optimized)
-        // Use a large limit to get all models for budget organization
-        const [modelsRes, brandsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models-with-pricing?limit=100`),
-          fetch(`${backendUrl}/api/brands`)
-        ])
-
-        console.log('📊 Response status:', {
-          models: modelsRes.status,
-          brands: brandsRes.status
-        })
-
-        if (!modelsRes.ok || !brandsRes.ok) {
-          console.error('❌ Failed to fetch data:', {
-            models: modelsRes.status,
-            brands: brandsRes.status
-          })
-          setCarsByBudget({})
-          setLoading(false)
-          return
-        }
-
-        const modelsResponse = await modelsRes.json()
-        const brands = await brandsRes.json()
-
-        // Extract data from pagination response
-        const models = modelsResponse.data || modelsResponse
-
-        console.log('✅ Data fetched successfully:', {
-          modelsCount: models.length,
-          brandsCount: brands.length
-        })
-
-        // Create a map of brand IDs to brand names
-        const brandMap = brands.reduce((acc: any, brand: any) => {
-          acc[brand.id] = brand.name
-          return acc
-        }, {})
-
-        // Process each model
-        const processedCars: Car[] = models.map((model: any) => {
-          const brandName = brandMap[model.brandId] || 'Unknown'
-          const slug = `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`
-
-          return {
-            id: model.id,
-            name: model.name,
-            brand: model.brandId,
-            brandName: brandName,
-            image: model.heroImage || '/car-placeholder.jpg',
-            startingPrice: model.lowestPrice || 0,
-            fuelTypes: model.fuelTypes || ['Petrol'],
-            transmissions: model.transmissions || ['Manual'],
-            seating: 5,
-            launchDate: model.launchDate || 'Launched',
-            slug: slug,
-            isNew: model.isNew || false,
-            isPopular: model.isPopular || false
-          }
-        })
-
-        // Organize cars by budget (include cars with price 0 in all categories for now)
-        const organized: Record<string, Car[]> = {
-          'under-8': processedCars.filter(car => car.startingPrice <= 800000),
-          'under-15': processedCars.filter(car => car.startingPrice <= 1500000),
-          'under-25': processedCars.filter(car => car.startingPrice <= 2500000),
-          'under-50': processedCars.filter(car => car.startingPrice <= 5000000),
-          'above-50': processedCars.filter(car => car.startingPrice > 5000000 || car.startingPrice === 0)
-        }
-
-        setCarsByBudget(organized)
-      } catch (error) {
-        console.error('Error fetching cars data:', error)
-      } finally {
-        setLoading(false)
+    if (initialCars.length > 0) {
+      // Organize cars by budget (include cars with price 0 in all categories for now)
+      const organized: Record<string, Car[]> = {
+        'under-8': initialCars.filter(car => car.startingPrice <= 800000),
+        'under-15': initialCars.filter(car => car.startingPrice <= 1500000),
+        'under-25': initialCars.filter(car => car.startingPrice <= 2500000),
+        'under-50': initialCars.filter(car => car.startingPrice <= 5000000),
+        'above-50': initialCars.filter(car => car.startingPrice > 5000000 || car.startingPrice === 0)
       }
+      setCarsByBudget(organized)
     }
-
-    fetchCarsData()
-  }, [])
+  }, [initialCars])
 
   const currentCars = carsByBudget[selectedBudget as keyof typeof carsByBudget] || []
 

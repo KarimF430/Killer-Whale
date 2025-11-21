@@ -55,89 +55,15 @@ const formatFuelType = (fuel: string): string => {
   return fuel.charAt(0).toUpperCase() + fuel.slice(1).toLowerCase()
 }
 
-export default function NewLaunchedCars() {
-  const [newLaunchedCars, setNewLaunchedCars] = useState<Car[]>([])
-  const [loading, setLoading] = useState(true)
+export default function NewLaunchedCars({ initialCars = [] }: { initialCars?: Car[] }) {
+  const [newLaunchedCars, setNewLaunchedCars] = useState<Car[]>(initialCars)
+  const [loading, setLoading] = useState(false)
 
-  // Fetch new launched cars from backend
   useEffect(() => {
-    const fetchNewLaunchedCars = async () => {
-      try {
-        setLoading(true)
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-
-        // Fetch models with pricing and brands (optimized)
-        // Use a large limit to get all new models
-        const [modelsRes, brandsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models-with-pricing?limit=100`),
-          fetch(`${backendUrl}/api/brands`)
-        ])
-
-        if (!modelsRes.ok || !brandsRes.ok) {
-          console.error('Failed to fetch data:', {
-            models: modelsRes.status,
-            brands: brandsRes.status
-          })
-          setNewLaunchedCars([])
-          setLoading(false)
-          return
-        }
-
-        const modelsResponse = await modelsRes.json()
-        const brands = await brandsRes.json()
-
-        // Extract data from pagination response
-        const models = modelsResponse.data || modelsResponse
-
-        // Create a map of brand IDs to brand names
-        const brandMap = brands.reduce((acc: any, brand: any) => {
-          acc[brand.id] = brand.name
-          return acc
-        }, {})
-
-        // Filter only new models
-        const newModels = models.filter((model: any) => model.isNew === true)
-
-        // Process each new model
-        const processedCars = newModels.map((model: any) => {
-          const brandName = brandMap[model.brandId] || 'Unknown'
-          const slug = `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`
-
-          return {
-            id: model.id,
-            name: model.name,
-            brand: model.brandId,
-            brandName: brandName,
-            image: model.heroImage || '/car-placeholder.jpg',
-            startingPrice: model.lowestPrice || 0,
-            fuelTypes: model.fuelTypes || ['Petrol'],
-            transmissions: model.transmissions || ['Manual'],
-            seating: 5,
-            launchDate: model.launchDate || 'Recently Launched',
-            slug: slug,
-            isNew: true,
-            isPopular: model.isPopular || false,
-            newRank: model.newRank || null
-          }
-        })
-
-        // Sort by newRank (ascending order - 1, 2, 3...)
-        const sortedCars = processedCars.sort((a: any, b: any) => {
-          const rankA = a.newRank || 999
-          const rankB = b.newRank || 999
-          return rankA - rankB
-        })
-
-        setNewLaunchedCars(sortedCars)
-      } catch (error) {
-        console.error('Error fetching new launched cars:', error)
-      } finally {
-        setLoading(false)
-      }
+    if (initialCars.length > 0) {
+      setNewLaunchedCars(initialCars)
     }
-
-    fetchNewLaunchedCars()
-  }, [])
+  }, [initialCars])
 
 
   return (

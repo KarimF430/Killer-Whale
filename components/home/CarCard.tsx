@@ -49,6 +49,9 @@ const formatLaunchDate = (dateString: string): string => {
   // Remove "Launched " prefix if present to parse the date
   const cleanDate = dateString.replace(/^Launched\s+/, '')
 
+  // Consistent month names (same as other components)
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
   try {
     const date = new Date(cleanDate)
 
@@ -57,7 +60,7 @@ const formatLaunchDate = (dateString: string): string => {
       return dateString.startsWith('Launched') ? dateString : `Launched ${dateString}`
     }
 
-    const month = date.toLocaleString('default', { month: 'short' })
+    const month = months[date.getMonth()]
     const year = date.getFullYear()
 
     return `Launched ${month} ${year}`

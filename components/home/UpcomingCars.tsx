@@ -15,9 +15,9 @@ interface Car {
   isNew: boolean
 }
 
-export default function UpcomingCars() {
+export default function UpcomingCars({ cars }: { cars?: Car[] }) {
   // Upcoming cars data - same structure as CarsByBudget
-  const upcomingCars: Car[] = [
+  const defaultUpcomingCars: Car[] = [
     {
       id: 1,
       name: 'Grand Vitara',
@@ -67,6 +67,8 @@ export default function UpcomingCars() {
       isNew: true
     }
   ]
+
+  const upcomingCars = cars && cars.length > 0 ? cars : defaultUpcomingCars
 
   return (
     <div>

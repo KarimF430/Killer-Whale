@@ -32,6 +32,29 @@ const FavouritesContext = createContext<FavouritesContextType | undefined>(undef
 
 const STORAGE_KEY = 'motoroctane_favourites'
 
+// Helper function to normalize fuel types
+const normalizeFuelType = (fuel: string): string => {
+    const lower = fuel.toLowerCase()
+    if (lower === 'petrol') return 'Petrol'
+    if (lower === 'diesel') return 'Diesel'
+    if (lower === 'cng') return 'CNG'
+    if (lower === 'electric') return 'Electric'
+    if (lower === 'hybrid') return 'Hybrid'
+    return fuel.charAt(0).toUpperCase() + fuel.slice(1).toLowerCase()
+}
+
+// Helper function to normalize transmission types
+const normalizeTransmission = (transmission: string): string => {
+    const lower = transmission.toLowerCase()
+    if (lower === 'manual') return 'Manual'
+    if (lower === 'automatic') return 'Automatic'
+    if (lower === 'amt') return 'AMT'
+    if (lower === 'cvt') return 'CVT'
+    if (lower === 'dct') return 'DCT'
+    if (lower === 'torque converter') return 'Automatic'
+    return transmission.toUpperCase()
+}
+
 export function FavouritesProvider({ children }: { children: ReactNode }) {
     const [favourites, setFavourites] = useState<Car[]>([])
     const [isLoaded, setIsLoaded] = useState(false)
@@ -42,7 +65,21 @@ export function FavouritesProvider({ children }: { children: ReactNode }) {
             const stored = localStorage.getItem(STORAGE_KEY)
             if (stored) {
                 const parsed = JSON.parse(stored)
-                setFavourites(Array.isArray(parsed) ? parsed : [])
+                if (Array.isArray(parsed)) {
+                    // Normalize existing favourites data
+                    const normalized = parsed.map(car => ({
+                        ...car,
+                        fuelTypes: car.fuelTypes && car.fuelTypes.length > 0
+                            ? car.fuelTypes.map(normalizeFuelType)
+                            : ['Petrol'],
+                        transmissions: car.transmissions && car.transmissions.length > 0
+                            ? car.transmissions.map(normalizeTransmission)
+                            : ['Manual']
+                    }))
+                    setFavourites(normalized)
+                } else {
+                    setFavourites([])
+                }
             }
         } catch (error) {
             console.error('Error loading favourites:', error)
@@ -64,7 +101,7 @@ export function FavouritesProvider({ children }: { children: ReactNode }) {
     }, [favourites, isLoaded])
 
     const addFavourite = (car: Car) => {
-        // Validate and ensure all required fields exist
+        // Validate and ensure all required fields exist with normalization
         const validatedCar: Car = {
             id: car.id || `temp-${Date.now()}`,
             name: car.name || 'Unknown Car',
@@ -72,8 +109,12 @@ export function FavouritesProvider({ children }: { children: ReactNode }) {
             brandName: car.brandName || car.brand || 'Unknown',
             image: car.image || '',
             startingPrice: car.startingPrice || 0,
-            fuelTypes: car.fuelTypes && car.fuelTypes.length > 0 ? car.fuelTypes : ['Petrol'],
-            transmissions: car.transmissions && car.transmissions.length > 0 ? car.transmissions : ['Manual'],
+            fuelTypes: car.fuelTypes && car.fuelTypes.length > 0
+                ? car.fuelTypes.map(normalizeFuelType)
+                : ['Petrol'],
+            transmissions: car.transmissions && car.transmissions.length > 0
+                ? car.transmissions.map(normalizeTransmission)
+                : ['Manual'],
             seating: car.seating || 5,
             launchDate: car.launchDate || 'Launched',
             slug: car.slug || `${(car.brandName || 'unknown').toLowerCase().replace(/\s+/g, '-')}-${(car.name || 'car').toLowerCase().replace(/\s+/g, '-')}`,

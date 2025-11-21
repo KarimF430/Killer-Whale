@@ -55,57 +55,16 @@ const formatFuelType = (fuel: string): string => {
   return fuel.charAt(0).toUpperCase() + fuel.slice(1).toLowerCase()
 }
 
-export default function PopularCars() {
-  const [popularCars, setPopularCars] = useState<Car[]>([])
-  const [loading, setLoading] = useState(true)
+export default function PopularCars({ initialCars = [] }: { initialCars?: Car[] }) {
+  const [popularCars, setPopularCars] = useState<Car[]>(initialCars)
+  const [loading, setLoading] = useState(false)
 
-  // Fetch popular cars from backend
+  // Update state if props change (though for SSR initial render is key)
   useEffect(() => {
-    const fetchPopularCars = async () => {
-      try {
-        setLoading(true)
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-
-        // Fetch only popular cars from the optimized endpoint
-        const res = await fetch(`${backendUrl}/api/cars/popular`)
-
-        if (!res.ok) {
-          console.error('Failed to fetch popular cars:', res.status)
-          setPopularCars([])
-          setLoading(false)
-          return
-        }
-
-        const data = await res.json()
-
-        // Map backend data to component state
-        const processedCars: Car[] = data.map((car: any) => ({
-          id: car.id, // Use the actual database ID from backend
-          name: car.name,
-          brand: car.brandId,
-          brandName: car.brandName,
-          image: car.image ? (car.image.startsWith('http') ? car.image : `${backendUrl}${car.image}`) : '',
-          startingPrice: car.startingPrice,
-          fuelTypes: car.fuelTypes,
-          transmissions: car.transmissions,
-          seating: car.seating,
-          launchDate: car.launchDate ? `Launched ${formatLaunchDate(car.launchDate)}` : 'Launched',
-          slug: `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`,
-          isNew: car.isNew,
-          isPopular: car.isPopular,
-          popularRank: car.popularRank
-        }))
-
-        setPopularCars(processedCars)
-      } catch (error) {
-        console.error('Error fetching popular cars:', error)
-      } finally {
-        setLoading(false)
-      }
+    if (initialCars.length > 0) {
+      setPopularCars(initialCars)
     }
-
-    fetchPopularCars()
-  }, [])
+  }, [initialCars])
 
   return (
     <div>

@@ -19,7 +19,144 @@ import { staticPageSEO } from '@/lib/seo'
 export const metadata: Metadata = staticPageSEO.home
 export const revalidate = 3600 // Revalidate every hour
 
-export default function HomePage() {
+// Helper interfaces and functions
+interface Car {
+  id: string
+  name: string
+  brand: string
+  brandName: string
+  image: string
+  startingPrice: number
+  fuelTypes: string[]
+  transmissions: string[]
+  seating: number
+  launchDate: string
+  slug: string
+  isNew: boolean
+  isPopular: boolean
+  popularRank?: number | null
+  newRank?: number | null
+}
+
+const formatLaunchDate = (date: string): string => {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const parts = date.split('-')
+  if (parts.length === 2) {
+    const year = parts[0]
+    const monthIndex = parseInt(parts[1]) - 1
+    return `${months[monthIndex]} ${year}`
+  }
+  return date
+}
+
+// Helper function to normalize fuel types
+const normalizeFuelType = (fuel: string): string => {
+  const lower = fuel.toLowerCase()
+  if (lower === 'petrol') return 'Petrol'
+  if (lower === 'diesel') return 'Diesel'
+  if (lower === 'cng') return 'CNG'
+  if (lower === 'electric') return 'Electric'
+  if (lower === 'hybrid') return 'Hybrid'
+  return fuel.charAt(0).toUpperCase() + fuel.slice(1).toLowerCase()
+}
+
+// Helper function to normalize transmission types
+const normalizeTransmission = (transmission: string): string => {
+  const lower = transmission.toLowerCase()
+  if (lower === 'manual') return 'Manual'
+  if (lower === 'automatic') return 'Automatic'
+  if (lower === 'amt') return 'AMT'
+  if (lower === 'cvt') return 'CVT'
+  if (lower === 'dct') return 'DCT'
+  if (lower === 'torque converter') return 'Automatic'
+  return transmission.toUpperCase()
+}
+
+async function getHomeData() {
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+
+  try {
+    const [popularRes, modelsRes, brandsRes] = await Promise.all([
+      fetch(`${backendUrl}/api/cars/popular`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/models-with-pricing?limit=100`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } })
+    ])
+
+    const popularData = await popularRes.json()
+    const modelsData = await modelsRes.json()
+    const brandsData = await brandsRes.json()
+
+    const models = modelsData.data || modelsData
+    const brands = brandsData
+
+    // Create brand map
+    const brandMap = brands.reduce((acc: any, brand: any) => {
+      acc[brand.id] = brand.name
+      return acc
+    }, {})
+
+    // Process Popular Cars with normalization
+    const popularCars: Car[] = Array.isArray(popularData) ? popularData.map((car: any) => ({
+      id: car.id,
+      name: car.name,
+      brand: car.brandId,
+      brandName: car.brandName,
+      image: car.image ? (car.image.startsWith('http') ? car.image : `${backendUrl}${car.image}`) : '',
+      startingPrice: car.startingPrice,
+      fuelTypes: (car.fuelTypes || ['Petrol']).map(normalizeFuelType),
+      transmissions: (car.transmissions || ['Manual']).map(normalizeTransmission),
+      seating: car.seating,
+      launchDate: car.launchDate ? `Launched ${formatLaunchDate(car.launchDate)}` : 'Launched',
+      slug: `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`,
+      isNew: car.isNew,
+      isPopular: car.isPopular,
+      popularRank: car.popularRank ?? null
+    })) : []
+
+    // Process All Cars (for Budget) with normalization
+    const allCars: Car[] = Array.isArray(models) ? models.map((model: any) => {
+      const brandName = brandMap[model.brandId] || 'Unknown'
+      return {
+        id: model.id,
+        name: model.name,
+        brand: model.brandId,
+        brandName: brandName,
+        image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`) : '/car-placeholder.jpg',
+        startingPrice: model.lowestPrice || 0,
+        fuelTypes: (model.fuelTypes || ['Petrol']).map(normalizeFuelType),
+        transmissions: (model.transmissions || ['Manual']).map(normalizeTransmission),
+        seating: 5,
+        launchDate: model.launchDate || 'Launched',
+        slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+        isNew: model.isNew || false,
+        isPopular: model.isPopular || false,
+        newRank: model.newRank ?? null
+      }
+    }) : []
+
+    // Process New Launched Cars
+    const newLaunchedCars = allCars
+      .filter(car => car.isNew)
+      .sort((a, b) => (a.newRank || 999) - (b.newRank || 999))
+
+    return {
+      popularCars,
+      allCars,
+      newLaunchedCars
+    }
+  } catch (error) {
+    console.error('Error fetching home data:', error)
+    return {
+      popularCars: [],
+      allCars: [],
+      newLaunchedCars: []
+    }
+  }
+}
+
+export default async function HomePage() {
+  const { popularCars, allCars, newLaunchedCars } = await getHomeData()
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main>
@@ -29,7 +166,7 @@ export default function HomePage() {
         <HeroSection />
 
         <PageSection background="gray">
-          <CarsByBudget />
+          <CarsByBudget initialCars={allCars} />
         </PageSection>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,7 +174,7 @@ export default function HomePage() {
         </div>
 
         <PageSection background="white">
-          <PopularCars />
+          <PopularCars initialCars={popularCars} />
         </PageSection>
 
         <PageSection background="gray">
@@ -62,7 +199,7 @@ export default function HomePage() {
         </PageSection>
 
         <PageSection background="white">
-          <NewLaunchedCars />
+          <NewLaunchedCars initialCars={newLaunchedCars} />
         </PageSection>
 
         <PageSection background="white">
