@@ -9,6 +9,7 @@ import PageSection from '@/components/common/PageSection'
 import Footer from '@/components/Footer'
 import CarCard from '@/components/home/CarCard'
 import AdBanner from '@/components/home/AdBanner'
+import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 
 interface Car {
     id: string
@@ -316,7 +317,9 @@ export default function BudgetCarsPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <main>
-                <AdBanner />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <Ad3DCarousel className="my-4" />
+                </div>
 
                 {/* Header & Filters */}
                 <PageSection background="white">
@@ -386,7 +389,9 @@ export default function BudgetCarsPage() {
                     )}
                 </PageSection>
 
-                <AdBanner />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <Ad3DCarousel className="my-4" />
+                </div>
 
                 {/* Popular Cars */}
                 {popularCars.length > 0 && (
@@ -408,7 +413,9 @@ export default function BudgetCarsPage() {
                     </PageSection>
                 )}
 
-                <AdBanner />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <Ad3DCarousel className="my-4" />
+                </div>
 
                 {/* New Launches */}
                 {newLaunchedCars.length > 0 && (

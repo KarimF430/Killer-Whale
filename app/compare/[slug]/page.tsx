@@ -8,6 +8,8 @@ import Footer from '@/components/Footer'
 import PopularComparisons from '@/components/home/PopularComparisons'
 import PopularCars from '@/components/home/PopularCars'
 import UpcomingCars from '@/components/home/UpcomingCars'
+import MovingAdBanner from '@/components/ads/MovingAdBanner'
+import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 
 interface Variant {
   id: string
@@ -34,7 +36,7 @@ interface ComparisonItem {
 export default function ComparePage({ params }: { params: Promise<{ slug: string }> }) {
   const router = useRouter()
   const [slug, setSlug] = useState('')
-  const [comparisonItems, setComparisonItems] = useState<ComparisonItem[]>([])
+  const [comparisonItems, setComparisonItems] = useState<(ComparisonItem | null)[]>([])
   const [loading, setLoading] = useState(true)
   const [showVariantDropdown, setShowVariantDropdown] = useState<number | null>(null)
   const [seoText, setSeoText] = useState('')
@@ -42,6 +44,10 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
   const [similarCars, setSimilarCars] = useState<any[]>([])
   const [loadingSimilarCars, setLoadingSimilarCars] = useState(false)
+  const [showAddCarModal, setShowAddCarModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [addCarAtIndex, setAddCarAtIndex] = useState<number | null>(null)
+  const [showVariantModal, setShowVariantModal] = useState<number | null>(null)
 
   // ✅ OPTIMIZATION: Shared data state - fetch once, reuse everywhere
   const [allModels, setAllModels] = useState<any[]>([])
@@ -166,14 +172,18 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
     try {
       setLoadingSimilarCars(true)
-      const firstModel = comparisonItems[0].model
+      const firstItem = comparisonItems[0]
+      if (!firstItem) return
+      const firstModel = firstItem.model
 
       // ✅ OPTIMIZATION: Use shared state instead of fetching again
       const brandMap: Record<string, string> = {}
       brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
 
       // Filter similar cars (exclude current comparison cars)
-      const currentModelIds = comparisonItems.map(item => item.model.id)
+      const currentModelIds = comparisonItems
+        .filter((item): item is ComparisonItem => item !== null)
+        .map(item => item.model.id)
       const similar = allModels
         .filter((m: any) => !currentModelIds.includes(m.id))
         .slice(0, 6)
@@ -219,21 +229,70 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
   const handleVariantChange = (index: number, newVariant: Variant) => {
     const newItems = [...comparisonItems]
-    newItems[index].variant = newVariant
-    setComparisonItems(newItems)
+    if (newItems[index]) {
+      newItems[index]!.variant = newVariant
+      setComparisonItems(newItems)
+    }
     setShowVariantDropdown(null)
   }
 
-  const handleAddMore = () => {
-    // TODO: Implement modal to select car and variant
-    alert('Add more cars functionality - to be implemented with car selection modal')
+  const handleAddMore = (index?: number) => {
+    setAddCarAtIndex(index ?? null)
+    setShowAddCarModal(true)
+    setSearchQuery('')
+  }
+
+  const handleAddCar = (model: any) => {
+    const modelVariants = allVariants.filter((v: any) => v.modelId === model.id)
+    const brandMap: Record<string, string> = {}
+    brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
+
+    if (modelVariants.length > 0) {
+      const lowestVariant = modelVariants.reduce((prev: Variant, curr: Variant) =>
+        (curr.price < prev.price && curr.price > 0) ? curr : prev
+      )
+
+      const newModel: Model = {
+        id: model.id,
+        name: model.name,
+        brandName: brandMap[model.brandId],
+        heroImage: resolveImageUrl(model.heroImage),
+        variants: modelVariants
+      }
+
+      const newItem = { model: newModel, variant: lowestVariant }
+
+      let newItems: (ComparisonItem | null)[]
+      if (addCarAtIndex !== null) {
+        // Replace at specific index
+        newItems = [...comparisonItems]
+        newItems[addCarAtIndex] = newItem
+      } else {
+        // Add to end
+        newItems = [...comparisonItems, newItem]
+      }
+
+      setComparisonItems(newItems)
+
+      // Update URL - only include non-null items
+      const validItems = newItems.filter((item): item is ComparisonItem => item !== null)
+      if (validItems.length > 0) {
+        const newSlug = validItems.map(item =>
+          `${item.model.brandName.toLowerCase().replace(/\s+/g, '-')}-${item.model.name.toLowerCase().replace(/\s+/g, '-')}`
+        ).join('-vs-')
+        router.push(`/compare/${newSlug}`)
+      }
+
+      setShowAddCarModal(false)
+      setAddCarAtIndex(null)
+    }
   }
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${comparisonItems.map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}`,
+          title: `${comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}`,
           text: 'Compare these cars on MotorOctane',
           url: window.location.href
         })
@@ -256,17 +315,18 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
   // Calculate comparison stats
   const getComparisonStats = () => {
-    if (comparisonItems.length !== 2) return null
+    const validItems = comparisonItems.filter((item): item is ComparisonItem => item !== null)
+    if (validItems.length !== 2) return null
 
-    const item1 = comparisonItems[0]
-    const item2 = comparisonItems[1]
+    const item1 = validItems[0]
+    const item2 = validItems[1]
 
     const price1 = getOnRoadPrice(item1.variant.price, item1.variant.fuelType)
     const price2 = getOnRoadPrice(item2.variant.price, item2.variant.fuelType)
 
     const priceDiff = Math.abs(price1 - price2)
     const priceDiffPercent = ((priceDiff / Math.min(price1, price2)) * 100).toFixed(1)
-    const cheaperIndex = price1 < price2 ? 0 : 1
+    const cheaperIndex = comparisonItems.findIndex(item => item === item1) < comparisonItems.findIndex(item => item === item2) && price1 < price2 ? comparisonItems.findIndex(item => item === item1) : comparisonItems.findIndex(item => item === item2)
 
     return {
       priceDiff,
@@ -504,7 +564,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         <div className="flex items-start justify-between mb-6">
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              {comparisonItems.map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}
+              {comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}
             </h1>
             <p className="text-base text-gray-600 leading-relaxed">
               {seoText}
@@ -536,7 +596,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
               <div className="text-right">
                 <div className="text-xs text-gray-600 font-medium mb-1">Price Difference</div>
                 <div className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                  ₹{(stats.priceDiff / 100000).toFixed(2)}L
+                  ₹{(stats.priceDiff / 100000).toFixed(2)} Lakhs
                 </div>
                 <div className="text-sm font-semibold text-orange-600 mt-0.5">
                   ({stats.priceDiffPercent}%)
@@ -549,6 +609,33 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         {/* Comparison Cards - Side by Side, Mobile Friendly */}
         <div className="flex gap-3 md:gap-6 overflow-x-auto scrollbar-hide pb-2 mb-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {comparisonItems.map((item, index) => {
+            // Handle empty slot
+            if (!item) {
+              return (
+                <div
+                  key={index}
+                  className="relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl md:rounded-2xl border-2 border-dashed border-gray-300 transition-all duration-300 flex-shrink-0 w-[calc(50%-6px)] md:w-full md:flex-1 hover:border-orange-400 hover:bg-gradient-to-br hover:from-orange-50 hover:to-red-50"
+                >
+                  <button
+                    onClick={() => handleAddMore(index)}
+                    className="w-full h-full min-h-[400px] md:min-h-[500px] flex flex-col items-center justify-center gap-3 md:gap-4 p-6 group"
+                  >
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white border-2 border-gray-300 group-hover:border-orange-500 flex items-center justify-center transition-all duration-200 group-hover:scale-110 shadow-md">
+                      <Plus className="h-8 w-8 md:h-10 md:w-10 text-gray-400 group-hover:text-orange-600 transition-colors" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-base md:text-lg font-bold text-gray-600 group-hover:text-orange-600 transition-colors">
+                        Add Car to Compare
+                      </div>
+                      <div className="text-xs md:text-sm text-gray-500 mt-1">
+                        Click to search and add
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )
+            }
+
             const onRoadPrice = getOnRoadPrice(item.variant.price, item.variant.fuelType)
             const isCheaper = stats && stats.cheaperIndex === index
 
@@ -568,6 +655,19 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                     <span>Best Value</span>
                   </div>
                 )}
+
+                {/* Remove Button - X Icon */}
+                <button
+                  onClick={() => {
+                    const newItems = [...comparisonItems]
+                    newItems[index] = null
+                    setComparisonItems(newItems)
+                  }}
+                  className="absolute top-2 md:top-4 right-2 md:right-4 z-20 bg-white hover:bg-red-50 border-2 border-gray-200 hover:border-red-500 rounded-full p-1.5 md:p-2 transition-all duration-200 shadow-md hover:shadow-lg group"
+                  aria-label="Remove car"
+                >
+                  <X className="h-4 w-4 md:h-5 md:w-5 text-gray-600 group-hover:text-red-600" />
+                </button>
 
                 {/* Car Image Section - Enhanced */}
                 <div className={`relative h-32 md:h-48 ${isCheaper ? 'bg-gradient-to-br from-orange-50 to-red-50' : 'bg-gradient-to-br from-gray-50 to-gray-100'} flex items-center justify-center p-2 md:p-4`}>
@@ -598,35 +698,18 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                     {item.model.brandName} {item.model.name}
                   </h3>
 
-                  {/* Variant Dropdown - Enhanced */}
+                  {/* Variant Button - Opens Modal */}
                   <div className="relative mb-3 md:mb-4">
                     <button
-                      onClick={() => setShowVariantDropdown(showVariantDropdown === index ? null : index)}
-                      className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-3 bg-white border-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${isCheaper
+                      onClick={() => setShowVariantModal(index)}
+                      className={`w-full flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3.5 bg-white border-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all ${isCheaper
                         ? 'border-orange-300 hover:border-orange-400 text-gray-900'
                         : 'border-gray-200 hover:border-gray-300 text-gray-700'
                         }`}
                     >
                       <span className="truncate pr-2">{item.variant.name}</span>
-                      <ChevronDown className={`h-4 w-4 md:h-5 md:w-5 flex-shrink-0 transition-transform ${showVariantDropdown === index ? 'rotate-180' : ''} ${isCheaper ? 'text-orange-600' : 'text-gray-500'}`} />
+                      <ChevronDown className={`h-4 w-4 md:h-5 md:w-5 flex-shrink-0 ${isCheaper ? 'text-orange-600' : 'text-gray-500'}`} />
                     </button>
-
-                    {/* Dropdown Menu - Properly positioned */}
-                    {showVariantDropdown === index && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg md:rounded-xl shadow-2xl max-h-64 overflow-y-auto z-[100]">
-                        {item.model.variants.map((v) => (
-                          <button
-                            key={v.id}
-                            onClick={() => handleVariantChange(index, v)}
-                            className={`w-full text-left px-3 md:px-4 py-2.5 md:py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${v.id === item.variant.id ? 'bg-orange-50' : ''
-                              }`}
-                          >
-                            <div className="font-semibold text-gray-900 text-xs md:text-sm">{v.name}</div>
-                            <div className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1">₹{(v.price / 100000).toFixed(2)} Lakhs</div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
 
                   {/* Price Section - Enhanced */}
@@ -636,7 +719,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                     }`}>
                     <div className={`text-lg md:text-2xl font-bold mb-0.5 md:mb-1 ${isCheaper ? 'text-white' : 'text-red-600'
                       }`}>
-                      ₹{(onRoadPrice / 100000).toFixed(2)} L
+                      ₹{(onRoadPrice / 100000).toFixed(2)} Lakhs
                     </div>
                     <div className={`text-[10px] md:text-xs font-medium ${isCheaper ? 'text-orange-50' : 'text-gray-600'
                       }`}>
@@ -649,14 +732,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           })}
         </div>
 
-        {/* Add More Button - Enhanced */}
-        <button
-          onClick={handleAddMore}
-          className="w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl py-4 mb-6 flex items-center justify-center gap-2 text-gray-700 font-bold text-lg hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-md hover:shadow-lg border-2 border-gray-200 hover:border-gray-300"
-        >
-          <Plus className="h-6 w-6" />
-          <span>Add more</span>
-        </button>
+
 
         {/* EMI Section - Compact Refined */}
         <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm mb-6">
@@ -673,7 +749,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
           {/* EMI Values - Two Columns */}
           <div className="grid grid-cols-2 gap-6">
-            {comparisonItems.map((item, index) => {
+            {comparisonItems.filter((item): item is ComparisonItem => item !== null).map((item, index) => {
               const onRoadPrice = getOnRoadPrice(item.variant.price, item.variant.fuelType)
               const emi = calculateEMI(onRoadPrice)
 
@@ -688,10 +764,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           </div>
         </div>
 
-        {/* Ad Banner - Proper Dimensions */}
-        <div className="bg-gray-300 rounded-2xl py-24 mb-6 text-center">
-          <h2 className="text-5xl font-bold text-gray-600">AD Banner</h2>
-        </div>
+        {/* Ad Banner */}
+        <Ad3DCarousel className="my-4" />
 
         {/* Specifications - 9 Sections from Variant Page */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6">
@@ -726,7 +800,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                 {expandedSections[section.id] && (
                   <div className="pb-4 space-y-2">
                     {section.specs.map((spec) => {
-                      const values = comparisonItems.map(item => item.variant[spec.key] || 'N/A')
+                      const validItems = comparisonItems.filter((item): item is ComparisonItem => item !== null)
+                      const values = validItems.map(item => item.variant[spec.key] || 'N/A')
                       const allSame = values.every(v => v === values[0])
                       if (showDifferences && allSame) return null
 
@@ -741,7 +816,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                             )}
                           </div>
                           <div className="grid grid-cols-2 gap-4">
-                            {comparisonItems.map((item, idx) => (
+                            {comparisonItems.filter((item): item is ComparisonItem => item !== null).map((item, idx) => (
                               <div key={idx} className={`text-sm font-medium ${!allSame ? 'text-gray-900' : 'text-gray-600'}`}>
                                 {item.variant[spec.key] || 'N/A'}
                               </div>
@@ -758,9 +833,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         </div>
 
         {/* Ad Banner */}
-        <div className="bg-gray-300 rounded-lg py-20 mb-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-        </div>
+        <Ad3DCarousel className="my-4" />
 
         {/* Compare With Similar Cars */}
         <div className="mb-6">
@@ -781,7 +854,10 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           ) : (
             <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
               {similarCars.map((car) => {
-                const currentModelOnRoad = getOnRoadPrice(comparisonItems[0].variant.price, comparisonItems[0].variant.fuelType)
+                const firstValidItem = comparisonItems.find((item): item is ComparisonItem => item !== null)
+                if (!firstValidItem) return null
+
+                const currentModelOnRoad = getOnRoadPrice(firstValidItem.variant.price, firstValidItem.variant.fuelType)
                 const compareCarOnRoad = getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol')
 
                 return (
@@ -790,8 +866,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                       <div className="flex-1">
                         <div className="relative mb-2">
                           <img
-                            src={comparisonItems[0].model.heroImage}
-                            alt={`${comparisonItems[0].model.brandName} ${comparisonItems[0].model.name}`}
+                            src={firstValidItem.model.heroImage}
+                            alt={`${firstValidItem.model.brandName} ${firstValidItem.model.name}`}
                             className="w-full h-20 object-contain"
                             onError={(e) => {
                               e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3C/svg%3E"
@@ -799,8 +875,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                           />
                         </div>
                         <div className="text-left">
-                          <div className="text-xs text-gray-500">{comparisonItems[0].model.brandName}</div>
-                          <div className="font-bold text-sm text-gray-900 mb-1">{comparisonItems[0].model.name}</div>
+                          <div className="text-xs text-gray-500">{firstValidItem.model.brandName}</div>
+                          <div className="font-bold text-sm text-gray-900 mb-1">{firstValidItem.model.name}</div>
                           <div className="text-red-600 font-bold text-sm">
                             ₹ {(currentModelOnRoad / 100000).toFixed(2)} Lakh
                           </div>
@@ -838,7 +914,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
                     <button
                       onClick={() => {
-                        const currentModelSlug = `${comparisonItems[0].model.brandName.toLowerCase().replace(/\s+/g, '-')}-${comparisonItems[0].model.name.toLowerCase().replace(/\s+/g, '-')}`
+                        const currentModelSlug = `${firstValidItem.model.brandName.toLowerCase().replace(/\s+/g, '-')}-${firstValidItem.model.name.toLowerCase().replace(/\s+/g, '-')}`
                         const compareModelSlug = `${car.brand.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
                         router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
                       }}
@@ -854,9 +930,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         </div>
 
         {/* Ad Banner */}
-        <div className="bg-gray-300 rounded-lg py-20 mb-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-        </div>
+        <Ad3DCarousel className="my-4" />
 
         {/* Popular Comparison - Using Homepage Component */}
         <div className="mb-6">
@@ -869,15 +943,149 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         </div>
 
         {/* Ad Banner */}
-        <div className="bg-gray-300 rounded-lg py-20 mb-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-        </div>
+        <Ad3DCarousel className="my-4" />
 
         {/* Upcoming Cars - reuse homepage component */}
         <div className="mb-6">
           <UpcomingCars />
         </div>
       </div>
+
+      {/* Variant Selection Modal */}
+      {showVariantModal !== null && comparisonItems[showVariantModal] && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setShowVariantModal(null)}>
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Select Variant</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {comparisonItems[showVariantModal]!.model.brandName} {comparisonItems[showVariantModal]!.model.name}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowVariantModal(null)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-6 w-6 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Variants List */}
+            <div className="overflow-y-auto max-h-96 p-4">
+              {comparisonItems[showVariantModal]!.model.variants.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => {
+                    handleVariantChange(showVariantModal, v)
+                    setShowVariantModal(null)
+                  }}
+                  className={`w-full text-left px-5 py-4 hover:bg-gray-50 rounded-xl transition-colors border-2 mb-3 ${v.id === comparisonItems[showVariantModal]!.variant.id
+                    ? 'bg-orange-50 border-orange-500'
+                    : 'border-gray-100 hover:border-gray-200'
+                    }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 text-base mb-1">{v.name}</div>
+                      <div className="text-sm text-gray-500">₹{(v.price / 100000).toFixed(2)} Lakhs</div>
+                    </div>
+                    {v.id === comparisonItems[showVariantModal]!.variant.id && (
+                      <div className="ml-3 w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Car Search Modal */}
+      {showAddCarModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setShowAddCarModal(false)}>
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">Add Car to Compare</h2>
+              <button
+                onClick={() => setShowAddCarModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-6 w-6 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="p-6 border-b border-gray-200">
+              <input
+                type="text"
+                placeholder="Search for a car model..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none text-base"
+                autoFocus
+              />
+            </div>
+
+            {/* Search Results */}
+            <div className="overflow-y-auto max-h-96 p-4">
+              {allModels
+                .filter((m: any) => {
+                  const brandMap: Record<string, string> = {}
+                  brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
+                  const brandName = brandMap[m.brandId] || ''
+                  const fullName = `${brandName} ${m.name}`.toLowerCase()
+                  return fullName.includes(searchQuery.toLowerCase()) && !comparisonItems.filter((item): item is ComparisonItem => item !== null).some(item => item.model.id === m.id)
+                })
+                .slice(0, 10)
+                .map((model: any) => {
+                  const brandMap: Record<string, string> = {}
+                  brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
+                  const brandName = brandMap[model.brandId] || ''
+
+                  return (
+                    <button
+                      key={model.id}
+                      onClick={() => handleAddCar(model)}
+                      className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors border border-gray-100 mb-2"
+                    >
+                      <img
+                        src={resolveImageUrl(model.heroImage)}
+                        alt={`${brandName} ${model.name}`}
+                        className="w-20 h-16 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3C/svg%3E"
+                        }}
+                      />
+                      <div className="flex-1 text-left">
+                        <div className="text-xs text-gray-500">{brandName}</div>
+                        <div className="font-bold text-gray-900">{model.name}</div>
+                      </div>
+                      <Plus className="h-5 w-5 text-orange-600" />
+                    </button>
+                  )
+                })}
+              {searchQuery && allModels.filter((m: any) => {
+                const brandMap: Record<string, string> = {}
+                brands.forEach((brand: any) => { brandMap[brand.id] = brand.name })
+                const brandName = brandMap[m.brandId] || ''
+                const fullName = `${brandName} ${m.name}`.toLowerCase()
+                return fullName.includes(searchQuery.toLowerCase()) && !comparisonItems.filter((item): item is ComparisonItem => item !== null).some(item => item.model.id === m.id)
+              }).length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No cars found matching "{searchQuery}"
+                  </div>
+                )}
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <Footer />
     </div>

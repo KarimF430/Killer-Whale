@@ -6,6 +6,7 @@ import AlternativeBrands from './AlternativeBrands'
 import BrandFAQ from './BrandFAQ'
 import BrandYouTube from './BrandYouTube'
 import AdBanner from '@/components/home/AdBanner'
+import Ad3DCarousel from '../ads/Ad3DCarousel'
 
 interface Brand {
   name: string
@@ -42,7 +43,9 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
 
   return (
     <div className="bg-white">
-      <AdBanner />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Ad3DCarousel className="my-4" />
+      </div>
 
       {/* Brand Title and SEO Text Section */}
       <section className="py-8 bg-white">
@@ -166,8 +169,10 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
       {/* Section 2: Car Models List with Filters */}
       <BrandCarsList brand={brand.slug} />
 
-      {/* Section 3: AD Banner */}
-      <AdBanner />
+      {/* Section 3: Ad Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Ad3DCarousel className="my-4" />
+      </div>
 
       {/* Section 4: Upcoming Cars Section - Using CarsByBudget Design */}
       <section className="py-8 bg-white">
@@ -307,8 +312,10 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
         </div>
       </section>
 
-      {/* Section 4: AD Banner + Alternative Brands */}
-      <AdBanner />
+      {/* Section 4: Ad Banner + Alternative Brands */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Ad3DCarousel className="my-4" />
+      </div>
 
       {/* Alternative Brands Section - Dynamic with Backend Logic */}
       <AlternativeBrands currentBrand={brand.slug} />
@@ -469,8 +476,10 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
       {/* Brand Videos Section - Using BrandYouTube Component */}
       <BrandYouTube brandName={brand.name} />
 
-      {/* Section 7: AD Banner + Brand FAQ */}
-      <AdBanner />
+      {/* Section 7: Ad Banner + Brand FAQ */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Ad3DCarousel className="my-4" />
+      </div>
 
       {/* Brand FAQ Section - Dynamic with Backend Logic */}
       <BrandFAQ brandName={brand.name} />

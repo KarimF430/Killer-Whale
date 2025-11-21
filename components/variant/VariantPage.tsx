@@ -13,6 +13,7 @@ import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import VariantCard from '../car-model/VariantCard'
 import UpcomingCars from '../home/UpcomingCars'
 import NewLaunchedCars from '../home/NewLaunchedCars'
+import Ad3DCarousel from '../ads/Ad3DCarousel'
 
 interface VariantData {
   brand: string
@@ -838,10 +839,8 @@ export default function VariantPage({
         {/* Section 2: AD Banner + Variant Highlights */}
         <PageSection background="white" maxWidth="7xl">
           <div id="highlights" className="space-y-8">
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* Key Features */}
             <div className="space-y-6">
@@ -2349,10 +2348,8 @@ export default function VariantPage({
         {/* Section 4: AD Banner + More Variants */}
         <PageSection background="white" maxWidth="7xl">
           <div className="space-y-8">
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* More Variants Section */}
             <div className="space-y-6">
@@ -2537,10 +2534,8 @@ export default function VariantPage({
               </div>
             </div>
 
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* Engine Section */}
             <div className="space-y-6">
@@ -2747,10 +2742,8 @@ export default function VariantPage({
               </div>
             </div>
 
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* Upcoming Cars Section */}
             <UpcomingCars />
@@ -2763,10 +2756,8 @@ export default function VariantPage({
             {/* New Launched Cars */}
             <NewLaunchedCars />
 
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* Feedback Section */}
             <div className="max-w-2xl mx-auto">

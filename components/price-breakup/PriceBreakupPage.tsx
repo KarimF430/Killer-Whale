@@ -8,6 +8,7 @@ import { formatPrice } from '@/utils/priceFormatter'
 import { calculateOnRoadPrice, OnRoadPriceBreakup } from '@/lib/rto-data-optimized'
 import PageSection from '../common/PageSection'
 import AdBanner from '../home/AdBanner'
+import Ad3DCarousel from '../ads/Ad3DCarousel'
 import Footer from '../Footer'
 import VariantCard from '../car-model/VariantCard'
 import CarCard from '../home/CarCard'
@@ -942,11 +943,9 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
       {/* Section 2: AD Banner & EMI Calculator */}
       <PageSection background="gray" maxWidth="7xl">
-        <div className="py-8 space-y-6">
-          {/* AD Banner */}
-          <div className="bg-gray-300 rounded-lg py-20 text-center">
-            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-          </div>
+        <div className="py-8 space-y-8">
+          {/* Ad Banner */}
+          <Ad3DCarousel className="mb-6" />
 
           {/* EMI Calculator Card */}
           <div id="emi" className="bg-white rounded-lg border border-gray-200 p-6">
@@ -986,7 +985,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
       {/* Section 3: More Variants */}
       <PageSection background="white" maxWidth="7xl">
-        <div id="variants" className="py-8 space-y-6">
+        <div id="variants" className="py-8 space-y-8">
           <h2 className="text-2xl font-bold text-gray-900">
             More {modelName} Variants price in {selectedCity.split(',')[0]}
           </h2>
@@ -1063,13 +1062,11 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
       {/* Section 4: AD Banner, Similar Cars & Popular Cars */}
       <PageSection background="white" maxWidth="7xl">
         <div id="similar-cars" className="py-8 space-y-12">
-          {/* AD Banner */}
-          <div className="bg-gray-300 rounded-lg py-20 text-center">
-            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-          </div>
+          {/* Ad Banner */}
+          <Ad3DCarousel className="mb-6" />
 
           {/* Similar Cars Section */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <h2 className="text-2xl font-bold text-gray-900">Similar Cars to {brandName} {modelName}</h2>
 
             {/* Cars Horizontal Scroll */}
@@ -1117,7 +1114,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
           </div>
 
           {/* Popular Cars Section */}
-          <div id="popular-cars" className="space-y-6">
+          <div id="popular-cars" className="space-y-8">
             <h2 className="text-2xl font-bold text-gray-900">Popular Cars</h2>
 
             {/* Cars Horizontal Scroll */}
@@ -1169,10 +1166,8 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
       {/* Section 5: AD Banner & Owner Reviews */}
       <PageSection background="white" maxWidth="7xl">
         <div id="reviews" className="py-8 space-y-12">
-          {/* AD Banner */}
-          <div className="bg-gray-300 rounded-lg py-20 text-center">
-            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-          </div>
+          {/* Ad Banner */}
+          <Ad3DCarousel className="mb-6" />
 
           {/* Owner Reviews Section */}
           <div>
@@ -1401,10 +1396,8 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
       {/* Section 6: AD Banner, FAQ & Brand Dealers */}
       <PageSection background="white" maxWidth="7xl">
         <div id="faq" className="py-8 space-y-12">
-          {/* AD Banner */}
-          <div className="bg-gray-300 rounded-lg py-20 text-center">
-            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-          </div>
+          {/* Ad Banner */}
+          <Ad3DCarousel className="mb-6" />
 
           {/* FAQ Section */}
           <div>
@@ -1446,7 +1439,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
               Planning to Buy {modelName}? Here are a few showrooms/dealers in {selectedCity.split(',')[0]}
             </p>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               {dealers.map((dealer, index) => (
                 <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
                   <div className="flex items-start">
@@ -1484,7 +1477,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
       <PageSection background="white" maxWidth="7xl">
         <div className="py-8 space-y-12">
           {/* Price across India */}
-          <div id="price-cities" className="space-y-6">
+          <div id="price-cities" className="space-y-8">
             <h2 className="text-2xl font-bold text-gray-900">
               {brandName} {modelName} {selectedVariantName} Price across India
             </h2>
@@ -1524,10 +1517,8 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
             </div>
           </div>
 
-          {/* AD Banner */}
-          <div className="bg-gray-300 rounded-lg py-20 text-center">
-            <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-          </div>
+          {/* Ad Banner */}
+          <Ad3DCarousel className="mb-6" />
 
           {/* Share Your Feedback */}
           <div id="feedback" className="max-w-2xl mx-auto">

@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Footer from '@/components/Footer'
 import AdBanner from '@/components/home/AdBanner'
+import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 import HeroSection from '@/components/home/HeroSection'
 import CarsByBudget from '@/components/home/CarsByBudget'
 import PopularCars from '@/components/home/PopularCars'
@@ -22,14 +23,18 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main>
-        <AdBanner />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Ad3DCarousel className="my-4" />
+        </div>
         <HeroSection />
 
         <PageSection background="gray">
           <CarsByBudget />
         </PageSection>
 
-        <AdBanner />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Ad3DCarousel className="my-4" />
+        </div>
 
         <PageSection background="white">
           <PopularCars />

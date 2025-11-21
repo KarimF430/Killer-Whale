@@ -14,6 +14,7 @@ import { formatPrice, formatPriceRange } from '@/utils/priceFormatter'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import CarCard from '../home/CarCard'
 import { useViewTracker } from '@/lib/use-view-tracker'
+import Ad3DCarousel from '../ads/Ad3DCarousel'
 
 interface ModelData {
   id: string
@@ -1246,10 +1247,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
               </Link>
             </div>
 
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* Model Highlights */}
             <div className="space-y-6">
@@ -1553,10 +1552,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
         {/* Section 4: AD Banner + Color Options */}
         <PageSection background="white" maxWidth="7xl">
           <div id="colors" className="space-y-8">
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* Color Options Section */}
             <div className="space-y-6">
@@ -1875,10 +1872,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
         {/* Section 6: Engine Highlights */}
         <PageSection background="white" maxWidth="7xl">
           <div id="engine" className="space-y-8">
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* Engine Highlights */}
             <div className="space-y-6">
@@ -2091,10 +2086,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
               </div>
             </div>
 
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
           </div>
         </PageSection>
 
@@ -2361,10 +2354,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
               </div>
             </div>
 
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
             {/* Model Videos Section - Exact copy from home page */}
             <div>
@@ -2786,10 +2777,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
         {/* Section 11: AD Banner + Feedback */}
         <PageSection background="white" maxWidth="7xl">
           <div className="space-y-8">
-            {/* AD Banner */}
-            <div className="bg-gray-300 rounded-lg py-20 text-center">
-              <h2 className="text-3xl font-bold text-gray-600">AD Banner</h2>
-            </div>
+            {/* Ad Banner */}
+            <Ad3DCarousel className="mb-6" />
 
 
             {/* Feedback Section */}
