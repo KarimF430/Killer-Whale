@@ -374,7 +374,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
         setLoadingVariants(true)
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}&fields=minimal`)
         if (response.ok) {
-          const variants = await response.json()
+          const variantsResponse = await response.json()
+          const variants = variantsResponse.data || variantsResponse
           setModelVariants(variants)
         } else {
           console.error('Failed to fetch variants:', response.statusText)

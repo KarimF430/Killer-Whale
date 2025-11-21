@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Search, Menu, X, MapPin } from 'lucide-react'
 
 export default function Header() {
@@ -40,10 +41,13 @@ export default function Header() {
           <Link href="/" className="flex items-center space-x-2 group">
             <div className="flex items-center">
               {/* MotorOctane Logo */}
-              <img
+              <Image
                 src="/motoroctane-logo.png"
                 alt="MotorOctane"
-                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+                width={40}
+                height={40}
+                className="w-auto h-10 object-contain group-hover:scale-105 transition-transform duration-300"
+                priority
               />
               <span className="text-2xl font-bold text-gray-900 ml-2 group-hover:text-red-600 transition-colors">MotorOctane</span>
             </div>
