@@ -27,6 +27,7 @@ interface Car {
   brandName: string
   image: string
   startingPrice: number
+  lowestPriceFuelType?: string
   fuelTypes: string[]
   transmissions: string[]
   seating: number
@@ -108,6 +109,9 @@ async function getHomeData() {
       brandName: car.brandName,
       image: car.image ? (car.image.startsWith('http') ? car.image : `${backendUrl}${car.image}`) : '',
       startingPrice: car.startingPrice,
+      popularRank: (car as any).popularRank ?? null,
+      newRank: (car as any).newRank ?? null,
+      lowestPriceFuelType: (car as any).lowestPriceFuelType,
       fuelTypes: (car.fuelTypes || ['Petrol']).map(normalizeFuelType),
       transmissions: (car.transmissions || ['Manual']).map(normalizeTransmission),
       seating: car.seating,
@@ -115,7 +119,7 @@ async function getHomeData() {
       slug: `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`,
       isNew: car.isNew,
       isPopular: car.isPopular,
-      popularRank: car.popularRank ?? null
+
     })) : []
 
     // Process All Cars (for Budget) with normalization

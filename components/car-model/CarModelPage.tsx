@@ -314,10 +314,16 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
     ? Math.max(...modelVariants.map(v => v.price || 0)) // Already in paise from database
     : model.endingPrice
 
+  // Find fuel type of the lowest priced variant
+  const lowestPriceVariant = modelVariants.length > 0
+    ? modelVariants.find(v => v.price === actualStartingPrice)
+    : null
+  const lowestPriceFuelType = lowestPriceVariant?.fuelType || lowestPriceVariant?.fuel || model.variants?.[0]?.fuelType || 'Petrol'
+
   // Get on-road prices for starting and ending prices
   const startingPriceData = useOnRoadPrice({
     exShowroomPrice: actualStartingPrice,
-    fuelType: model.variants?.[0]?.fuelType || 'Petrol'
+    fuelType: lowestPriceFuelType
   })
 
   const endingPriceData = useOnRoadPrice({

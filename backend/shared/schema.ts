@@ -101,6 +101,12 @@ export const variants = pgTable("variants", {
   engineTorque: text("engine_torque"),
   engineSpeed: text("engine_speed"),
 
+  // Additional engine fields (from MongoDB schema)
+  fuel: text("fuel"),
+  power: text("power"),
+  maxPower: text("max_power"),
+  torque: text("torque"),
+
   // Page 2 - Mileage
   mileageEngineName: text("mileage_engine_name"),
   mileageCompanyClaimed: text("mileage_company_claimed"),

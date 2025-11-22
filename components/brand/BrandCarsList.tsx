@@ -12,6 +12,7 @@ interface Car {
   brandName: string
   image: string
   startingPrice: number
+  lowestPriceFuelType?: string
   fuelTypes: string[]
   transmissions: string[]
   seating: number
@@ -30,7 +31,7 @@ function BrandCarCard({ car }: { car: Car }) {
 
   const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
     exShowroomPrice,
-    fuelType: car.fuelTypes[0] || 'Petrol'
+    fuelType: car.lowestPriceFuelType || car.fuelTypes[0] || 'Petrol'
   })
 
   const displayPrice = isOnRoadMode ? (onRoadPrice / 100000).toFixed(2) : (exShowroomPrice / 100000).toFixed(2)
@@ -138,6 +139,7 @@ export default function BrandCarsList({ brand, initialModels = [], brandId }: Br
     brandName: brandName,
     image: model.heroImage || '/car-placeholder.jpg',
     startingPrice: model.lowestPrice || 0,
+    lowestPriceFuelType: model.lowestPriceFuelType,
     fuelTypes: model.fuelTypes || ['Petrol'],
     transmissions: model.transmissions || ['Manual'],
     seating: 5,

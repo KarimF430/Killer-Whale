@@ -424,13 +424,25 @@ export class MongoDBStorage implements IStorage {
       const results = [];
 
       for (const model of models) {
-        const variants = await MongoVariant.find({ modelId: model.id, status: 'active' }).select('price').lean();
+        const variants = await MongoVariant.find({ modelId: model.id, status: 'active' }).select('price fuel fuelType').lean();
         const prices = variants.map(v => v.price).filter(p => p > 0);
         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
         const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
 
+        // Find the fuel type of the lowest priced variant
+        let lowestPriceFuelType = 'Petrol';
+        if (minPrice > 0) {
+          const minPriceVariant = variants.find(v => v.price === minPrice);
+          if (minPriceVariant) {
+            lowestPriceFuelType = minPriceVariant.fuel || minPriceVariant.fuelType || 'Petrol';
+          }
+        }
+
         results.push({
           ...mapModel(model),
+          startingPrice: minPrice, // Standard field
+          lowestPrice: minPrice,   // Alias
+          lowestPriceFuelType,     // New field for accurate RTO calc
           priceRange: {
             min: minPrice,
             max: maxPrice

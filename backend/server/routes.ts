@@ -1789,7 +1789,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
   // Get model by ID with Redis caching
   app.get("/api/models/:id",
-    redisCacheMiddleware(CacheTTL.MODEL_DETAILS), // ✅ 1-hour cache
+    redisCacheMiddleware(RedisCacheTTL.MODEL_DETAILS), // ✅ 1-hour cache
     async (req, res) => {
       // Set browser cache headers
       res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
@@ -1914,6 +1914,17 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           ? Math.min(...modelVariants.map(v => v.price || 0))
           : 0;
 
+        // Find fuel type of lowest priced variant
+        let lowestPriceFuelType = 'Petrol';
+        if (lowestPrice > 0) {
+          const minPriceVariant = modelVariants.find(v => v.price === lowestPrice);
+          if (minPriceVariant) {
+            lowestPriceFuelType = minPriceVariant.fuel || minPriceVariant.fuelType || 'Petrol';
+          }
+        }
+
+
+
         const brand = brands.find(b => b.id === model.brandId);
 
         // Use fuel types and transmissions from MODEL, not variants
@@ -1928,6 +1939,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           brandName: brand?.name || 'Unknown',
           image: model.heroImage || '/placeholder-car.jpg',
           startingPrice: lowestPrice,
+          lowestPriceFuelType: lowestPriceFuelType, // Explicit assignment
           fuelTypes: fuelTypes,
           transmissions: transmissions,
           seating: 5, // Default
@@ -2166,7 +2178,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
   // Frontend API endpoints
   app.get("/api/frontend/brands/:brandId/models",
-    redisCacheMiddleware(CacheTTL.BRAND_MODELS), // ✅ 30-minute cache
+    redisCacheMiddleware(RedisCacheTTL.BRAND_MODELS), // ✅ 30-minute cache
     async (req, res) => {
       try {
         const { brandId } = req.params;

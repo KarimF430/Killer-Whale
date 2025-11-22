@@ -83,9 +83,10 @@ export function redisCacheMiddleware(ttl: number = 300, staleTime: number = 60) 
       return next();
     }
 
-    // Generate hierarchical cache key
+    // Generate hierarchical cache key with version
+    const CACHE_VERSION = 'v2'; // Increment to invalidate all caches
     const namespace = req.path.split('/')[2] || 'api'; // e.g., 'brands', 'models'
-    const cacheKey = `cache:${namespace}:${req.path}:${JSON.stringify(req.query)}`;
+    const cacheKey = `cache:${CACHE_VERSION}:${namespace}:${req.path}:${JSON.stringify(req.query)}`;
 
     try {
       // Try to get from cache

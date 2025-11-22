@@ -8,10 +8,13 @@ interface VariantsPageProps {
   }>
 }
 
+// Enable ISR with 1-hour revalidation (matches Model Page)
+export const revalidate = 3600
+
 async function getModelData(brandSlug: string, modelSlug: string) {
   try {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
-    const brandsResponse = await fetch(`${backendUrl}/api/brands`, { cache: 'no-store' })
+    const brandsResponse = await fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } })
     if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
 
     const brands = await brandsResponse.json()
@@ -23,7 +26,7 @@ async function getModelData(brandSlug: string, modelSlug: string) {
 
     if (!brandData) throw new Error('Brand not found')
 
-    const modelsResponse = await fetch(`${backendUrl}/api/frontend/brands/${brandData.id}/models`, { cache: 'no-store' })
+    const modelsResponse = await fetch(`${backendUrl}/api/frontend/brands/${brandData.id}/models`, { next: { revalidate: 3600 } })
     if (!modelsResponse.ok) throw new Error('Failed to fetch models')
 
     const modelsData = await modelsResponse.json()

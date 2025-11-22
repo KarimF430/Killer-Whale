@@ -10,6 +10,7 @@ interface Car {
   brandName: string
   image: string
   startingPrice: number
+  lowestPriceFuelType?: string
   fuelTypes: string[]
   transmissions: string[]
   seating: number
@@ -76,7 +77,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
   // Get on-road price (lightning fast with caching)
   const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
     exShowroomPrice: car.startingPrice,
-    fuelType: car.fuelTypes?.[0] || 'Petrol'
+    fuelType: car.lowestPriceFuelType || car.fuelTypes?.[0] || 'Petrol'
   })
 
   // Use on-road price if mode is enabled, otherwise ex-showroom

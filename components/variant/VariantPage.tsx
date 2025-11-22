@@ -46,6 +46,7 @@ interface VariantPageProps {
   brandName: string
   modelName: string
   variantName: string
+  newLaunchedCars?: any[]
 }
 
 // Mock variant data removed - using real data from backend
@@ -63,12 +64,14 @@ export default function VariantPage({
   variantData,
   brandName,
   modelName,
-  variantName
+  variantName,
+  newLaunchedCars = []
 }: {
   variantData?: VariantData,
   brandName?: string,
   modelName?: string,
-  variantName?: string
+  variantName?: string,
+  newLaunchedCars?: any[]
 }) {
   const router = useRouter()
   const [expandedSpecs, setExpandedSpecs] = useState<Record<string, boolean>>({})
@@ -2754,7 +2757,7 @@ export default function VariantPage({
         <PageSection background="white" maxWidth="7xl">
           <div className="space-y-8">
             {/* New Launched Cars */}
-            <NewLaunchedCars />
+            <NewLaunchedCars initialCars={newLaunchedCars} />
 
             {/* Ad Banner */}
             <Ad3DCarousel className="mb-6" />
