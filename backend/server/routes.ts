@@ -754,6 +754,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       // Upload to R2 if configured (mirror /api/upload/image behaviour)
       const bucket = process.env.R2_BUCKET;
+      const requireR2 = process.env.REQUIRE_R2 === 'true' || process.env.NODE_ENV === 'production';
+
       if (bucket) {
         const accountId = process.env.R2_ACCOUNT_ID;
         const endpoint = process.env.R2_ENDPOINT || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
@@ -804,12 +806,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '');
           if (publicBase) {
             fileUrl = `${publicBase}/${key}`;
+          } else {
+            throw new Error('R2_PUBLIC_BASE_URL not configured - cannot generate public URL');
           }
 
           // Clean up temp file
           fs.unlinkSync(req.file.path);
 
-          console.log(`✅ Logo uploaded to R2 (server-side): ${fileUrl}`);
+          console.log(`✅ Logo uploaded to R2 successfully: ${fileUrl}`);
         } catch (error) {
           console.error('❌ R2 logo upload failed:', {
             error: error instanceof Error ? error.message : String(error),
@@ -818,18 +822,27 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             hasCredentials: !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY)
           });
           console.error('📋 Full error details:', error);
-          console.warn('⚠️  Logo upload falling back to local storage (will be lost on restart!)');
-          // In production, optionally fail hard instead of falling back to local storage
-          if (process.env.REQUIRE_R2 === 'true') {
+
+          // In production or when R2 is required, fail the upload
+          if (requireR2) {
             const message = error instanceof Error ? error.message : String(error);
             return res.status(500).json({
-              error: 'Cloud storage unavailable. Please try again later.',
-              details: message
+              error: 'Cloud storage upload failed. Logo not saved.',
+              details: message,
+              suggestion: 'Please check R2 configuration or try again later.'
             });
           }
-          // Fall through to local storage
+
+          console.warn('⚠️  Logo upload falling back to local storage (will be lost on restart!)');
+          // Fall through to local storage (development only)
         }
       } else {
+        if (requireR2) {
+          return res.status(500).json({
+            error: 'Cloud storage not configured. Cannot upload logo.',
+            suggestion: 'Please configure R2_BUCKET and related environment variables.'
+          });
+        }
         console.warn('⚠️  R2 not configured for logo upload, using local storage (files will be lost on restart!)');
       }
 
@@ -838,7 +851,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         url: fileUrl,
         processed: true,
         format: 'webp',
-        compression: compressionInfo
+        compression: compressionInfo,
+        storage: fileUrl.startsWith('http') ? 'r2' : 'local'
       });
     }
   );
@@ -2012,15 +2026,23 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       // Field projection optimization
       if (fields) {
         if (fields === 'minimal') {
-          // Minimal fields for list views
+          // Minimal fields for list views - expanded to include all display fields
           const minimalVariants = allVariants.map(v => ({
             id: v.id,
             name: v.name,
             price: v.price,
             fuelType: v.fuelType,
+            fuel: v.fuel,
             transmission: v.transmission,
             modelId: v.modelId,
-            features: v.keyFeatures
+            keyFeatures: v.keyFeatures,
+            headerSummary: v.headerSummary,
+            power: v.power,
+            maxPower: v.maxPower,
+            enginePower: v.enginePower,
+            isValueForMoney: v.isValueForMoney,
+            mileage: v.mileageCompanyClaimed,
+            mileageCompanyClaimed: v.mileageCompanyClaimed
           }));
           return res.json(minimalVariants);
         } else {

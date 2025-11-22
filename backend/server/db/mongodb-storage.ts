@@ -76,8 +76,12 @@ function mapVariant(doc: any): Variant {
     exteriorDesign: doc.exteriorDesign || null,
     comfortConvenience: doc.comfortConvenience || null,
     // Maps to specific schema fields instead of grouped objects
-    fuelType: doc.fuelType || null,
+    fuelType: doc.fuelType || doc.fuel || null,
     transmission: doc.transmission || null,
+    fuel: doc.fuel || doc.fuelType || null,
+    // Use enginePower/engineTorque as fallbacks for power/maxPower/torque
+    power: doc.power || doc.maxPower || doc.enginePower || null,
+    maxPower: doc.maxPower || doc.power || doc.enginePower || null,
 
     // Safety Features
     globalNCAPRating: doc.globalNCAPRating || null,
@@ -147,6 +151,9 @@ function mapVariant(doc: any): Variant {
     enginePower: doc.enginePower || null,
     engineTorque: doc.engineTorque || null,
     engineSpeed: doc.engineSpeed || null,
+    torque: doc.torque || doc.engineTorque || null,
+    engineNamePage4: doc.engineNamePage4 || doc.engineName || null,
+    engineCapacity: doc.engineCapacity || null,
 
     // Mileage
     mileageEngineName: doc.mileageEngineName || null,
@@ -223,11 +230,52 @@ export class MongoDBStorage implements IStorage {
 
   async createBrand(brand: InsertBrand): Promise<Brand> {
     try {
-      const newBrand = await MongoBrand.create(brand);
+      console.log('🔍 createBrand called with:', { name: brand.name, logo: brand.logo, hasLogo: !!brand.logo });
+
+      // Validate logo URL if provided
+      if (brand.logo) {
+        // Check if it's a full URL (R2 or external)
+        if (brand.logo.startsWith('http://') || brand.logo.startsWith('https://')) {
+          console.log('✅ Logo is a full URL (R2/external):', brand.logo);
+        } else if (brand.logo.startsWith('/uploads/')) {
+          console.warn('⚠️  Logo is a local path - may be lost on server restart:', brand.logo);
+        } else {
+          console.warn('⚠️  Unexpected logo format:', brand.logo);
+        }
+      }
+
+      // Generate a unique brand ID (format: "brand-{name-slug}")
+      const slug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const id = `brand-${slug}`;
+
+      // Check if brand with this ID already exists
+      const existing = await MongoBrand.findOne({ id }).lean();
+      if (existing) {
+        throw new Error(`Brand "${brand.name}" already exists.`);
+      }
+
+      // Auto-assign ranking based on creation order (next available position)
+      const brands = await MongoBrand.find({}).select('ranking').lean();
+      const maxRanking = brands.length > 0
+        ? Math.max(...brands.map(b => b.ranking))
+        : 0;
+      const autoRanking = maxRanking + 1;
+
+      console.log('✅ Creating brand with:', { id, ranking: autoRanking, logo: brand.logo });
+
+      const newBrand = await MongoBrand.create({
+        ...brand,
+        id,
+        ranking: autoRanking,
+        createdAt: new Date()
+      });
+
+      console.log('✅ Brand created successfully:', { id: newBrand.id, logo: newBrand.logo });
+
       return mapBrand(newBrand.toObject());
     } catch (error) {
       console.error('createBrand error:', error);
-      throw new Error('Failed to create brand');
+      throw error instanceof Error ? error : new Error('Failed to create brand');
     }
   }
 
@@ -295,11 +343,33 @@ export class MongoDBStorage implements IStorage {
 
   async createModel(model: InsertModel): Promise<Model> {
     try {
-      const newModel = await MongoModel.create(model);
+      // Get brand to generate proper ID
+      const brand = await MongoBrand.findOne({ id: model.brandId }).lean();
+      if (!brand) {
+        throw new Error(`Invalid brandId: ${model.brandId}. Brand does not exist.`);
+      }
+
+      // Generate model ID (format: "model-brand-{brand-slug}-{model-slug}")
+      const brandSlug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const id = `model-brand-${brandSlug}-${modelSlug}`;
+
+      // Check if model with this ID already exists
+      const existing = await MongoModel.findOne({ id }).lean();
+      if (existing) {
+        throw new Error(`Model "${model.name}" already exists for brand "${brand.name}".`);
+      }
+
+      const newModel = await MongoModel.create({
+        ...model,
+        id,
+        createdAt: new Date()
+      });
+
       return mapModel(newModel.toObject());
     } catch (error) {
       console.error('createModel error:', error);
-      throw new Error('Failed to create model');
+      throw error instanceof Error ? error : new Error('Failed to create model');
     }
   }
 
@@ -405,11 +475,46 @@ export class MongoDBStorage implements IStorage {
 
   async createVariant(variant: InsertVariant): Promise<Variant> {
     try {
-      const newVariant = await MongoVariant.create(variant);
+      // Get brand and model to generate proper ID
+      const [brand, model] = await Promise.all([
+        MongoBrand.findOne({ id: variant.brandId }).lean(),
+        MongoModel.findOne({ id: variant.modelId }).lean()
+      ]);
+
+      if (!brand) {
+        throw new Error(`Invalid brandId: ${variant.brandId}. Brand does not exist.`);
+      }
+
+      if (!model) {
+        throw new Error(`Invalid modelId: ${variant.modelId}. Model does not exist.`);
+      }
+
+      if (model.brandId !== variant.brandId) {
+        throw new Error(`Model ${variant.modelId} does not belong to brand ${variant.brandId}.`);
+      }
+
+      // Generate variant ID (format: "variant-brand-{brand-slug}-model-{model-slug}-{variant-slug}")
+      const brandSlug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const id = `variant-brand-${brandSlug}-model-${brandSlug}-${modelSlug}-${variantSlug}`;
+
+      // Check if variant with this ID already exists
+      const existing = await MongoVariant.findOne({ id }).lean();
+      if (existing) {
+        throw new Error(`Variant "${variant.name}" already exists for model "${model.name}".`);
+      }
+
+      const newVariant = await MongoVariant.create({
+        ...variant,
+        id,
+        createdAt: new Date()
+      });
+
       return mapVariant(newVariant.toObject());
     } catch (error) {
       console.error('createVariant error:', error);
-      throw new Error('Failed to create variant');
+      throw error instanceof Error ? error : new Error('Failed to create variant');
     }
   }
 

@@ -207,17 +207,17 @@ async function getModelData(brandSlug: string, modelSlug: string) {
         price: variant.price,
         fuelType: variant.fuelType || modelData.fuelType,
         transmission: variant.transmission || modelData.transmission,
-        keyFeatures: [
-          variant.engine ? `Engine: ${variant.engine}` : null,
-          variant.power ? `Power: ${variant.power}` : null,
-          variant.mileage ? `Mileage: ${variant.mileage}` : null,
-          'Safety Features'
-        ].filter(Boolean),
+        // Use actual keyFeatures from database, not constructed array
+        keyFeatures: variant.keyFeatures || variant.headerSummary || "Standard features included",
         isValueForMoney: variant.isValueForMoney || false,
         engine: variant.engine,
-        power: variant.power,
-        mileage: variant.mileage,
-        fuel: variant.fuelType || modelData.fuelType // Ensure fuel property exists for CarModelPage
+        power: variant.power || variant.maxPower || variant.enginePower,
+        maxPower: variant.maxPower || variant.power,
+        enginePower: variant.enginePower,
+        headerSummary: variant.headerSummary,
+        mileage: variant.mileage || variant.mileageCompanyClaimed,
+        mileageCompanyClaimed: variant.mileageCompanyClaimed,
+        fuel: variant.fuel || variant.fuelType || modelData.fuelType // Ensure fuel property exists for CarModelPage
       }))
       : [
         {

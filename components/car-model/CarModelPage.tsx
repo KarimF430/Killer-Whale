@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Star, Heart, Share2, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowRight, Calendar, Fuel, Users, Settings, IndianRupee, MapPin, Phone, MessageCircle, Zap, Shield, Award, TrendingUp, Clock, CheckCircle, AlertCircle, Info, X, Plus, Minus, Eye, ExternalLink, Play, ThumbsUp, Wrench, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -249,6 +249,7 @@ const navigationSections = [
 export default function CarModelPage({ model }: CarModelPageProps) {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
   const [selectedMileageEngine, setSelectedMileageEngine] = useState(0)
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [showAllPros, setShowAllPros] = useState(false)
@@ -278,8 +279,36 @@ export default function CarModelPage({ model }: CarModelPageProps) {
     }
   }, [])
   const [selectedVariant, setSelectedVariant] = useState(model?.variants?.[0]?.name || 'Base Variant')
-  // Initialize variants from props instead of fetching
-  const [modelVariants, setModelVariants] = useState<any[]>(model.variants || [])
+
+  // Fetch variants from API (same as AllVariantsClient)
+  const [modelVariants, setModelVariants] = useState<any[]>([])
+  const [loadingVariants, setLoadingVariants] = useState(true)
+
+  useEffect(() => {
+    const fetchVariants = async () => {
+      if (!model?.id) return
+
+      try {
+        setLoadingVariants(true)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}&fields=minimal`)
+        if (response.ok) {
+          const variants = await response.json()
+          setModelVariants(variants)
+        } else {
+          console.error('Failed to fetch variants')
+          setModelVariants([])
+        }
+      } catch (error) {
+        console.error('Error fetching variants:', error)
+        setModelVariants([])
+      } finally {
+        setLoadingVariants(false)
+      }
+    }
+
+    fetchVariants()
+  }, [model?.id])
+
 
   // Track page view for smart favourites algorithm
   const carDataForTracking = model ? {
@@ -344,8 +373,6 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   }
 
   const displayEMI = calculateDisplayEMI(displayStartPrice)
-  // Variants are now passed from server, no need to fetch
-  const loadingVariants = false
   const mileageScrollRef = useRef<HTMLDivElement>(null)
 
   // Function to handle tab switching and reset scroll position
@@ -421,7 +448,7 @@ export default function CarModelPage({ model }: CarModelPageProps) {
     price: variant.price ? (variant.price / 100000) : 0, // Convert to lakhs
     fuel: (variant as any).fuel || variant.fuelType || "Petrol", // Use fuel from Page 4 Engine & Transmission specifications
     transmission: (variant as any).transmission || "Manual", // Use transmission from Page 4 specifications
-    power: (variant as any).maxPower || variant.enginePower || "N/A", // Use maxPower from Page 4 specifications
+    power: (variant as any).power || (variant as any).maxPower || variant.enginePower || "N/A", // Check power, maxPower, then enginePower
     features: variant.keyFeatures || variant.headerSummary || "Standard features included",
     isValueForMoney: variant.isValueForMoney || false
   })).sort((a, b) => a.price - b.price) // Sort by price in ascending order (lowest to highest)
@@ -437,59 +464,78 @@ export default function CarModelPage({ model }: CarModelPageProps) {
     const filters = ['All']
     const fuelTypes = new Set<string>()
     const transmissionTypes = new Set<string>()
-    let hasAutomatic = false
     let hasValueVariants = false
 
     allVariants.forEach(variant => {
-      // Collect fuel types
       if (variant.fuel) fuelTypes.add(variant.fuel)
-
-      // Check for automatic transmissions
-      if (variant.transmission && isAutomaticTransmission(variant.transmission)) {
-        hasAutomatic = true
+      if (variant.transmission) {
+        if (isAutomaticTransmission(variant.transmission)) {
+          transmissionTypes.add('Automatic')
+        } else {
+          transmissionTypes.add('Manual')
+        }
       }
-
-      // Check for value variants (marked as value for money in backend)
       if (variant.isValueForMoney === true) {
         hasValueVariants = true
       }
     })
 
-    // Add fuel type filters
     fuelTypes.forEach(fuel => filters.push(fuel))
-
-    // Add automatic filter if any automatic variants exist
-    if (hasAutomatic) filters.push('Automatic')
-
-    // Add value for money filter if applicable
-    if (hasValueVariants) filters.push('Value for Money Variants')
+    transmissionTypes.forEach(trans => filters.push(trans))
+    if (hasValueVariants) filters.push('Value for Money')
 
     return filters
   }
 
-  const availableFilters = getDynamicFilters()
+  const availableFilters = useMemo(() => getDynamicFilters(), [allVariants])
 
-  // Filter variants based on active filter
-  const getFilteredVariants = () => {
-    switch (activeFilter) {
-      case 'Diesel':
-        return allVariants.filter(variant => variant.fuel === 'Diesel')
-      case 'Petrol':
-        return allVariants.filter(variant => variant.fuel === 'Petrol')
-      case 'CNG':
-        return allVariants.filter(variant => variant.fuel === 'CNG')
-      case 'Automatic':
-        return allVariants.filter(variant =>
-          variant.transmission && isAutomaticTransmission(variant.transmission)
-        )
-      case 'Value for Money Variants':
-        return allVariants.filter(variant => variant.isValueForMoney === true)
-      default:
-        return allVariants
+  // Handle filter toggle (multi-select)
+  const handleFilterToggle = (filter: string) => {
+    if (filter === 'All') {
+      setSelectedFilters(['All'])
+    } else {
+      setSelectedFilters(prev => {
+        const withoutAll = prev.filter(f => f !== 'All')
+        if (withoutAll.includes(filter)) {
+          const newFilters = withoutAll.filter(f => f !== filter)
+          return newFilters.length === 0 ? ['All'] : newFilters
+        } else {
+          return [...withoutAll, filter]
+        }
+      })
     }
   }
 
-  const filteredVariants = getFilteredVariants()
+  // Filter variants based on selected filters (multi-select logic) - Memoized for performance
+  const filteredVariants = useMemo(() => {
+    if (selectedFilters.includes('All')) {
+      return allVariants
+    }
+
+    return allVariants.filter(variant => {
+      const fuelFilters = selectedFilters.filter(f => ['Petrol', 'Diesel', 'CNG', 'Electric'].includes(f))
+      const transmissionFilters = selectedFilters.filter(f => ['Manual', 'Automatic'].includes(f))
+      const specialFilters = selectedFilters.filter(f => f === 'Value for Money')
+
+      let matchesFuel = fuelFilters.length === 0 || fuelFilters.includes(variant.fuel)
+      let matchesTransmission = transmissionFilters.length === 0
+
+      if (transmissionFilters.length > 0) {
+        if (transmissionFilters.includes('Automatic')) {
+          matchesTransmission = matchesTransmission || isAutomaticTransmission(variant.transmission)
+        }
+        if (transmissionFilters.includes('Manual')) {
+          matchesTransmission = matchesTransmission || !isAutomaticTransmission(variant.transmission)
+        }
+      }
+
+      let matchesSpecial = specialFilters.length === 0 || (specialFilters.includes('Value for Money') && variant.isValueForMoney)
+
+      return matchesFuel && matchesTransmission && matchesSpecial
+    })
+  }, [allVariants, selectedFilters])
+
+
 
 
   // Extended Pros and Cons data - Use backend data or fallback
@@ -1339,8 +1385,8 @@ export default function CarModelPage({ model }: CarModelPageProps) {
                 {availableFilters.map((filter) => (
                   <button
                     key={filter}
-                    onClick={() => setActiveFilter(filter)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
+                    onClick={() => handleFilterToggle(filter)}
+                    className={`px-4 py-2 rounded-lg transition-colors ${selectedFilters.includes(filter)
                       ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
