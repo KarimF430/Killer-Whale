@@ -174,6 +174,71 @@ export const variants = pgTable("variants", {
   wirelessCharging: text("wireless_charging"),
   connectedCarTech: text("connected_car_tech"),
 
+  // Page 4 - Engine & Transmission (Additional fields)
+  engineNamePage4: text("engine_name_page4"),
+  engineCapacity: text("engine_capacity"),
+  noOfGears: text("no_of_gears"),
+  paddleShifter: text("paddle_shifter"),
+  zeroTo100KmphTime: text("zero_to_100_kmph_time"),
+  topSpeed: text("top_speed"),
+  evBatteryCapacity: text("ev_battery_capacity"),
+  hybridBatteryCapacity: text("hybrid_battery_capacity"),
+  batteryType: text("battery_type"),
+  electricMotorPlacement: text("electric_motor_placement"),
+  evRange: text("ev_range"),
+  evChargingTime: text("ev_charging_time"),
+  maxElectricMotorPower: text("max_electric_motor_power"),
+  turboCharged: text("turbo_charged"),
+  hybridType: text("hybrid_type"),
+  driveTrain: text("drive_train"),
+  drivingModes: text("driving_modes"),
+  offRoadModes: text("off_road_modes"),
+  differentialLock: text("differential_lock"),
+  limitedSlipDifferential: text("limited_slip_differential"),
+
+  // Page 4 - Seating Comfort
+  seatUpholstery: text("seat_upholstery"),
+  seatsAdjustment: text("seats_adjustment"),
+  driverSeatAdjustment: text("driver_seat_adjustment"),
+  passengerSeatAdjustment: text("passenger_seat_adjustment"),
+  rearSeatAdjustment: text("rear_seat_adjustment"),
+  welcomeSeats: text("welcome_seats"),
+  memorySeats: text("memory_seats"),
+
+  // Page 4 - Exteriors
+  headLights: text("head_lights"),
+  tailLight: text("tail_light"),
+  frontFogLights: text("front_fog_lights"),
+  roofRails: text("roof_rails"),
+  radioAntenna: text("radio_antenna"),
+  outsideRearViewMirror: text("outside_rear_view_mirror"),
+  daytimeRunningLights: text("daytime_running_lights"),
+  sideIndicator: text("side_indicator"),
+  rearWindshieldWiper: text("rear_windshield_wiper"),
+
+  // Page 5 - Dimensions
+  groundClearance: text("ground_clearance"),
+  length: text("length"),
+  width: text("width"),
+  height: text("height"),
+  wheelbase: text("wheelbase"),
+  turningRadius: text("turning_radius"),
+  kerbWeight: text("kerb_weight"),
+
+  // Page 5 - Tyre & Suspension
+  frontTyreProfile: text("front_tyre_profile"),
+  rearTyreProfile: text("rear_tyre_profile"),
+  spareTyreProfile: text("spare_tyre_profile"),
+  spareWheelType: text("spare_wheel_type"),
+  frontSuspension: text("front_suspension"),
+  rearSuspension: text("rear_suspension"),
+
+  // Page 5 - Storage
+  cupholders: text("cupholders"),
+  fuelTankCapacity: text("fuel_tank_capacity"),
+  bootSpace: text("boot_space"),
+  bootSpaceAfterFoldingRearRowSeats: text("boot_space_after_folding_rear_row_seats"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

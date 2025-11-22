@@ -153,13 +153,76 @@ function mapVariant(doc: any): Variant {
     engineSpeed: doc.engineSpeed || null,
     torque: doc.torque || doc.engineTorque || null,
 
-
-
     // Mileage
     mileageEngineName: doc.mileageEngineName || null,
     mileageCompanyClaimed: doc.mileageCompanyClaimed || null,
     mileageCityRealWorld: doc.mileageCityRealWorld || null,
     mileageHighwayRealWorld: doc.mileageHighwayRealWorld || null,
+
+    // Page 4 - Engine & Transmission (Additional fields)
+    engineNamePage4: doc.engineNamePage4 || null,
+    engineCapacity: doc.engineCapacity || null,
+    noOfGears: doc.noOfGears || null,
+    paddleShifter: doc.paddleShifter || null,
+    zeroTo100KmphTime: doc.zeroTo100KmphTime || null,
+    topSpeed: doc.topSpeed || null,
+    evBatteryCapacity: doc.evBatteryCapacity || null,
+    hybridBatteryCapacity: doc.hybridBatteryCapacity || null,
+    batteryType: doc.batteryType || null,
+    electricMotorPlacement: doc.electricMotorPlacement || null,
+    evRange: doc.evRange || null,
+    evChargingTime: doc.evChargingTime || null,
+    maxElectricMotorPower: doc.maxElectricMotorPower || null,
+    turboCharged: doc.turboCharged || null,
+    hybridType: doc.hybridType || null,
+    driveTrain: doc.driveTrain || null,
+    drivingModes: doc.drivingModes || null,
+    offRoadModes: doc.offRoadModes || null,
+    differentialLock: doc.differentialLock || null,
+    limitedSlipDifferential: doc.limitedSlipDifferential || null,
+
+    // Page 4 - Seating Comfort
+    seatUpholstery: doc.seatUpholstery || null,
+    seatsAdjustment: doc.seatsAdjustment || null,
+    driverSeatAdjustment: doc.driverSeatAdjustment || null,
+    passengerSeatAdjustment: doc.passengerSeatAdjustment || null,
+    rearSeatAdjustment: doc.rearSeatAdjustment || null,
+    welcomeSeats: doc.welcomeSeats || null,
+    memorySeats: doc.memorySeats || null,
+
+    // Page 4 - Exteriors
+    headLights: doc.headLights || null,
+    tailLight: doc.tailLight || null,
+    frontFogLights: doc.frontFogLights || null,
+    roofRails: doc.roofRails || null,
+    radioAntenna: doc.radioAntenna || null,
+    outsideRearViewMirror: doc.outsideRearViewMirror || null,
+    daytimeRunningLights: doc.daytimeRunningLights || null,
+    sideIndicator: doc.sideIndicator || null,
+    rearWindshieldWiper: doc.rearWindshieldWiper || null,
+
+    // Page 5 - Dimensions
+    groundClearance: doc.groundClearance || null,
+    length: doc.length || null,
+    width: doc.width || null,
+    height: doc.height || null,
+    wheelbase: doc.wheelbase || null,
+    turningRadius: doc.turningRadius || null,
+    kerbWeight: doc.kerbWeight || null,
+
+    // Page 5 - Tyre & Suspension
+    frontTyreProfile: doc.frontTyreProfile || null,
+    rearTyreProfile: doc.rearTyreProfile || null,
+    spareTyreProfile: doc.spareTyreProfile || null,
+    spareWheelType: doc.spareWheelType || null,
+    frontSuspension: doc.frontSuspension || null,
+    rearSuspension: doc.rearSuspension || null,
+
+    // Page 5 - Storage
+    cupholders: doc.cupholders || null,
+    fuelTankCapacity: doc.fuelTankCapacity || null,
+    bootSpace: doc.bootSpace || null,
+    bootSpaceAfterFoldingRearRowSeats: doc.bootSpaceAfterFoldingRearRowSeats || null,
 
     // Other
     keyFeatures: doc.keyFeatures || null,
