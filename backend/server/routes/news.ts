@@ -1,11 +1,15 @@
 import express from 'express'
 import { newsStorage } from '../db/news-storage'
+import { redisCacheMiddleware, CacheTTL as RedisCacheTTL } from '../middleware/redis-cache'
 
 const router = express.Router()
 
 // Get all published articles (public)
-router.get('/', async (req, res) => {
+router.get('/', redisCacheMiddleware(RedisCacheTTL.NEWS), async (req, res) => {
   try {
+    // Set browser cache headers (10 minutes)
+    res.set('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=1800');
+
     const { category, tag, search, page = '1', limit = '10' } = req.query
 
     let articles = await newsStorage.getAllArticles()
@@ -26,7 +30,7 @@ router.get('/', async (req, res) => {
     // Search
     if (search && typeof search === 'string') {
       const searchLower = search.toLowerCase()
-      articles = articles.filter(a => 
+      articles = articles.filter(a =>
         a.title.toLowerCase().includes(searchLower) ||
         a.excerpt.toLowerCase().includes(searchLower)
       )
@@ -58,7 +62,7 @@ router.get('/', async (req, res) => {
 router.get('/featured/list', async (req, res) => {
   try {
     const articles = await newsStorage.getAllArticles()
-    
+
     const featuredArticles = articles
       .filter(a => a.status === 'published' && a.isFeatured)
       .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
@@ -75,7 +79,7 @@ router.get('/featured/list', async (req, res) => {
 router.get('/trending/list', async (req, res) => {
   try {
     const articles = await newsStorage.getAllArticles()
-    
+
     const trendingArticles = articles
       .filter(a => a.status === 'published')
       .sort((a, b) => b.views - a.views)

@@ -1873,8 +1873,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Get popular cars (optimized endpoint)
-  app.get("/api/cars/popular", publicLimiter, async (req: Request, res: Response) => {
+  app.get("/api/cars/popular", publicLimiter, redisCacheMiddleware(RedisCacheTTL.POPULAR_CARS), async (req: Request, res: Response) => {
     try {
+      // Set browser cache headers (1 hour)
+      res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+
       const limit = parseInt(req.query.limit as string) || 20;
       const models = await storage.getPopularModels(limit);
 
@@ -2232,8 +2235,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Popular Comparisons Routes
-  app.get("/api/popular-comparisons", async (req, res) => {
+  app.get("/api/popular-comparisons", redisCacheMiddleware(RedisCacheTTL.COMPARISONS), async (req, res) => {
     try {
+      // Set browser cache headers (2 hours)
+      res.set('Cache-Control', 'public, max-age=7200, s-maxage=7200, stale-while-revalidate=86400');
+
       const comparisons = await storage.getPopularComparisons();
       res.json(comparisons);
     } catch (error) {

@@ -437,6 +437,7 @@ export async function warmUpCache(storage: any) {
 export const CacheTTL = {
   BRANDS: 3600,      // 1 hour
   MODELS: 1800,      // 30 minutes
+  POPULAR_CARS: 3600, // 1 hour - NEW
   VARIANTS: 900,     // 15 minutes
   STATS: 300,        // 5 minutes
   COMPARISONS: 7200, // 2 hours
