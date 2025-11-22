@@ -103,6 +103,7 @@ interface ModelData {
 
 interface CarModelPageProps {
   model: ModelData
+  initialVariants?: any[] // ✅ Server-rendered variants for AllVariantsClient
 }
 
 // FAQ Data
@@ -246,7 +247,7 @@ const navigationSections = [
   { id: 'reviews', label: 'Reviews' }
 ]
 
-export default function CarModelPage({ model }: CarModelPageProps) {
+export default function CarModelPage({ model, initialVariants = [] }: CarModelPageProps) {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
@@ -280,34 +281,9 @@ export default function CarModelPage({ model }: CarModelPageProps) {
   }, [])
   const [selectedVariant, setSelectedVariant] = useState(model?.variants?.[0]?.name || 'Base Variant')
 
-  // Fetch variants from API (same as AllVariantsClient)
-  const [modelVariants, setModelVariants] = useState<any[]>([])
-  const [loadingVariants, setLoadingVariants] = useState(true)
-
-  useEffect(() => {
-    const fetchVariants = async () => {
-      if (!model?.id) return
-
-      try {
-        setLoadingVariants(true)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}&fields=minimal`)
-        if (response.ok) {
-          const variants = await response.json()
-          setModelVariants(variants)
-        } else {
-          console.error('Failed to fetch variants')
-          setModelVariants([])
-        }
-      } catch (error) {
-        console.error('Error fetching variants:', error)
-        setModelVariants([])
-      } finally {
-        setLoadingVariants(false)
-      }
-    }
-
-    fetchVariants()
-  }, [model?.id])
+  // Use variants from server-side props (no client-side fetch needed)
+  const [modelVariants] = useState<any[]>(model.variants || [])
+  const loadingVariants = false
 
 
   // Track page view for smart favourites algorithm

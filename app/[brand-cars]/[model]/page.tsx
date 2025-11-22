@@ -10,6 +10,10 @@ interface ModelPageProps {
   }>
 }
 
+// Enable ISR with 1-hour revalidation (matches home page pattern)
+export const revalidate = 3600
+
+
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
   const resolvedParams = await params
   const brandSlug = resolvedParams['brand-cars'].replace('-cars', '')
@@ -65,29 +69,28 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     if (!modelData) throw new Error('Model not found')
 
     // Step 3: PARALLEL FETCH - Get detailed model data, variants, and similar cars data simultaneously
-    const [detailedModelData, variantsData, similarModelsRes, allVariantsRes] = await Promise.all([
-      fetch(`${backendUrl}/api/models/${modelData.id}`, { cache: 'no-store' })
+    // ✅ OPTIMIZED: Only fetch 8 variants (visible on page) + removed 200-variant fetch
+    const [detailedModelData, variantsData, similarModelsRes] = await Promise.all([
+      fetch(`${backendUrl}/api/models/${modelData.id}`, { next: { revalidate: 3600 } })
         .then(res => res.ok ? res.json() : null)
         .catch(err => {
           console.log('❌ Error fetching detailed model data:', err)
           return null
         }),
-      fetch(`${backendUrl}/api/variants?modelId=${modelData.id}&fields=id,name,price,fuelType,transmission,engine,power,mileage,isValueForMoney`, { cache: 'no-store' })
+      // ✅ OPTIMIZED: Fetch only 8 variants (visible on page) with key fields
+      fetch(`${backendUrl}/api/variants?modelId=${modelData.id}&limit=8&fields=minimal`, { next: { revalidate: 3600 } })
         .then(res => res.ok ? res.json() : [])
         .catch(err => {
           console.log('❌ Error fetching variants:', err)
           return []
         }),
-      fetch(`${backendUrl}/api/models?limit=20`, { cache: 'no-store' })
-        .then(res => res.ok ? res.json() : { data: [] })
-        .catch(() => ({ data: [] })),
-      fetch(`${backendUrl}/api/variants?fields=minimal&limit=200`, { cache: 'no-store' })
+      // ✅ Uses models-with-pricing endpoint (has lowestPrice already)
+      fetch(`${backendUrl}/api/models?limit=20`, { next: { revalidate: 3600 } })
         .then(res => res.ok ? res.json() : { data: [] })
         .catch(() => ({ data: [] }))
     ])
 
     const similarModelsData = similarModelsRes?.data || similarModelsRes || []
-    const allVariantsData = allVariantsRes?.data || allVariantsRes || []
 
     // Helper function to format launch date
     const formatLaunchDate = (date: string): string => {
@@ -110,18 +113,17 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     const similarCars = similarModelsData
       .filter((m: any) => m.id !== modelData.id)
       .map((m: any) => {
-        const mVariants = allVariantsData.filter((v: any) => v.modelId === m.id)
-        const lowestPrice = mVariants.length > 0
-          ? Math.min(...mVariants.map((v: any) => v.price || 0))
-          : m.price || 0
+        // ✅ OPTIMIZED: Use model's lowestPrice directly (from models-with-pricing endpoint)
+        const lowestPrice = m.lowestPrice || m.price || 0
 
+        // ✅ Use model-level fuel types and transmissions (already aggregated)
         const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
           ? m.fuelTypes
-          : Array.from(new Set(mVariants.map((v: any) => v.fuel || v.fuelType).filter(Boolean)))
+          : ['Petrol']
 
         const transmissions = m.transmissions && m.transmissions.length > 0
           ? m.transmissions
-          : Array.from(new Set(mVariants.map((v: any) => v.transmission).filter(Boolean)))
+          : ['Manual']
 
         const heroImage = m.heroImage
           ? (m.heroImage.startsWith('http') ? m.heroImage : `${backendUrl}${m.heroImage}`)
@@ -406,5 +408,5 @@ export default async function ModelPage({ params }: ModelPageProps) {
     notFound()
   }
 
-  return <CarModelPage model={modelData} />
+  return <CarModelPage model={modelData} initialVariants={modelData.variants} />
 }

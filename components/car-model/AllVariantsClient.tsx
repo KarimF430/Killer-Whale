@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import VariantCard from './VariantCard'
@@ -9,39 +9,20 @@ interface AllVariantsClientProps {
   model: any
   brandSlug?: string
   modelSlug?: string
+  initialVariants?: any[] // ✅ Server-rendered variants
 }
 
-export default function AllVariantsClient({ model, brandSlug, modelSlug }: AllVariantsClientProps) {
+export default function AllVariantsClient({
+  model,
+  brandSlug,
+  modelSlug,
+  initialVariants = [] // ✅ Server-rendered data
+}: AllVariantsClientProps) {
   const router = useRouter()
-  const [modelVariants, setModelVariants] = useState<any[]>([])
-  const [loadingVariants, setLoadingVariants] = useState(true)
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
 
-  // Fetch variants for this model (EXACT COPY FROM MODEL PAGE)
-  useEffect(() => {
-    const fetchVariants = async () => {
-      if (!model?.id) return
-
-      try {
-        setLoadingVariants(true)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${model.id}&fields=minimal`)
-        if (response.ok) {
-          const variants = await response.json()
-          setModelVariants(variants)
-        } else {
-          console.error('Failed to fetch variants:', response.statusText)
-          setModelVariants([])
-        }
-      } catch (error) {
-        console.error('Error fetching variants:', error)
-        setModelVariants([])
-      } finally {
-        setLoadingVariants(false)
-      }
-    }
-
-    fetchVariants()
-  }, [model?.id])
+  // ✅ Use server-rendered variants directly (no client-side fetch)
+  const modelVariants = initialVariants
 
   // Transform backend variant data to match component structure (EXACT COPY FROM MODEL PAGE)
   const allVariants = modelVariants.map(variant => ({
@@ -199,12 +180,7 @@ export default function AllVariantsClient({ model, brandSlug, modelSlug }: AllVa
 
           {/* Variant Cards - Dynamic (Show ALL variants) */}
           <div className="space-y-4">
-            {loadingVariants ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
-                <p className="text-gray-500">Loading variants...</p>
-              </div>
-            ) : filteredVariants.length > 0 ? (
+            {filteredVariants.length > 0 ? (
               filteredVariants.map((variant) => (
                 <VariantCard
                   key={variant.id}

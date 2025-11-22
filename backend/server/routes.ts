@@ -1787,13 +1787,20 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.get("/api/models/:id", async (req, res) => {
-    const model = await storage.getModel(req.params.id);
-    if (!model) {
-      return res.status(404).json({ error: "Model not found" });
+  // Get model by ID with Redis caching
+  app.get("/api/models/:id",
+    redisCacheMiddleware(CacheTTL.MODEL_DETAILS), // ✅ 1-hour cache
+    async (req, res) => {
+      // Set browser cache headers
+      res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+
+      const model = await storage.getModel(req.params.id);
+      if (!model) {
+        return res.status(404).json({ error: "Model not found" });
+      }
+      res.json(model);
     }
-    res.json(model);
-  });
+  );
 
   app.post("/api/models", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
@@ -2158,51 +2165,53 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Frontend API endpoints
-  app.get("/api/frontend/brands/:brandId/models", async (req, res) => {
-    try {
-      const { brandId } = req.params;
-      console.log('🚗 Frontend: Getting models for brand:', brandId);
+  app.get("/api/frontend/brands/:brandId/models",
+    redisCacheMiddleware(CacheTTL.BRAND_MODELS), // ✅ 30-minute cache
+    async (req, res) => {
+      try {
+        const { brandId } = req.params;
+        console.log('🚗 Frontend: Getting models for brand:', brandId);
 
-      const models = await storage.getModels(brandId);
-      const brand = await storage.getBrand(brandId);
+        const models = await storage.getModels(brandId);
+        const brand = await storage.getBrand(brandId);
 
-      if (!brand) {
-        return res.status(404).json({ error: "Brand not found" });
+        if (!brand) {
+          return res.status(404).json({ error: "Brand not found" });
+        }
+
+        // Transform models for frontend display
+        const frontendModels = models.map(model => ({
+          id: model.id,
+          name: model.name,
+          price: "₹7.71", // Will be calculated later
+          rating: 4.5, // Will be from reviews later
+          reviews: 1247, // Will be from reviews later
+          power: "89 bhp", // Will be from engine data
+          image: model.heroImage || '/cars/default-car.jpg',
+          isNew: model.isNew || false,
+          seating: "5 seater", // Will be from specifications
+          fuelType: model.fuelTypes?.join('-') || 'Petrol',
+          transmission: model.transmissions?.join('-') || 'Manual',
+          mileage: "18.3 kmpl", // Will be from mileage data
+          variants: 16, // Will be calculated from variants
+          slug: model.name.toLowerCase().replace(/\s+/g, '-'),
+          brandName: brand.name
+        }));
+
+        console.log('✅ Frontend: Returning', frontendModels.length, 'models for brand', brand.name);
+        res.json({
+          brand: {
+            id: brand.id,
+            name: brand.name,
+            slug: brand.name.toLowerCase().replace(/\s+/g, '-')
+          },
+          models: frontendModels
+        });
+      } catch (error) {
+        console.error('❌ Frontend models error:', error);
+        res.status(500).json({ error: "Failed to fetch models" });
       }
-
-      // Transform models for frontend display
-      const frontendModels = models.map(model => ({
-        id: model.id,
-        name: model.name,
-        price: "₹7.71", // Will be calculated later
-        rating: 4.5, // Will be from reviews later
-        reviews: 1247, // Will be from reviews later
-        power: "89 bhp", // Will be from engine data
-        image: model.heroImage || '/cars/default-car.jpg',
-        isNew: model.isNew || false,
-        seating: "5 seater", // Will be from specifications
-        fuelType: model.fuelTypes?.join('-') || 'Petrol',
-        transmission: model.transmissions?.join('-') || 'Manual',
-        mileage: "18.3 kmpl", // Will be from mileage data
-        variants: 16, // Will be calculated from variants
-        slug: model.name.toLowerCase().replace(/\s+/g, '-'),
-        brandName: brand.name
-      }));
-
-      console.log('✅ Frontend: Returning', frontendModels.length, 'models for brand', brand.name);
-      res.json({
-        brand: {
-          id: brand.id,
-          name: brand.name,
-          slug: brand.name.toLowerCase().replace(/\s+/g, '-')
-        },
-        models: frontendModels
-      });
-    } catch (error) {
-      console.error('❌ Frontend models error:', error);
-      res.status(500).json({ error: "Failed to fetch models" });
-    }
-  });
+    });
 
   app.get("/api/frontend/models/:slug", async (req, res) => {
     try {

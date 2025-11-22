@@ -435,15 +435,17 @@ export async function warmUpCache(storage: any) {
  * Cache TTL Constants (in seconds)
  */
 export const CacheTTL = {
-  BRANDS: 3600,      // 1 hour
-  MODELS: 1800,      // 30 minutes
-  POPULAR_CARS: 3600, // 1 hour - NEW
-  VARIANTS: 900,     // 15 minutes
-  STATS: 300,        // 5 minutes
-  COMPARISONS: 7200, // 2 hours
-  NEWS: 600,         // 10 minutes
-  SEARCH: 1800,      // 30 minutes
-  CAR_DETAILS: 1800, // 30 minutes
+  BRANDS: 3600,       // 1 hour
+  MODELS: 1800,       // 30 minutes
+  POPULAR_CARS: 3600, // 1 hour
+  MODEL_DETAILS: 3600,   // 1 hour - Model page details
+  BRAND_MODELS: 1800,    // 30 minutes - Brand's model list
+  VARIANTS: 900,      // 15 minutes
+  STATS: 300,         // 5 minutes
+  COMPARISONS: 7200,  // 2 hours
+  NEWS: 600,          // 10 minutes
+  SEARCH: 1800,       // 30 minutes
+  CAR_DETAILS: 1800,  // 30 minutes
 };
 
 /**
