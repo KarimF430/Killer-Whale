@@ -46,7 +46,7 @@ export default function VariantFormPage4() {
     offRoadModes: '',
     differentialLock: '',
     limitedSlipDifferential: '',
-    
+
     // Seating Comfort
     seatUpholstery: '',
     seatsAdjustment: '',
@@ -55,7 +55,7 @@ export default function VariantFormPage4() {
     rearSeatAdjustment: '',
     welcomeSeats: '',
     memorySeats: '',
-    
+
     // Exteriors
     headLights: '',
     tailLight: '',
@@ -145,11 +145,15 @@ export default function VariantFormPage4() {
   });
 
   const handleSave = () => {
-    saveMutation.mutate(formData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...formData } : formData;
+    saveMutation.mutate(dataToSave);
   };
 
   const handleNextPage = () => {
-    saveMutation.mutate(formData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...formData } : formData;
+    saveMutation.mutate(dataToSave);
     if (isEditMode) {
       setLocation(`/variants/${params.id}/edit/page5`);
     } else {
@@ -168,7 +172,7 @@ export default function VariantFormPage4() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Engine & Transmission</h3>
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Engine Name</Label>
@@ -393,7 +397,7 @@ export default function VariantFormPage4() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Seating Comfort</h3>
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Seat Upholstery</Label>
@@ -465,7 +469,7 @@ export default function VariantFormPage4() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Exteriors</h3>
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Head Lights</Label>
@@ -554,13 +558,13 @@ export default function VariantFormPage4() {
 
         {/* Navigation Buttons */}
         <div className="flex justify-between pt-6 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setLocation(isEditMode ? `/variants/${params.id}/edit/page3` : '/variants/new/page3')}
           >
             ← Previous Page
           </Button>
-          
+
           <div className="flex gap-4">
             <Button onClick={handleSave} disabled={saveMutation.isPending}>
               {saveMutation.isPending ? 'Saving...' : 'Save Data'}

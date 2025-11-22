@@ -81,7 +81,7 @@ export default function VariantPage({
   const [isLiked, setIsLiked] = useState(false)
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
   const [showFullDescription, setShowFullDescription] = useState(false)
-  const [selectedVariant, setSelectedVariant] = useState(variantData.variant)
+  const [selectedVariant, setSelectedVariant] = useState(variantData?.variant)
   const [selectedCity, setSelectedCity] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedCity = localStorage.getItem('selectedCity')
@@ -150,7 +150,7 @@ export default function VariantPage({
         }
 
         // Finally fetch variants for this model only
-        const variantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${foundModel.id}&fields=minimal`)
+        const variantsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/variants?modelId=${foundModel.id}`)
         if (!variantsResponse.ok) throw new Error('Failed to fetch variants')
         const variants = await variantsResponse.json()
 
@@ -742,7 +742,7 @@ export default function VariantPage({
                 onClick={() => {
                   const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                   const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
-                  const variantSlug = variantName?.toLowerCase().replace(/\s+/g, '-')
+                  const variantSlug = displayVariantName?.toLowerCase().replace(/\s+/g, '-')
                   router.push(`/${brandSlug}-cars/${modelSlug}/price-in/mumbai?variant=${variantSlug}`)
                 }}
                 className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
@@ -821,7 +821,7 @@ export default function VariantPage({
                       currency: 'INR',
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
-                    }).format(displayEMI)}
+                    }).format(displayEMI ?? 0)}
                   </p>
                   <p className="text-gray-600 text-base">per month</p>
                 </div>
@@ -829,7 +829,7 @@ export default function VariantPage({
 
               {/* Calculate EMI Button */}
               <Link
-                href={`/emi-calculator?brand=${encodeURIComponent(displayBrandName)}&model=${encodeURIComponent(displayModelName)}&variant=${encodeURIComponent(variantName)}&price=${displayPrice}`}
+                href={`/emi-calculator?brand=${encodeURIComponent(displayBrandName ?? '')}&model=${encodeURIComponent(displayModelName ?? '')}&variant=${encodeURIComponent(displayVariantName ?? '')}&price=${displayPrice}`}
                 className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-semibold py-3 px-6 rounded-full transition-colors flex items-center justify-center space-x-2"
               >
                 <Calendar className="w-4 h-4" />
@@ -2453,7 +2453,7 @@ export default function VariantPage({
                     </ul>
                   ) : (
                     <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                      The {displayBrandName} {displayModelName} is a {currentVariantData.fuelType} {currentVariantData.transmission.toLowerCase()} variant that belongs to the premium hatchback segment. It offers excellent value for money with modern features and was launched in {currentVariantData.launchYear}.
+                      The {displayBrandName} {displayModelName} is a {currentVariantData?.fuelType} {currentVariantData?.transmission?.toLowerCase()} variant that belongs to the premium hatchback segment. It offers excellent value for money with modern features and was launched in {currentVariantData?.launchYear}.
                       {showSummaryDescription && (
                         <span> The vehicle offers excellent value for money with its efficient engine, modern features, and reliable performance. It's designed for urban commuting with a focus on fuel efficiency and ease of driving.</span>
                       )}
@@ -2553,7 +2553,7 @@ export default function VariantPage({
                         <span className="text-white font-bold text-sm">1</span>
                       </div>
                       <h3 className="text-lg font-bold text-gray-900">
-                        {variant?.engineName || currentVariantData.engine}
+                        {variant?.engineName || currentVariantData?.engine}
                       </h3>
                     </div>
                     <button
@@ -2577,7 +2577,7 @@ export default function VariantPage({
                   )}
                   {!expandedEngine && !variant?.engineSummary && (
                     <p className="text-gray-600 text-sm mt-3 line-clamp-2">
-                      Suitable for both city driving and highway cruising. The {variant?.engineName || currentVariantData.engine} engine offers excellent fuel efficiency with smooth acceleration.
+                      Suitable for both city driving and highway cruising. The {variant?.engineName || currentVariantData?.engine} engine offers excellent fuel efficiency with smooth acceleration.
                     </p>
                   )}
                 </div>
@@ -2602,7 +2602,7 @@ export default function VariantPage({
                           {/* Transmission Label */}
                           <h4 className="font-bold text-gray-900 mb-3 text-center">
                             {(() => {
-                              const trans = variant?.engineTransmission || variant?.transmission || currentVariantData.transmission
+                              const trans = variant?.engineTransmission || variant?.transmission || currentVariantData?.transmission
                               return trans.toLowerCase() === 'manual' ? 'Manual' : trans.toUpperCase()
                             })()}
                           </h4>
@@ -2610,11 +2610,11 @@ export default function VariantPage({
                           <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Power:</p>
-                              <p className="font-medium text-gray-900">{variant?.enginePower || currentVariantData.power}</p>
+                              <p className="font-medium text-gray-900">{variant?.enginePower || currentVariantData?.power}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Torque:</p>
-                              <p className="font-medium text-gray-900">{variant?.engineTorque || currentVariantData.torque}</p>
+                              <p className="font-medium text-gray-900">{variant?.engineTorque || currentVariantData?.torque}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Transmission:</p>
@@ -2679,21 +2679,21 @@ export default function VariantPage({
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <span className="text-gray-600 text-sm">Company Claimed</span>
                       <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageCompanyClaimed || currentVariantData.mileage} Kmpl
+                        {variant?.mileageCompanyClaimed || currentVariantData?.mileage} Kmpl
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <span className="text-gray-600 text-sm">City Real World</span>
                       <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageCityRealWorld || (currentVariantData.mileage * 0.85).toFixed(1)} Kmpl
+                        {variant?.mileageCityRealWorld || (currentVariantData?.mileage ? currentVariantData.mileage * 0.85 : 0).toFixed(1)} Kmpl
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center py-2">
                       <span className="text-gray-600 text-sm">Highway Real World</span>
                       <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageHighwayRealWorld || (currentVariantData.mileage * 1.1).toFixed(1)} Kmpl
+                        {variant?.mileageHighwayRealWorld || (currentVariantData?.mileage ? currentVariantData.mileage * 1.1 : 0).toFixed(1)} Kmpl
                       </span>
                     </div>
                   </div>
@@ -2721,14 +2721,14 @@ export default function VariantPage({
 
                 {/* City Price List */}
                 <div className="divide-y divide-gray-200">
-                  {currentVariantData.cities.map((city, index) => (
+                  {currentVariantData?.cities?.map((city, index) => (
                     <div key={city.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                       <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
                         <span className="text-red-600 font-medium hover:text-red-700 cursor-pointer">
                           {city.name}
                         </span>
                         <span className="text-gray-900 font-semibold">
-                          Rs. {(currentVariantData.price + (index * 0.1) + 0.5).toFixed(2)} Lakh
+                          Rs. {(currentVariantData?.price ? currentVariantData.price + (index * 0.1) + 0.5 : 0).toFixed(2)} Lakh
                         </span>
                       </div>
                     </div>

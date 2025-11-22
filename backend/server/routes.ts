@@ -2061,7 +2061,87 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             enginePower: v.enginePower,
             isValueForMoney: v.isValueForMoney,
             mileage: v.mileageCompanyClaimed,
-            mileageCompanyClaimed: v.mileageCompanyClaimed
+            mileageCompanyClaimed: v.mileageCompanyClaimed,
+
+            // Comfort & Convenience
+            ventilatedSeats: v.ventilatedSeats,
+            sunroof: v.sunroof,
+            airPurifier: v.airPurifier,
+            headsUpDisplay: v.headsUpDisplay,
+            cruiseControl: v.cruiseControl,
+            rainSensingWipers: v.rainSensingWipers,
+            automaticHeadlamp: v.automaticHeadlamp,
+            followMeHomeHeadlights: v.followMeHomeHeadlights,
+            keylessEntry: v.keylessEntry,
+            ignition: v.ignition,
+            ambientLighting: v.ambientLighting,
+            steeringAdjustment: v.steeringAdjustment,
+            airConditioning: v.airConditioning,
+            climateZones: v.climateZones,
+            rearACVents: v.rearACVents,
+            frontArmrest: v.frontArmrest,
+            rearArmrest: v.rearArmrest,
+            insideRearViewMirror: v.insideRearViewMirror,
+            outsideRearViewMirrors: v.outsideRearViewMirrors,
+            steeringMountedControls: v.steeringMountedControls,
+            rearWindshieldDefogger: v.rearWindshieldDefogger,
+            frontWindshieldDefogger: v.frontWindshieldDefogger,
+            cooledGlovebox: v.cooledGlovebox,
+
+            // Safety Features
+            globalNCAPRating: v.globalNCAPRating,
+            airbags: v.airbags,
+            airbagsLocation: v.airbagsLocation,
+            adasLevel: v.adasLevel,
+            adasFeatures: v.adasFeatures,
+            reverseCamera: v.reverseCamera,
+            reverseCameraGuidelines: v.reverseCameraGuidelines,
+            tyrePressureMonitor: v.tyrePressureMonitor,
+            hillHoldAssist: v.hillHoldAssist,
+            hillDescentControl: v.hillDescentControl,
+            rollOverMitigation: v.rollOverMitigation,
+            parkingSensor: v.parkingSensor,
+            discBrakes: v.discBrakes,
+            electronicStabilityProgram: v.electronicStabilityProgram,
+            abs: v.abs,
+            ebd: v.ebd,
+            brakeAssist: v.brakeAssist,
+            isofixMounts: v.isofixMounts,
+            seatbeltWarning: v.seatbeltWarning,
+            speedAlertSystem: v.speedAlertSystem,
+            speedSensingDoorLocks: v.speedSensingDoorLocks,
+            immobiliser: v.immobiliser,
+
+            // Entertainment & Connectivity
+            touchScreenInfotainment: v.touchScreenInfotainment,
+            androidAppleCarplay: v.androidAppleCarplay,
+            speakers: v.speakers,
+            tweeters: v.tweeters,
+            subwoofers: v.subwoofers,
+            usbCChargingPorts: v.usbCChargingPorts,
+            usbAChargingPorts: v.usbAChargingPorts,
+            twelvevChargingPorts: v.twelvevChargingPorts,
+            wirelessCharging: v.wirelessCharging,
+            connectedCarTech: v.connectedCarTech,
+
+            // Engine Data
+            engineName: v.engineName,
+            engineSummary: v.engineSummary,
+            engineTransmission: v.engineTransmission,
+            engineTorque: v.engineTorque,
+            engineSpeed: v.engineSpeed,
+            torque: v.torque,
+
+            // Mileage
+            mileageEngineName: v.mileageEngineName,
+            mileageCityRealWorld: v.mileageCityRealWorld,
+            mileageHighwayRealWorld: v.mileageHighwayRealWorld,
+
+            // Other
+            highlightImages: v.highlightImages,
+            description: v.description,
+            exteriorDesign: v.exteriorDesign,
+            comfortConvenience: v.comfortConvenience
           }));
           return res.json(minimalVariants);
         } else {

@@ -29,13 +29,13 @@ export default function VariantFormPage2() {
     enginePower: '',
     engineTorque: '',
     engineSpeed: '',
-    
+
     // Mileage
     mileageEngineName: '',
     mileageCompanyClaimed: '',
     mileageCityRealWorld: '',
     mileageHighwayRealWorld: '',
-    
+
     // Comfort & Convenience Features
     ventilatedSeats: '',
     sunroof: '',
@@ -132,11 +132,15 @@ export default function VariantFormPage2() {
   });
 
   const handleSave = () => {
-    saveMutation.mutate(formData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...formData } : formData;
+    saveMutation.mutate(dataToSave);
   };
 
   const handleNextPage = () => {
-    saveMutation.mutate(formData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...formData } : formData;
+    saveMutation.mutate(dataToSave);
     if (isEditMode) {
       setLocation(`/variants/${params.id}/edit/page3`);
     } else {
@@ -154,7 +158,7 @@ export default function VariantFormPage2() {
         {/* Variant SEO Engine data */}
         <div className="space-y-6">
           <h2 className="text-lg font-semibold">Variant SEO Engine data</h2>
-          
+
           <div className="grid grid-cols-2 gap-8">
             {/* Left Column - Title Name */}
             <div className="space-y-4">
@@ -167,7 +171,7 @@ export default function VariantFormPage2() {
                   placeholder="Engine Name"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Summary</Label>
                 <RichTextEditor
@@ -180,7 +184,7 @@ export default function VariantFormPage2() {
             {/* Right Column - Spec's */}
             <div className="space-y-4">
               <h3 className="font-medium">Spec's</h3>
-              
+
               <div className="space-y-2">
                 <Label>Transmission Drop Down</Label>
                 <select
@@ -230,7 +234,7 @@ export default function VariantFormPage2() {
         {/* Variant Mileage */}
         <div className="space-y-6">
           <h2 className="text-lg font-semibold">Variant Mileage</h2>
-          
+
           <div className="space-y-4">
             <h3 className="font-medium">1. Engine & Transmission Name</h3>
             <div className="space-y-2">
@@ -277,7 +281,7 @@ export default function VariantFormPage2() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Comfort & Convenience</h3>
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Ventilated Seats</Label>
@@ -490,13 +494,13 @@ export default function VariantFormPage2() {
 
         {/* Navigation Buttons */}
         <div className="flex justify-between pt-6 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setLocation(isEditMode ? `/variants/${params.id}/edit` : '/variants/new')}
           >
             ← Previous Page
           </Button>
-          
+
           <div className="flex gap-4">
             <Button onClick={handleSave} disabled={saveMutation.isPending}>
               {saveMutation.isPending ? 'Saving...' : 'Save Data'}

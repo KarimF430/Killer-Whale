@@ -152,8 +152,8 @@ function mapVariant(doc: any): Variant {
     engineTorque: doc.engineTorque || null,
     engineSpeed: doc.engineSpeed || null,
     torque: doc.torque || doc.engineTorque || null,
-    engineNamePage4: doc.engineNamePage4 || doc.engineName || null,
-    engineCapacity: doc.engineCapacity || null,
+
+
 
     // Mileage
     mileageEngineName: doc.mileageEngineName || null,

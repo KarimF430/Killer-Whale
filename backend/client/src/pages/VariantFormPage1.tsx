@@ -220,8 +220,10 @@ export default function VariantFormPage1() {
       highlightImages: highlightImages.length > 0 ? highlightImages : [],
     };
 
-    console.log('✅ Submitting variant data:', submitData);
-    saveMutation.mutate(submitData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...submitData } : submitData;
+    console.log('✅ Submitting variant data:', dataToSave);
+    saveMutation.mutate(dataToSave);
   };
 
   const navigateMutation = useMutation({
@@ -296,8 +298,10 @@ export default function VariantFormPage1() {
       highlightImages: highlightImages.length > 0 ? highlightImages : [],
     };
 
-    console.log('Saving and navigating to page 2:', submitData);
-    navigateMutation.mutate(submitData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...submitData } : submitData;
+    console.log('Saving and navigating to page 2:', dataToSave);
+    navigateMutation.mutate(dataToSave);
   };
 
   // Filter models by selected brand

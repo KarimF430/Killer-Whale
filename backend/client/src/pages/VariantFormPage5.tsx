@@ -29,7 +29,7 @@ export default function VariantFormPage5() {
     wheelbase: '',
     turningRadius: '',
     kerbWeight: '',
-    
+
     // Tyre & Suspension
     frontTyreProfile: '',
     rearTyreProfile: '',
@@ -37,7 +37,7 @@ export default function VariantFormPage5() {
     spareWheelType: '',
     frontSuspension: '',
     rearSuspension: '',
-    
+
     // Storage
     cupholders: '',
     fuelTankCapacity: '',
@@ -100,7 +100,9 @@ export default function VariantFormPage5() {
   });
 
   const handleSaveAllData = () => {
-    saveMutation.mutate(formData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...formData } : formData;
+    saveMutation.mutate(dataToSave);
   };
 
   return (
@@ -114,7 +116,7 @@ export default function VariantFormPage5() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Dimensions</h3>
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Ground Clearance</Label>
@@ -186,7 +188,7 @@ export default function VariantFormPage5() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Tyre & Suspension</h3>
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Front Tyre Profile</Label>
@@ -249,7 +251,7 @@ export default function VariantFormPage5() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Storage</h3>
-          
+
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Cupholders</Label>
@@ -293,15 +295,15 @@ export default function VariantFormPage5() {
 
         {/* Final Save Button */}
         <div className="flex justify-between pt-6 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setLocation(isEditMode ? `/variants/${params.id}/edit/page4` : '/variants/new/page4')}
           >
             ← Previous Page
           </Button>
-          
-          <Button 
-            onClick={handleSaveAllData} 
+
+          <Button
+            onClick={handleSaveAllData}
             disabled={saveMutation.isPending}
             className="bg-green-600 hover:bg-green-700 text-white px-8"
           >

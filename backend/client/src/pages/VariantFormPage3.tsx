@@ -44,7 +44,7 @@ export default function VariantFormPage3() {
     speedAlertSystem: '',
     speedSensingDoorLocks: '',
     immobiliser: '',
-    
+
     // Entertainment & Connectivity
     touchScreenInfotainment: '',
     androidAppleCarplay: '',
@@ -127,11 +127,15 @@ export default function VariantFormPage3() {
   });
 
   const handleSave = () => {
-    saveMutation.mutate(formData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...formData } : formData;
+    saveMutation.mutate(dataToSave);
   };
 
   const handleNextPage = () => {
-    saveMutation.mutate(formData);
+    // Merge with existing variant data to preserve fields from other pages
+    const dataToSave = existingVariant ? { ...existingVariant, ...formData } : formData;
+    saveMutation.mutate(dataToSave);
     if (isEditMode) {
       setLocation(`/variants/${params.id}/edit/page4`);
     } else {
@@ -150,7 +154,7 @@ export default function VariantFormPage3() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Safety</h3>
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Global NCAP Rating</Label>
@@ -357,7 +361,7 @@ export default function VariantFormPage3() {
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-center">Specifications and Features</h2>
           <h3 className="text-lg font-medium">Entertainment & Connectivity</h3>
-          
+
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Touch Screen Infotainment</Label>
@@ -454,13 +458,13 @@ export default function VariantFormPage3() {
 
         {/* Navigation Buttons */}
         <div className="flex justify-between pt-6 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setLocation(isEditMode ? `/variants/${params.id}/edit/page2` : '/variants/new/page2')}
           >
             ← Previous Page
           </Button>
-          
+
           <div className="flex gap-4">
             <Button onClick={handleSave} disabled={saveMutation.isPending}>
               {saveMutation.isPending ? 'Saving...' : 'Save Data'}

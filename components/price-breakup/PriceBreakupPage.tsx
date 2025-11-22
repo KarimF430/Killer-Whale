@@ -258,24 +258,42 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
           // Set default variant: use URL param if provided, otherwise lowest price variant
           if (variantParam) {
-            // Convert slug to name (e.g., "zx-cvt" -> "ZX CVT")
-            const variantNameFromSlug = variantParam.split('-').map(word => word.toUpperCase()).join(' ')
+            // Normalize function to remove special characters and convert to lowercase
+            const normalizeForMatch = (str: string) =>
+              str.toLowerCase()
+                .replace(/[()]/g, '') // Remove parentheses
+                .replace(/\s+/g, '-')  // Replace spaces with hyphens
+                .replace(/[^a-z0-9-]/g, '') // Remove other special chars
 
-            // Try to find match by comparing slugified versions
+            const normalizedParam = normalizeForMatch(variantParam)
+
+            // Try to find match by comparing normalized versions
             const matchedVariant = transformedVariants.find((v: any) => {
-              const variantSlug = v.name.toLowerCase().replace(/\s+/g, '-')
-              const paramSlug = variantParam.toLowerCase()
-              return variantSlug === paramSlug || v.name.toLowerCase() === variantParam.toLowerCase()
+              const normalizedVariantName = normalizeForMatch(v.name)
+              return normalizedVariantName === normalizedParam
             })
 
             console.log('🔍 Variant matching:', {
               variantParam,
-              variantNameFromSlug,
+              normalizedParam,
               matchedVariant: matchedVariant?.name,
-              allVariants: transformedVariants.map((v: any) => v.name)
+              allVariants: transformedVariants.map((v: any) => ({
+                name: v.name,
+                normalized: normalizeForMatch(v.name)
+              }))
             })
 
-            setSelectedVariantName(matchedVariant?.name || transformedVariants[0]?.name || '')
+            if (matchedVariant) {
+              setSelectedVariantName(matchedVariant.name)
+              console.log('✅ Matched variant from URL:', matchedVariant.name)
+            } else {
+              // Fallback to lowest price variant if no match found
+              const lowestPriceVariant = transformedVariants.reduce((lowest: any, current: any) => {
+                return (current.price < lowest.price) ? current : lowest
+              }, transformedVariants[0])
+              setSelectedVariantName(lowestPriceVariant?.name || '')
+              console.warn('⚠️ No variant match found, using lowest price:', lowestPriceVariant?.name)
+            }
           } else {
             // Find lowest price variant
             const lowestPriceVariant = transformedVariants.reduce((lowest: any, current: any) => {
@@ -295,7 +313,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     }
 
     fetchData()
-  }, [brandName, modelName])
+  }, [brandName, modelName, variantParam])
 
   // Fetch popular cars from backend
   useEffect(() => {

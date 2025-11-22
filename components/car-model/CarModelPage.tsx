@@ -320,6 +320,12 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
     : null
   const lowestPriceFuelType = lowestPriceVariant?.fuelType || lowestPriceVariant?.fuel || model.variants?.[0]?.fuelType || 'Petrol'
 
+  // Find fuel type of the highest priced variant
+  const highestPriceVariant = modelVariants.length > 0
+    ? modelVariants.find(v => v.price === actualEndingPrice)
+    : null
+  const highestPriceFuelType = highestPriceVariant?.fuelType || highestPriceVariant?.fuel || model.variants?.[0]?.fuelType || 'Petrol'
+
   // Get on-road prices for starting and ending prices
   const startingPriceData = useOnRoadPrice({
     exShowroomPrice: actualStartingPrice,
@@ -328,7 +334,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
   const endingPriceData = useOnRoadPrice({
     exShowroomPrice: actualEndingPrice,
-    fuelType: model.variants?.[0]?.fuelType || 'Petrol'
+    fuelType: highestPriceFuelType
   })
 
   const displayStartPrice = startingPriceData.isOnRoadMode
