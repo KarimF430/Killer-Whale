@@ -32,9 +32,13 @@ interface Brand {
 
 interface BrandHeroSectionProps {
   brand: Brand
+  brands?: any[]
+  models?: any[]
+  brandId?: string
+  backendBrand?: any
 }
 
-export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
+export default function BrandHeroSection({ brand, brands = [], models = [], brandId, backendBrand }: BrandHeroSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const formatPrice = (price: number) => {
@@ -167,7 +171,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
       </section>
 
       {/* Section 2: Car Models List with Filters */}
-      <BrandCarsList brand={brand.slug} />
+      <BrandCarsList brand={brand.slug} initialModels={models} brandId={brandId} />
 
       {/* Section 3: Ad Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -318,7 +322,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
       </div>
 
       {/* Alternative Brands Section - Dynamic with Backend Logic */}
-      <AlternativeBrands currentBrand={brand.slug} />
+      <AlternativeBrands currentBrand={brand.slug} initialBrands={brands} />
 
       {/* Section 6: Brand News and Videos */}
       {/* Brand News Section - Copied from Home Page LatestCarNews */}
@@ -482,7 +486,7 @@ export default function BrandHeroSection({ brand }: BrandHeroSectionProps) {
       </div>
 
       {/* Brand FAQ Section - Dynamic with Backend Logic */}
-      <BrandFAQ brandName={brand.name} />
+      <BrandFAQ brandName={brand.name} initialBrand={backendBrand} />
 
       {/* Section 8: Owner Reviews */}
       <section className="py-8 bg-gray-50">

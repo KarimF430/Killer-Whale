@@ -117,121 +117,38 @@ function BrandCarCard({ car }: { car: Car }) {
 
 interface BrandCarsListProps {
   brand: string
+  initialModels?: any[]
+  brandId?: string
 }
 
-export default function BrandCarsList({ brand }: BrandCarsListProps) {
-  const [models, setModels] = useState<Car[]>([])
-  const [brandData, setBrandData] = useState<{ id: string; name: string; slug: string } | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default function BrandCarsList({ brand, initialModels = [], brandId }: BrandCarsListProps) {
   const [selectedFuel, setSelectedFuel] = useState<string[]>([])
   const [selectedTransmission, setSelectedTransmission] = useState<string[]>([])
 
   const fuelFilters = ['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid']
   const transmissionFilters = ['Manual', 'Automatic']
 
-  // Fetch models from backend
-  useEffect(() => {
-    async function fetchModels() {
-      try {
-        setLoading(true)
-        setError(null)
+  const brandName = brand === 'maruti-suzuki' ? 'Maruti Suzuki' : brand.charAt(0).toUpperCase() + brand.slice(1)
 
-        console.log('🔍 Fetching models for brand:', brand)
-
-        // Fetch brand ID from API
-        let brandId: string | undefined
-
-        try {
-          const brandsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/brands`)
-          if (brandsResponse.ok) {
-            const brands = await brandsResponse.json()
-            const foundBrand = brands.find((b: any) => {
-              const normalizedBrandName = b.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-              return normalizedBrandName === brand.toLowerCase()
-            })
-            if (foundBrand) {
-              brandId = foundBrand.id
-              console.log('✅ Found brand ID from API:', brandId, 'for', foundBrand.name)
-            }
-          }
-        } catch (apiError) {
-          console.error('❌ Error fetching brands from API:', apiError)
-        }
-
-        console.log('🔍 Final brand ID:', brandId)
-
-        if (!brandId) {
-          console.error('❌ No brand ID found for:', brand)
-          setError(`Brand "${brand}" not found`)
-          return
-        }
-
-        console.log('🔍 Fetching models for brand ID:', brandId)
-
-        // Fetch models with pre-calculated pricing data (optimized endpoint)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/models-with-pricing?brandId=${brandId}`)
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-        }
-
-        const responseData = await response.json()
-        console.log('📊 Models with pricing response:', responseData)
-
-        // Extract data from pagination response
-        const modelsWithPricing = responseData.data || responseData
-
-        if (modelsWithPricing && Array.isArray(modelsWithPricing)) {
-          console.log('🔍 Found models for brand:', modelsWithPricing.length)
-
-          if (modelsWithPricing.length === 0) {
-            setError(`No models found for brand ID: ${brandId}`)
-            return
-          }
-
-          // Get brand name for display
-          const brandName = brand === 'maruti-suzuki' ? 'Maruti Suzuki' : brand.charAt(0).toUpperCase() + brand.slice(1)
-
-          // Convert backend model to frontend format
-          const processedModels: Car[] = modelsWithPricing.map((model: any) => ({
-            id: model.id,
-            name: model.name,
-            brand: brandId,
-            brandName: brandName,
-            image: model.heroImage || '/car-placeholder.jpg',
-            startingPrice: model.lowestPrice || 0,
-            fuelTypes: model.fuelTypes || ['Petrol'],
-            transmissions: model.transmissions || ['Manual'],
-            seating: 5,
-            launchDate: model.launchDate || 'Launched',
-            slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
-            isNew: model.isNew || false,
-            isPopular: model.isPopular || false,
-            rating: 4.5,
-            reviews: 1247,
-            variants: model.variantCount || 0
-          }))
-
-          setModels(processedModels)
-          setBrandData({ id: brandId, name: brandName, slug: brand })
-          console.log('✅ Models processed:', processedModels.length)
-        } else {
-          console.error('❌ Invalid models data structure:', modelsWithPricing)
-          setError('Invalid data structure received')
-        }
-      } catch (err) {
-        console.error('❌ Error loading models:', err)
-        setError('Failed to load models')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchModels()
-  }, [brand])
-
-  const brandName = brandData?.name || (brand === 'maruti-suzuki' ? 'Maruti Suzuki' : brand.charAt(0).toUpperCase() + brand.slice(1))
+  // Convert backend models to frontend format
+  const models: Car[] = initialModels.map((model: any) => ({
+    id: model.id,
+    name: model.name,
+    brand: brandId || '',
+    brandName: brandName,
+    image: model.heroImage || '/car-placeholder.jpg',
+    startingPrice: model.lowestPrice || 0,
+    fuelTypes: model.fuelTypes || ['Petrol'],
+    transmissions: model.transmissions || ['Manual'],
+    seating: 5,
+    launchDate: model.launchDate || 'Launched',
+    slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+    isNew: model.isNew || false,
+    isPopular: model.isPopular || false,
+    rating: 4.5,
+    reviews: 1247,
+    variants: model.variantCount || 0
+  }))
 
   // Apply filters (exact copy from budget page)
   const filteredModels = models.filter((model) => {
@@ -300,48 +217,18 @@ export default function BrandCarsList({ brand }: BrandCarsListProps) {
 
       <section className="bg-white py-4">
         <div className="max-w-6xl mx-auto px-4">
-
-          {/* Loading State */}
-          {loading && (
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="bg-white border border-gray-200 rounded-lg h-40 animate-pulse"></div>
-              ))}
-            </div>
-          )}
-
-          {/* Show error */}
-          {error && (
-            <div className="flex flex-col justify-center items-center py-12 space-y-4">
-              <div className="text-red-500 text-xl font-bold">Error: {error}</div>
-              <div className="text-gray-600 text-sm">
-                <p>Brand slug: {brand}</p>
-                <p>Please check the browser console for more details.</p>
-                <p className="mt-2">Trying to fetch from: {process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}/api/brands</p>
+          {/* Car List - Vertical List */}
+          <div className="space-y-3">
+            {models.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-gray-500 text-lg">No models found for {brandName}</p>
               </div>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Retry
-              </button>
-            </div>
-          )}
-
-          {/* Car List - Vertical List (EXACT COPY from budget page) */}
-          {!loading && !error && (
-            <div className="space-y-3">
-              {models.length === 0 ? (
-                <div className="text-center py-20">
-                  <p className="text-gray-500 text-lg">No models found for {brandName}</p>
-                </div>
-              ) : (
-                filteredModels.map((car) => (
-                  <BrandCarCard key={car.id} car={car} />
-                ))
-              )}
-            </div>
-          )}
+            ) : (
+              filteredModels.map((car) => (
+                <BrandCarCard key={car.id} car={car} />
+              ))
+            )}
+          </div>
         </div>
       </section>
     </>

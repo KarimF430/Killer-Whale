@@ -27,31 +27,9 @@ interface NewsArticle {
   status: string
 }
 
-export default function LatestCarNews() {
-  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchNews()
-  }, [])
-
-  const fetchNews = async () => {
-    try {
-      // Use environment variable or fallback to localhost
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
-      const response = await fetch(`${apiUrl}/api/news?limit=6`)
-      if (response.ok) {
-        const data = await response.json()
-        setNewsArticles(data.articles || [])
-      } else {
-        console.error('Failed to fetch news:', response.status, response.statusText)
-      }
-    } catch (error) {
-      console.error('Error fetching news:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+export default function LatestCarNews({ initialNews = [] }: { initialNews?: NewsArticle[] }) {
+  // Use prop data directly
+  const newsArticles = initialNews
 
   // Get first image from contentBlocks
   const getFirstImage = (blocks: ContentBlock[]) => {
@@ -79,10 +57,6 @@ export default function LatestCarNews() {
     }, 0)
     const minutes = Math.ceil(wordCount / 200)
     return `${minutes} min read`
-  }
-
-  if (loading) {
-    return <div className="py-12 text-center">Loading latest news...</div>
   }
 
   if (newsArticles.length === 0) {

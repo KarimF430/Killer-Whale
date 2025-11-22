@@ -76,15 +76,20 @@ async function getHomeData() {
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
   try {
-    const [popularRes, modelsRes, brandsRes] = await Promise.all([
+    // Fetch all data in parallel (5 requests)
+    const [popularRes, modelsRes, brandsRes, comparisonsRes, newsRes] = await Promise.all([
       fetch(`${backendUrl}/api/cars/popular`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/models-with-pricing?limit=100`, { next: { revalidate: 3600 } }),
-      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } })
+      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/popular-comparisons`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/news?limit=6`, { next: { revalidate: 3600 } })
     ])
 
     const popularData = await popularRes.json()
     const modelsData = await modelsRes.json()
     const brandsData = await brandsRes.json()
+    const comparisonsData = await comparisonsRes.json()
+    const newsData = await newsRes.json()
 
     const models = modelsData.data || modelsData
     const brands = brandsData
@@ -139,23 +144,60 @@ async function getHomeData() {
       .filter(car => car.isNew)
       .sort((a, b) => (a.newRank || 999) - (b.newRank || 999))
 
+    // Process Comparisons with model and brand data
+    const processedComparisons = Array.isArray(comparisonsData) ? comparisonsData
+      .filter((comp: any) => comp.model1Id && comp.model2Id)
+      .map((comp: any) => {
+        const model1 = models.find((m: any) => m.id === comp.model1Id)
+        const model2 = models.find((m: any) => m.id === comp.model2Id)
+
+        if (!model1 || !model2) return null
+
+        return {
+          id: comp.id,
+          model1: {
+            id: model1.id,
+            name: model1.name,
+            brand: brandMap[model1.brandId] || 'Unknown',
+            heroImage: model1.heroImage || '',
+            startingPrice: model1.lowestPrice || 0,
+            fuelTypes: model1.fuelTypes || ['Petrol']
+          },
+          model2: {
+            id: model2.id,
+            name: model2.name,
+            brand: brandMap[model2.brandId] || 'Unknown',
+            heroImage: model2.heroImage || '',
+            startingPrice: model2.lowestPrice || 0,
+            fuelTypes: model2.fuelTypes || ['Petrol']
+          }
+        }
+      })
+      .filter((comp): comp is NonNullable<typeof comp> => comp !== null) : []
+
     return {
       popularCars,
       allCars,
-      newLaunchedCars
+      newLaunchedCars,
+      brands,
+      comparisons: processedComparisons,
+      news: newsData.articles || []
     }
   } catch (error) {
     console.error('Error fetching home data:', error)
     return {
       popularCars: [],
       allCars: [],
-      newLaunchedCars: []
+      newLaunchedCars: [],
+      brands: [],
+      comparisons: [],
+      news: []
     }
   }
 }
 
 export default async function HomePage() {
-  const { popularCars, allCars, newLaunchedCars } = await getHomeData()
+  const { popularCars, allCars, newLaunchedCars, brands, comparisons, news } = await getHomeData()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -178,7 +220,7 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="gray">
-          <BrandSection />
+          <BrandSection initialBrands={brands} />
         </PageSection>
 
         <PageSection background="white">
@@ -203,11 +245,11 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="white">
-          <PopularComparisons />
+          <PopularComparisons initialComparisons={comparisons} />
         </PageSection>
 
         <PageSection background="white">
-          <LatestCarNews />
+          <LatestCarNews initialNews={news} />
         </PageSection>
 
         <PageSection background="white">

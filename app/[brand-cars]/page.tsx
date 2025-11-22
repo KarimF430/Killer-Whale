@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   const resolvedParams = await params
   const brandSlug = resolvedParams['brand-cars'].replace('-cars', '')
   const brandName = brandSlug.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-  
+
   return generateBrandSEO(brandName)
 }
 
@@ -38,7 +38,7 @@ async function fetchBrandData(brandSlug: string) {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
+
     const response = await fetch(`${backendUrl}/api/brands`, {
       cache: 'no-store',
       signal: controller.signal,
@@ -47,26 +47,26 @@ async function fetchBrandData(brandSlug: string) {
         'Content-Type': 'application/json'
       }
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch brands: ${response.status}`);
     }
-    
+
     const brands = await response.json();
     if (!Array.isArray(brands)) {
       throw new Error('Invalid response format');
     }
-    
+
     const brand = brands.find((b: any) => {
       const normalizedBrandName = b.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const normalizedSlug = brandSlug.toLowerCase();
-      
+
       return normalizedBrandName === normalizedSlug ||
-             b.name.toLowerCase() === normalizedSlug;
+        b.name.toLowerCase() === normalizedSlug;
     });
-    
+
     return brand || null;
   } catch (error) {
     console.error('❌ Error fetching brand data:', error);
@@ -79,7 +79,7 @@ async function fetchBrandModels(brandId: string) {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
+
     const response = await fetch(`${backendUrl}/api/frontend/brands/${brandId}/models`, {
       cache: 'no-store',
       signal: controller.signal,
@@ -88,13 +88,13 @@ async function fetchBrandModels(brandId: string) {
         'Content-Type': 'application/json'
       }
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch models: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data || { brand: null, models: [] };
   } catch (error) {
@@ -251,27 +251,100 @@ function SafeComponent({ children, name }: { children: React.ReactNode, name: st
 
 export default async function BrandPage({ params }: BrandPageProps) {
   const { 'brand-cars': brandCarsSlug } = await params
-  
+
   // Extract brand name by removing '-cars' suffix
   const brandSlug = brandCarsSlug.replace(/-cars$/, '')
-  
-  // Fetch real brand data from backend
-  let backendBrand = await fetchBrandData(brandSlug)
-  let brand = null
-  
-  if (backendBrand) {
+
+  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+
+  // Fetch all data in parallel with caching
+  try {
+    const [brandsRes, modelsRes] = await Promise.all([
+      fetch(`${backendUrl}/api/brands`, {
+        next: { revalidate: 3600 }, // Cache for 1 hour
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }),
+      // We'll fetch models after we have the brand ID
+      Promise.resolve(null)
+    ])
+
+    if (!brandsRes.ok) {
+      console.error('Failed to fetch brands')
+      notFound()
+    }
+
+    const brands = await brandsRes.json()
+
+    if (!Array.isArray(brands)) {
+      console.error('Invalid brands response')
+      notFound()
+    }
+
+    // Find the brand
+    const backendBrand = brands.find((b: any) => {
+      const normalizedBrandName = b.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      const normalizedSlug = brandSlug.toLowerCase()
+      return normalizedBrandName === normalizedSlug || b.name.toLowerCase() === normalizedSlug
+    })
+
+    if (!backendBrand) {
+      // Fallback to static data
+      const staticBrand = brandData[brandSlug as keyof typeof brandData]
+      if (!staticBrand) {
+        notFound()
+      }
+
+      const breadcrumbs = [
+        { label: 'Home', href: '/' },
+        { label: 'Brands', href: '/brands' },
+        { label: staticBrand.name }
+      ]
+
+      return (
+        <div className="min-h-screen bg-gray-50">
+          <main>
+            <SafeComponent name="BrandHeroSection">
+              <BrandHeroSection brand={staticBrand} brands={brands} models={[]} />
+            </SafeComponent>
+          </main>
+          <Footer />
+        </div>
+      )
+    }
+
+    // Now fetch models for this specific brand
+    const modelsResponse = await fetch(
+      `${backendUrl}/api/models-with-pricing?brandId=${backendBrand.id}`,
+      {
+        next: { revalidate: 1800 }, // Cache for 30 minutes
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    let models = []
+    if (modelsResponse.ok) {
+      const modelsData = await modelsResponse.json()
+      models = modelsData.data || modelsData || []
+    }
+
     // Map backend brand data to expected format
-    brand = {
+    const brand = {
       name: backendBrand.name,
       slug: backendBrand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-      logo: backendBrand.logo ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${backendBrand.logo}` : '/brands/default.png',
+      logo: backendBrand.logo ? `${backendUrl}${backendBrand.logo}` : '/brands/default.png',
       description: backendBrand.summary || `${backendBrand.name} offers a wide range of vehicles with excellent features and competitive pricing.`,
       fullDescription: backendBrand.summary || `${backendBrand.name} is a leading automotive manufacturer known for quality, innovation, and customer satisfaction.`,
       priceRange: {
-        min: 350000, // Default values - can be calculated from models
-        max: 2500000
+        min: models.length > 0 ? Math.min(...models.map((m: any) => m.lowestPrice || 0)) : 350000,
+        max: models.length > 0 ? Math.max(...models.map((m: any) => m.lowestPrice || 0)) : 2500000
       },
-      totalModels: 0, // Will be populated from models API
+      totalModels: models.length,
       categories: {
         suv: 0,
         sedan: 0,
@@ -281,33 +354,34 @@ export default async function BrandPage({ params }: BrandPageProps) {
       },
       upcomingCars: 0
     }
-  } else {
-    // Fallback to static data
-    brand = brandData[brandSlug as keyof typeof brandData]
-  }
-  
-  if (!brand) {
+
+    const breadcrumbs = [
+      { label: 'Home', href: '/' },
+      { label: 'Brands', href: '/brands' },
+      { label: brand.name }
+    ]
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <main>
+          {/* Section 1: Brand Hero Section - Pass all data as props */}
+          <SafeComponent name="BrandHeroSection">
+            <BrandHeroSection
+              brand={brand}
+              brands={brands}
+              models={models}
+              brandId={backendBrand.id}
+              backendBrand={backendBrand}
+            />
+          </SafeComponent>
+        </main>
+
+        <Footer />
+      </div>
+    )
+  } catch (error) {
+    console.error('Error fetching brand page data:', error)
     notFound()
   }
-
-  const breadcrumbs = [
-    { label: 'Home', href: '/' },
-    { label: 'Brands', href: '/brands' },
-    { label: brand.name }
-  ]
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <main>
-        {/* Section 1: Brand Hero Section */}
-        <SafeComponent name="BrandHeroSection">
-          <BrandHeroSection brand={brand} />
-        </SafeComponent>
-
-      </main>
-      
-      <Footer />
-    </div>
-  )
 }
 
