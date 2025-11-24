@@ -1,11 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import fs from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+import { NewsArticle, NewsCategory, NewsTag, NewsAuthor, NewsMedia } from './schemas'
 
 // Content Block Interface for flexible article content
 export interface ContentBlock {
@@ -22,11 +16,11 @@ export interface NewsArticle {
   title: string
   slug: string
   excerpt: string
-  contentBlocks: ContentBlock[] // New: Block-based content instead of single HTML string
+  contentBlocks: ContentBlock[]
   categoryId: string
   tags: string[]
   authorId: string
-  linkedCars: string[] // Array of car model IDs
+  linkedCars: string[]
   featuredImage: string
   seoTitle: string
   seoDescription: string
@@ -95,129 +89,21 @@ export interface Media {
 }
 
 class NewsStorage {
-  private dataDir: string
-  private articlesFile: string
-  private categoriesFile: string
-  private tagsFile: string
-  private authorsFile: string
-  private mediaFile: string
-
-  private articles: NewsArticle[] = []
-  private categories: NewsCategory[] = []
-  private tags: NewsTag[] = []
-  private authors: NewsAuthor[] = []
-  private media: Media[] = []
-
-  constructor() {
-    this.dataDir = path.join(__dirname, '../../data')
-    this.articlesFile = path.join(this.dataDir, 'news-articles.json')
-    this.categoriesFile = path.join(this.dataDir, 'news-categories.json')
-    this.tagsFile = path.join(this.dataDir, 'news-tags.json')
-    this.authorsFile = path.join(this.dataDir, 'news-authors.json')
-    this.mediaFile = path.join(this.dataDir, 'news-media.json')
-  }
-
   async initialize() {
     try {
-      await fs.mkdir(this.dataDir, { recursive: true })
-      await this.loadArticles()
-      await this.loadCategories()
-      await this.loadTags()
-      await this.loadAuthors()
-      await this.loadMedia()
-      console.log('News storage initialized successfully')
+      // Initialize default categories if none exist
+      const categoriesCount = await NewsCategory.countDocuments()
+      if (categoriesCount === 0) {
+        await this.createDefaultCategories()
+      }
+      console.log('✅ News storage initialized successfully (MongoDB)')
     } catch (error) {
-      console.error('Error initializing news storage:', error)
+      console.error('❌ Error initializing news storage:', error)
     }
   }
 
-  // ==================== ARTICLES ====================
-  private async loadArticles() {
-    try {
-      const data = await fs.readFile(this.articlesFile, 'utf-8')
-      this.articles = JSON.parse(data)
-      console.log(`Loaded ${this.articles.length} articles from storage`)
-    } catch (error) {
-      this.articles = []
-      await this.saveArticles()
-    }
-  }
-
-  private async saveArticles() {
-    await fs.writeFile(this.articlesFile, JSON.stringify(this.articles, null, 2))
-  }
-
-  async getAllArticles(): Promise<NewsArticle[]> {
-    return this.articles
-  }
-
-  async getArticleById(id: string): Promise<NewsArticle | undefined> {
-    return this.articles.find(article => article.id === id)
-  }
-
-  async getArticleBySlug(slug: string): Promise<NewsArticle | undefined> {
-    return this.articles.find(article => article.slug === slug)
-  }
-
-  async createArticle(articleData: Omit<NewsArticle, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'likes' | 'comments'>): Promise<NewsArticle> {
-    const article: NewsArticle = {
-      ...articleData,
-      id: uuidv4(),
-      views: 0,
-      likes: 0,
-      comments: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-    this.articles.push(article)
-    await this.saveArticles()
-    return article
-  }
-
-  async updateArticle(id: string, updates: Partial<NewsArticle>): Promise<NewsArticle | null> {
-    const index = this.articles.findIndex(article => article.id === id)
-    if (index === -1) return null
-
-    this.articles[index] = {
-      ...this.articles[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    }
-    await this.saveArticles()
-    return this.articles[index]
-  }
-
-  async deleteArticle(id: string): Promise<boolean> {
-    const index = this.articles.findIndex(article => article.id === id)
-    if (index === -1) return false
-
-    this.articles.splice(index, 1)
-    await this.saveArticles()
-    return true
-  }
-
-  async incrementArticleViews(id: string): Promise<void> {
-    const article = this.articles.find(a => a.id === id)
-    if (article) {
-      article.views++
-      await this.saveArticles()
-    }
-  }
-
-  // ==================== CATEGORIES ====================
-  private async loadCategories() {
-    try {
-      const data = await fs.readFile(this.categoriesFile, 'utf-8')
-      this.categories = JSON.parse(data)
-      console.log(`Loaded ${this.categories.length} categories from storage`)
-    } catch (error) {
-      this.categories = this.getDefaultCategories()
-      await this.saveCategories()
-    }
-  }
-
-  private getDefaultCategories(): NewsCategory[] {
-    return [
+  private async createDefaultCategories() {
+    const defaultCategories = [
       {
         id: uuidv4(),
         name: 'News',
@@ -255,258 +141,336 @@ class NewsStorage {
         updatedAt: new Date().toISOString()
       }
     ]
+
+    await NewsCategory.insertMany(defaultCategories)
+    console.log('✅ Created default news categories')
   }
 
-  private async saveCategories() {
-    await fs.writeFile(this.categoriesFile, JSON.stringify(this.categories, null, 2))
+  // ==================== ARTICLES ====================
+  async getAllArticles(): Promise<NewsArticle[]> {
+    const articles = await NewsArticle.find().lean()
+    return articles.map(this.mapArticle)
   }
 
+  async getArticleById(id: string): Promise<NewsArticle | undefined> {
+    const article = await NewsArticle.findOne({ id }).lean()
+    return article ? this.mapArticle(article) : undefined
+  }
+
+  async getArticleBySlug(slug: string): Promise<NewsArticle | undefined> {
+    const article = await NewsArticle.findOne({ slug }).lean()
+    return article ? this.mapArticle(article) : undefined
+  }
+
+  async createArticle(articleData: Omit<NewsArticle, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'likes' | 'comments'>): Promise<NewsArticle> {
+    const article = new NewsArticle({
+      ...articleData,
+      id: uuidv4(),
+      views: 0,
+      likes: 0,
+      comments: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+    await article.save()
+    return this.mapArticle(article.toObject())
+  }
+
+  async updateArticle(id: string, updates: Partial<NewsArticle>): Promise<NewsArticle | null> {
+    const article = await NewsArticle.findOneAndUpdate(
+      { id },
+      { ...updates, updatedAt: new Date() },
+      { new: true }
+    ).lean()
+    return article ? this.mapArticle(article) : null
+  }
+
+  async deleteArticle(id: string): Promise<boolean> {
+    const result = await NewsArticle.deleteOne({ id })
+    return result.deletedCount > 0
+  }
+
+  async incrementArticleViews(id: string): Promise<void> {
+    await NewsArticle.updateOne({ id }, { $inc: { views: 1 } })
+  }
+
+  // ==================== CATEGORIES ====================
   async getAllCategories(): Promise<NewsCategory[]> {
-    return this.categories
+    const categories = await NewsCategory.find().lean()
+    return categories.map(this.mapCategory)
   }
 
   async getCategoryById(id: string): Promise<NewsCategory | undefined> {
-    return this.categories.find(cat => cat.id === id)
+    const category = await NewsCategory.findOne({ id }).lean()
+    return category ? this.mapCategory(category) : undefined
   }
 
   async createCategory(categoryData: Omit<NewsCategory, 'id' | 'createdAt' | 'updatedAt'>): Promise<NewsCategory> {
-    const category: NewsCategory = {
+    const category = new NewsCategory({
       ...categoryData,
       id: uuidv4(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-    this.categories.push(category)
-    await this.saveCategories()
-    return category
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+    await category.save()
+    return this.mapCategory(category.toObject())
   }
 
   async updateCategory(id: string, updates: Partial<NewsCategory>): Promise<NewsCategory | null> {
-    const index = this.categories.findIndex(cat => cat.id === id)
-    if (index === -1) return null
-
-    this.categories[index] = {
-      ...this.categories[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    }
-    await this.saveCategories()
-    return this.categories[index]
+    const category = await NewsCategory.findOneAndUpdate(
+      { id },
+      { ...updates, updatedAt: new Date() },
+      { new: true }
+    ).lean()
+    return category ? this.mapCategory(category) : null
   }
 
   async deleteCategory(id: string): Promise<boolean> {
-    const index = this.categories.findIndex(cat => cat.id === id)
-    if (index === -1) return false
-
-    this.categories.splice(index, 1)
-    await this.saveCategories()
-    return true
+    const result = await NewsCategory.deleteOne({ id })
+    return result.deletedCount > 0
   }
 
   // ==================== TAGS ====================
-  private async loadTags() {
-    try {
-      const data = await fs.readFile(this.tagsFile, 'utf-8')
-      this.tags = JSON.parse(data)
-      console.log(`Loaded ${this.tags.length} tags from storage`)
-    } catch (error) {
-      this.tags = []
-      await this.saveTags()
-    }
-  }
-
-  private async saveTags() {
-    await fs.writeFile(this.tagsFile, JSON.stringify(this.tags, null, 2))
-  }
-
   async getAllTags(): Promise<NewsTag[]> {
-    return this.tags
+    const tags = await NewsTag.find().lean()
+    return tags.map(this.mapTag)
   }
 
   async getTagById(id: string): Promise<NewsTag | undefined> {
-    return this.tags.find(tag => tag.id === id)
+    const tag = await NewsTag.findOne({ id }).lean()
+    return tag ? this.mapTag(tag) : undefined
   }
 
   async createTag(tagData: Omit<NewsTag, 'id' | 'createdAt' | 'updatedAt'>): Promise<NewsTag> {
-    const tag: NewsTag = {
+    const tag = new NewsTag({
       ...tagData,
       id: uuidv4(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-    this.tags.push(tag)
-    await this.saveTags()
-    return tag
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+    await tag.save()
+    return this.mapTag(tag.toObject())
   }
 
   async updateTag(id: string, updates: Partial<NewsTag>): Promise<NewsTag | null> {
-    const index = this.tags.findIndex(tag => tag.id === id)
-    if (index === -1) return null
-
-    this.tags[index] = {
-      ...this.tags[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    }
-    await this.saveTags()
-    return this.tags[index]
+    const tag = await NewsTag.findOneAndUpdate(
+      { id },
+      { ...updates, updatedAt: new Date() },
+      { new: true }
+    ).lean()
+    return tag ? this.mapTag(tag) : null
   }
 
   async deleteTag(id: string): Promise<boolean> {
-    const index = this.tags.findIndex(tag => tag.id === id)
-    if (index === -1) return false
-
-    this.tags.splice(index, 1)
-    await this.saveTags()
-    return true
+    const result = await NewsTag.deleteOne({ id })
+    return result.deletedCount > 0
   }
 
   // ==================== AUTHORS ====================
-  private async loadAuthors() {
-    try {
-      const data = await fs.readFile(this.authorsFile, 'utf-8')
-      this.authors = JSON.parse(data)
-      console.log(`Loaded ${this.authors.length} authors from storage`)
-    } catch (error) {
-      this.authors = []
-      await this.saveAuthors()
-    }
-  }
-
-  private async saveAuthors() {
-    await fs.writeFile(this.authorsFile, JSON.stringify(this.authors, null, 2))
-  }
-
   async getAllAuthors(): Promise<NewsAuthor[]> {
-    return this.authors
+    const authors = await NewsAuthor.find().lean()
+    return authors.map(this.mapAuthor)
   }
 
   async getAuthorById(id: string): Promise<NewsAuthor | undefined> {
-    return this.authors.find(author => author.id === id)
+    const author = await NewsAuthor.findOne({ id }).lean()
+    return author ? this.mapAuthor(author) : undefined
   }
 
   async getAuthorByEmail(email: string): Promise<NewsAuthor | undefined> {
-    return this.authors.find(author => author.email === email)
+    const author = await NewsAuthor.findOne({ email }).lean()
+    return author ? this.mapAuthor(author) : undefined
   }
 
   async createAuthor(authorData: Omit<NewsAuthor, 'id' | 'createdAt' | 'updatedAt'>): Promise<NewsAuthor> {
-    const author: NewsAuthor = {
+    const author = new NewsAuthor({
       ...authorData,
       id: uuidv4(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-    this.authors.push(author)
-    await this.saveAuthors()
-    return author
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+    await author.save()
+    return this.mapAuthor(author.toObject())
   }
 
   async updateAuthor(id: string, updates: Partial<NewsAuthor>): Promise<NewsAuthor | null> {
-    const index = this.authors.findIndex(author => author.id === id)
-    if (index === -1) return null
-
-    this.authors[index] = {
-      ...this.authors[index],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    }
-    await this.saveAuthors()
-    return this.authors[index]
+    const author = await NewsAuthor.findOneAndUpdate(
+      { id },
+      { ...updates, updatedAt: new Date() },
+      { new: true }
+    ).lean()
+    return author ? this.mapAuthor(author) : null
   }
 
   async deleteAuthor(id: string): Promise<boolean> {
-    const index = this.authors.findIndex(author => author.id === id)
-    if (index === -1) return false
-
-    this.authors.splice(index, 1)
-    await this.saveAuthors()
-    return true
+    const result = await NewsAuthor.deleteOne({ id })
+    return result.deletedCount > 0
   }
 
   // ==================== MEDIA ====================
-  private async loadMedia() {
-    try {
-      const data = await fs.readFile(this.mediaFile, 'utf-8')
-      this.media = JSON.parse(data)
-      console.log(`Loaded ${this.media.length} media files from storage`)
-    } catch (error) {
-      this.media = []
-      await this.saveMedia()
-    }
-  }
-
-  private async saveMedia() {
-    await fs.writeFile(this.mediaFile, JSON.stringify(this.media, null, 2))
-  }
-
   async getAllMedia(): Promise<Media[]> {
-    return this.media
+    const media = await NewsMedia.find().lean()
+    return media.map(this.mapMedia)
   }
 
   async getMediaById(id: string): Promise<Media | undefined> {
-    return this.media.find(m => m.id === id)
+    const media = await NewsMedia.findOne({ id }).lean()
+    return media ? this.mapMedia(media) : undefined
   }
 
   async createMedia(mediaData: Omit<Media, 'id' | 'createdAt'>): Promise<Media> {
-    const media: Media = {
+    const media = new NewsMedia({
       ...mediaData,
       id: uuidv4(),
-      createdAt: new Date().toISOString()
-    }
-    this.media.push(media)
-    await this.saveMedia()
-    return media
+      createdAt: new Date()
+    })
+    await media.save()
+    return this.mapMedia(media.toObject())
   }
 
   async deleteMedia(id: string): Promise<boolean> {
-    const index = this.media.findIndex(m => m.id === id)
-    if (index === -1) return false
-
-    this.media.splice(index, 1)
-    await this.saveMedia()
-    return true
+    const result = await NewsMedia.deleteOne({ id })
+    return result.deletedCount > 0
   }
 
   // ==================== ANALYTICS ====================
   async getAnalytics() {
-    const totalArticles = this.articles.length
-    const publishedArticles = this.articles.filter(a => a.status === 'published').length
-    const draftArticles = this.articles.filter(a => a.status === 'draft').length
-    const scheduledArticles = this.articles.filter(a => a.status === 'scheduled').length
-    const totalViews = this.articles.reduce((sum, a) => sum + a.views, 0)
+    const [
+      totalArticles,
+      publishedArticles,
+      draftArticles,
+      scheduledArticles,
+      categories,
+      authors,
+      topArticles
+    ] = await Promise.all([
+      NewsArticle.countDocuments(),
+      NewsArticle.countDocuments({ status: 'published' }),
+      NewsArticle.countDocuments({ status: 'draft' }),
+      NewsArticle.countDocuments({ status: 'scheduled' }),
+      NewsCategory.find().lean(),
+      NewsAuthor.find().lean(),
+      NewsArticle.find({ status: 'published' })
+        .sort({ views: -1 })
+        .limit(5)
+        .select('id title views publishDate')
+        .lean()
+    ])
 
-    // Top categories
-    const categoryStats = this.categories.map(cat => ({
-      category: cat.name,
-      count: this.articles.filter(a => a.categoryId === cat.id).length
-    }))
+    const totalViews = await NewsArticle.aggregate([
+      { $group: { _id: null, total: { $sum: '$views' } } }
+    ])
 
-    // Top authors
-    const authorStats = this.authors.map(author => ({
-      author: author.name,
-      count: this.articles.filter(a => a.authorId === author.id).length
-    }))
-
-    // Top articles by views
-    const topArticles = [...this.articles]
-      .sort((a, b) => b.views - a.views)
-      .slice(0, 5)
-      .map(a => ({
-        id: a.id,
-        title: a.title,
-        views: a.views,
-        publishDate: a.publishDate
+    // Category stats
+    const categoryStats = await Promise.all(
+      categories.map(async (cat: any) => ({
+        category: cat.name,
+        count: await NewsArticle.countDocuments({ categoryId: cat.id })
       }))
+    )
+
+    // Author stats
+    const authorStats = await Promise.all(
+      authors.map(async (author: any) => ({
+        author: author.name,
+        count: await NewsArticle.countDocuments({ authorId: author.id })
+      }))
+    )
 
     return {
       totalArticles,
       publishedArticles,
       draftArticles,
       scheduledArticles,
-      totalViews,
+      totalViews: totalViews[0]?.total || 0,
       categoryStats,
       authorStats,
-      topArticles
+      topArticles: topArticles.map((a: any) => ({
+        id: a.id,
+        title: a.title,
+        views: a.views,
+        publishDate: a.publishDate
+      }))
+    }
+  }
+
+  // ==================== MAPPING FUNCTIONS ====================
+  private mapArticle(doc: any): NewsArticle {
+    return {
+      id: doc.id,
+      title: doc.title,
+      slug: doc.slug,
+      excerpt: doc.excerpt,
+      contentBlocks: doc.contentBlocks || [],
+      categoryId: doc.categoryId,
+      tags: doc.tags || [],
+      authorId: doc.authorId,
+      linkedCars: doc.linkedCars || [],
+      featuredImage: doc.featuredImage,
+      seoTitle: doc.seoTitle,
+      seoDescription: doc.seoDescription,
+      seoKeywords: doc.seoKeywords || [],
+      status: doc.status,
+      publishDate: doc.publishDate instanceof Date ? doc.publishDate.toISOString() : doc.publishDate,
+      views: doc.views || 0,
+      likes: doc.likes || 0,
+      comments: doc.comments || 0,
+      isFeatured: doc.isFeatured || false,
+      isBreaking: doc.isBreaking || false,
+      createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+      updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt
+    }
+  }
+
+  private mapCategory(doc: any): NewsCategory {
+    return {
+      id: doc.id,
+      name: doc.name,
+      slug: doc.slug,
+      description: doc.description,
+      isFeatured: doc.isFeatured || false,
+      createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+      updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt
+    }
+  }
+
+  private mapTag(doc: any): NewsTag {
+    return {
+      id: doc.id,
+      name: doc.name,
+      slug: doc.slug,
+      type: doc.type,
+      createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+      updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt
+    }
+  }
+
+  private mapAuthor(doc: any): NewsAuthor {
+    return {
+      id: doc.id,
+      name: doc.name,
+      email: doc.email,
+      password: doc.password,
+      role: doc.role,
+      bio: doc.bio || '',
+      profileImage: doc.profileImage || '',
+      socialLinks: doc.socialLinks || {},
+      isActive: doc.isActive !== undefined ? doc.isActive : true,
+      createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+      updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : doc.updatedAt
+    }
+  }
+
+  private mapMedia(doc: any): Media {
+    return {
+      id: doc.id,
+      filename: doc.filename,
+      originalName: doc.originalName,
+      url: doc.url,
+      type: doc.type,
+      size: doc.size,
+      uploaderId: doc.uploaderId,
+      createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt
     }
   }
 }

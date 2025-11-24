@@ -405,9 +405,149 @@ const popularComparisonSchema = new mongoose.Schema({
 popularComparisonSchema.index({ id: 1 }, { unique: true });
 popularComparisonSchema.index({ isActive: 1, order: 1 });
 
+// ==================== NEWS SYSTEM SCHEMAS ====================
+
+// News Article Schema
+const newsArticleSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  title: { type: String, required: true },
+  slug: { type: String, required: true },
+  excerpt: { type: String, required: true },
+  contentBlocks: [{
+    id: { type: String, required: true },
+    type: {
+      type: String,
+      required: true,
+      enum: ['paragraph', 'heading1', 'heading2', 'heading3', 'image', 'bulletList', 'numberedList', 'quote', 'code']
+    },
+    content: { type: String, required: true },
+    imageUrl: { type: String, default: null },
+    imageCaption: { type: String, default: null }
+  }],
+  categoryId: { type: String, required: true },
+  tags: [{ type: String }],
+  authorId: { type: String, required: true },
+  linkedCars: [{ type: String }], // Array of car model IDs
+  featuredImage: { type: String, required: true },
+  seoTitle: { type: String, required: true },
+  seoDescription: { type: String, required: true },
+  seoKeywords: [{ type: String }],
+  status: {
+    type: String,
+    required: true,
+    enum: ['draft', 'published', 'scheduled'],
+    default: 'draft'
+  },
+  publishDate: { type: Date, required: true },
+  views: { type: Number, default: 0 },
+  likes: { type: Number, default: 0 },
+  comments: { type: Number, default: 0 },
+  isFeatured: { type: Boolean, default: false },
+  isBreaking: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+newsArticleSchema.index({ id: 1 }, { unique: true });
+newsArticleSchema.index({ slug: 1 }, { unique: true });
+newsArticleSchema.index({ status: 1, publishDate: -1 });
+newsArticleSchema.index({ categoryId: 1, status: 1 });
+newsArticleSchema.index({ authorId: 1, status: 1 });
+newsArticleSchema.index({ isFeatured: 1, status: 1 });
+newsArticleSchema.index({ views: -1 }); // For trending articles
+newsArticleSchema.index({ title: 'text', excerpt: 'text' }); // Text search
+
+// News Category Schema
+const newsCategorySchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  slug: { type: String, required: true },
+  description: { type: String, required: true },
+  isFeatured: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+newsCategorySchema.index({ id: 1 }, { unique: true });
+newsCategorySchema.index({ slug: 1 }, { unique: true });
+newsCategorySchema.index({ isFeatured: 1 });
+
+// News Tag Schema
+const newsTagSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  slug: { type: String, required: true },
+  type: {
+    type: String,
+    required: true,
+    enum: ['brand', 'segment', 'fuel', 'general']
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+newsTagSchema.index({ id: 1 }, { unique: true });
+newsTagSchema.index({ slug: 1 }, { unique: true });
+newsTagSchema.index({ type: 1 });
+
+// News Author Schema
+const newsAuthorSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true },
+  role: {
+    type: String,
+    required: true,
+    enum: ['admin', 'editor', 'author'],
+    default: 'author'
+  },
+  bio: { type: String, default: '' },
+  profileImage: { type: String, default: '' },
+  socialLinks: {
+    twitter: { type: String, default: null },
+    linkedin: { type: String, default: null },
+    facebook: { type: String, default: null }
+  },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+newsAuthorSchema.index({ id: 1 }, { unique: true });
+newsAuthorSchema.index({ email: 1 }, { unique: true });
+newsAuthorSchema.index({ isActive: 1 });
+
+// News Media Schema
+const newsMediaSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  filename: { type: String, required: true },
+  originalName: { type: String, required: true },
+  url: { type: String, required: true },
+  type: {
+    type: String,
+    required: true,
+    enum: ['image', 'video']
+  },
+  size: { type: Number, required: true },
+  uploaderId: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+newsMediaSchema.index({ id: 1 }, { unique: true });
+newsMediaSchema.index({ uploaderId: 1, createdAt: -1 });
+newsMediaSchema.index({ type: 1 });
+
 // Export models
 export const Brand = mongoose.model('Brand', brandSchema);
 export const Model = mongoose.model('Model', modelSchema);
 export const Variant = mongoose.model('Variant', variantSchema);
 export const AdminUser = mongoose.model('AdminUser', adminUserSchema);
 export const PopularComparison = mongoose.model('PopularComparison', popularComparisonSchema);
+
+// Export news models
+export const NewsArticle = mongoose.model('NewsArticle', newsArticleSchema);
+export const NewsCategory = mongoose.model('NewsCategory', newsCategorySchema);
+export const NewsTag = mongoose.model('NewsTag', newsTagSchema);
+export const NewsAuthor = mongoose.model('NewsAuthor', newsAuthorSchema);
+export const NewsMedia = mongoose.model('NewsMedia', newsMediaSchema);
