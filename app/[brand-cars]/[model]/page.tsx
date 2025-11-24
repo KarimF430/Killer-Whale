@@ -85,7 +85,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
           return []
         }),
       // ✅ Uses models-with-pricing endpoint (has lowestPrice already)
-      fetch(`${backendUrl}/api/models-with-pricing?limit=20`, { next: { revalidate: 3600 } })
+      // ✅ OPTIMIZATION: Reduced limit from 20 to 6 (matches similar cars display)
+      fetch(`${backendUrl}/api/models-with-pricing?limit=6`, { next: { revalidate: 3600 } })
         .then(res => res.ok ? res.json() : { data: [] })
         .catch(() => ({ data: [] }))
     ])

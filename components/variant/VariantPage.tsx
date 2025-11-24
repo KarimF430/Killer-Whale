@@ -5,14 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { truncateCarName } from '@/lib/text-utils'
 import { formatPrice, formatPriceRange } from '@/utils/priceFormatter'
-import { Heart, Star, Share2, ChevronDown, ChevronRight, Calendar, Users, Fuel, ChevronLeft, Clock, Eye, MessageCircle, ArrowRight, Play, ExternalLink, ThumbsUp, Phone, CheckCircle } from 'lucide-react'
+import { Heart, Star, Share2, ChevronDown, ChevronRight, Calendar, Users, Fuel, ChevronLeft, Clock, Eye, MessageCircle, ArrowRight, Play, ExternalLink, ThumbsUp, Phone, CheckCircle, Settings } from 'lucide-react'
 import Footer from '../Footer'
 import PageSection from '../common/PageSection'
 import AdBanner from '../home/AdBanner'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import VariantCard from '../car-model/VariantCard'
 import UpcomingCars from '../home/UpcomingCars'
-import NewLaunchedCars from '../home/NewLaunchedCars'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
 
 interface VariantData {
@@ -65,19 +64,27 @@ export default function VariantPage({
   brandName,
   modelName,
   variantName,
-  newLaunchedCars = []
+  newLaunchedCars = [],
+  initialBrand,
+  initialModel,
+  initialVariant,
+  initialAllVariants = []
 }: {
   variantData?: VariantData,
   brandName?: string,
   modelName?: string,
   variantName?: string,
-  newLaunchedCars?: any[]
+  newLaunchedCars?: any[],
+  initialBrand?: any,
+  initialModel?: any,
+  initialVariant?: any,
+  initialAllVariants?: any[]
 }) {
   const router = useRouter()
   const [expandedSpecs, setExpandedSpecs] = useState<Record<string, boolean>>({})
   const [activeSection, setActiveSection] = useState('')
   const [isSticky, setIsSticky] = useState(false)
-  const [activeFilter, setActiveFilter] = useState('All')
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
   const [isLiked, setIsLiked] = useState(false)
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
   const [showFullDescription, setShowFullDescription] = useState(false)
@@ -109,9 +116,22 @@ export default function VariantPage({
   const variantDropdownRef = useRef<HTMLDivElement>(null)
   const cityDropdownRef = useRef<HTMLDivElement>(null)
 
-  // Optimized data fetching - fetch only what we need
+  // Optimized data fetching - use server-side data if available, otherwise fetch client-side
   useEffect(() => {
     const fetchData = async () => {
+      // If we have initial data from server-side, use it directly
+      if (initialBrand && initialModel && initialVariant) {
+        console.log('Using server-side initial data')
+        setBrand(initialBrand)
+        setModel(initialModel) // This includes similarCars!
+        setVariant(initialVariant)
+        setAllModelVariants(initialAllVariants)
+        setLoading(false)
+        setInitialLoad(false)
+        return
+      }
+
+      // Otherwise, fetch client-side (fallback for client-side navigation)
       if (!brandName || !modelName || !variantName) {
         setLoading(false)
         return
@@ -316,43 +336,75 @@ export default function VariantPage({
     }))
     .sort((a, b) => a.price - b.price) // Sort by price in ascending order
 
+  // Handle filter toggle (multi-select)
+  const handleFilterToggle = (filter: string) => {
+    if (filter === 'All') {
+      setSelectedFilters(['All'])
+    } else {
+      setSelectedFilters(prev => {
+        const withoutAll = prev.filter(f => f !== 'All')
+        if (withoutAll.includes(filter)) {
+          const newFilters = withoutAll.filter(f => f !== filter)
+          return newFilters.length === 0 ? ['All'] : newFilters
+        } else {
+          return [...withoutAll, filter]
+        }
+      })
+    }
+  }
+
   // Generate dynamic filters based on available variants
   const getDynamicFilters = () => {
     const filters = ['All']
     const fuelTypes = new Set<string>()
-    let hasAutomatic = false
+    const transmissionTypes = new Set<string>()
+    let hasValueVariants = false
 
     transformedVariants.forEach(v => {
       if (v.fuel) fuelTypes.add(v.fuel)
-      if (v.transmission && isAutomaticTransmission(v.transmission)) {
-        hasAutomatic = true
+      if (v.transmission) {
+        if (isAutomaticTransmission(v.transmission)) {
+          transmissionTypes.add('Automatic')
+        } else {
+          transmissionTypes.add('Manual')
+        }
       }
+      // Check if variant is value for money (you can add this field to transformedVariants if available)
+      // if (v.isValueForMoney === true) {
+      //   hasValueVariants = true
+      // }
     })
 
     fuelTypes.forEach(fuel => filters.push(fuel))
-    if (hasAutomatic) filters.push('Automatic')
+    transmissionTypes.forEach(trans => filters.push(trans))
+    // if (hasValueVariants) filters.push('Value for Money')
 
     return filters
   }
 
   const availableFilters = getDynamicFilters()
 
-  // Filter variants based on active filter
+  // Filter variants based on selected filters (multi-select with OR logic)
   const getFilteredVariants = () => {
-    switch (activeFilter) {
-      case 'Diesel':
-        return transformedVariants.filter(v => v.fuel === 'Diesel')
-      case 'Petrol':
-        return transformedVariants.filter(v => v.fuel === 'Petrol')
-      case 'CNG':
-        return transformedVariants.filter(v => v.fuel === 'CNG')
-      case 'Automatic':
-        return transformedVariants.filter(v =>
-          v.transmission && isAutomaticTransmission(v.transmission)
-        )
-      default:
-        return transformedVariants
+    if (selectedFilters.includes('All')) {
+      return transformedVariants
     }
+
+    return transformedVariants.filter(v => {
+      return selectedFilters.some(filter => {
+        // Check fuel type
+        if (v.fuel === filter) return true
+
+        // Check transmission type
+        if (filter === 'Automatic' && v.transmission && isAutomaticTransmission(v.transmission)) return true
+        if (filter === 'Manual' && v.transmission && !isAutomaticTransmission(v.transmission)) return true
+
+        // Check value for money (if available)
+        // if (filter === 'Value for Money' && v.isValueForMoney === true) return true
+
+        return false
+      })
+    })
   }
 
   const filteredVariants = getFilteredVariants()
@@ -2363,8 +2415,8 @@ export default function VariantPage({
                 {availableFilters.map((filter) => (
                   <button
                     key={filter}
-                    onClick={() => setActiveFilter(filter)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
+                    onClick={() => handleFilterToggle(filter)}
+                    className={`px-4 py-2 rounded-lg transition-colors ${selectedFilters.includes(filter)
                       ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
@@ -2756,8 +2808,218 @@ export default function VariantPage({
         {/* Section 7: New Launched Cars, AD Banner & Feedback */}
         <PageSection background="white" maxWidth="7xl">
           <div className="space-y-8">
-            {/* New Launched Cars */}
-            <NewLaunchedCars initialCars={newLaunchedCars} />
+            {/* Similar Cars Section - Exact copy from CarModelPage */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Similar Cars To {displayModelName || 'model'}
+              </h2>
+
+              {/* Cars Horizontal Scroll - Exact copy from model page */}
+              <div className="relative">
+                {loading ? (
+                  <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                        <div className="h-48 bg-gray-200 animate-pulse"></div>
+                        <div className="p-5 space-y-3">
+                          <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+                          <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (model?.similarCars || []).length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <p>No similar cars found</p>
+                  </div>
+                ) : (
+                  <div
+                    className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {(model?.similarCars || []).map((car: any) => (
+                      <div
+                        key={car.id}
+                        className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+                        onClick={() => {
+                          const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                          const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                          window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                        }}
+                      >
+                        {/* Car Image */}
+                        <div className="relative h-48 bg-gray-50">
+                          {car.isNew && (
+                            <div className="absolute top-3 left-3 z-10">
+                              <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                NEW
+                              </span>
+                            </div>
+                          )}
+                          <img
+                            src={car.image || '/placeholder-car.png'}
+                            alt={`${car.brandName} ${car.name}`}
+                            className="w-full h-full object-contain p-4"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+
+                        {/* Car Details */}
+                        <div className="p-5">
+                          <h3 className="font-bold text-lg text-gray-900 mb-2">
+                            {car.brandName} {car.name}
+                          </h3>
+
+                          <div className="flex items-baseline gap-2 mb-3">
+                            <span className="text-2xl font-bold text-red-600">
+                              ₹ {(car.startingPrice / 100000).toFixed(2)} Lakh
+                            </span>
+                            <span className="text-sm text-gray-500">Onwards</span>
+                          </div>
+
+                          <div className="text-sm text-gray-600 mb-4">On-Road Price</div>
+
+                          {/* Specs */}
+                          <div className="space-y-2 text-sm text-gray-600 mb-4">
+                            {car.launchDate && (
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4" />
+                                <span>Launched {car.launchDate}</span>
+                              </div>
+                            )}
+                            {car.fuelTypes && car.fuelTypes.length > 0 && (
+                              <div className="flex items-center gap-2">
+                                <Fuel className="w-4 h-4" />
+                                <span>{car.fuelTypes.join('/')}</span>
+                              </div>
+                            )}
+                            {car.transmissionTypes && car.transmissionTypes.length > 0 && (
+                              <div className="flex items-center gap-2">
+                                <Settings className="w-4 h-4" />
+                                <span>{car.transmissionTypes.join('/')}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* View Details Button */}
+                          <button className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2.5 rounded-lg transition-all duration-200 font-semibold">
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Compare With Similar Cars Section - Dynamic with body type matching */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-gray-900">Compare With Similar Cars</h2>
+
+              {/* Comparison Cards - Horizontal Scroll */}
+              <div className="relative">
+                {loading ? (
+                  <div className="flex gap-4 overflow-x-auto pb-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl border border-gray-200 p-4">
+                        <div className="h-32 bg-gray-200 animate-pulse rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (model?.similarCars || []).length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No cars available for comparison</p>
+                  </div>
+                ) : (
+                  <div
+                    className="flex gap-4 overflow-x-auto pb-4"
+                    style={{ scrollbarWidth: 'thin', msOverflowStyle: 'auto' }}
+                  >
+                    {(model?.similarCars || []).map((car: any) => {
+                      // Calculate on-road prices
+                      const currentModelOnRoad = variant?.price || model?.startingPrice || 0
+                      const compareCarOnRoad = car.startingPrice
+
+                      return (
+                        <div key={car.id} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+                          {/* Side by Side Layout with VS Badge */}
+                          <div className="flex items-start gap-2 mb-3">
+                            {/* Current Model */}
+                            <div className="flex-1">
+                              <div className="relative mb-2">
+                                <img
+                                  src={model?.heroImage || ''}
+                                  alt={`${displayBrandName} ${displayModelName}`}
+                                  className="w-full h-20 object-contain"
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                              </div>
+                              <div className="text-left">
+                                <div className="text-xs text-gray-500">{displayBrandName}</div>
+                                <div className="font-bold text-sm text-gray-900 mb-1">{displayModelName}</div>
+                                <div className="text-red-600 font-bold text-sm">
+                                  ₹ {(currentModelOnRoad / 100000).toFixed(2)} Lakh
+                                </div>
+                                <div className="text-xs text-gray-500">On-Road Price</div>
+                              </div>
+                            </div>
+
+                            {/* VS Badge - Positioned between cards */}
+                            <div className="flex items-center justify-center" style={{ marginTop: '30px' }}>
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center shadow-md">
+                                <span className="text-white text-xs font-bold">VS</span>
+                              </div>
+                            </div>
+
+                            {/* Similar Car */}
+                            <div className="flex-1">
+                              <div className="relative mb-2">
+                                <img
+                                  src={car.image || '/placeholder-car.png'}
+                                  alt={`${car.brandName} ${car.name}`}
+                                  className="w-full h-20 object-contain"
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                              </div>
+                              <div className="text-left">
+                                <div className="text-xs text-gray-500">{car.brandName}</div>
+                                <div className="font-bold text-sm text-gray-900 mb-1">{car.name}</div>
+                                <div className="text-red-600 font-bold text-sm">
+                                  ₹ {(compareCarOnRoad / 100000).toFixed(2)} Lakh
+                                </div>
+                                <div className="text-xs text-gray-500">On-Road Price</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              const currentModelSlug = `${displayBrandName?.toLowerCase().replace(/\s+/g, '-')}-${displayModelName?.toLowerCase().replace(/\s+/g, '-')}`
+                              const compareModelSlug = `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
+                              router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
+                            }}
+                            className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm"
+                          >
+                            Compare Now
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Compare Cars of Your Choice Button */}
+              <div className="text-center">
+                <button className="w-full max-w-md bg-white border-2 border-red-600 text-red-600 hover:bg-red-50 py-3 rounded-lg transition-all duration-200 font-medium">
+                  Compare Cars of Your Choice
+                </button>
+              </div>
+            </div>
 
             {/* Ad Banner */}
             <Ad3DCarousel className="mb-6" />

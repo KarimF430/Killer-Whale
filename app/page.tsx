@@ -80,7 +80,8 @@ async function getHomeData() {
     // Fetch all data in parallel (5 requests)
     const [popularRes, modelsRes, brandsRes, comparisonsRes, newsRes] = await Promise.all([
       fetch(`${backendUrl}/api/cars/popular`, { next: { revalidate: 3600 } }),
-      fetch(`${backendUrl}/api/models-with-pricing?limit=100`, { next: { revalidate: 3600 } }),
+      // ✅ OPTIMIZATION: Reduced limit from 100 to 20 (matches display needs)
+      fetch(`${backendUrl}/api/models-with-pricing?limit=20`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/popular-comparisons`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/news?limit=6`, { next: { revalidate: 3600 } })

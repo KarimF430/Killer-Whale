@@ -257,19 +257,16 @@ export default async function BrandPage({ params }: BrandPageProps) {
 
   const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
-  // Fetch all data in parallel with caching
+  // ✅ OPTIMIZATION: Fetch brands data once (removed duplicate call)
   try {
-    const [brandsRes, modelsRes] = await Promise.all([
-      fetch(`${backendUrl}/api/brands`, {
-        next: { revalidate: 3600 }, // Cache for 1 hour
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      }),
-      // We'll fetch models after we have the brand ID
-      Promise.resolve(null)
-    ])
+    // Fetch brands first to get brand ID
+    const brandsRes = await fetch(`${backendUrl}/api/brands`, {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
 
     if (!brandsRes.ok) {
       console.error('Failed to fetch brands')
@@ -315,17 +312,29 @@ export default async function BrandPage({ params }: BrandPageProps) {
       )
     }
 
-    // Now fetch models for this specific brand
-    const modelsResponse = await fetch(
-      `${backendUrl}/api/models-with-pricing?brandId=${backendBrand.id}`,
-      {
-        next: { revalidate: 1800 }, // Cache for 30 minutes
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+    // ✅ OPTIMIZATION: Now fetch models data in parallel with brand-specific data
+    const [modelsResponse, brandModelsResponse] = await Promise.all([
+      fetch(
+        `${backendUrl}/api/models-with-pricing?brandId=${backendBrand.id}`,
+        {
+          next: { revalidate: 1800 }, // Cache for 30 minutes
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         }
-      }
-    )
+      ),
+      fetch(
+        `${backendUrl}/api/frontend/brands/${backendBrand.id}/models`,
+        {
+          next: { revalidate: 1800 },
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+    ])
 
     let models = []
     if (modelsResponse.ok) {
