@@ -1900,35 +1900,79 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
 
       const limit = parseInt(req.query.limit as string) || 20;
-      const models = await storage.getPopularModels(limit);
 
-      // Enrich with brand names and variant info (optimized)
+      // ✅ OPTIMIZED: Use MongoDB aggregation instead of fetching all variants
+      const mongoose = (await import('mongoose')).default;
+      const db = mongoose.connection.db;
+
+      if (!db) {
+        throw new Error('Database connection not established');
+      }
+
+      // Fetch brands for mapping
       const brands = await storage.getBrands();
       const brandMap = new Map(brands.map(b => [b.id, b.name]));
 
-      const allVariants = await storage.getVariants();
+      // Single optimized aggregation pipeline
+      const popularCarsWithPricing = await db.collection('models').aggregate([
+        // Filter for popular cars only
+        { $match: { isPopular: true, status: 'active' } },
 
-      const enrichedModels = models.map(model => {
-        const modelVariants = allVariants.filter(v => v.modelId === model.id);
-        const lowestPrice = modelVariants.length > 0
-          ? Math.min(...modelVariants.map(v => v.price || 0))
-          : 0;
+        // Sort by popularRank
+        { $sort: { popularRank: 1 } },
 
-        // Find fuel type of lowest priced variant
-        let lowestPriceFuelType = 'Petrol';
-        if (lowestPrice > 0) {
-          const minPriceVariant = modelVariants.find(v => v.price === lowestPrice);
-          if (minPriceVariant) {
-            lowestPriceFuelType = minPriceVariant.fuel || minPriceVariant.fuelType || 'Petrol';
+        // Limit results
+        { $limit: limit },
+
+        // Lookup variants and calculate pricing in one operation
+        {
+          $lookup: {
+            from: 'variants',
+            localField: 'id',
+            foreignField: 'modelId',
+            pipeline: [
+              { $match: { status: 'active' } },
+              { $sort: { price: 1 } },  // Sort by price ascending
+              {
+                $group: {
+                  _id: null,
+                  lowestPrice: { $min: '$price' },
+                  lowestPriceFuelType: { $first: '$fuel' },  // Get fuel type of cheapest variant
+                  count: { $sum: 1 }
+                }
+              }
+            ],
+            as: 'pricing'
+          }
+        },
+
+        // Add pricing fields to model document
+        {
+          $addFields: {
+            lowestPrice: {
+              $ifNull: [{ $arrayElemAt: ['$pricing.lowestPrice', 0] }, 0]
+            },
+            lowestPriceFuelType: {
+              $ifNull: [{ $arrayElemAt: ['$pricing.lowestPriceFuelType', 0] }, 'Petrol']
+            },
+            variantCount: {
+              $ifNull: [{ $arrayElemAt: ['$pricing.count', 0] }, 0]
+            }
+          }
+        },
+
+        // Remove the pricing array (no longer needed)
+        {
+          $project: {
+            pricing: 0,
+            _id: 0
           }
         }
+      ]).toArray();
 
-
-
+      // Format response
+      const enrichedModels = popularCarsWithPricing.map((model: any) => {
         const brand = brands.find(b => b.id === model.brandId);
-
-        // Use fuel types and transmissions from MODEL, not variants
-        // Only pricing comes from variants
         const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0 ? model.fuelTypes : ['Petrol'];
         const transmissions = model.transmissions && model.transmissions.length > 0 ? model.transmissions : ['Manual'];
 
@@ -1938,15 +1982,17 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           brand: brand?.name || 'Unknown',
           brandName: brand?.name || 'Unknown',
           image: model.heroImage || '/placeholder-car.jpg',
-          startingPrice: lowestPrice,
-          lowestPriceFuelType: lowestPriceFuelType, // Explicit assignment
+          startingPrice: model.lowestPrice || 0,
+          lowestPriceFuelType: model.lowestPriceFuelType || 'Petrol',
           fuelTypes: fuelTypes,
           transmissions: transmissions,
-          seating: 5, // Default
+          seating: 5,
           launchDate: model.launchDate || new Date().toISOString(),
-          slug: model.id, // Use ID as slug since slug property might be missing
+          slug: model.id,
           isNew: model.isNew || false,
-          isPopular: model.isPopular || false
+          isPopular: model.isPopular || false,
+          popularRank: model.popularRank || null,
+          newRank: model.newRank || null
         };
       });
 

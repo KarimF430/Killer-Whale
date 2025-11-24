@@ -59,11 +59,11 @@ const formatLaunchDate = (date: string): string => {
  * Fetch popular cars with consistent formatting
  * This is the single source of truth for popular cars across the entire project
  */
-export async function getPopularCars(): Promise<Car[]> {
+export async function getPopularCars(limit: number = 10): Promise<Car[]> {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'http://localhost:5001'
 
     try {
-        const popularRes = await fetch(`${backendUrl}/api/cars/popular`, {
+        const popularRes = await fetch(`${backendUrl}/api/cars/popular?limit=${limit}`, {
             next: { revalidate: 3600 },
             cache: 'force-cache'
         })
@@ -105,7 +105,7 @@ export async function getPopularCars(): Promise<Car[]> {
  * Fetch new launched cars with consistent formatting
  * This is the single source of truth for new launches across the entire project
  */
-export async function getNewLaunches(): Promise<Car[]> {
+export async function getNewLaunches(limit: number = 10): Promise<Car[]> {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'http://localhost:5001'
 
     try {
@@ -159,10 +159,11 @@ export async function getNewLaunches(): Promise<Car[]> {
             }
         }) : []
 
-        // Filter and sort new launched cars
+        // Filter and sort new launched cars, then limit
         const newLaunchedCars = allCars
             .filter(car => car.isNew)
             .sort((a, b) => (a.newRank || 999) - (b.newRank || 999))
+            .slice(0, limit) // Limit to specified number
 
         return newLaunchedCars
     } catch (error) {
