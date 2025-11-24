@@ -68,13 +68,13 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
 
   useEffect(() => {
     if (initialCars.length > 0) {
-      // Organize cars by budget (include cars with price 0 in all categories for now)
+      // ✅ FIXED: Use proper price RANGES, not cumulative filters
       const organized: Record<string, Car[]> = {
-        'under-8': initialCars.filter(car => car.startingPrice <= 800000),
-        'under-15': initialCars.filter(car => car.startingPrice <= 1500000),
-        'under-25': initialCars.filter(car => car.startingPrice <= 2500000),
-        'under-50': initialCars.filter(car => car.startingPrice <= 5000000),
-        'above-50': initialCars.filter(car => car.startingPrice > 5000000 || car.startingPrice === 0)
+        'under-8': initialCars.filter(car => car.startingPrice > 0 && car.startingPrice <= 800000),
+        'under-15': initialCars.filter(car => car.startingPrice > 800000 && car.startingPrice <= 1500000),
+        'under-25': initialCars.filter(car => car.startingPrice > 1500000 && car.startingPrice <= 2500000),
+        'under-50': initialCars.filter(car => car.startingPrice > 2500000 && car.startingPrice <= 5000000),
+        'above-50': initialCars.filter(car => car.startingPrice > 5000000)
       }
       setCarsByBudget(organized)
     }
@@ -155,8 +155,8 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
                 />
               ))}
 
-              {/* See More tile - only show if there are more than 10 cars */}
-              {currentCars.length > 10 && (
+              {/* See More tile - always show to encourage visiting budget page for full list */}
+              {currentCars.length > 0 && (
                 <Link
                   href={`/cars-by-budget/${selectedBudget}`}
                   className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"

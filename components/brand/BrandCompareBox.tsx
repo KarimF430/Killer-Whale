@@ -63,17 +63,13 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
 
       const comparisonsData = await comparisonsRes.json()
 
-      // Fetch all models and brands to populate comparison data
-      const modelsRes = await fetch(`${backendUrl}/api/models?limit=100`)
+      // ✅ OPTIMIZATION: Use models-with-pricing instead of fetching 1000 variants
+      const modelsRes = await fetch(`${backendUrl}/api/models-with-pricing?limit=100`)
       const modelsResponse = await modelsRes.json()
       const models = modelsResponse.data || modelsResponse
 
       const brandsRes = await fetch(`${backendUrl}/api/brands`)
       const brands = await brandsRes.json()
-
-      const variantsRes = await fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
-      const variantsResponse = await variantsRes.json()
-      const variants = variantsResponse.data || variantsResponse
 
       // Create brand map
       const brandMap: Record<string, string> = {}
@@ -99,17 +95,9 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
             return null
           }
 
-          // Get lowest prices
-          const model1Variants = variants.filter((v: any) => v.modelId === model1.id)
-          const model2Variants = variants.filter((v: any) => v.modelId === model2.id)
-
-          const model1Price = model1Variants.length > 0
-            ? Math.min(...model1Variants.map((v: any) => v.price || 0))
-            : model1.price || 0
-
-          const model2Price = model2Variants.length > 0
-            ? Math.min(...model2Variants.map((v: any) => v.price || 0))
-            : model2.price || 0
+          // ✅ OPTIMIZATION: Use lowestPrice from models-with-pricing (no variants needed!)
+          const model1Price = model1.lowestPrice || 0
+          const model2Price = model2.lowestPrice || 0
 
           return {
             id: comp.id,

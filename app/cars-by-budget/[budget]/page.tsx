@@ -213,43 +213,35 @@ export default function BudgetCarsPage() {
                 console.log('🚗 Cars set:', data.data?.length || 0, 'cars')
                 console.log('🚗 First car:', data.data?.[0])
 
-                // For popular and new cars, we still need to fetch all models
-                // But we can do this in parallel and it's cached
-                const [modelsRes] = await Promise.all([
-                    fetch(`${backendUrl}/api/models?limit=100`)
+
+                // ✅ OPTIMIZATION: Fetch popular/new cars data in parallel using models-with-pricing
+                // This endpoint includes lowestPrice, so we don't need to fetch 1000 variants!
+                const [modelsRes, brandsRes] = await Promise.all([
+                    fetch(`${backendUrl}/api/models-with-pricing?limit=20`), // Only need ~20 for popular/new
+                    fetch(`${backendUrl}/api/brands`)
                 ])
 
-                if (modelsRes.ok) {
+                if (modelsRes.ok && brandsRes.ok) {
                     const modelsResponse = await modelsRes.json()
                     const models = modelsResponse.data || modelsResponse
 
-                    // Get brands for mapping
-                    const brandsRes = await fetch(`${backendUrl}/api/brands`)
                     const brands = await brandsRes.json()
                     const brandMap = brands.reduce((acc: any, brand: any) => {
                         acc[brand.id] = brand.name
                         return acc
                     }, {})
 
-                    // Get variants for pricing
-                    const variantsRes = await fetch(`${backendUrl}/api/variants?fields=minimal&limit=1000`)
-                    const variantsResponse = await variantsRes.json()
-                    const variants = variantsResponse.data || variantsResponse
-
-                    // Process for popular and new cars
+                    // ✅ OPTIMIZATION: Use lowestPrice from models-with-pricing (no variants fetch needed!)
                     const processedCars: Car[] = models.map((model: any) => {
-                        const modelVariants = variants.filter((v: any) => v.modelId === model.id)
-                        const lowestPrice = modelVariants.length > 0
-                            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-                            : model.price || 0
+                        const lowestPrice = model.lowestPrice || model.price || 0
 
                         const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
                             ? model.fuelTypes
-                            : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
+                            : ['Petrol']
 
-                        const transmissions = model.transmissions && model.transmissions.length > 0
-                            ? model.transmissions
-                            : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
+                        const transmissions = model.transmissionTypes && model.transmissionTypes.length > 0
+                            ? model.transmissionTypes
+                            : ['Manual']
 
                         const heroImage = model.heroImage
                             ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
@@ -262,6 +254,7 @@ export default function BudgetCarsPage() {
                             brandName: brandMap[model.brandId] || 'Unknown',
                             image: heroImage,
                             startingPrice: lowestPrice,
+                            lowestPriceFuelType: model.lowestPriceFuelType || fuelTypes[0],
                             fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
                             transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
                             seating: model.seating || 5,
@@ -271,7 +264,7 @@ export default function BudgetCarsPage() {
                             isPopular: model.isPopular || false,
                             rating: 4.5,
                             reviews: 1247,
-                            variants: modelVariants.length
+                            variants: model.variantCount || 0
                         }
                     })
 
@@ -396,6 +389,7 @@ export default function BudgetCarsPage() {
                         </div>
                     ) : (
                         <div className="space-y-3">
+                            {/* Show all filtered cars - no limit, no See More card */}
                             {filteredCars.map((car) => (
                                 <BudgetCarCard key={car.id} car={car} budgetLabel={currentBudget.label} />
                             ))}
