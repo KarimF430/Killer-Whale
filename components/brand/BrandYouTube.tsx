@@ -34,7 +34,7 @@ function formatPublishedDate(dateString: string): string {
   const now = new Date()
   const diffTime = Math.abs(now.getTime() - date.getTime())
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  
+
   if (diffDays === 0) return 'Today'
   if (diffDays === 1) return '1 day ago'
   if (diffDays < 7) return `${diffDays} days ago`
@@ -47,11 +47,11 @@ function formatPublishedDate(dateString: string): string {
 function parseDuration(duration: string): string {
   const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/)
   if (!match) return '0:00'
-  
+
   const hours = (match[1] || '').replace('H', '')
   const minutes = (match[2] || '').replace('M', '')
   const seconds = (match[3] || '').replace('S', '')
-  
+
   if (hours) {
     return `${hours}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')}`
   }
@@ -60,233 +60,11 @@ function parseDuration(duration: string): string {
 
 // Helper function to get brand-specific fallback data
 function getBrandFallbackData(brand: string) {
-    const brandData: Record<string, any> = {
-      honda: {
-        featured: {
-          id: 'placeholder',
-          title: 'Honda Amaze Detailed Review | Hybrid vs Petrol | Which One to Buy?',
-          thumbnail: '',
-          duration: '12:45',
-          views: '2.5M',
-          likes: '45K',
-          publishedAt: '2 days ago',
-          channelName: 'MotorOctane'
-        },
-        related: [
-          {
-            id: 'placeholder1',
-            title: 'Top 5 Honda Cars Under 10 Lakhs in 2024',
-            thumbnail: '',
-            duration: '8:30',
-            views: '1.2M',
-            likes: '28K',
-            publishedAt: '1 week ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder2',
-            title: 'Honda Electric vs Petrol Cars: Complete Cost Analysis',
-            thumbnail: '',
-            duration: '15:20',
-            views: '890K',
-            likes: '19K',
-            publishedAt: '3 days ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder3',
-            title: 'Honda City 2024 First Drive Review',
-            thumbnail: '',
-            duration: '10:15',
-            views: '1.8M',
-            likes: '35K',
-            publishedAt: '5 days ago',
-            channelName: 'MotorOctane'
-          }
-        ]
-      },
-      'maruti-suzuki': {
-        featured: {
-          id: 'placeholder',
-          title: 'Maruti Suzuki Swift Detailed Review | Petrol vs CNG | Which One to Buy?',
-          thumbnail: '',
-          duration: '14:20',
-          views: '3.1M',
-          likes: '52K',
-          publishedAt: '1 day ago',
-          channelName: 'MotorOctane'
-        },
-        related: [
-          {
-            id: 'placeholder1',
-            title: 'Top 5 Maruti Suzuki Cars Under 8 Lakhs in 2024',
-            thumbnail: '',
-            duration: '9:15',
-            views: '1.8M',
-            likes: '35K',
-            publishedAt: '4 days ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder2',
-            title: 'Maruti Suzuki Baleno vs Swift: Complete Comparison',
-            thumbnail: '',
-            duration: '16:45',
-            views: '2.2M',
-            likes: '41K',
-            publishedAt: '1 week ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder3',
-            title: 'Maruti Suzuki Grand Vitara Hybrid Review',
-            thumbnail: '',
-            duration: '11:30',
-            views: '1.5M',
-            likes: '29K',
-            publishedAt: '2 weeks ago',
-            channelName: 'MotorOctane'
-          }
-        ]
-      },
-      tata: {
-        featured: {
-          id: 'placeholder',
-          title: 'Tata Nexon EV Detailed Review | Range Test | Should You Buy?',
-          thumbnail: '',
-          duration: '13:35',
-          views: '2.8M',
-          likes: '48K',
-          publishedAt: '3 days ago',
-          channelName: 'MotorOctane'
-        },
-        related: [
-          {
-            id: 'placeholder1',
-            title: 'Top 5 Tata Cars Under 12 Lakhs in 2024',
-            thumbnail: '',
-            duration: '10:20',
-            views: '1.6M',
-            likes: '32K',
-            publishedAt: '1 week ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder2',
-            title: 'Tata Safari vs Mahindra XUV700: Ultimate SUV Battle',
-            thumbnail: '',
-            duration: '18:15',
-            views: '3.5M',
-            likes: '67K',
-            publishedAt: '5 days ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder3',
-            title: 'Tata Harrier Safety Features Explained',
-            thumbnail: '',
-            duration: '12:10',
-            views: '1.9M',
-            likes: '38K',
-            publishedAt: '2 weeks ago',
-            channelName: 'MotorOctane'
-          }
-        ]
-      },
-      hyundai: {
-        featured: {
-          id: 'placeholder',
-          title: 'Hyundai Creta 2024 Detailed Review | Petrol vs Diesel | Best Variant?',
-          thumbnail: '',
-          duration: '15:25',
-          views: '4.2M',
-          likes: '78K',
-          publishedAt: '1 day ago',
-          channelName: 'MotorOctane'
-        },
-        related: [
-          {
-            id: 'placeholder1',
-            title: 'Top 5 Hyundai Cars Under 15 Lakhs in 2024',
-            thumbnail: '',
-            duration: '11:40',
-            views: '2.1M',
-            likes: '42K',
-            publishedAt: '6 days ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder2',
-            title: 'Hyundai Venue N Line vs Tata Nexon: Compact SUV Battle',
-            thumbnail: '',
-            duration: '17:30',
-            views: '2.8M',
-            likes: '55K',
-            publishedAt: '3 days ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder3',
-            title: 'Hyundai i20 Buying Guide 2024',
-            thumbnail: '',
-            duration: '13:20',
-            views: '1.7M',
-            likes: '34K',
-            publishedAt: '1 week ago',
-            channelName: 'MotorOctane'
-          }
-        ]
-      },
-      kia: {
-        featured: {
-          id: 'placeholder',
-          title: 'Kia Seltos 2024 Detailed Review | Turbo Petrol vs Diesel | Worth It?',
-          thumbnail: '',
-          duration: '14:50',
-          views: '3.3M',
-          likes: '61K',
-          publishedAt: '2 days ago',
-          channelName: 'MotorOctane'
-        },
-        related: [
-          {
-            id: 'placeholder1',
-            title: 'Top 5 Kia Cars Under 20 Lakhs in 2024',
-            thumbnail: '',
-            duration: '12:15',
-            views: '1.9M',
-            likes: '37K',
-            publishedAt: '1 week ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder2',
-            title: 'Kia Sonet vs Hyundai Venue: Which is Better?',
-            thumbnail: '',
-            duration: '16:05',
-            views: '2.4M',
-            likes: '46K',
-            publishedAt: '4 days ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder3',
-            title: 'Kia Carens 7-Seater Review',
-            thumbnail: '',
-            duration: '13:45',
-            views: '2.0M',
-            likes: '39K',
-            publishedAt: '10 days ago',
-            channelName: 'MotorOctane'
-          }
-        ]
-      }
-    }
-    
-    const defaultData = brandData[brand.toLowerCase()] || {
+  const brandData: Record<string, any> = {
+    honda: {
       featured: {
         id: 'placeholder',
-        title: `${brand} Grand Vitara Detailed Review | Hybrid vs Petrol | Which One to Buy?`,
+        title: 'Honda Amaze Detailed Review | Hybrid vs Petrol | Which One to Buy?',
         thumbnail: '',
         duration: '12:45',
         views: '2.5M',
@@ -297,7 +75,7 @@ function getBrandFallbackData(brand: string) {
       related: [
         {
           id: 'placeholder1',
-          title: `Top 5 ${brand} Cars Under 10 Lakhs in 2024`,
+          title: 'Top 5 Honda Cars Under 10 Lakhs in 2024',
           thumbnail: '',
           duration: '8:30',
           views: '1.2M',
@@ -307,7 +85,7 @@ function getBrandFallbackData(brand: string) {
         },
         {
           id: 'placeholder2',
-          title: `${brand} Electric vs Petrol Cars: Complete Cost Analysis`,
+          title: 'Honda Electric vs Petrol Cars: Complete Cost Analysis',
           thumbnail: '',
           duration: '15:20',
           views: '890K',
@@ -317,7 +95,7 @@ function getBrandFallbackData(brand: string) {
         },
         {
           id: 'placeholder3',
-          title: `${brand} Creta 2024 First Drive Review`,
+          title: 'Honda City 2024 First Drive Review',
           thumbnail: '',
           duration: '10:15',
           views: '1.8M',
@@ -326,9 +104,231 @@ function getBrandFallbackData(brand: string) {
           channelName: 'MotorOctane'
         }
       ]
+    },
+    'maruti-suzuki': {
+      featured: {
+        id: 'placeholder',
+        title: 'Maruti Suzuki Swift Detailed Review | Petrol vs CNG | Which One to Buy?',
+        thumbnail: '',
+        duration: '14:20',
+        views: '3.1M',
+        likes: '52K',
+        publishedAt: '1 day ago',
+        channelName: 'MotorOctane'
+      },
+      related: [
+        {
+          id: 'placeholder1',
+          title: 'Top 5 Maruti Suzuki Cars Under 8 Lakhs in 2024',
+          thumbnail: '',
+          duration: '9:15',
+          views: '1.8M',
+          likes: '35K',
+          publishedAt: '4 days ago',
+          channelName: 'MotorOctane'
+        },
+        {
+          id: 'placeholder2',
+          title: 'Maruti Suzuki Baleno vs Swift: Complete Comparison',
+          thumbnail: '',
+          duration: '16:45',
+          views: '2.2M',
+          likes: '41K',
+          publishedAt: '1 week ago',
+          channelName: 'MotorOctane'
+        },
+        {
+          id: 'placeholder3',
+          title: 'Maruti Suzuki Grand Vitara Hybrid Review',
+          thumbnail: '',
+          duration: '11:30',
+          views: '1.5M',
+          likes: '29K',
+          publishedAt: '2 weeks ago',
+          channelName: 'MotorOctane'
+        }
+      ]
+    },
+    tata: {
+      featured: {
+        id: 'placeholder',
+        title: 'Tata Nexon EV Detailed Review | Range Test | Should You Buy?',
+        thumbnail: '',
+        duration: '13:35',
+        views: '2.8M',
+        likes: '48K',
+        publishedAt: '3 days ago',
+        channelName: 'MotorOctane'
+      },
+      related: [
+        {
+          id: 'placeholder1',
+          title: 'Top 5 Tata Cars Under 12 Lakhs in 2024',
+          thumbnail: '',
+          duration: '10:20',
+          views: '1.6M',
+          likes: '32K',
+          publishedAt: '1 week ago',
+          channelName: 'MotorOctane'
+        },
+        {
+          id: 'placeholder2',
+          title: 'Tata Safari vs Mahindra XUV700: Ultimate SUV Battle',
+          thumbnail: '',
+          duration: '18:15',
+          views: '3.5M',
+          likes: '67K',
+          publishedAt: '5 days ago',
+          channelName: 'MotorOctane'
+        },
+        {
+          id: 'placeholder3',
+          title: 'Tata Harrier Safety Features Explained',
+          thumbnail: '',
+          duration: '12:10',
+          views: '1.9M',
+          likes: '38K',
+          publishedAt: '2 weeks ago',
+          channelName: 'MotorOctane'
+        }
+      ]
+    },
+    hyundai: {
+      featured: {
+        id: 'placeholder',
+        title: 'Hyundai Creta 2024 Detailed Review | Petrol vs Diesel | Best Variant?',
+        thumbnail: '',
+        duration: '15:25',
+        views: '4.2M',
+        likes: '78K',
+        publishedAt: '1 day ago',
+        channelName: 'MotorOctane'
+      },
+      related: [
+        {
+          id: 'placeholder1',
+          title: 'Top 5 Hyundai Cars Under 15 Lakhs in 2024',
+          thumbnail: '',
+          duration: '11:40',
+          views: '2.1M',
+          likes: '42K',
+          publishedAt: '6 days ago',
+          channelName: 'MotorOctane'
+        },
+        {
+          id: 'placeholder2',
+          title: 'Hyundai Venue N Line vs Tata Nexon: Compact SUV Battle',
+          thumbnail: '',
+          duration: '17:30',
+          views: '2.8M',
+          likes: '55K',
+          publishedAt: '3 days ago',
+          channelName: 'MotorOctane'
+        },
+        {
+          id: 'placeholder3',
+          title: 'Hyundai i20 Buying Guide 2024',
+          thumbnail: '',
+          duration: '13:20',
+          views: '1.7M',
+          likes: '34K',
+          publishedAt: '1 week ago',
+          channelName: 'MotorOctane'
+        }
+      ]
+    },
+    kia: {
+      featured: {
+        id: 'placeholder',
+        title: 'Kia Seltos 2024 Detailed Review | Turbo Petrol vs Diesel | Worth It?',
+        thumbnail: '',
+        duration: '14:50',
+        views: '3.3M',
+        likes: '61K',
+        publishedAt: '2 days ago',
+        channelName: 'MotorOctane'
+      },
+      related: [
+        {
+          id: 'placeholder1',
+          title: 'Top 5 Kia Cars Under 20 Lakhs in 2024',
+          thumbnail: '',
+          duration: '12:15',
+          views: '1.9M',
+          likes: '37K',
+          publishedAt: '1 week ago',
+          channelName: 'MotorOctane'
+        },
+        {
+          id: 'placeholder2',
+          title: 'Kia Sonet vs Hyundai Venue: Which is Better?',
+          thumbnail: '',
+          duration: '16:05',
+          views: '2.4M',
+          likes: '46K',
+          publishedAt: '4 days ago',
+          channelName: 'MotorOctane'
+        },
+        {
+          id: 'placeholder3',
+          title: 'Kia Carens 7-Seater Review',
+          thumbnail: '',
+          duration: '13:45',
+          views: '2.0M',
+          likes: '39K',
+          publishedAt: '10 days ago',
+          channelName: 'MotorOctane'
+        }
+      ]
     }
-    
-    return defaultData
+  }
+
+  const defaultData = brandData[brand.toLowerCase()] || {
+    featured: {
+      id: 'placeholder',
+      title: `${brand} Grand Vitara Detailed Review | Hybrid vs Petrol | Which One to Buy?`,
+      thumbnail: '',
+      duration: '12:45',
+      views: '2.5M',
+      likes: '45K',
+      publishedAt: '2 days ago',
+      channelName: 'MotorOctane'
+    },
+    related: [
+      {
+        id: 'placeholder1',
+        title: `Top 5 ${brand} Cars Under 10 Lakhs in 2024`,
+        thumbnail: '',
+        duration: '8:30',
+        views: '1.2M',
+        likes: '28K',
+        publishedAt: '1 week ago',
+        channelName: 'MotorOctane'
+      },
+      {
+        id: 'placeholder2',
+        title: `${brand} Electric vs Petrol Cars: Complete Cost Analysis`,
+        thumbnail: '',
+        duration: '15:20',
+        views: '890K',
+        likes: '19K',
+        publishedAt: '3 days ago',
+        channelName: 'MotorOctane'
+      },
+      {
+        id: 'placeholder3',
+        title: `${brand} Creta 2024 First Drive Review`,
+        thumbnail: '',
+        duration: '10:15',
+        views: '1.8M',
+        likes: '35K',
+        publishedAt: '5 days ago',
+        channelName: 'MotorOctane'
+      }
+    ]
+  }
+
+  return defaultData
 }
 
 export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
@@ -341,15 +341,100 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
     const fetchBrandVideos = async () => {
       try {
         setLoading(true)
-        
-        // Directly use fallback data (skip API calls)
-        const fallbackData = getBrandFallbackData(brandName)
-        setFeaturedVideo(fallbackData.featured)
-        setRelatedVideos(fallbackData.related)
+
+        // Get API key and channel ID from environment variables
+        const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
+        const channelId = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID || '@motoroctane'
+
+        console.log('🔑 YouTube API Key exists:', !!apiKey)
+        console.log('📺 Channel ID:', channelId)
+        console.log('🏷️ Brand Name:', brandName)
+
+        if (!apiKey) {
+          console.error('❌ YouTube API key not configured')
+          throw new Error('YouTube API key not configured')
+        }
+
+        // If channelId is a handle (starts with @), we need to get the actual channel ID first
+        let actualChannelId = channelId
+        if (channelId.startsWith('@')) {
+          console.log('🔍 Converting channel handle to ID...')
+          const searchResponse = await fetch(
+            `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${channelId}&type=channel&key=${apiKey}`
+          )
+          const searchData = await searchResponse.json()
+
+          if (searchData.error) {
+            console.error('❌ YouTube API Error:', searchData.error)
+            throw new Error(searchData.error.message)
+          }
+
+          if (searchData.items && searchData.items.length > 0) {
+            actualChannelId = searchData.items[0].snippet.channelId
+            console.log('✅ Found channel ID:', actualChannelId)
+          }
+        }
+
+        // Fetch brand-specific videos using search query with exact phrase matching
+        console.log(`🎥 Fetching ${brandName} videos from channel:`, actualChannelId)
+        const searchQuery = `"${brandName}"`
+        const videosResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${actualChannelId}&part=snippet,id&order=date&maxResults=5&type=video&q=${encodeURIComponent(searchQuery)}`
+        )
+
+        if (!videosResponse.ok) {
+          const errorData = await videosResponse.json().catch(() => ({}))
+          console.error('❌ Videos fetch error:', errorData)
+          // If quota exceeded, use fallback
+          if (errorData.error?.message?.includes('quota')) {
+            console.warn('⚠️ YouTube API quota exceeded - showing fallback')
+            const fallbackData = getBrandFallbackData(brandName)
+            setFeaturedVideo(fallbackData.featured)
+            setRelatedVideos(fallbackData.related)
+            setLoading(false)
+            return
+          }
+          throw new Error(errorData.error?.message || 'Failed to fetch YouTube videos')
+        }
+
+        const videosData = await videosResponse.json()
+        console.log('📹 Videos data:', videosData)
+
+        if (!videosData.items || videosData.items.length === 0) {
+          throw new Error('No videos found')
+        }
+
+        // Get video IDs
+        const videoIds = videosData.items.map((item: any) => item.id.videoId).join(',')
+
+        // Fetch video statistics and content details
+        const statsResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/videos?key=${apiKey}&id=${videoIds}&part=statistics,contentDetails,snippet`
+        )
+
+        const statsData = await statsResponse.json()
+
+        // Transform the data
+        const videos: YouTubeVideo[] = statsData.items.map((item: any) => ({
+          id: item.id,
+          title: item.snippet.title,
+          thumbnail: item.snippet.thumbnails.high.url,
+          duration: parseDuration(item.contentDetails.duration),
+          views: formatViewCount(parseInt(item.statistics.viewCount)),
+          likes: formatViewCount(parseInt(item.statistics.likeCount || '0')),
+          publishedAt: formatPublishedDate(item.snippet.publishedAt),
+          channelName: item.snippet.channelTitle
+        }))
+
+        // Set featured video (first one) and related videos (rest)
+        setFeaturedVideo(videos[0])
+        setRelatedVideos(videos.slice(1))
         setError(null)
       } catch (err) {
-        console.error('Error loading brand videos:', err)
-        // Even if there's an error, use fallback data
+        console.error('Error fetching brand videos:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load videos')
+
+        // Fallback to placeholder data
         const fallbackData = getBrandFallbackData(brandName)
         setFeaturedVideo(fallbackData.featured)
         setRelatedVideos(fallbackData.related)
@@ -361,8 +446,22 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
     fetchBrandVideos()
   }, [brandName])
 
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null)
+
   const handleVideoClick = (videoId: string) => {
-    window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank')
+    // If clicking a related video, swap it with the featured video
+    if (videoId !== featuredVideo?.id) {
+      const clickedVideo = relatedVideos.find(v => v.id === videoId)
+      if (clickedVideo && featuredVideo) {
+        // Swap: move current featured to related videos, and clicked video to featured
+        const newRelatedVideos = relatedVideos.filter(v => v.id !== videoId)
+        newRelatedVideos.unshift(featuredVideo) // Add old featured to start of related
+        setRelatedVideos(newRelatedVideos)
+        setFeaturedVideo(clickedVideo)
+      }
+    }
+    // Set the video to play
+    setPlayingVideo(videoId)
   }
 
   if (loading || !featuredVideo) {
@@ -399,8 +498,8 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">{brandName.charAt(0).toUpperCase() + brandName.slice(1)} Videos</h2>
-          <a 
-            href="https://www.youtube.com/@motoroctane" 
+          <a
+            href="https://www.youtube.com/@motoroctane"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center text-red-600 hover:text-red-700 font-medium"
@@ -414,37 +513,51 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
           {/* Featured Video */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              {/* Video Thumbnail */}
-              <div 
-                className="relative h-64 md:h-80 bg-gradient-to-r from-red-500 to-pink-500 cursor-pointer group"
-                onClick={() => handleVideoClick(featuredVideo.id)}
-                style={{
-                  backgroundImage: featuredVideo.thumbnail ? `url(${featuredVideo.thumbnail})` : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 rounded-full p-4 group-hover:bg-white transition-colors">
-                    <Play className="h-8 w-8 text-red-600 fill-current" />
+              {/* Video Player or Thumbnail */}
+              {playingVideo === featuredVideo.id ? (
+                <div className="relative h-64 md:h-80 bg-black">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${featuredVideo.id}?autoplay=1`}
+                    title={featuredVideo.title}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              ) : (
+                <div
+                  className="relative h-64 md:h-80 bg-gradient-to-r from-red-500 to-pink-500 cursor-pointer group"
+                  onClick={() => handleVideoClick(featuredVideo.id)}
+                  style={{
+                    backgroundImage: featuredVideo.thumbnail ? `url(${featuredVideo.thumbnail})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-white/90 rounded-full p-4 group-hover:bg-white transition-colors">
+                      <Play className="h-8 w-8 text-red-600 fill-current" />
+                    </div>
+                  </div>
+
+                  {/* Duration Badge */}
+                  <div className="absolute bottom-3 right-3 bg-black/80 text-white px-2 py-1 rounded text-sm font-medium">
+                    {featuredVideo.duration}
+                  </div>
+
+                  {/* Video Overlay */}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+
+                  {/* Video Title Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <h3 className="text-white font-bold text-lg line-clamp-2">
+                      {featuredVideo.title}
+                    </h3>
                   </div>
                 </div>
-                
-                {/* Duration Badge */}
-                <div className="absolute bottom-3 right-3 bg-black/80 text-white px-2 py-1 rounded text-sm font-medium">
-                  {featuredVideo.duration}
-                </div>
-
-                {/* Video Overlay */}
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                
-                {/* Video Title Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                  <h3 className="text-white font-bold text-lg line-clamp-2">
-                    {featuredVideo.title}
-                  </h3>
-                </div>
-              </div>
+              )}
 
               {/* Video Info */}
               <div className="p-4">
@@ -474,16 +587,16 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
           {/* Related Videos */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-gray-900">More Videos</h3>
-            
+
             {relatedVideos.map((video) => (
-              <div 
+              <div
                 key={video.id}
                 className="bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => handleVideoClick(video.id)}
               >
                 <div className="flex">
                   {/* Video Thumbnail */}
-                  <div 
+                  <div
                     className="relative w-32 h-20 bg-gradient-to-r from-blue-400 to-purple-500 flex-shrink-0"
                     style={{
                       backgroundImage: video.thumbnail ? `url(${video.thumbnail})` : undefined,
@@ -494,7 +607,7 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Play className="h-4 w-4 text-white fill-current" />
                     </div>
-                    
+
                     {/* Duration Badge */}
                     <div className="absolute bottom-1 right-1 bg-black/80 text-white px-1 py-0.5 rounded text-xs">
                       {video.duration}
@@ -506,13 +619,13 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
                     <h4 className="font-medium text-gray-900 text-sm line-clamp-2 mb-1">
                       {video.title}
                     </h4>
-                    
+
                     <div className="text-xs text-gray-500 space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-red-600 font-medium">{video.channelName}</span>
                         <span>{video.publishedAt}</span>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2">
                         <span>{video.views} views</span>
                         <span>•</span>

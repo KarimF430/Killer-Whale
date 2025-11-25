@@ -13,7 +13,7 @@ try {
       ? new URL(rawR2).hostname
       : rawR2.replace(/^https?:\/\//, '').replace(/\/.*/, '')
   }
-} catch {}
+} catch { }
 // Extract backend host (Render) so brand logos served from backend pass Next/Image allow-list
 const rawBackend = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ''
 let backendHost = ''
@@ -23,7 +23,7 @@ try {
       ? new URL(rawBackend).hostname
       : rawBackend.replace(/^https?:\/\//, '').replace(/\/.*/, '')
   }
-} catch {}
+} catch { }
 const baseImageHosts = [
   'images.unsplash.com',
   'motoroctane.com',
@@ -45,10 +45,10 @@ const remotePatterns = imageHosts.flatMap((hostname) => {
 const nextConfig = {
   // Server-rendered build suitable for Vercel/Node runtime
   output: 'standalone',
-  
+
   // External packages configuration
   serverExternalPackages: ['sharp'],
-  
+
   images: {
     unoptimized: true,
     remotePatterns,
@@ -63,7 +63,7 @@ const nextConfig = {
     let backendOrigin = ''
     try {
       if (apiUrl) backendOrigin = new URL(apiUrl).origin
-    } catch {}
+    } catch { }
     const connectSrc = isProd ? backendOrigin : `${connectSrcDev} ${backendOrigin}`.trim()
     const unsafeEval = isProd ? "" : " 'unsafe-eval'"
     const csp = [
@@ -73,7 +73,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: http: blob:",
       "font-src 'self' data:",
-      `connect-src 'self' ${connectSrc} https://www.google-analytics.com https://*.sentry.io https://images.unsplash.com`,
+      `connect-src 'self' ${connectSrc} https://www.google-analytics.com https://*.sentry.io https://images.unsplash.com https://www.googleapis.com`,
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
     ].join('; ')
 
@@ -100,15 +100,15 @@ const nextConfig = {
       ...config.resolve.alias,
       'lucide-react': require.resolve('lucide-react')
     }
-    
+
     return config
   },
-  
+
   // Exclude backend directory from TypeScript checking
   typescript: {
     ignoreBuildErrors: true,
   },
-  
+
   // Exclude backend from build
   outputFileTracingExcludes: {
     '*': ['./backend/**/*'],

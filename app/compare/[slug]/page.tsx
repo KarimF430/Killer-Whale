@@ -12,6 +12,7 @@ import MovingAdBanner from '@/components/ads/MovingAdBanner'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 import PageSection from '@/components/common/PageSection'
 import CarCard from '@/components/home/CarCard'
+import ComparisonYouTube from '@/components/comparison/ComparisonYouTube'
 
 interface Variant {
   id: string
@@ -539,31 +540,6 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           </button>
         </div>
 
-        {/* Quick Comparison Stats - Enhanced */}
-        {stats && (
-          <div className="bg-gradient-to-r from-orange-50 via-red-50 to-orange-50 rounded-2xl p-5 mb-6 border-2 border-orange-200 shadow-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-lg shadow-md">
-                  <Award className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <span className="font-bold text-gray-900 text-lg block">Quick Comparison</span>
-                  <span className="text-xs text-gray-600">Price analysis</span>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-gray-600 font-medium mb-1">Price Difference</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                  ₹{(stats.priceDiff / 100000).toFixed(2)} Lakhs
-                </div>
-                <div className="text-sm font-semibold text-orange-600 mt-0.5">
-                  ({stats.priceDiffPercent}%)
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Comparison Cards - Side by Side, Mobile Friendly */}
         <div className="flex gap-3 md:gap-6 overflow-x-auto scrollbar-hide pb-2 mb-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -950,10 +926,8 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
         {/* Ad Banner */}
         <Ad3DCarousel className="my-4" />
 
-        {/* Upcoming Cars - reuse homepage component */}
-        <div className="mb-6">
-          <UpcomingCars />
-        </div>
+        {/* Comparison Videos */}
+        <ComparisonYouTube carNames={comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`)} />
       </div>
 
       {/* Variant Selection Modal */}
