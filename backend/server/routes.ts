@@ -1697,6 +1697,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       });
 
       // Get similar cars (same price range, exclude comparison models)
+      // Get similar cars based on body type and sub-body type of BOTH compared cars
       const avgPrice = comparisonData.reduce((sum, item) => {
         return sum + (item.lowestVariant?.price || 0);
       }, 0) / comparisonData.length;
@@ -1704,12 +1705,20 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       const priceMin = avgPrice * 0.7;
       const priceMax = avgPrice * 1.3;
 
-      // Get similar cars using aggregation
+      const bodyTypes = comparisonModels.map((m: any) => m.bodyType).filter(Boolean);
+      const subBodyTypes = comparisonModels.map((m: any) => m.subBodyType).filter(Boolean);
+
+
       const similarCars = await db.collection('models').aggregate([
         {
           $match: {
             status: 'active',
-            id: { $nin: modelIds }
+            id: { $nin: modelIds },
+            // Match if bodyType or subBodyType matches ANY of the compared cars
+            $or: [
+              { bodyType: { $in: bodyTypes } },
+              { subBodyType: { $in: subBodyTypes } }
+            ]
           }
         },
         {
@@ -1722,7 +1731,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
               {
                 $group: {
                   _id: null,
-                  lowestPrice: { $min: '$price' }
+                  lowestPrice: { $min: '$price' },
+                  lowestPriceFuelType: { $first: '$fuel' }
                 }
               }
             ],
@@ -1733,18 +1743,25 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           $addFields: {
             startingPrice: {
               $ifNull: [{ $arrayElemAt: ['$pricing.lowestPrice', 0] }, 0]
+            },
+            lowestPriceFuelType: {
+              $ifNull: [{ $arrayElemAt: ['$pricing.lowestPriceFuelType', 0] }, 'Petrol']
             }
           }
         },
+        // Filter by price range (±30% of average)
         {
           $match: {
             startingPrice: {
               $gte: priceMin,
-              $lte: priceMax
+              $lte: priceMax,
+              $gt: 0
             }
           }
         },
-        { $limit: 6 },
+        // Sort by popularity and new launches
+        { $sort: { isPopular: -1, isNew: -1, popularRank: 1 } },
+        { $limit: 10 },
         {
           $project: {
             _id: 0,
@@ -1762,10 +1779,20 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         return {
           id: car.id,
           name: car.name,
-          brand: brandName,
-          price: car.startingPrice || 0,
+          brand: car.brandId,
+          brandName: brandName,
           image: heroImage,
-          slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
+          startingPrice: car.startingPrice || 0,
+          lowestPriceFuelType: car.lowestPriceFuelType || 'Petrol',
+          fuelTypes: car.fuelTypes || ['Petrol'],
+          transmissions: car.transmissions || ['Manual'],
+          seating: car.seating || 5,
+          launchDate: car.launchDate || new Date().toISOString(),
+          slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`,
+          isNew: car.isNew || false,
+          isPopular: car.isPopular || false,
+          bodyType: car.bodyType,
+          subBodyType: car.subBodyType
         };
       });
 

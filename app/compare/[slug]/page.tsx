@@ -10,6 +10,8 @@ import PopularCars from '@/components/home/PopularCars'
 import UpcomingCars from '@/components/home/UpcomingCars'
 import MovingAdBanner from '@/components/ads/MovingAdBanner'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
+import PageSection from '@/components/common/PageSection'
+import CarCard from '@/components/home/CarCard'
 
 interface Variant {
   id: string
@@ -119,8 +121,10 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
       setComparisonItems(items)
 
-      // Set similar cars
-      setSimilarCars(data.similarCars || [])
+      // Similar cars are now passed from API (like model page gets from props)
+      const similarCars = data.similarCars || []
+      setSimilarCars(similarCars)
+      setLoadingSimilarCars(false)
 
       // Generate SEO text
       const modelNames = items.map(item => `${item.model.brandName} ${item.model.name}`)
@@ -812,8 +816,12 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                 const firstValidItem = comparisonItems.find((item): item is ComparisonItem => item !== null)
                 if (!firstValidItem) return null
 
+                // Fix: Handle undefined or zero prices
+                const carPrice = car.startingPrice || 0
+                if (carPrice === 0) return null
+
                 const currentModelOnRoad = getOnRoadPrice(firstValidItem.variant.price, firstValidItem.variant.fuelType)
-                const compareCarOnRoad = getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol')
+                const compareCarOnRoad = getOnRoadPrice(carPrice, car.fuelTypes?.[0] || car.lowestPriceFuelType || 'Petrol')
 
                 return (
                   <div key={car.id} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all">
@@ -892,9 +900,51 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           <PopularComparisons />
         </div>
 
-        {/* Popular Cars - Using Homepage Component */}
+        {/* Similar Cars Section - Exact copy from Model Page */}
         <div className="mb-6">
-          <PopularCars />
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Similar Cars You May Like
+            </h2>
+
+            {/* Cars Horizontal Scroll */}
+            <div className="relative">
+              {loadingSimilarCars ? (
+                <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="h-48 bg-gray-200 animate-pulse"></div>
+                      <div className="p-5 space-y-3">
+                        <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+                        <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : similarCars.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <p>No similar cars found</p>
+                </div>
+              ) : (
+                <div
+                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {similarCars.map((car) => (
+                    <CarCard
+                      key={car.id}
+                      car={car}
+                      onClick={() => {
+                        const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                        const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                        window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Ad Banner */}
