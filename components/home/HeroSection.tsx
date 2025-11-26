@@ -24,10 +24,6 @@ export default function HeroSection() {
           <h1 className="text-5xl font-bold text-white mb-4">
             Find Your Perfect Car
           </h1>
-          <p className="text-white/90 text-lg flex items-center justify-center gap-2">
-            <Sparkles className="h-5 w-5" />
-            Powered by AI - Just tell us what you need!
-          </p>
         </div>
 
         {/* Search Card */}
