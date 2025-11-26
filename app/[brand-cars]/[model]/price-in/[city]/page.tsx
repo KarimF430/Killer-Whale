@@ -8,20 +8,25 @@ interface PriceInCityPageProps {
   }>
 }
 
+import { FloatingAIBot } from '@/components/FloatingAIBot'
+
 export default async function PriceInCityPage({ params }: PriceInCityPageProps) {
   // Await params as required by Next.js 15
   const resolvedParams = await params
-  
+
   // Extract brand from "honda-cars" -> "honda"
   const brandSlug = resolvedParams['brand-cars'].replace('-cars', '')
   const modelSlug = resolvedParams.model
   const citySlug = resolvedParams.city
-  
+
   return (
-    <PriceBreakupPage 
-      brandSlug={brandSlug}
-      modelSlug={modelSlug}
-      citySlug={citySlug}
-    />
+    <>
+      <PriceBreakupPage
+        brandSlug={brandSlug}
+        modelSlug={modelSlug}
+        citySlug={citySlug}
+      />
+      <FloatingAIBot type="price" id={modelSlug} name={modelSlug} />
+    </>
   )
 }

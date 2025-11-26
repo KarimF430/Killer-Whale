@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import VariantPage from '@/components/variant/VariantPage'
 import { generateVariantSEO } from '@/lib/seo'
+import { FloatingAIBot } from '@/components/FloatingAIBot'
 
 interface PageProps {
   params: Promise<{
@@ -167,11 +168,16 @@ export default async function VariantDetailPage({ params }: PageProps) {
     ]
   }
 
-  return <VariantPage
-    variantData={mockVariantData}
-    brandName={brandName}
-    modelName={modelName}
-    variantName={variantName}
-    newLaunchedCars={newLaunchedCars}
-  />
+  return (
+    <>
+      <VariantPage
+        variantData={mockVariantData}
+        brandName={brandName}
+        modelName={modelName}
+        variantName={variantName}
+        newLaunchedCars={newLaunchedCars}
+      />
+      <FloatingAIBot type="variant" id={variantSlug} name={variantName} />
+    </>
+  )
 }

@@ -40,6 +40,8 @@ import adminTagsRoutes from "./routes/admin-tags";
 import adminAuthorsRoutes from "./routes/admin-authors";
 import adminMediaRoutes from "./routes/admin-media";
 import adminAnalyticsRoutes from "./routes/admin-analytics";
+import aiChatHandler from "./routes/ai-chat";
+import quirkyBitRoutes from "./routes/quirky-bit";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -2469,6 +2471,13 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
   // Public news routes
   app.use('/api/news', newsRoutes);
+
+  // AI Chat endpoint
+  app.post('/api/ai-chat', publicLimiter, aiChatHandler);
+
+  // Quirky Bits endpoint (for floating AI bot)
+  app.use('/api/quirky-bit', publicLimiter, quirkyBitRoutes);
+
 
   // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
   app.use('/api/admin/articles', adminArticlesRoutes);

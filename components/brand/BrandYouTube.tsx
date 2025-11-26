@@ -351,32 +351,33 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
         console.log('🏷️ Brand Name:', brandName)
 
         if (!apiKey) {
-          console.error('❌ YouTube API key not configured')
-          throw new Error('YouTube API key not configured')
+          console.log('ℹ️ YouTube API key not configured - using fallback videos')
+          const fallbackData = getBrandFallbackData(brandName)
+          setFeaturedVideo(fallbackData.featured)
+          setRelatedVideos(fallbackData.related)
+          setLoading(false)
+          return
         }
 
         // If channelId is a handle (starts with @), we need to get the actual channel ID first
         let actualChannelId = channelId
         if (channelId.startsWith('@')) {
-          console.log('🔍 Converting channel handle to ID...')
+          // ... (rest of the logic)
           const searchResponse = await fetch(
             `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${channelId}&type=channel&key=${apiKey}`
           )
           const searchData = await searchResponse.json()
 
           if (searchData.error) {
-            console.error('❌ YouTube API Error:', searchData.error)
             throw new Error(searchData.error.message)
           }
 
           if (searchData.items && searchData.items.length > 0) {
             actualChannelId = searchData.items[0].snippet.channelId
-            console.log('✅ Found channel ID:', actualChannelId)
           }
         }
 
         // Fetch brand-specific videos using search query with exact phrase matching
-        console.log(`🎥 Fetching ${brandName} videos from channel:`, actualChannelId)
         const searchQuery = `"${brandName}"`
         const videosResponse = await fetch(
           `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${actualChannelId}&part=snippet,id&order=date&maxResults=5&type=video&q=${encodeURIComponent(searchQuery)}`
@@ -384,7 +385,6 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
 
         if (!videosResponse.ok) {
           const errorData = await videosResponse.json().catch(() => ({}))
-          console.error('❌ Videos fetch error:', errorData)
           // If quota exceeded, use fallback
           if (errorData.error?.message?.includes('quota')) {
             console.warn('⚠️ YouTube API quota exceeded - showing fallback')
@@ -398,7 +398,6 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
         }
 
         const videosData = await videosResponse.json()
-        console.log('📹 Videos data:', videosData)
 
         if (!videosData.items || videosData.items.length === 0) {
           throw new Error('No videos found')

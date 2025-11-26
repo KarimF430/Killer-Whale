@@ -397,6 +397,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
   }
 }
 
+import { FloatingAIBot } from '@/components/FloatingAIBot'
+
 export default async function ModelPage({ params }: ModelPageProps) {
   const resolvedParams = await params
   if (resolvedParams['brand-cars'].startsWith('.well-known') || resolvedParams['brand-cars'] === 'well-known') {
@@ -409,5 +411,10 @@ export default async function ModelPage({ params }: ModelPageProps) {
     notFound()
   }
 
-  return <CarModelPage model={modelData} initialVariants={modelData.variants} />
+  return (
+    <>
+      <CarModelPage model={modelData} initialVariants={modelData.variants} />
+      <FloatingAIBot type="model" id={modelData.id} name={modelData.name} />
+    </>
+  )
 }

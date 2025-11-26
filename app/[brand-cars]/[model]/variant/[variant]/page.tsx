@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import VariantPage from '@/components/variant/VariantPage'
 import { generateVariantSEO } from '@/lib/seo'
+import { FloatingAIBot } from '@/components/FloatingAIBot'
 
 interface PageProps {
   params: Promise<{
@@ -140,23 +141,33 @@ export default async function VariantDetailPage({ params }: PageProps) {
       similarCars
     }
 
-    return <VariantPage
-      brandName={brandName}
-      modelName={modelName}
-      variantName={variantName}
-      initialBrand={brand}
-      initialModel={modelWithSimilarCars}
-      initialVariant={variant}
-      initialAllVariants={variants}
-    />
+    return (
+      <>
+        <VariantPage
+          brandName={brandName}
+          modelName={modelName}
+          variantName={variantName}
+          initialBrand={brand}
+          initialModel={modelWithSimilarCars}
+          initialVariant={variant}
+          initialAllVariants={variants}
+        />
+        <FloatingAIBot type="variant" id={variant?.id || variantSlug} name={variant?.name || variantName} />
+      </>
+    )
   } catch (error) {
     console.error('Error fetching variant data:', error)
 
     // Return with empty data on error
-    return <VariantPage
-      brandName={brandName}
-      modelName={modelName}
-      variantName={variantName}
-    />
+    return (
+      <>
+        <VariantPage
+          brandName={brandName}
+          modelName={modelName}
+          variantName={variantName}
+        />
+        <FloatingAIBot type="variant" id={variantSlug} name={variantName} />
+      </>
+    )
   }
 }

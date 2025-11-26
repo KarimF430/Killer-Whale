@@ -62,6 +62,53 @@ export default function YouTubeVideoPlayer() {
 
   useEffect(() => {
     const fetchYouTubeVideos = async () => {
+      const setFallbackData = () => {
+        setFeaturedVideo({
+          id: 'placeholder',
+          title: 'Maruti Suzuki Grand Vitara Detailed Review | Hybrid vs Petrol | Which One to Buy?',
+          thumbnail: 'https://img.youtube.com/vi/hVdKkXyXkS0/maxresdefault.jpg',
+          duration: '12:45',
+          views: '2.5M',
+          likes: '45K',
+          publishedAt: '2 days ago',
+          channelName: 'MotorOctane'
+        })
+
+        setRelatedVideos([
+          {
+            id: 'placeholder1',
+            title: 'Top 5 Cars Under 10 Lakhs in 2024',
+            thumbnail: 'https://img.youtube.com/vi/Qy8qg5y5x5c/maxresdefault.jpg',
+            duration: '8:30',
+            views: '1.2M',
+            likes: '28K',
+            publishedAt: '1 week ago',
+            channelName: 'MotorOctane'
+          },
+          {
+            id: 'placeholder2',
+            title: 'Electric vs Petrol Cars: Complete Cost Analysis',
+            thumbnail: 'https://img.youtube.com/vi/7y8qg5y5x5c/maxresdefault.jpg',
+            duration: '15:20',
+            views: '890K',
+            likes: '19K',
+            publishedAt: '3 days ago',
+            channelName: 'MotorOctane'
+          },
+          {
+            id: 'placeholder3',
+            title: 'Hyundai Creta 2024 First Drive Review',
+            thumbnail: 'https://img.youtube.com/vi/9y8qg5y5x5c/maxresdefault.jpg',
+            duration: '10:15',
+            views: '1.8M',
+            likes: '35K',
+            publishedAt: '5 days ago',
+            channelName: 'MotorOctane'
+          }
+        ])
+        setLoading(false)
+      }
+
       try {
         setLoading(true)
 
@@ -69,57 +116,49 @@ export default function YouTubeVideoPlayer() {
         const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
         const channelId = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID || '@motoroctane'
 
+        if (!apiKey) {
+          console.log('ℹ️ YouTube API key not configured - using fallback videos')
+          setFallbackData()
+          return
+        }
+
         console.log('🔑 YouTube API Key exists:', !!apiKey)
         console.log('📺 Channel ID:', channelId)
-
-        if (!apiKey) {
-          console.error('❌ YouTube API key not configured')
-          throw new Error('YouTube API key not configured')
-        }
 
         // If channelId is a handle (starts with @), we need to get the actual channel ID first
         let actualChannelId = channelId
         if (channelId.startsWith('@')) {
-          console.log('🔍 Converting channel handle to ID...')
+          // ... (rest of the logic)
           const searchResponse = await fetch(
             `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${channelId}&type=channel&key=${apiKey}`
           )
           const searchData = await searchResponse.json()
-          console.log('📡 Channel search response:', searchData)
 
           if (searchData.error) {
-            console.error('❌ YouTube API Error:', searchData.error)
             throw new Error(searchData.error.message)
           }
 
           if (searchData.items && searchData.items.length > 0) {
             actualChannelId = searchData.items[0].snippet.channelId
-            console.log('✅ Found channel ID:', actualChannelId)
           }
         }
 
         // Fetch latest videos from the channel
-        console.log('🎥 Fetching videos from channel:', actualChannelId)
         const videosResponse = await fetch(
           `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${actualChannelId}&part=snippet,id&order=date&maxResults=4&type=video`
         )
 
         if (!videosResponse.ok) {
           const errorData = await videosResponse.json().catch(() => ({}))
-          console.error('❌ Videos fetch error:', errorData)
-          // If quota exceeded, just set empty videos instead of throwing
           if (errorData.error?.message?.includes('quota')) {
             console.warn('⚠️ YouTube API quota exceeded - showing fallback')
-            setFeaturedVideo(null)
-            setRelatedVideos([])
-            setLoading(false)
+            setFallbackData()
             return
           }
           throw new Error(errorData.error?.message || 'Failed to fetch YouTube videos')
         }
 
         const videosData = await videosResponse.json()
-        console.log('📹 Videos data:', videosData)
 
         if (!videosData.items || videosData.items.length === 0) {
           throw new Error('No videos found')
@@ -151,56 +190,12 @@ export default function YouTubeVideoPlayer() {
         setFeaturedVideo(videos[0])
         setRelatedVideos(videos.slice(1))
         setError(null)
+        setLoading(false)
+
       } catch (err) {
         console.error('Error fetching YouTube videos:', err)
         setError(err instanceof Error ? err.message : 'Failed to load videos')
-
-        // Fallback to placeholder data
-        setFeaturedVideo({
-          id: 'placeholder',
-          title: 'Maruti Suzuki Grand Vitara Detailed Review | Hybrid vs Petrol | Which One to Buy?',
-          thumbnail: '',
-          duration: '12:45',
-          views: '2.5M',
-          likes: '45K',
-          publishedAt: '2 days ago',
-          channelName: 'MotorOctane'
-        })
-
-        setRelatedVideos([
-          {
-            id: 'placeholder1',
-            title: 'Top 5 Cars Under 10 Lakhs in 2024',
-            thumbnail: '',
-            duration: '8:30',
-            views: '1.2M',
-            likes: '28K',
-            publishedAt: '1 week ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder2',
-            title: 'Electric vs Petrol Cars: Complete Cost Analysis',
-            thumbnail: '',
-            duration: '15:20',
-            views: '890K',
-            likes: '19K',
-            publishedAt: '3 days ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder3',
-            title: 'Hyundai Creta 2024 First Drive Review',
-            thumbnail: '',
-            duration: '10:15',
-            views: '1.8M',
-            likes: '35K',
-            publishedAt: '5 days ago',
-            channelName: 'MotorOctane'
-          }
-        ])
-      } finally {
-        setLoading(false)
+        setFallbackData()
       }
     }
 

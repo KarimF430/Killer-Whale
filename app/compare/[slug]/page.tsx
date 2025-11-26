@@ -13,6 +13,7 @@ import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 import PageSection from '@/components/common/PageSection'
 import CarCard from '@/components/home/CarCard'
 import ComparisonYouTube from '@/components/comparison/ComparisonYouTube'
+import { FloatingAIBot } from '@/components/FloatingAIBot'
 
 interface Variant {
   id: string
@@ -1067,6 +1068,17 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
 
       <Footer />
+      <FloatingAIBot
+        type="comparison"
+        id={comparisonItems.length > 0
+          ? comparisonItems
+            .filter((item): item is ComparisonItem => item !== null)
+            .map(item => item.variant.id)
+            .join(',')
+          : "general"
+        }
+        name={comparisonItems.length > 0 ? "Comparison" : "Comparison Tool"}
+      />
     </div>
   )
 }

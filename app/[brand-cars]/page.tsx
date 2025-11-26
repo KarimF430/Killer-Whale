@@ -16,6 +16,7 @@ import Footer from '@/components/Footer'
 import PageSection from '@/components/common/PageSection'
 import PageHeader from '@/components/common/PageHeader'
 import CarComparison from '@/components/common/CarComparison'
+import { FloatingAIBot } from '@/components/FloatingAIBot'
 import { generateBrandSEO } from '@/lib/seo'
 
 interface BrandPageProps {
@@ -385,6 +386,13 @@ export default async function BrandPage({ params }: BrandPageProps) {
           </SafeComponent>
         </main>
 
+        {/* Floating AI Bot */}
+        <FloatingAIBot
+          type="brand"
+          id={backendBrand.id}
+          name={brand.name}
+        />
+
         <Footer />
       </div>
     )
@@ -393,4 +401,3 @@ export default async function BrandPage({ params }: BrandPageProps) {
     notFound()
   }
 }
-

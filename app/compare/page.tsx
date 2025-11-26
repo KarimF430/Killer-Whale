@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import Footer from '@/components/Footer'
+import { FloatingAIBot } from '@/components/FloatingAIBot'
 import PopularComparisons from '@/components/home/PopularComparisons'
 import PageContainer, { PageSection } from '@/components/layout/PageContainer'
 
@@ -234,6 +235,7 @@ export default function CompareCarsPage() {
       )}
 
       <Footer />
+      <FloatingAIBot type="comparison" id="general" name="Comparison Tool" />
     </div>
   )
 }

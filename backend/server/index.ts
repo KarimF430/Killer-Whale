@@ -261,7 +261,9 @@ app.use(
       console.error('   1. MongoDB is running (brew services start mongodb-community)');
       console.error('   2. MONGODB_URI in .env file is correct');
       console.error('   3. Network connection is available');
-      process.exit(1);
+      console.error('   3. Network connection is available');
+      console.warn('⚠️  Continuing without MongoDB (AI Chat will use mock data)...');
+      // process.exit(1); // Don't exit, allow server to run for AI Chat
     }
 
     // Initialize news storage
