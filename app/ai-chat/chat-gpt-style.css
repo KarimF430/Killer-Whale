@@ -31,7 +31,7 @@
 .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding: 20px 0 140px 0;
+    padding: 20px 0 180px 0;
     /* Extra bottom padding for input */
     scroll-behavior: smooth;
 }

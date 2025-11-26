@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { truncateCarName } from '@/lib/text-utils'
@@ -85,6 +85,131 @@ export default function VariantPage({
   const [activeSection, setActiveSection] = useState('')
   const [isSticky, setIsSticky] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
+
+  // Backend data fetching states
+  const [variant, setVariant] = useState<any>(null)
+  const [model, setModel] = useState<any>(null)
+  const [brand, setBrand] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [initialLoad, setInitialLoad] = useState(true)
+  const [allModelVariants, setAllModelVariants] = useState<any[]>([])
+
+  // ... (existing code)
+
+  // Extract brand, model, variant names from data (fallback to props or backend data)
+  const displayBrandName = brand?.name || brandName || variantData?.brand
+  const displayModelName = model?.name || modelName || variantData?.model
+  const displayVariantName = variant?.name || variantName || variantData?.variant
+
+  // Helper function to check if transmission is automatic type
+  const isAutomaticTransmission = (transmission: string) => {
+    const automaticTypes = ['automatic', 'cvt', 'amt', 'dct', 'torque converter', 'dual clutch']
+    return automaticTypes.some(type => transmission.toLowerCase().includes(type))
+  }
+
+  // Transform backend variant data for More Variants section - exclude current variant and sort by price
+  const transformedVariants = useMemo(() => {
+    return allModelVariants
+      .filter(v => v.id !== variant?.id) // Exclude current variant
+      .map(v => ({
+        id: v.id,
+        name: v.name,
+        price: v.price ? (v.price / 100000) : 0, // Convert to lakhs
+        fuel: v.fuel || 'Petrol',
+        transmission: v.transmission || 'Manual',
+        power: v.maxPower || 'N/A',
+        features: v.keyFeatures || v.headerSummary || 'Key features not available'
+      }))
+      .sort((a, b) => a.price - b.price) // Sort by price in ascending order
+  }, [allModelVariants, variant?.id])
+
+  // Handle filter toggle (multi-select)
+  const handleFilterToggle = (filter: string) => {
+    if (filter === 'All') {
+      setSelectedFilters(['All'])
+    } else {
+      setSelectedFilters(prev => {
+        // Remove 'All' if selecting a specific filter
+        const withoutAll = prev.filter(f => f !== 'All')
+
+        // Toggle the clicked filter
+        if (withoutAll.includes(filter)) {
+          const newFilters = withoutAll.filter(f => f !== filter)
+          // If no filters left, select 'All'
+          return newFilters.length === 0 ? ['All'] : newFilters
+        } else {
+          return [...withoutAll, filter]
+        }
+      })
+    }
+  }
+
+  // Generate dynamic filters based on available variants
+  const availableFilters = useMemo(() => {
+    const filters = ['All']
+    const fuelTypes = new Set<string>()
+    const transmissionTypes = new Set<string>()
+
+    transformedVariants.forEach(v => {
+      if (v.fuel) fuelTypes.add(v.fuel)
+      if (v.transmission) {
+        if (isAutomaticTransmission(v.transmission)) {
+          transmissionTypes.add('Automatic')
+        } else {
+          transmissionTypes.add('Manual')
+        }
+      }
+    })
+
+    fuelTypes.forEach(fuel => filters.push(fuel))
+    transmissionTypes.forEach(trans => filters.push(trans))
+
+    return filters
+  }, [transformedVariants])
+
+  // Filter variants based on selected filters (multi-select logic)
+  const filteredVariants = useMemo(() => {
+    if (selectedFilters.includes('All')) {
+      return transformedVariants
+    }
+
+    return transformedVariants.filter(v => {
+      // Normalize variant data
+      const vFuel = (v.fuel || '').toLowerCase().trim()
+      const vTransmission = (v.transmission || '').toLowerCase().trim()
+      const isAuto = isAutomaticTransmission(vTransmission)
+
+      // Categorize selected filters
+      const fuelFilters = selectedFilters.filter(f => {
+        const lf = f.toLowerCase()
+        return ['petrol', 'diesel', 'cng', 'electric'].some(t => lf.includes(t))
+      })
+
+      const transmissionFilters = selectedFilters.filter(f => {
+        const lf = f.toLowerCase()
+        return ['manual', 'automatic'].includes(lf)
+      })
+
+      // Check matches
+      let matchesFuel = fuelFilters.length === 0
+      if (fuelFilters.length > 0) {
+        matchesFuel = fuelFilters.some(f => vFuel.includes(f.toLowerCase()))
+      }
+
+      let matchesTransmission = transmissionFilters.length === 0
+      if (transmissionFilters.length > 0) {
+        if (transmissionFilters.some(f => f.toLowerCase() === 'automatic')) {
+          matchesTransmission = matchesTransmission || isAuto
+        }
+        if (transmissionFilters.some(f => f.toLowerCase() === 'manual')) {
+          matchesTransmission = matchesTransmission || !isAuto
+        }
+      }
+
+      return matchesFuel && matchesTransmission
+    })
+  }, [transformedVariants, selectedFilters])
   const [isLiked, setIsLiked] = useState(false)
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
   const [showFullDescription, setShowFullDescription] = useState(false)
@@ -104,14 +229,7 @@ export default function VariantPage({
   const [showSummaryComfort, setShowSummaryComfort] = useState(false)
   const [expandedEngine, setExpandedEngine] = useState<boolean>(false)
 
-  // Backend data fetching states
-  const [variant, setVariant] = useState<any>(null)
-  const [model, setModel] = useState<any>(null)
-  const [brand, setBrand] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [initialLoad, setInitialLoad] = useState(true)
-  const [allModelVariants, setAllModelVariants] = useState<any[]>([])
+
 
   const variantDropdownRef = useRef<HTMLDivElement>(null)
   const cityDropdownRef = useRef<HTMLDivElement>(null)
@@ -311,103 +429,9 @@ export default function VariantPage({
     fetchData()
   }, [brandName, modelName, variantName])
 
-  // Extract brand, model, variant names from data (fallback to props or backend data)
-  const displayBrandName = brand?.name || brandName || variantData?.brand
-  const displayModelName = model?.name || modelName || variantData?.model
-  const displayVariantName = variant?.name || variantName || variantData?.variant
 
-  // Helper function to check if transmission is automatic type
-  const isAutomaticTransmission = (transmission: string) => {
-    const automaticTypes = ['automatic', 'cvt', 'amt', 'dct', 'torque converter', 'dual clutch']
-    return automaticTypes.some(type => transmission.toLowerCase().includes(type))
-  }
 
-  // Transform backend variant data for More Variants section - exclude current variant and sort by price
-  const transformedVariants = allModelVariants
-    .filter(v => v.id !== variant?.id) // Exclude current variant
-    .map(v => ({
-      id: v.id,
-      name: v.name,
-      price: v.price ? (v.price / 100000) : 0, // Convert to lakhs
-      fuel: v.fuel || 'Petrol',
-      transmission: v.transmission || 'Manual',
-      power: v.maxPower || 'N/A',
-      features: v.keyFeatures || v.headerSummary || 'Key features not available'
-    }))
-    .sort((a, b) => a.price - b.price) // Sort by price in ascending order
 
-  // Handle filter toggle (multi-select)
-  const handleFilterToggle = (filter: string) => {
-    if (filter === 'All') {
-      setSelectedFilters(['All'])
-    } else {
-      setSelectedFilters(prev => {
-        const withoutAll = prev.filter(f => f !== 'All')
-        if (withoutAll.includes(filter)) {
-          const newFilters = withoutAll.filter(f => f !== filter)
-          return newFilters.length === 0 ? ['All'] : newFilters
-        } else {
-          return [...withoutAll, filter]
-        }
-      })
-    }
-  }
-
-  // Generate dynamic filters based on available variants
-  const getDynamicFilters = () => {
-    const filters = ['All']
-    const fuelTypes = new Set<string>()
-    const transmissionTypes = new Set<string>()
-    let hasValueVariants = false
-
-    transformedVariants.forEach(v => {
-      if (v.fuel) fuelTypes.add(v.fuel)
-      if (v.transmission) {
-        if (isAutomaticTransmission(v.transmission)) {
-          transmissionTypes.add('Automatic')
-        } else {
-          transmissionTypes.add('Manual')
-        }
-      }
-      // Check if variant is value for money (you can add this field to transformedVariants if available)
-      // if (v.isValueForMoney === true) {
-      //   hasValueVariants = true
-      // }
-    })
-
-    fuelTypes.forEach(fuel => filters.push(fuel))
-    transmissionTypes.forEach(trans => filters.push(trans))
-    // if (hasValueVariants) filters.push('Value for Money')
-
-    return filters
-  }
-
-  const availableFilters = getDynamicFilters()
-
-  // Filter variants based on selected filters (multi-select with OR logic)
-  const getFilteredVariants = () => {
-    if (selectedFilters.includes('All')) {
-      return transformedVariants
-    }
-
-    return transformedVariants.filter(v => {
-      return selectedFilters.some(filter => {
-        // Check fuel type
-        if (v.fuel === filter) return true
-
-        // Check transmission type
-        if (filter === 'Automatic' && v.transmission && isAutomaticTransmission(v.transmission)) return true
-        if (filter === 'Manual' && v.transmission && !isAutomaticTransmission(v.transmission)) return true
-
-        // Check value for money (if available)
-        // if (filter === 'Value for Money' && v.isValueForMoney === true) return true
-
-        return false
-      })
-    })
-  }
-
-  const filteredVariants = getFilteredVariants()
 
   // Helper function to parse bullet points from backend string
   const parseBulletPoints = (text: string | string[]): string[] => {
