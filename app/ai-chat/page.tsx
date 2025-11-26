@@ -5,7 +5,7 @@
  * Modern dark theme with MotorOctane branding
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { Send, Mic, ThumbsUp, ThumbsDown, Copy, Menu, Plus, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -36,7 +36,7 @@ interface CarMatch {
     }
 }
 
-export default function AICarFinderPage() {
+function AICarFinderContent() {
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState('')
     const [isTyping, setIsTyping] = useState(false)
@@ -268,5 +268,23 @@ export default function AICarFinderPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function AICarFinderPage() {
+    return (
+        <Suspense fallback={
+            <div className="ai-chat-container">
+                <div className="chat-layout">
+                    <div className="chat-main">
+                        <div className="chat-messages">
+                            <div className="loading-spinner">Loading AI Chat...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }>
+            <AICarFinderContent />
+        </Suspense>
     )
 }
