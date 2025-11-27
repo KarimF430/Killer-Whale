@@ -97,6 +97,10 @@ export default async function VariantDetailPage({ params }: PageProps) {
       variant = variants[0] // Fallback to first variant
     }
 
+    // Calculate model's starting price from variants
+    const variantPrices = variants.map((v: any) => v.price).filter((p: number) => p > 0)
+    const modelStartingPrice = variantPrices.length > 0 ? Math.min(...variantPrices) : 0
+
     // Fetch similar cars (same as model page)
     const similarModelsRes = await fetch(
       `${backendUrl}/api/models-with-pricing?bodyType=${model.bodyType || 'Hatchback'}`,
@@ -118,8 +122,8 @@ export default async function VariantDetailPage({ params }: PageProps) {
         const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
           ? m.fuelTypes
           : ['Petrol']
-        const transmissionTypes = m.transmissionTypes && m.transmissionTypes.length > 0
-          ? m.transmissionTypes
+        const transmissionTypes = m.transmissions && m.transmissions.length > 0
+          ? m.transmissions
           : ['Manual']
 
         return {
@@ -135,9 +139,10 @@ export default async function VariantDetailPage({ params }: PageProps) {
         }
       })
 
-    // Add similar cars to model object
+    // Add similar cars and starting price to model object
     const modelWithSimilarCars = {
       ...model,
+      startingPrice: modelStartingPrice,
       similarCars
     }
 

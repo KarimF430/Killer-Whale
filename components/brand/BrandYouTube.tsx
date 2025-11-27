@@ -346,9 +346,7 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
         const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
         const channelId = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID || '@motoroctane'
 
-        console.log('🔑 YouTube API Key exists:', !!apiKey)
-        console.log('📺 Channel ID:', channelId)
-        console.log('🏷️ Brand Name:', brandName)
+
 
         if (!apiKey) {
           console.log('ℹ️ YouTube API key not configured - using fallback videos')

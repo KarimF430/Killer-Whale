@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 import { truncateCarName } from '@/lib/text-utils'
 import { formatPrice, formatPriceRange } from '@/utils/priceFormatter'
 import { Heart, Star, Share2, ChevronDown, ChevronRight, Calendar, Users, Fuel, ChevronLeft, Clock, Eye, MessageCircle, ArrowRight, Play, ExternalLink, ThumbsUp, Phone, CheckCircle, Settings } from 'lucide-react'
@@ -11,6 +12,7 @@ import PageSection from '../common/PageSection'
 import AdBanner from '../home/AdBanner'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import VariantCard from '../car-model/VariantCard'
+import CarCard from '../home/CarCard'
 import UpcomingCars from '../home/UpcomingCars'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
 
@@ -442,6 +444,20 @@ export default function VariantPage({
       .map(line => line.trim())
       .filter(line => line.length > 0)
       .map(line => line.replace(/^[•\-\*]\s*/, ''))
+  }
+
+  // Helper function to calculate on-road price using the exact same logic as CarsByBudget
+  const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
+    // Get selected city from localStorage (same as useOnRoadPrice hook)
+    const selectedCity = typeof window !== 'undefined'
+      ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
+      : 'Mumbai, Maharashtra'
+
+    const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
+
+    // Use the exact same calculation function as CarsByBudget
+    const breakup = calculateOnRoadPrice(exShowroomPrice, state, fuelType)
+    return breakup.totalOnRoadPrice
   }
 
   // Create dynamic variant data from backend
@@ -2861,78 +2877,37 @@ export default function VariantPage({
                     className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
-                    {(model?.similarCars || []).map((car: any) => (
-                      <div
-                        key={car.id}
-                        className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
-                        onClick={() => {
-                          const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                          const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                          window.location.href = `/${brandSlug}-cars/${modelSlug}`
-                        }}
-                      >
-                        {/* Car Image */}
-                        <div className="relative h-48 bg-gray-50">
-                          {car.isNew && (
-                            <div className="absolute top-3 left-3 z-10">
-                              <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                NEW
-                              </span>
-                            </div>
-                          )}
-                          <img
-                            src={car.image || '/placeholder-car.png'}
-                            alt={`${car.brandName} ${car.name}`}
-                            className="w-full h-full object-contain p-4"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </div>
+                    {(model?.similarCars || []).map((car: any) => {
+                      // Transform the data to match CarCard interface
+                      const transformedCar = {
+                        id: car.id,
+                        name: car.name,
+                        brand: car.brand || car.brandName,
+                        brandName: car.brandName,
+                        image: car.image || '/placeholder-car.png',
+                        startingPrice: car.startingPrice,
+                        lowestPriceFuelType: car.fuelTypes?.[0] || 'Petrol',
+                        fuelTypes: car.fuelTypes || ['Petrol'],
+                        transmissions: car.transmissionTypes || ['Manual'],
+                        seating: car.seating || 5,
+                        launchDate: car.launchDate || 'Recently Launched',
+                        slug: car.slug || `${car.brandName?.toLowerCase().replace(/\s+/g, '-')}-${car.name?.toLowerCase().replace(/\s+/g, '-')}`,
+                        isNew: car.isNew || false,
+                        isPopular: car.isPopular || false
+                      }
 
-                        {/* Car Details */}
-                        <div className="p-5">
-                          <h3 className="font-bold text-lg text-gray-900 mb-2">
-                            {car.brandName} {car.name}
-                          </h3>
-
-                          <div className="flex items-baseline gap-2 mb-3">
-                            <span className="text-2xl font-bold text-red-600">
-                              ₹ {(car.startingPrice / 100000).toFixed(2)} Lakh
-                            </span>
-                            <span className="text-sm text-gray-500">Onwards</span>
-                          </div>
-
-                          <div className="text-sm text-gray-600 mb-4">On-Road Price</div>
-
-                          {/* Specs */}
-                          <div className="space-y-2 text-sm text-gray-600 mb-4">
-                            {car.launchDate && (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4" />
-                                <span>Launched {car.launchDate}</span>
-                              </div>
-                            )}
-                            {car.fuelTypes && car.fuelTypes.length > 0 && (
-                              <div className="flex items-center gap-2">
-                                <Fuel className="w-4 h-4" />
-                                <span>{car.fuelTypes.join('/')}</span>
-                              </div>
-                            )}
-                            {car.transmissionTypes && car.transmissionTypes.length > 0 && (
-                              <div className="flex items-center gap-2">
-                                <Settings className="w-4 h-4" />
-                                <span>{car.transmissionTypes.join('/')}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* View Details Button */}
-                          <button className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2.5 rounded-lg transition-all duration-200 font-semibold">
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      return (
+                        <CarCard
+                          key={car.id}
+                          car={transformedCar}
+                          onClick={() => {
+                            const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                            const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                            window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                          }}
+                        />
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -2962,9 +2937,11 @@ export default function VariantPage({
                     style={{ scrollbarWidth: 'thin', msOverflowStyle: 'auto' }}
                   >
                     {(model?.similarCars || []).map((car: any) => {
-                      // Calculate on-road prices
-                      const currentModelOnRoad = variant?.price || model?.startingPrice || 0
-                      const compareCarOnRoad = car.startingPrice
+                      // Calculate on-road prices using the same logic as Model Page
+                      // Use the model's actual starting price (already in rupees from backend)
+                      const modelStartingPrice = model?.startingPrice || variant?.price || 0
+                      const currentModelOnRoad = getOnRoadPrice(modelStartingPrice, 'Petrol')
+                      const compareCarOnRoad = getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol')
 
                       return (
                         <div key={car.id} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
