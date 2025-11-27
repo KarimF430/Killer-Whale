@@ -22,6 +22,7 @@ import {
 } from "./middleware/rateLimiter";
 import { redisCacheMiddleware, invalidateRedisCache, CacheTTL as RedisCacheTTL } from "./middleware/redis-cache";
 import { securityMiddleware, validateFileUpload } from "./middleware/sanitize";
+import { ipWhitelist, botDetector, ddosShield } from "./middleware/security";
 import { imageProcessingConfigs, ImageProcessor } from "./middleware/image-processor";
 import multer from "multer";
 import path from "path";
@@ -363,8 +364,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Bulk import brands endpoint - with strict bulk rate limiting
-  app.post("/api/bulk/brands", bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
+  // Bulk import brands endpoint - with strict bulk rate limiting + IP whitelist
+  app.post("/api/bulk/brands", ipWhitelist, bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
     try {
       console.log('📦 Starting bulk brand import...');
       const { brands } = req.body;
@@ -406,8 +407,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Bulk import variants endpoint - with strict bulk rate limiting
-  app.post("/api/bulk/variants", bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
+  // Bulk import variants endpoint - with strict bulk rate limiting + IP whitelist
+  app.post("/api/bulk/variants", ipWhitelist, bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
     try {
       console.log('📦 Starting bulk variant import...');
       const { variants } = req.body;
@@ -448,8 +449,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Bulk import models endpoint - with strict bulk rate limiting
-  app.post("/api/bulk/models", bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
+  // Bulk import models endpoint - with strict bulk rate limiting + IP whitelist
+  app.post("/api/bulk/models", ipWhitelist, bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
     try {
       console.log('📦 Starting bulk model import...');
       const { models } = req.body;
@@ -492,7 +493,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Clear models only endpoint
-  app.post("/api/cleanup/clear-models", authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
+  app.post("/api/cleanup/clear-models", ipWhitelist, authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting models cleanup...');
 
@@ -527,7 +528,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Clear all data endpoint
-  app.post("/api/cleanup/clear-all", authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
+  app.post("/api/cleanup/clear-all", ipWhitelist, authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting complete database cleanup...');
 
@@ -573,7 +574,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Cleanup orphaned data endpoint
-  app.post("/api/cleanup/orphaned-data", authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
+  app.post("/api/cleanup/orphaned-data", ipWhitelist, authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting orphaned data cleanup...');
 

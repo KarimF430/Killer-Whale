@@ -14,7 +14,9 @@ const __dirname = path.dirname(__filename);
 // dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const LOCAL_URI = 'mongodb://localhost:27017/motoroctane';
-const PROD_URI = 'mongodb+srv://motoroctane_user21:U2kcCNN7h5Y56Je6@cluster0.hok00oq.mongodb.net/motoroctane?retryWrites=true&w=majority&appName=Cluster0';
+const PROD_URI = process.env.MONGODB_URI || (() => {
+    throw new Error('MONGODB_URI environment variable is required');
+})();
 
 if (!PROD_URI || PROD_URI.includes('localhost')) {
     console.error('❌ MONGODB_URI is not set to a remote production database.');

@@ -116,6 +116,8 @@ modelSchema.index({ name: 1 });
 modelSchema.index({ isPopular: 1, popularRank: 1 });
 modelSchema.index({ isNew: 1, newRank: 1 });
 modelSchema.index({ bodyType: 1, status: 1 });
+modelSchema.index({ brandId: 1, status: 1, name: 1 }); // Sort models within brand
+modelSchema.index({ status: 1, launchDate: -1 }); // New launches
 
 // Variant Schema - Complete with all fields
 const variantSchema = new mongoose.Schema({
@@ -375,6 +377,8 @@ variantSchema.index({ transmission: 1, status: 1 });
 variantSchema.index({ createdAt: -1 }); // For latest variants
 variantSchema.index({ name: 'text', description: 'text' }); // Text search
 variantSchema.index({ price: 1, status: 1 }); // Price filtering
+variantSchema.index({ modelId: 1, status: 1, price: 1 }); // Sort variants of a model
+variantSchema.index({ brandId: 1, status: 1, bodyType: 1 }); // Filter by body type across brand
 
 // Admin User Schema
 const adminUserSchema = new mongoose.Schema({
@@ -456,6 +460,7 @@ newsArticleSchema.index({ authorId: 1, status: 1 });
 newsArticleSchema.index({ isFeatured: 1, status: 1 });
 newsArticleSchema.index({ views: -1 }); // For trending articles
 newsArticleSchema.index({ title: 'text', excerpt: 'text' }); // Text search
+newsArticleSchema.index({ status: 1, publishDate: -1, isFeatured: 1 }); // Homepage news
 
 // News Category Schema
 const newsCategorySchema = new mongoose.Schema({

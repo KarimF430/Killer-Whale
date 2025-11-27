@@ -20,6 +20,8 @@ import pinoHttp from "pino-http";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
+import * as Sentry from "@sentry/node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -31,7 +33,24 @@ const backendEnv = path.resolve(__dirname, '../.env');
 dotenv.config({ path: rootEnv });
 dotenv.config({ path: backendEnv, override: true });
 
+// Initialize Sentry
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  // Tracing
+  tracesSampleRate: 1.0, //  Capture 100% of the transactions
+  // Set sampling rate for profiling - this is relative to tracesSampleRate
+  profilesSampleRate: 1.0,
+});
+
 const app = express();
+
+// Sentry Request Handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());
@@ -306,6 +325,9 @@ app.use(
       // console.error('❌ Failed to initialize scheduler:', error);
       console.warn('⚠️  Continuing without scheduler...');
     }
+
+    // Sentry Error Handler must be before any other error middleware and after all controllers
+    app.use(Sentry.Handlers.errorHandler());
 
     // Error handling middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

@@ -9,6 +9,12 @@ dotenv.config();
 
 // JWT Configuration
 const AUTH_BYPASS = process.env.AUTH_BYPASS === 'true';
+
+// SECURITY: Prevent AUTH_BYPASS in production
+if (AUTH_BYPASS && process.env.NODE_ENV === 'production') {
+  throw new Error('🚨 SECURITY ERROR: AUTH_BYPASS cannot be enabled in production!');
+}
+
 const JWT_SECRET = process.env.JWT_SECRET as string;
 if (!JWT_SECRET && !AUTH_BYPASS) {
   throw new Error('JWT_SECRET environment variable is required');
