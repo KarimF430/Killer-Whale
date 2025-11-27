@@ -224,7 +224,7 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="gray">
-          <BrandSection initialBrands={brands} />
+          <BrandSection />
         </PageSection>
 
         <PageSection background="white">
@@ -249,7 +249,7 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="white">
-          <PopularComparisons initialComparisons={comparisons} />
+          <PopularComparisons />
         </PageSection>
 
         <PageSection background="white">

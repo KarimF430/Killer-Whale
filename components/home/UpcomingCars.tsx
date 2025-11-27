@@ -72,7 +72,7 @@ export default function UpcomingCars({ cars }: { cars?: Car[] }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">Upcoming Cars</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Upcoming Cars</h2>
 
       {/* Cars Horizontal Scroll */}
       <div className="relative">

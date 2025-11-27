@@ -125,7 +125,7 @@ export default function YouTubeVideoPlayer() {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Latest Videos</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Latest Videos</h2>
           <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -151,7 +151,7 @@ export default function YouTubeVideoPlayer() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Latest Videos</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Latest Videos</h2>
         <a
           href="https://www.youtube.com/@motoroctane"
           target="_blank"
