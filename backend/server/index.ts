@@ -20,7 +20,7 @@ import pinoHttp from "pino-http";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
-import * as Sentry from "@sentry/node";
+import { init as sentryInit, Handlers as SentryHandlers } from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 // Get __dirname equivalent in ES modules
@@ -37,7 +37,7 @@ dotenv.config({ path: backendEnv, override: true });
 const sentryEnabled = !!process.env.SENTRY_DSN;
 if (sentryEnabled) {
   try {
-    Sentry.init({
+    sentryInit({
       dsn: process.env.SENTRY_DSN,
       integrations: [
         nodeProfilingIntegration(),
@@ -59,11 +59,11 @@ if (sentryEnabled) {
 const app = express();
 
 // Sentry Request Handler must be the first middleware on the app (if Sentry is configured)
-if (sentryEnabled && Sentry.Handlers) {
+if (sentryEnabled && SentryHandlers) {
   try {
-    app.use(Sentry.Handlers.requestHandler());
+    app.use(SentryHandlers.requestHandler());
     // TracingHandler creates a trace for every incoming request
-    app.use(Sentry.Handlers.tracingHandler());
+    app.use(SentryHandlers.tracingHandler());
   } catch (error) {
     console.warn('⚠️ Sentry handlers not available:', error);
   }
@@ -344,9 +344,9 @@ app.use(
     }
 
     // Sentry Error Handler must be before any other error middleware and after all controllers
-    if (sentryEnabled && Sentry.Handlers) {
+    if (sentryEnabled && SentryHandlers) {
       try {
-        app.use(Sentry.Handlers.errorHandler());
+        app.use(SentryHandlers.errorHandler());
       } catch (error) {
         console.warn('⚠️ Sentry error handler not available:', error);
       }
