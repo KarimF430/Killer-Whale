@@ -844,7 +844,7 @@ export default function VariantPage({
             </div>
 
             {/* Variant and City Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Variant Dropdown */}
               <div className="relative" ref={variantDropdownRef}>
                 <button
@@ -939,11 +939,11 @@ export default function VariantPage({
 
             {/* Key Features */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">Key Features</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Key Features</h2>
 
               {/* Highlights Grid - Horizontal Scroll */}
               <div className="relative">
-                <div className="highlights-scroll-container flex gap-4 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div className="highlights-scroll-container flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   {/* Dynamic Highlight Cards from Variant Backend */}
                   {showSkeleton ? (
                     /* Skeleton loading cards */
@@ -1063,7 +1063,7 @@ export default function VariantPage({
           <div id="specifications" className="space-y-8">
             {/* SEO Text Section */}
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">{brandName} {modelName} {variantName} Info</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} {variantName} Info</h2>
               <div className="text-gray-700 leading-relaxed">
                 <p>
                   Tata Nexon price for the base model starts at Rs. 8.00 Lakh and the top model price goes upto Rs. 15.60 Lakh (Avg. ex-showroom). Nexon price for 49 variants is listed below.
@@ -1073,7 +1073,7 @@ export default function VariantPage({
 
             {/* Specifications Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
                 {brandName} {variantName} {modelName} Specifications & Features
               </h2>
 
@@ -2448,7 +2448,7 @@ export default function VariantPage({
 
             {/* More Variants Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">More {displayBrandName} {displayModelName} {variantName} Variants</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">More {displayBrandName} {displayModelName} {variantName} Variants</h2>
 
               {/* Filter Options - Dynamic based on available variants */}
               <div className="flex flex-wrap gap-3">
@@ -2525,7 +2525,7 @@ export default function VariantPage({
           <div className="space-y-8">
             {/* Variant Summary Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{displayBrandName} {displayModelName} {variantName} Summary</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName} {displayModelName} {variantName} Summary</h2>
 
               <div className="space-y-6">
                 {/* Description */}
@@ -2634,7 +2634,7 @@ export default function VariantPage({
 
             {/* Engine Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{displayBrandName} {displayModelName} {variantName} Engine</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName} {displayModelName} {variantName} Engine</h2>
 
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 {/* Engine Header - Always Visible */}
@@ -2754,7 +2754,7 @@ export default function VariantPage({
 
             {/* Mileage Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{displayBrandName} {displayModelName} {variantName} Mileage</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName} {displayModelName} {variantName} Mileage</h2>
 
               <div className="flex justify-center">
                 <div className="w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
@@ -2800,7 +2800,7 @@ export default function VariantPage({
           <div className="space-y-8">
             {/* City On-Road Prices */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{brandName} {modelName} {variantName} Price Across India</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} {variantName} Price Across India</h2>
 
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 {/* Table Header */}
@@ -2850,7 +2850,7 @@ export default function VariantPage({
           <div className="space-y-8">
             {/* Similar Cars Section - Exact copy from CarModelPage */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
                 Similar Cars To {displayModelName || 'model'}
               </h2>
 
@@ -2915,7 +2915,7 @@ export default function VariantPage({
 
             {/* Compare With Similar Cars Section - Dynamic with body type matching */}
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">Compare With Similar Cars</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare With Similar Cars</h2>
 
               {/* Comparison Cards - Horizontal Scroll */}
               <div className="relative">
@@ -3028,7 +3028,7 @@ export default function VariantPage({
             {/* Feedback Section */}
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Share Your Feedback</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Share Your Feedback</h2>
                 <p className="text-gray-600">Help us improve by sharing your thoughts about this page</p>
               </div>
 

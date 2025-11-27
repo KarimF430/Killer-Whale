@@ -1015,7 +1015,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
             {/* Car Title and Actions */}
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">
                   {model?.brand || 'Car Brand'} {model?.name || 'Car Model'}
                 </h1>
 
@@ -2043,7 +2043,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
           <div id="similar-cars" className="space-y-8">
             {/* Similar Cars Section - Exact copy from CarsByBudget */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
                 Similar Cars To {model?.name || 'model'}
               </h2>
 
