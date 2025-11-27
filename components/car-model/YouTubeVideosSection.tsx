@@ -25,7 +25,7 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
   const moreVideos = videos.slice(1)
 
   return (
-    <section className="py-12 bg-white">
+    <section className="py-6 sm:py-8 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">

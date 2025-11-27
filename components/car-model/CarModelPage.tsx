@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Star, Heart, Share2, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowRight, Calendar, Fuel, Users, Settings, IndianRupee, MapPin, Phone, MessageCircle, Zap, Shield, Award, TrendingUp, Clock, CheckCircle, AlertCircle, Info, X, Plus, Minus, Eye, ExternalLink, Play, ThumbsUp, Wrench, DollarSign } from 'lucide-react'
+import { Star, Heart, Share2, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowRight, Calendar, Fuel, Users, Settings, IndianRupee, MapPin, Phone, MessageCircle, Zap, Shield, Award, TrendingUp, Clock, CheckCircle, AlertCircle, Info, X, Plus, Minus, Eye, ExternalLink, Play, ThumbsUp, ThumbsDown, Wrench, DollarSign, User, Car } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
@@ -201,31 +201,40 @@ const userReviews = [
   {
     id: 1,
     userName: 'Rajesh Kumar',
+    userLocation: 'Delhi',
     rating: 4.5,
+    reviewDate: '2024-03-12',
+    carModel: 'VXI AMT',
+    reviewTitle: 'Perfect City Car',
     reviewText: 'Excellent car for city driving. Great fuel economy and reliable performance. The AMT variant is perfect for traffic conditions.',
-    location: 'Delhi',
-    date: '2024-03-12',
-    variant: 'VXI AMT',
+    helpfulVotes: 45,
+    totalVotes: 50,
     verified: true
   },
   {
     id: 2,
     userName: 'Priya Sharma',
+    userLocation: 'Mumbai',
     rating: 4.0,
+    reviewDate: '2024-03-10',
+    carModel: 'ZXI',
+    reviewTitle: 'Good Features but Limited Space',
     reviewText: 'Good build quality and features. The infotainment system is user-friendly. Only complaint is the rear seat space.',
-    location: 'Mumbai',
-    date: '2024-03-10',
-    variant: 'ZXI',
+    helpfulVotes: 32,
+    totalVotes: 35,
     verified: true
   },
   {
     id: 3,
     userName: 'Amit Singh',
+    userLocation: 'Bangalore',
     rating: 4.2,
+    reviewDate: '2024-03-08',
+    carModel: 'VXI',
+    reviewTitle: 'Value for Money',
     reviewText: 'Value for money car with good after-sales service. The K-Series engine is proven and reliable.',
-    location: 'Bangalore',
-    date: '2024-03-08',
-    variant: 'VXI',
+    helpfulVotes: 28,
+    totalVotes: 30,
     verified: false
   }
 ]
@@ -267,6 +276,8 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
   const [showAllSimilarCars, setShowAllSimilarCars] = useState(false)
   const [showAllCities, setShowAllCities] = useState(false)
   const [selectedCity, setSelectedCity] = useState(model?.cities?.[0]?.name || 'Delhi')
+  const [selectedRating, setSelectedRating] = useState<number | null>(null)
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'rating' | 'helpful'>('newest')
 
   // Load car models for hyperlink generation
   useCarModelsData()
@@ -303,6 +314,56 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
     isNew: false,
     isPopular: false
   } : null
+
+  // Review Logic
+  const reviews = useMemo(() => model.reviews || userReviews, [model.reviews])
+
+  const ratingDistribution = useMemo(() => {
+    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    reviews.forEach((review: any) => {
+      const rating = Math.round(review.rating) as 1 | 2 | 3 | 4 | 5
+      if (distribution[rating as keyof typeof distribution] !== undefined) {
+        distribution[rating as keyof typeof distribution]++
+      }
+    })
+    return distribution
+  }, [reviews])
+
+  const totalReviews = reviews.length
+  const averageRating = totalReviews > 0 ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / totalReviews : 0
+
+  const filteredReviews = useMemo(() => {
+    let result = [...reviews]
+
+    // Filter by rating
+    if (selectedRating) {
+      result = result.filter((r: any) => Math.round(r.rating) === selectedRating)
+    }
+
+    // Sort
+    if (sortBy === 'newest') {
+      result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    } else if (sortBy === 'oldest') {
+      result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    } else if (sortBy === 'rating') {
+      result.sort((a, b) => b.rating - a.rating)
+    } else if (sortBy === 'helpful') {
+      // Mock helpful sort as we don't have helpful count in all data
+      result.sort((a, b) => (b.helpful || 0) - (a.helpful || 0))
+    }
+
+    return result
+  }, [reviews, selectedRating, sortBy])
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`h-4 w-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+          }`}
+      />
+    ))
+  }
 
   useViewTracker(carDataForTracking)
 
@@ -953,7 +1014,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
             {/* Car Title and Actions */}
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
                   {model?.brand || 'Car Brand'} {model?.name || 'Car Model'}
                 </h1>
 
@@ -1028,7 +1089,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
             {/* Price Display */}
             <div className="space-y-4">
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">
                 {formatPriceRange(displayStartPrice / 100000, displayEndPrice / 100000)}
               </div>
               <div className="text-sm text-gray-500">*{priceLabel}</div>
@@ -1137,10 +1198,10 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
             {/* Model Highlights */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Highlights</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Highlights</h2>
 
               {/* Tab Navigation - Clickable Headers */}
-              <div className="flex space-x-8 border-b border-gray-200">
+              <div className="flex space-x-4 sm:space-x-8 border-b border-gray-200 overflow-x-auto scrollbar-hide">
                 <button
                   onClick={() => handleHighlightTabChange('keyFeatures')}
                   className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeHighlightTab === 'keyFeatures'
@@ -1336,7 +1397,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
           <div id="variants" className="space-y-8">
             {/* Model Price Header */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">{model?.brand || 'Car'} {model?.name || 'Model'} Price</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">{model?.brand || 'Car'} {model?.name || 'Model'} Price</h2>
 
               {/* SEO Content */}
               <div className="text-gray-700 leading-relaxed">
@@ -1442,7 +1503,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
             {/* Color Options Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Colours</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Colours</h2>
 
               {/* Check if backend colorImages exist */}
               {model?.colorImages && model.colorImages.length > 0 ? (
@@ -1581,7 +1642,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
           <div id="pros-cons" className="space-y-8">
             {/* Pros & Cons Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Pros & Cons</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Pros & Cons</h2>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Pros Column */}
@@ -1648,7 +1709,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
             {/* Model Summary Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Summary</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Summary</h2>
 
               <div className="space-y-6">
                 {/* Description */}
@@ -1762,7 +1823,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
             {/* Engine Highlights */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Engine</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Engine</h2>
 
               <div className="space-y-4">
                 {/* Use backend engineSummaries if available, otherwise fallback to engineOptions */}
@@ -1835,7 +1896,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
                                   })()}
                                 </h4>
 
-                                <div className="grid grid-cols-3 gap-4 text-center">
+                                <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                                   <div>
                                     <p className="text-xs text-gray-500 mb-1">Power:</p>
                                     <p className="font-medium text-gray-900">{(engine as any).power}</p>
@@ -1866,7 +1927,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
                                       {variant.type}
                                     </h4>
 
-                                    <div className="grid grid-cols-3 gap-4 text-center">
+                                    <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                                       <div>
                                         <p className="text-xs text-gray-500 mb-1">Power:</p>
                                         <p className="font-medium text-gray-900">{variant.power}</p>
@@ -1900,7 +1961,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
           <div id="mileage" className="space-y-8">
             {/* Mileage Section */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} Mileage</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Mileage</h2>
 
               {/* Horizontal Scrollable Mileage Cards */}
               <div className="relative">
@@ -2026,7 +2087,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
             {/* Compare With Similar Cars Section - Dynamic with body type matching */}
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">Compare With Similar Cars</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare With Similar Cars</h2>
 
               {/* Comparison Cards - Horizontal Scroll */}
               <div className="relative">
@@ -2145,7 +2206,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
             {/* Model News Section - Exact copy from home page */}
             <div>
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} News</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} News</h2>
                 <Link
                   href="/news"
                   className="flex items-center text-red-600 hover:text-orange-600 font-medium"
@@ -2249,12 +2310,19 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
         {/* Section 10: Model FAQ & Owner Reviews */}
         <PageSection background="white" maxWidth="7xl">
-          <div id="faq-reviews" className="space-y-8">
-            {/* Model FAQ Section - Exact copy from brand page */}
+          <div id="faq-reviews" className="space-y-12">
+            {/* Model FAQ Section - Matches BrandFAQ */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} FAQ</h2>
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1.5 sm:mb-2">
+                  {model?.brand || 'Car'} {model?.name || 'Model'} FAQ
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {(model?.faqs?.length || 0) > 0 ? `${model?.faqs?.length} questions about ${model?.name}` : 'Common questions answered'}
+                </p>
+              </div>
 
-              <div className="space-y-4 max-w-4xl mx-auto">
+              <div className="space-y-3 sm:space-y-4 max-w-4xl mx-auto">
                 {/* Dynamic FAQ Items from backend */}
                 {(model?.faqs && model.faqs.length > 0 ? model.faqs : [
                   {
@@ -2274,26 +2342,27 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
                     answer: "The Triber is an excellent choice for families with its 7-seater configuration and spacious interior."
                   }
                 ]).map((faq, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg border border-gray-200">
+                  <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                     <button
                       onClick={() => toggleFAQ(index)}
-                      className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-100 transition-colors"
+                      className="w-full px-4 py-3 sm:px-6 sm:py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors min-h-[56px]"
                     >
-                      <span className="text-lg font-medium text-gray-900">
+                      <span className="font-medium text-gray-900 pr-3 sm:pr-4 text-sm sm:text-base">
                         {faq.question}
                       </span>
-                      <svg
-                        className={`h-5 w-5 text-gray-500 transition-transform ${openFAQ === index ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      {openFAQ === index ? (
+                        <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 flex-shrink-0" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 flex-shrink-0" />
+                      )}
                     </button>
                     {openFAQ === index && (
-                      <div className="px-6 pb-4 text-gray-600 leading-relaxed">
-                        {renderTextWithCarLinks(faq.answer, model?.brand)}
+                      <div className="px-4 pb-3 sm:px-6 sm:pb-4">
+                        <div className="border-t border-gray-100 pt-3 sm:pt-4">
+                          <div className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                            {renderTextWithCarLinks(faq.answer, model?.brand)}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -2301,227 +2370,218 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
               </div>
             </div>
 
-            {/* Model Owner Reviews Section - Exact copy from brand page */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Owner Reviews</h2>
+            {/* Model Owner Reviews Section - Exact Copy from BrandHeroSection.tsx */}
+            <section className="py-6 sm:py-8 bg-gray-50">
+              <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Owner Reviews</h2>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Rating Summary */}
-                <div className="lg:col-span-1">
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4].map((star) => (
-                          <svg key={star} className="h-6 w-6 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                        <svg className="h-6 w-6 text-gray-300" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+                {/* Overall Rating */}
+                <div className="flex items-center mb-4 sm:mb-6">
+                  <div className="flex items-center flex-wrap gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <svg key={star} className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                    <span className="ml-1 sm:ml-2 text-xl sm:text-2xl font-bold text-gray-900">4.2</span>
+                    <span className="text-sm sm:text-base text-gray-600">(1,543 reviews)</span>
+                  </div>
+                </div>
+
+                {/* Rating Breakdown */}
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Rating Breakdown</h3>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    {/* 5 Star */}
+                    <div className="flex items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 w-5 sm:w-6">5★</span>
+                      <div className="flex-1 mx-2 sm:mx-3 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                        <div className="bg-orange-500 h-1.5 sm:h-2 rounded-full" style={{ width: '60%' }}></div>
                       </div>
-                      <span className="ml-2 text-2xl font-bold text-gray-900">4.2</span>
-                      <span className="ml-2 text-gray-500">(1,543 reviews)</span>
+                      <span className="text-xs sm:text-sm text-gray-600 w-7 sm:w-8 text-right">856</span>
                     </div>
 
-                    <div className="space-y-2 mb-6">
-                      <h3 className="font-semibold text-gray-900 mb-3">Rating Breakdown</h3>
-
-                      {/* 5 Star */}
-                      <div className="flex items-center">
-                        <span className="text-sm text-gray-600 w-8">5★</span>
-                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                          <div className="bg-orange-400 h-2 rounded-full" style={{ width: '55%' }}></div>
-                        </div>
-                        <span className="text-sm text-gray-600 w-12 text-right">856</span>
+                    {/* 4 Star */}
+                    <div className="flex items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 w-5 sm:w-6">4★</span>
+                      <div className="flex-1 mx-2 sm:mx-3 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                        <div className="bg-orange-500 h-1.5 sm:h-2 rounded-full" style={{ width: '25%' }}></div>
                       </div>
-
-                      {/* 4 Star */}
-                      <div className="flex items-center">
-                        <span className="text-sm text-gray-600 w-8">4★</span>
-                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                          <div className="bg-orange-400 h-2 rounded-full" style={{ width: '21%' }}></div>
-                        </div>
-                        <span className="text-sm text-gray-600 w-12 text-right">324</span>
-                      </div>
-
-                      {/* 3 Star */}
-                      <div className="flex items-center">
-                        <span className="text-sm text-gray-600 w-8">3★</span>
-                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                          <div className="bg-orange-400 h-2 rounded-full" style={{ width: '12%' }}></div>
-                        </div>
-                        <span className="text-sm text-gray-600 w-12 text-right">189</span>
-                      </div>
-
-                      {/* 2 Star */}
-                      <div className="flex items-center">
-                        <span className="text-sm text-gray-600 w-8">2★</span>
-                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                          <div className="bg-gray-300 h-2 rounded-full" style={{ width: '2%' }}></div>
-                        </div>
-                        <span className="text-sm text-gray-600 w-12 text-right">26</span>
-                      </div>
-
-                      {/* 1 Star */}
-                      <div className="flex items-center">
-                        <span className="text-sm text-gray-600 w-8">1★</span>
-                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                          <div className="bg-gray-300 h-2 rounded-full" style={{ width: '1%' }}></div>
-                        </div>
-                        <span className="text-sm text-gray-600 w-12 text-right">13</span>
-                      </div>
+                      <span className="text-xs sm:text-sm text-gray-600 w-7 sm:w-8 text-right">324</span>
                     </div>
 
-                    {/* Filter Options */}
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Filter by rating:</label>
-                        <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                          <option>All Ratings</option>
-                          <option>5 Stars</option>
-                          <option>4 Stars</option>
-                          <option>3 Stars</option>
-                          <option>2 Stars</option>
-                          <option>1 Star</option>
-                        </select>
+                    {/* 3 Star */}
+                    <div className="flex items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 w-5 sm:w-6">3★</span>
+                      <div className="flex-1 mx-2 sm:mx-3 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                        <div className="bg-orange-500 h-1.5 sm:h-2 rounded-full" style={{ width: '12%' }}></div>
                       </div>
+                      <span className="text-xs sm:text-sm text-gray-600 w-7 sm:w-8 text-right">189</span>
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Sort by:</label>
-                        <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                          <option>Most Recent</option>
-                          <option>Most Helpful</option>
-                          <option>Highest Rating</option>
-                          <option>Lowest Rating</option>
-                        </select>
+                    {/* 2 Star */}
+                    <div className="flex items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 w-5 sm:w-6">2★</span>
+                      <div className="flex-1 mx-2 sm:mx-3 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                        <div className="bg-orange-500 h-1.5 sm:h-2 rounded-full" style={{ width: '2%' }}></div>
                       </div>
+                      <span className="text-xs sm:text-sm text-gray-600 w-7 sm:w-8 text-right">26</span>
+                    </div>
+
+                    {/* 1 Star */}
+                    <div className="flex items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700 w-5 sm:w-6">1★</span>
+                      <div className="flex-1 mx-2 sm:mx-3 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                        <div className="bg-orange-500 h-1.5 sm:h-2 rounded-full" style={{ width: '1%' }}></div>
+                      </div>
+                      <span className="text-xs sm:text-sm text-gray-600 w-7 sm:w-8 text-right">13</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Reviews List */}
-                <div className="lg:col-span-2">
-                  {/* Individual Reviews */}
-                  <div className="space-y-6">
-                    {/* Review 1 */}
-                    <div className="border-b border-gray-200 pb-6">
-                      <div className="flex items-start">
-                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
-                          <span className="text-orange-600 font-semibold text-sm">R</span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <h4 className="font-semibold text-gray-900 flex items-center">
-                                Rajesh Kumar
-                                <svg className="h-4 w-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                              </h4>
-                              <p className="text-sm text-gray-500">15/01/2024</p>
-                            </div>
-                            <div className="flex items-center">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <svg key={star} className="h-4 w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                              ))}
-                            </div>
-                          </div>
-                          <h5 className="font-semibold text-gray-900 mb-2">Excellent car with great mileage</h5>
-                          <p className="text-gray-700 mb-3">
-                            I have been using this car for 6 months now. The mileage is excellent in city conditions. Build quality is good and maintenance cost is reasonable.
-                          </p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                            <button className="flex items-center hover:text-gray-700">
-                              <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                              </svg>
-                              24
-                            </button>
-                            <button className="flex items-center hover:text-gray-700">
-                              <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
-                              </svg>
-                              2
-                            </button>
-                            <span>Helpful</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                {/* Filters */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Filter by rating:</label>
+                    <select className="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 bg-white text-sm">
+                      <option>All Ratings</option>
+                      <option>5 Stars</option>
+                      <option>4 Stars</option>
+                      <option>3 Stars</option>
+                      <option>2 Stars</option>
+                      <option>1 Star</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Sort by:</label>
+                    <select className="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 bg-white text-sm">
+                      <option>Most Recent</option>
+                      <option>Most Helpful</option>
+                      <option>Highest Rating</option>
+                      <option>Lowest Rating</option>
+                    </select>
+                  </div>
+                </div>
 
-                    {/* Review 2 */}
-                    <div className="border-b border-gray-200 pb-6">
-                      <div className="flex items-start">
-                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
-                          <span className="text-orange-600 font-semibold text-sm">P</span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <h4 className="font-semibold text-gray-900 flex items-center">
-                                Priya Sharma
-                                <svg className="h-4 w-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                              </h4>
-                              <p className="text-sm text-gray-500">10/01/2024</p>
-                            </div>
-                            <div className="flex items-center">
-                              {[1, 2, 3, 4].map((star) => (
-                                <svg key={star} className="h-4 w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                              ))}
-                              <svg className="h-4 w-4 text-gray-300" viewBox="0 0 20 20">
+                {/* Individual Reviews */}
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Review 1 */}
+                  <div className="border-b border-gray-200 pb-4 sm:pb-6">
+                    <div className="flex items-start">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-full flex items-center justify-center mr-2 sm:mr-4 flex-shrink-0">
+                        <span className="text-orange-600 font-semibold text-xs sm:text-sm">R</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start sm:items-center justify-between mb-2 flex-col sm:flex-row gap-2 sm:gap-0">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 flex items-center text-sm sm:text-base">
+                              Rajesh Kumar
+                              <svg className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 ml-1 sm:ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                            </h4>
+                            <p className="text-xs sm:text-sm text-gray-500">15/01/2024</p>
+                          </div>
+                          <div className="flex items-center">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <svg key={star} className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
-                            </div>
+                            ))}
                           </div>
-                          <h5 className="font-semibold text-gray-900 mb-2">Good family car</h5>
-                          <p className="text-gray-700 mb-3">
-                            Perfect for family use. Spacious interior and comfortable seats. Only issue is the road noise at high speeds.
-                          </p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                            <button className="flex items-center hover:text-gray-700">
-                              <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                              </svg>
-                              18
-                            </button>
-                            <button className="flex items-center hover:text-gray-700">
-                              <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
-                              </svg>
-                              1
-                            </button>
-                            <span>Helpful</span>
-                          </div>
+                        </div>
+                        <h5 className="font-semibold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base">Excellent car with great mileage</h5>
+                        <p className="text-gray-700 mb-2 sm:mb-3 text-sm">
+                          I have been using this car for 6 months now. The mileage is excellent in city conditions. Build quality is good and maintenance cost is reasonable.
+                        </p>
+                        <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-500">
+                          <button className="flex items-center hover:text-gray-700 min-h-[44px] py-2 sm:py-0">
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                            </svg>
+                            24
+                          </button>
+                          <button className="flex items-center hover:text-gray-700 min-h-[44px] py-2 sm:py-0">
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
+                            </svg>
+                            2
+                          </button>
+                          <span className="hidden sm:inline">Helpful</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Read More Button */}
-                  <div className="text-center mt-6">
-                    <button className="text-red-600 hover:text-orange-600 font-medium transition-colors">Read More</button>
-                  </div>
-
-                  {/* Write Review CTA */}
-                  <div className="bg-gray-50 rounded-lg p-6 mt-6 text-center">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Own a {model?.brand || 'Car'} {model?.name || 'Model'}? Share your experience!</h3>
-                    <p className="text-gray-600 mb-4">
-                      Help other buyers make informed decisions by sharing your honest review
-                    </p>
-                    <button className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-md">
-                      Write a Review
-                    </button>
+                  {/* Review 2 */}
+                  <div className="border-b border-gray-200 pb-4 sm:pb-6">
+                    <div className="flex items-start">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-full flex items-center justify-center mr-2 sm:mr-4 flex-shrink-0">
+                        <span className="text-orange-600 font-semibold text-xs sm:text-sm">P</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start sm:items-center justify-between mb-2 flex-col sm:flex-row gap-2 sm:gap-0">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 flex items-center text-sm sm:text-base">
+                              Priya Sharma
+                              <svg className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 ml-1 sm:ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                            </h4>
+                            <p className="text-xs sm:text-sm text-gray-500">12/01/2024</p>
+                          </div>
+                          <div className="flex items-center">
+                            {[1, 2, 3, 4].map((star) => (
+                              <svg key={star} className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                            ))}
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4 text-gray-300" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <h5 className="font-semibold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base">Good family car</h5>
+                        <p className="text-gray-700 mb-2 sm:mb-3 text-sm">
+                          Perfect for family use. Spacious interior and comfortable seats. Only issue is the road noise at high speeds.
+                        </p>
+                        <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-500">
+                          <button className="flex items-center hover:text-gray-700 min-h-[44px] py-2 sm:py-0">
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                            </svg>
+                            18
+                          </button>
+                          <button className="flex items-center hover:text-gray-700 min-h-[44px] py-2 sm:py-0">
+                            <svg className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
+                            </svg>
+                            1
+                          </button>
+                          <span className="hidden sm:inline">Helpful</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                {/* Read More Button */}
+                <div className="text-center mt-4 sm:mt-6">
+                  <button className="text-red-600 hover:text-orange-600 font-medium transition-colors min-h-[44px] py-2 text-sm sm:text-base">Read More</button>
+                </div>
+
+                {/* Write Review CTA */}
+                <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mt-4 sm:mt-6 text-center">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Own a {model?.brand?.toLowerCase() || 'car'} {model?.name?.toLowerCase() || 'model'}? Share your experience!</h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
+                    Help other buyers make informed decisions by sharing your honest review
+                  </p>
+                  <button className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2 sm:px-6 sm:py-2 rounded-lg font-medium transition-all duration-200 shadow-md text-sm sm:text-base">
+                    Write a Review
+                  </button>
+                </div>
               </div>
-            </div>
+            </section>
           </div>
         </PageSection>
 
@@ -2535,7 +2595,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
             {/* Feedback Section */}
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Share Your Feedback</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Share Your Feedback</h2>
                 <p className="text-gray-600">Help us improve by sharing your thoughts about this page</p>
               </div>
 

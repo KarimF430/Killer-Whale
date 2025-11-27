@@ -352,8 +352,8 @@ export default function BudgetCarsPage() {
                             <button
                                 key={fuel}
                                 onClick={() => toggleFilter('fuel', fuel)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedFuel.includes(fuel)
-                                    ? 'bg-red-600 text-white'
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedFuel.includes(fuel)
+                                    ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >
@@ -364,8 +364,8 @@ export default function BudgetCarsPage() {
                             <button
                                 key={trans}
                                 onClick={() => toggleFilter('transmission', trans)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedTransmission.includes(trans)
-                                    ? 'bg-red-600 text-white'
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedTransmission.includes(trans)
+                                    ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >

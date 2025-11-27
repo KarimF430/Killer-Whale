@@ -27,7 +27,7 @@ export default function VariantCard({ variant, onClick, onGetPrice, onCompare }:
   const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-Showroom'
 
   return (
-    <div 
+    <div
       className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
       onClick={onClick}
     >
@@ -45,22 +45,22 @@ export default function VariantCard({ variant, onClick, onGetPrice, onCompare }:
           <p className="text-xl font-bold text-gray-900">{formatPrice(displayPrice)}</p>
         </div>
       </div>
-      
+
       <div className="mb-4">
         <p className="text-sm font-medium text-gray-900 mb-2">Key Features:</p>
         <p className="text-sm text-gray-600 line-clamp-2 overflow-hidden">
           {variant.features}
         </p>
       </div>
-      
+
       <div className="flex space-x-3">
-        <button 
+        <button
           className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
           onClick={onGetPrice}
         >
           Get On-Road Price
         </button>
-        <button 
+        <button
           className="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded text-sm font-medium transition-colors"
           onClick={onCompare}
         >
