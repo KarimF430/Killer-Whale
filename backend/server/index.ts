@@ -33,24 +33,32 @@ const backendEnv = path.resolve(__dirname, '../.env');
 dotenv.config({ path: rootEnv });
 dotenv.config({ path: backendEnv, override: true });
 
-// Initialize Sentry
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  integrations: [
-    nodeProfilingIntegration(),
-  ],
-  // Tracing
-  tracesSampleRate: 1.0, //  Capture 100% of the transactions
-  // Set sampling rate for profiling - this is relative to tracesSampleRate
-  profilesSampleRate: 1.0,
-});
+// Initialize Sentry (only if DSN is configured)
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    integrations: [
+      nodeProfilingIntegration(),
+    ],
+    // Tracing
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    // Set sampling rate for profiling - this is relative to tracesSampleRate
+    profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    environment: process.env.NODE_ENV || 'development',
+  });
+  console.log('✅ Sentry initialized');
+} else {
+  console.log('ℹ️ Sentry not configured (set SENTRY_DSN to enable error tracking)');
+}
 
 const app = express();
 
-// Sentry Request Handler must be the first middleware on the app
-app.use(Sentry.Handlers.requestHandler());
-// TracingHandler creates a trace for every incoming request
-app.use(Sentry.Handlers.tracingHandler());
+// Sentry Request Handler must be the first middleware on the app (if Sentry is configured)
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
+}
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());
@@ -327,7 +335,9 @@ app.use(
     }
 
     // Sentry Error Handler must be before any other error middleware and after all controllers
-    app.use(Sentry.Handlers.errorHandler());
+    if (process.env.SENTRY_DSN) {
+      app.use(Sentry.Handlers.errorHandler());
+    }
 
     // Error handling middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
