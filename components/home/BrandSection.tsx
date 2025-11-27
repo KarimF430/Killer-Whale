@@ -23,19 +23,19 @@ export default function BrandSection({ initialBrands = [] }: { initialBrands?: F
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">Popular Brands</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Popular Brands</h2>
 
       {/* Brands Grid */}
-      <div className="grid grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6 sm:mb-8">
         {/* Show backend brands */}
         {(showAllBrands ? allBrands : allBrands.slice(0, 6)).map((brand) => (
           <Link
             key={brand.id}
             href={`/${brand.slug}-cars`}
-            className="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-all duration-300 p-4 text-center"
+            className="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-all duration-300 p-3 sm:p-4 text-center"
           >
             {/* Brand Logo */}
-            <div className="h-16 flex items-center justify-center mb-3">
+            <div className="h-12 sm:h-16 flex items-center justify-center mb-2 sm:mb-3">
               {brand.logo && brand.logo.startsWith('http') ? (
                 <img
                   src={brand.logo}
@@ -43,7 +43,7 @@ export default function BrandSection({ initialBrands = [] }: { initialBrands?: F
                   width={48}
                   height={48}
                   loading="lazy"
-                  className="w-12 h-12 object-contain"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                   onError={(e) => {
                     const target = e.currentTarget
                     target.style.display = 'none'
@@ -51,15 +51,15 @@ export default function BrandSection({ initialBrands = [] }: { initialBrands?: F
                   }}
                 />
               ) : null}
-              <div className={`w-12 h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-lg flex items-center justify-center ${brand.logo && brand.logo.startsWith('http') ? 'hidden' : ''}`}>
-                <span className="text-sm font-bold text-white">
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-lg flex items-center justify-center ${brand.logo && brand.logo.startsWith('http') ? 'hidden' : ''}`}>
+                <span className="text-xs sm:text-sm font-bold text-white">
                   {brand.name.split(' ').map((word: string) => word.charAt(0)).join('')}
                 </span>
               </div>
             </div>
 
             {/* Brand Name */}
-            <h3 className="font-medium text-gray-900 text-sm">{brand.name}</h3>
+            <h3 className="font-medium text-gray-900 text-xs sm:text-sm">{brand.name}</h3>
           </Link>
         ))}
       </div>
@@ -68,17 +68,18 @@ export default function BrandSection({ initialBrands = [] }: { initialBrands?: F
       <div className="text-center">
         <button
           onClick={() => setShowAllBrands(!showAllBrands)}
-          className="inline-flex items-center bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 shadow-md"
+          className="inline-flex items-center bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-semibold text-sm sm:text-base lg:text-lg transition-all duration-200 shadow-md"
         >
           {showAllBrands ? (
             <>
-              <ChevronUp className="h-5 w-5 mr-2" />
-              Show Less Brands
+              <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              Show Less
             </>
           ) : (
             <>
-              <ChevronDown className="h-5 w-5 mr-2" />
-              Show All {allBrands.length} Brands
+              <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              <span className="hidden sm:inline">Show All {allBrands.length} Brands</span>
+              <span className="sm:hidden">All Brands</span>
             </>
           )}
         </button>

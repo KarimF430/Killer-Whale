@@ -7,9 +7,9 @@ interface PageSectionProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '7xl'
 }
 
-export default function PageSection({ 
-  children, 
-  className = '', 
+export default function PageSection({
+  children,
+  className = '',
   background = 'white',
   title,
   subtitle,
@@ -23,7 +23,7 @@ export default function PageSection({
 
   const maxWidthClasses = {
     sm: 'max-w-sm',
-    md: 'max-w-md', 
+    md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '2xl': 'max-w-2xl',
@@ -31,17 +31,17 @@ export default function PageSection({
   }
 
   return (
-    <section className={`${bgClasses[background]} py-4 ${className}`}>
-      <div className={`${maxWidthClasses[maxWidth]} mx-auto px-4 sm:px-6 lg:px-8`}>
+    <section className={`${bgClasses[background]} py-3 sm:py-4 ${className}`}>
+      <div className={`${maxWidthClasses[maxWidth]} mx-auto px-3 sm:px-4 lg:px-6 xl:px-8`}>
         {(title || subtitle) && (
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             {title && (
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                 {title}
               </h2>
             )}
             {subtitle && (
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 {subtitle}
               </p>
             )}

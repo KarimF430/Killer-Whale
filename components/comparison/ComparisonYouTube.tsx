@@ -69,70 +69,27 @@ export default function ComparisonYouTube({ carNames }: ComparisonYouTubeProps) 
             try {
                 setLoading(true)
 
-                const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
-                const channelId = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID || '@motoroctane'
-
-                if (!apiKey) {
-                    throw new Error('YouTube API key not configured')
-                }
-
-                // Get actual channel ID if needed
-                let actualChannelId = channelId
-                if (channelId.startsWith('@')) {
-                    const searchResponse = await fetch(
-                        `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${channelId}&type=channel&key=${apiKey}`
-                    )
-                    const searchData = await searchResponse.json()
-
-                    if (searchData.items && searchData.items.length > 0) {
-                        actualChannelId = searchData.items[0].snippet.channelId
-                    }
-                }
-
                 // Create search query for comparison videos
-                // Try exact comparison first, then fallback to individual car names
                 const comparisonQuery = carNames.length >= 2
-                    ? `"${carNames[0]} vs ${carNames[1]}"`
+                    ? `${carNames[0]} vs ${carNames[1]}`
                     : carNames.join(' ')
 
-                const videosResponse = await fetch(
-                    `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${actualChannelId}&part=snippet,id&order=date&maxResults=5&type=video&q=${encodeURIComponent(comparisonQuery)}`
-                )
+                // Fetch videos from secure server-side API route
+                const response = await fetch(`/api/youtube/videos?search=${encodeURIComponent(comparisonQuery)}`)
 
-                if (!videosResponse.ok) {
+                if (!response.ok) {
                     throw new Error('Failed to fetch videos')
                 }
 
-                const videosData = await videosResponse.json()
+                const data = await response.json()
 
-                if (!videosData.items || videosData.items.length === 0) {
-                    throw new Error('No videos found')
+                if (data.featuredVideo) {
+                    setFeaturedVideo(data.featuredVideo)
                 }
 
-                // Get video IDs
-                const videoIds = videosData.items.map((item: any) => item.id.videoId).join(',')
-
-                // Fetch video statistics
-                const statsResponse = await fetch(
-                    `https://www.googleapis.com/youtube/v3/videos?key=${apiKey}&id=${videoIds}&part=statistics,contentDetails,snippet`
-                )
-
-                const statsData = await statsResponse.json()
-
-                // Transform the data
-                const videos: YouTubeVideo[] = statsData.items.map((item: any) => ({
-                    id: item.id,
-                    title: item.snippet.title,
-                    thumbnail: item.snippet.thumbnails.high.url,
-                    duration: parseDuration(item.contentDetails.duration),
-                    views: formatViewCount(parseInt(item.statistics.viewCount)),
-                    likes: formatViewCount(parseInt(item.statistics.likeCount || '0')),
-                    publishedAt: formatPublishedDate(item.snippet.publishedAt),
-                    channelName: item.snippet.channelTitle
-                }))
-
-                setFeaturedVideo(videos[0])
-                setRelatedVideos(videos.slice(1))
+                if (data.relatedVideos && data.relatedVideos.length > 0) {
+                    setRelatedVideos(data.relatedVideos)
+                }
             } catch (err) {
                 console.error('Error fetching comparison videos:', err)
             } finally {

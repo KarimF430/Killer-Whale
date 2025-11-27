@@ -68,7 +68,7 @@ export default function PopularCars({ initialCars = [] }: { initialCars?: Car[] 
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">Popular Cars</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Popular Cars</h2>
 
       {/* Cars Horizontal Scroll */}
       <div className="relative">
@@ -95,7 +95,7 @@ export default function PopularCars({ initialCars = [] }: { initialCars?: Car[] 
           </div>
         ) : (
           <div className="relative">
-            <div className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {popularCars.map((car) => (
                 <CarCard
                   key={car.id}

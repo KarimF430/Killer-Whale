@@ -95,15 +95,15 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Cars by Budget</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Cars by Budget</h2>
 
       {/* Budget Filter Buttons */}
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
         {budgetRanges.map((budget) => (
           <button
             key={budget.id}
             onClick={() => setSelectedBudget(budget.id)}
-            className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${selectedBudget === budget.id
+            className={`px-4 py-2 sm:px-6 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${selectedBudget === budget.id
               ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -140,7 +140,7 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
           <div className="relative">
             <div
               id={`budget-cars-${selectedBudget}`}
-              className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
+              className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {currentCars.slice(0, 10).map((car, index) => (
@@ -159,28 +159,28 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
               {currentCars.length > 0 && (
                 <Link
                   href={`/cars-by-budget/${selectedBudget}`}
-                  className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                  className="flex-shrink-0 w-[260px] sm:w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
                 >
                   {/* Top section matching image height */}
-                  <div className="h-48 flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-500">
-                    <div className="text-center px-6">
-                      <h3 className="text-4xl font-bold text-white mb-2">
+                  <div className="h-40 sm:h-48 flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-500">
+                    <div className="text-center px-4 sm:px-6">
+                      <h3 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                         See More
                       </h3>
                     </div>
                   </div>
 
                   {/* Bottom section matching card info height */}
-                  <div className="p-5 bg-gradient-to-br from-orange-500 to-orange-600">
-                    <h4 className="text-2xl font-bold text-white text-center mb-4">
+                  <div className="p-4 sm:p-5 bg-gradient-to-br from-orange-500 to-orange-600">
+                    <h4 className="text-xl sm:text-2xl font-bold text-white text-center mb-3 sm:mb-4">
                       {budgetRanges.find(b => b.id === selectedBudget)?.label} Cars
                     </h4>
 
                     {/* Spacer to match card height */}
-                    <div className="h-24"></div>
+                    <div className="h-20 sm:h-24"></div>
 
                     {/* Button matching View Details */}
-                    <div className="w-full bg-white text-orange-600 py-2.5 rounded-lg font-semibold text-center shadow-md">
+                    <div className="w-full bg-white text-orange-600 py-2 sm:py-2.5 rounded-lg font-semibold text-sm sm:text-base text-center shadow-md">
                       View All Cars
                     </div>
                   </div>

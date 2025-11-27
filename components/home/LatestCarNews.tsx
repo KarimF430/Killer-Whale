@@ -91,14 +91,15 @@ export default function LatestCarNews({ initialNews = [] }: { initialNews?: News
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Latest Car News</h2>
+      <div className="flex items-center justify-between mb-4 sm:mb-6 lg:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Latest Car News</h2>
         <Link
           href="/news"
-          className="flex items-center text-red-600 hover:text-orange-600 font-medium"
+          className="flex items-center text-red-600 hover:text-orange-600 font-medium text-sm sm:text-base"
         >
-          View All News
-          <ArrowRight className="h-4 w-4 ml-1" />
+          <span className="hidden sm:inline">View All News</span>
+          <span className="sm:hidden">View All</span>
+          <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
         </Link>
       </div>
 
@@ -106,17 +107,17 @@ export default function LatestCarNews({ initialNews = [] }: { initialNews?: News
       <div className="relative">
         <div
           id="latest-news-scroll"
-          className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
+          className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {newsArticles.map((article) => (
             <Link
               key={article.id}
               href={`/news/${article.slug}`}
-              className="flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden"
+              className="flex-shrink-0 w-[260px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden"
             >
               {/* Article Image - First image from contentBlocks or gradient */}
-              <div className="h-40 relative overflow-hidden">
+              <div className="h-32 sm:h-40 relative overflow-hidden">
                 {getFirstImage(article.contentBlocks) !== '/api/placeholder/400/300' ? (
                   <img
                     src={getFirstImage(article.contentBlocks)}
@@ -154,38 +155,38 @@ export default function LatestCarNews({ initialNews = [] }: { initialNews?: News
               </div>
 
               {/* Article Info */}
-              <div className="p-3">
-                <h3 className="font-bold text-gray-900 mb-2 text-base leading-tight line-clamp-2">
+              <div className="p-2.5 sm:p-3">
+                <h3 className="font-bold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base leading-tight line-clamp-2">
                   {article.title}
                 </h3>
 
-                <p className="text-sm text-gray-600 mb-3 leading-relaxed line-clamp-2">
+                <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 leading-relaxed line-clamp-2">
                   {article.excerpt}
                 </p>
 
                 {/* Author and Date */}
-                <div className="flex items-center text-xs text-gray-500 mb-3">
-                  <span className="font-medium">{article.authorId}</span>
-                  <span className="mx-2">•</span>
-                  <Calendar className="h-3 w-3 mr-1" />
-                  <span>{new Date(article.publishDate).toLocaleDateString('en-IN', {
+                <div className="flex items-center text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
+                  <span className="font-medium truncate max-w-[80px]">{article.authorId}</span>
+                  <span className="mx-1 sm:mx-2">•</span>
+                  <Calendar className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
+                  <span className="whitespace-nowrap">{new Date(article.publishDate).toLocaleDateString('en-IN', {
                     day: 'numeric',
                     month: 'short'
                   })}</span>
                 </div>
 
                 {/* Article Stats */}
-                <div className="flex items-center space-x-3 text-xs text-gray-500">
+                <div className="flex items-center space-x-2 sm:space-x-3 text-[10px] sm:text-xs text-gray-500">
                   <div className="flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    <span>{calculateReadTime(article.contentBlocks)}</span>
+                    <Clock className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{calculateReadTime(article.contentBlocks)}</span>
                   </div>
                   <div className="flex items-center">
-                    <Eye className="h-3 w-3 mr-1" />
+                    <Eye className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
                     <span>{article.views.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center">
-                    <MessageCircle className="h-3 w-3 mr-1" />
+                    <MessageCircle className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
                     <span>{article.likes}</span>
                   </div>
                 </div>

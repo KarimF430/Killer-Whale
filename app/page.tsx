@@ -206,8 +206,8 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Ad3DCarousel className="my-4" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+          <Ad3DCarousel className="my-3 sm:my-4" />
         </div>
         <HeroSection />
 
@@ -215,8 +215,8 @@ export default async function HomePage() {
           <CarsByBudget initialCars={allCars} />
         </PageSection>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Ad3DCarousel className="my-4" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+          <Ad3DCarousel className="my-3 sm:my-4" />
         </div>
 
         <PageSection background="white">

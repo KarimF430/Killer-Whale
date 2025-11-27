@@ -56,13 +56,13 @@ export default function PopularComparisons({ initialComparisons = [] }: { initia
   return (
     <div>
       {/* Section Header */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular Comparison</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Popular Comparison</h2>
 
       {/* Comparison Cards - Horizontal Scroll */}
       {/* Comparison Cards Horizontal Scroll */}
       <div className="relative">
         <div
-          className="flex gap-4 sm:gap-6 overflow-x-auto pb-4"
+          className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {comparisons.map((comparison) => {
@@ -78,17 +78,17 @@ export default function PopularComparisons({ initialComparisons = [] }: { initia
             return (
               <div
                 key={comparison.id}
-                className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300"
+                className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white rounded-xl border border-gray-200 p-2.5 sm:p-3 hover:shadow-lg transition-all duration-300"
               >
                 {/* Side by Side Layout with VS Badge */}
-                <div className="flex items-start gap-2 mb-3">
+                <div className="flex items-start gap-1.5 sm:gap-2 mb-2.5 sm:mb-3">
                   {/* Model 1 */}
                   <div className="flex-1">
-                    <div className="relative mb-2">
+                    <div className="relative mb-1.5 sm:mb-2">
                       <img
                         src={comparison.model1.heroImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"}
                         alt={`${comparison.model1.brand} ${comparison.model1.name}`}
-                        className="w-full h-20 object-contain"
+                        className="w-full h-16 sm:h-20 object-contain"
                         onError={(e) => {
                           if (e.currentTarget.src !== "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E") {
                             console.error('❌ Failed to load image:', comparison.model1.heroImage)
@@ -98,29 +98,29 @@ export default function PopularComparisons({ initialComparisons = [] }: { initia
                       />
                     </div>
                     <div className="text-left">
-                      <div className="text-xs text-gray-500">{comparison.model1.brand}</div>
-                      <div className="font-bold text-sm text-gray-900 mb-1">{comparison.model1.name}</div>
-                      <div className="text-red-600 font-bold text-sm">
+                      <div className="text-[10px] sm:text-xs text-gray-500 truncate">{comparison.model1.brand}</div>
+                      <div className="font-bold text-xs sm:text-sm text-gray-900 mb-0.5 sm:mb-1 truncate">{comparison.model1.name}</div>
+                      <div className="text-red-600 font-bold text-xs sm:text-sm">
                         ₹ {(model1OnRoad / 100000).toFixed(2)} Lakh
                       </div>
-                      <div className="text-xs text-gray-500">On-Road Price</div>
+                      <div className="text-[10px] sm:text-xs text-gray-500">On-Road Price</div>
                     </div>
                   </div>
 
                   {/* VS Badge - Positioned between cards */}
-                  <div className="flex items-center justify-center" style={{ marginTop: '30px' }}>
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center shadow-md">
-                      <span className="text-white text-xs font-bold">VS</span>
+                  <div className="flex items-center justify-center" style={{ marginTop: '24px' }}>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center shadow-md">
+                      <span className="text-white text-[10px] sm:text-xs font-bold">VS</span>
                     </div>
                   </div>
 
                   {/* Model 2 */}
                   <div className="flex-1">
-                    <div className="relative mb-2">
+                    <div className="relative mb-1.5 sm:mb-2">
                       <img
                         src={comparison.model2.heroImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"}
                         alt={`${comparison.model2.brand} ${comparison.model2.name}`}
-                        className="w-full h-20 object-contain"
+                        className="w-full h-16 sm:h-20 object-contain"
                         onError={(e) => {
                           if (e.currentTarget.src !== "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E") {
                             console.error('❌ Failed to load image:', comparison.model2.heroImage)
@@ -130,19 +130,19 @@ export default function PopularComparisons({ initialComparisons = [] }: { initia
                       />
                     </div>
                     <div className="text-left">
-                      <div className="text-xs text-gray-500">{comparison.model2.brand}</div>
-                      <div className="font-bold text-sm text-gray-900 mb-1">{comparison.model2.name}</div>
-                      <div className="text-red-600 font-bold text-sm">
+                      <div className="text-[10px] sm:text-xs text-gray-500 truncate">{comparison.model2.brand}</div>
+                      <div className="font-bold text-xs sm:text-sm text-gray-900 mb-0.5 sm:mb-1 truncate">{comparison.model2.name}</div>
+                      <div className="text-red-600 font-bold text-xs sm:text-sm">
                         ₹ {(model2OnRoad / 100000).toFixed(2)} Lakh
                       </div>
-                      <div className="text-xs text-gray-500">On-Road Price</div>
+                      <div className="text-[10px] sm:text-xs text-gray-500">On-Road Price</div>
                     </div>
                   </div>
                 </div>
 
                 <button
                   onClick={() => handleCompareClick(comparison.model1, comparison.model2)}
-                  className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm"
+                  className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-1.5 sm:py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm font-semibold shadow-sm"
                 >
                   Compare Now
                 </button>
@@ -153,10 +153,10 @@ export default function PopularComparisons({ initialComparisons = [] }: { initia
       </div>
 
       {/* Compare Cars of Your Choice Button */}
-      <div className="text-center mt-6">
+      <div className="text-center mt-4 sm:mt-6">
         <button
           onClick={() => router.push('/compare')}
-          className="w-full max-w-md bg-white border-2 border-red-600 text-red-600 hover:bg-red-50 py-3 rounded-lg transition-all duration-200 font-medium"
+          className="w-full sm:w-auto sm:max-w-md bg-white border-2 border-red-600 text-red-600 hover:bg-red-50 py-2.5 sm:py-3 px-6 rounded-lg transition-all duration-200 font-medium text-sm sm:text-base"
         >
           Compare Cars of Your Choice
         </button>

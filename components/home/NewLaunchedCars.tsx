@@ -68,7 +68,7 @@ export default function NewLaunchedCars({ initialCars = [] }: { initialCars?: Ca
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">New Launches</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">New Launches</h2>
 
       {/* Cars Horizontal Scroll */}
       <div className="relative">
@@ -96,7 +96,7 @@ export default function NewLaunchedCars({ initialCars = [] }: { initialCars?: Ca
         ) : (
           <div className="relative">
             <div
-              className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
+              className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {newLaunchedCars.map((car) => (
