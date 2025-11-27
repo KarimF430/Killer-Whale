@@ -16,6 +16,7 @@ import CarCard from '../home/CarCard'
 import { useViewTracker } from '@/lib/use-view-tracker'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
 import ModelYouTube from './ModelYouTube'
+import ModelFAQ from './ModelFAQ'
 
 interface ModelData {
   id: string
@@ -1107,7 +1108,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
             </div>
 
             {/* Variant and City Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Variant Dropdown */}
               <div className="relative" ref={variantDropdownRef}>
                 <button
@@ -1233,7 +1234,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
               {/* Highlights Grid - Horizontal Scroll */}
               <div className="relative">
-                <div className="highlights-scroll-container flex gap-4 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div className="highlights-scroll-container flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   {/* Dynamic Highlight Cards from Backend - Show Based on Active Tab */}
                   {(() => {
                     let currentHighlights: any[] = [];
@@ -1536,7 +1537,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
 
                   {/* Color Selector - Horizontal Scroll */}
                   <div className="relative">
-                    <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       {model.colorImages.map((color, index) => (
                         <button
                           key={index}
@@ -1896,7 +1897,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
                                   })()}
                                 </h4>
 
-                                <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                                <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
                                   <div>
                                     <p className="text-xs text-gray-500 mb-1">Power:</p>
                                     <p className="font-medium text-gray-900">{(engine as any).power}</p>
@@ -1927,7 +1928,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
                                       {variant.type}
                                     </h4>
 
-                                    <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                                    <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
                                       <div>
                                         <p className="text-xs text-gray-500 mb-1">Power:</p>
                                         <p className="font-medium text-gray-900">{variant.power}</p>
@@ -1967,7 +1968,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
               <div className="relative">
                 <div
                   ref={mileageScrollRef}
-                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   {/* Use backend mileageData if available, otherwise fallback */}
@@ -2066,7 +2067,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
                   </div>
                 ) : (
                   <div
-                    className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                    className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
                     {similarCars.map((car) => (
@@ -2092,7 +2093,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
               {/* Comparison Cards - Horizontal Scroll */}
               <div className="relative">
                 {loadingSimilarCars ? (
-                  <div className="flex gap-4 overflow-x-auto pb-4">
+                  <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl border border-gray-200 p-4">
                         <div className="h-32 bg-gray-200 animate-pulse rounded"></div>
@@ -2105,7 +2106,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
                   </div>
                 ) : (
                   <div
-                    className="flex gap-4 overflow-x-auto pb-4"
+                    className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4"
                     style={{ scrollbarWidth: 'thin', msOverflowStyle: 'auto' }}
                   >
                     {similarCars.map((car, index) => {
@@ -2206,7 +2207,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
             {/* Model News Section - Exact copy from home page */}
             <div>
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} News</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} News</h2>
                 <Link
                   href="/news"
                   className="flex items-center text-red-600 hover:text-orange-600 font-medium"
@@ -2220,7 +2221,7 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
               <div className="relative">
                 <div
                   id="model-news-scroll"
-                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   {newsArticles.map((article) => (
@@ -2311,64 +2312,12 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
         {/* Section 10: Model FAQ & Owner Reviews */}
         <PageSection background="white" maxWidth="7xl">
           <div id="faq-reviews" className="space-y-12">
-            {/* Model FAQ Section - Matches BrandFAQ */}
-            <div>
-              <div className="mb-6 sm:mb-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1.5 sm:mb-2">
-                  {model?.brand || 'Car'} {model?.name || 'Model'} FAQ
-                </h2>
-                <p className="text-sm sm:text-base text-gray-600">
-                  {(model?.faqs?.length || 0) > 0 ? `${model?.faqs?.length} questions about ${model?.name}` : 'Common questions answered'}
-                </p>
-              </div>
-
-              <div className="space-y-3 sm:space-y-4 max-w-4xl mx-auto">
-                {/* Dynamic FAQ Items from backend */}
-                {(model?.faqs && model.faqs.length > 0 ? model.faqs : [
-                  {
-                    question: "What is the price range of Maruti cars?",
-                    answer: "Renault offers cars across various price segments to cater to different budgets. The entry-level models start from around ₹4-5 lakhs, while premium models can go up to ₹15-20 lakhs."
-                  },
-                  {
-                    question: "Which Maruti car has the best mileage?",
-                    answer: `The ${model?.brand || 'Car'} ${model?.name || 'Model'} is among the most fuel-efficient cars, delivering up to 22-24 km/l.`
-                  },
-                  {
-                    question: "Are Maruti cars reliable?",
-                    answer: "Yes, Renault cars are known for their reliability and durability. The brand has built a strong reputation for producing vehicles that require minimal maintenance."
-                  },
-                  {
-                    question: "Which Maruti car is best for families?",
-                    answer: "The Triber is an excellent choice for families with its 7-seater configuration and spacious interior."
-                  }
-                ]).map((faq, index) => (
-                  <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                    <button
-                      onClick={() => toggleFAQ(index)}
-                      className="w-full px-4 py-3 sm:px-6 sm:py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors min-h-[56px]"
-                    >
-                      <span className="font-medium text-gray-900 pr-3 sm:pr-4 text-sm sm:text-base">
-                        {faq.question}
-                      </span>
-                      {openFAQ === index ? (
-                        <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 flex-shrink-0" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 flex-shrink-0" />
-                      )}
-                    </button>
-                    {openFAQ === index && (
-                      <div className="px-4 pb-3 sm:px-6 sm:pb-4">
-                        <div className="border-t border-gray-100 pt-3 sm:pt-4">
-                          <div className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                            {renderTextWithCarLinks(faq.answer, model?.brand)}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Model FAQ Section - Standalone Component */}
+            <ModelFAQ
+              brandName={model?.brand}
+              modelName={model?.name}
+              faqs={model?.faqs || []}
+            />
 
             {/* Model Owner Reviews Section - Exact Copy from BrandHeroSection.tsx */}
             <section className="py-6 sm:py-8 bg-gray-50">
