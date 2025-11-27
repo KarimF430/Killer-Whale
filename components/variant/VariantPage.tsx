@@ -821,7 +821,7 @@ export default function VariantPage({
 
             {/* Single Price Display for Variant */}
             <div className="space-y-4">
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">
                 {showSkeleton ? (
                   <div className="bg-gray-200 animate-pulse h-9 w-32 rounded"></div>
                 ) : (
@@ -900,8 +900,8 @@ export default function VariantPage({
                     <span className="text-white text-lg font-bold">K</span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">kotak</h3>
-                    <p className="text-gray-600 text-base">Mahindra Bank</p>
+                    <h3 className="text-lg font-bold text-gray-900">kotak</h3>
+                    <p className="text-sm text-gray-600">Mahindra Bank</p>
                   </div>
                 </div>
 
@@ -915,7 +915,7 @@ export default function VariantPage({
                       maximumFractionDigits: 0,
                     }).format(displayEMI ?? 0)}
                   </p>
-                  <p className="text-gray-600 text-base">per month</p>
+                  <p className="text-sm text-gray-600">per month</p>
                 </div>
               </div>
 
