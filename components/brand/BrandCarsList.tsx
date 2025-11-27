@@ -186,7 +186,7 @@ export default function BrandCarsList({ brand, initialModels = [], brandId }: Br
   return (
     <>
       {/* Filters Section (exact copy from budget page) */}
-      <section className="bg-white py-4">
+      <section className="bg-white pt-2 pb-4">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-wrap gap-3 pb-4 border-b border-gray-200">
             {fuelFilters.map(fuel => (

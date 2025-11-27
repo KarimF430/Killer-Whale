@@ -190,9 +190,11 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {/* Upcoming Car 1 */}
-              <div className="flex-shrink-0 w-[260px] sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+              {/* Upcoming Car 1 */}
+              <div className="flex-shrink-0 w-[280px] sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
                 {/* Car Image with Badges */}
-                <div className="relative h-40 sm:h-48 bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center overflow-hidden">
+                {/* Car Image with Badges */}
+                <div className="relative h-44 sm:h-48 bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center overflow-hidden">
                   {/* NEW Badge */}
                   <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-red-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold z-10">
                     NEW
@@ -216,14 +218,14 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
                 </div>
 
                 {/* Car Info */}
-                <div className="p-4 sm:p-5">
-                  <h3 className="font-bold text-gray-900 mb-2 text-base sm:text-lg">{brand.name} Grand Vitara</h3>
+                <div className="p-5">
+                  <h3 className="font-bold text-gray-900 mb-2 text-lg sm:text-lg">{brand.name} Grand Vitara</h3>
 
-                  <div className="flex items-center text-red-600 font-bold text-lg sm:text-xl mb-3 sm:mb-4">
+                  <div className="flex items-center text-red-600 font-bold text-xl sm:text-xl mb-3 sm:mb-4">
                     <span>₹ 10.99 Lakh</span>
                   </div>
 
-                  <div className="space-y-2 sm:space-y-2.5 text-sm text-gray-600 mb-3 sm:mb-4">
+                  <div className="space-y-2 sm:space-y-2.5 text-base sm:text-sm text-gray-600 mb-3 sm:mb-4">
                     <div className="flex items-center">
                       <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -251,9 +253,11 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
               </div>
 
               {/* Upcoming Car 2 */}
-              <div className="flex-shrink-0 w-[260px] sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+              {/* Upcoming Car 2 */}
+              <div className="flex-shrink-0 w-[280px] sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
                 {/* Car Image with Badges */}
-                <div className="relative h-40 sm:h-48 bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center overflow-hidden">
+                {/* Car Image with Badges */}
+                <div className="relative h-44 sm:h-48 bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center overflow-hidden">
                   {/* NEW Badge */}
                   <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-red-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold z-10">
                     NEW
@@ -277,14 +281,14 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
                 </div>
 
                 {/* Car Info */}
-                <div className="p-4 sm:p-5">
-                  <h3 className="font-bold text-gray-900 mb-2 text-base sm:text-lg">Hyundai i20</h3>
+                <div className="p-5">
+                  <h3 className="font-bold text-gray-900 mb-2 text-lg sm:text-lg">Hyundai i20</h3>
 
-                  <div className="flex items-center text-red-600 font-bold text-lg sm:text-xl mb-3 sm:mb-4">
+                  <div className="flex items-center text-red-600 font-bold text-xl sm:text-xl mb-3 sm:mb-4">
                     <span>₹ 29.99 Lakh</span>
                   </div>
 
-                  <div className="space-y-2 sm:space-y-2.5 text-sm text-gray-600 mb-3 sm:mb-4">
+                  <div className="space-y-2 sm:space-y-2.5 text-base sm:text-sm text-gray-600 mb-3 sm:mb-4">
                     <div className="flex items-center">
                       <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -343,14 +347,16 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
           <div className="relative">
             <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {/* News Article 1 */}
-              <div className="flex-shrink-0 w-[260px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden cursor-pointer">
+              {/* News Article 1 */}
+              <div className="flex-shrink-0 w-[280px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden cursor-pointer">
                 {/* Article Image with Gradient */}
-                <div className="h-32 sm:h-40 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center relative">
+                {/* Article Image with Gradient */}
+                <div className="h-36 sm:h-40 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center relative">
                   <div className="text-center text-white px-2 sm:px-3">
                     <div className="w-10 h-7 sm:w-12 sm:h-8 bg-white/20 rounded-lg mx-auto mb-1.5 sm:mb-2 flex items-center justify-center">
                       <span className="text-[10px] sm:text-xs font-medium">NEWS</span>
                     </div>
-                    <h3 className="text-xs sm:text-sm font-bold leading-tight line-clamp-2">
+                    <h3 className="text-sm sm:text-sm font-bold leading-tight line-clamp-2">
                       {brand.name} Grand Vitara Hybrid Review: Best Fuel Economy in Segment
                     </h3>
                   </div>
@@ -371,7 +377,7 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
                 </div>
 
                 {/* Article Info */}
-                <div className="p-2.5 sm:p-3">
+                <div className="p-4 sm:p-3">
                   <h3 className="font-bold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base leading-tight">
                     {brand.name} Grand Vitara Hybrid Review: Best Fuel Economy in Segment
                   </h3>
@@ -416,13 +422,14 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
               </div>
 
               {/* News Article 2 */}
-              <div className="flex-shrink-0 w-[260px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden cursor-pointer">
-                <div className="h-32 sm:h-40 bg-gradient-to-br from-green-400 via-blue-500 to-purple-500 flex items-center justify-center relative">
+              {/* News Article 2 */}
+              <div className="flex-shrink-0 w-[280px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden cursor-pointer">
+                <div className="h-36 sm:h-40 bg-gradient-to-br from-green-400 via-blue-500 to-purple-500 flex items-center justify-center relative">
                   <div className="text-center text-white px-2 sm:px-3">
                     <div className="w-10 h-7 sm:w-12 sm:h-8 bg-white/20 rounded-lg mx-auto mb-1.5 sm:mb-2 flex items-center justify-center">
                       <span className="text-[10px] sm:text-xs font-medium">NEWS</span>
                     </div>
-                    <h3 className="text-xs sm:text-sm font-bold leading-tight line-clamp-2">
+                    <h3 className="text-sm sm:text-sm font-bold leading-tight line-clamp-2">
                       Upcoming {brand.name} Cars 2024: Complete List with Expected Prices
                     </h3>
                   </div>
@@ -434,7 +441,7 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
                   </div>
                 </div>
 
-                <div className="p-2.5 sm:p-3">
+                <div className="p-4 sm:p-3">
                   <h3 className="font-bold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base leading-tight">
                     Upcoming {brand.name} Cars 2024: Complete List with Expected Prices
                   </h3>
@@ -493,7 +500,7 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brand.name} Owner Reviews</h2>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 sm:p-6">
             {/* Overall Rating */}
             <div className="flex items-center mb-4 sm:mb-6">
               <div className="flex items-center flex-wrap gap-2">

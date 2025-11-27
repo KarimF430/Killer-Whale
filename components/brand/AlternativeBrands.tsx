@@ -40,22 +40,22 @@ export default function AlternativeBrands({ currentBrand, initialBrands = [] }: 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Alternative Brands</h2>
 
-        {/* Brands Grid - Responsive: 2 cols mobile, 3 tablet, 4 desktop */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6 sm:mb-8">
+        {/* Brands Grid - Matching Home Page BrandSection */}
+        <div className="grid grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
           {/* Show backend brands */}
           {(showAllBrands ? allBrands : allBrands.slice(0, 6)).map((brand) => (
             <Link
               key={brand.id}
               href={`/${brand.slug}-cars`}
-              className="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-all duration-300 p-2 sm:p-3 text-center"
+              className="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-all duration-300 p-4 text-center"
             >
               {/* Brand Logo */}
-              <div className="h-10 sm:h-14 flex items-center justify-center mb-1.5 sm:mb-2">
+              <div className="h-16 flex items-center justify-center mb-3">
                 {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/uploads')) ? (
                   <img
                     src={brand.logo}
                     alt={`${brand.name} logo`}
-                    className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                    className="w-12 h-12 object-contain"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -66,15 +66,15 @@ export default function AlternativeBrands({ currentBrand, initialBrands = [] }: 
                     }}
                   />
                 ) : null}
-                <div className={`fallback-logo w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-lg flex items-center justify-center ${brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/uploads')) ? 'hidden' : ''}`}>
-                  <span className="text-xs sm:text-sm font-bold text-white">
+                <div className={`fallback-logo w-12 h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-lg flex items-center justify-center ${brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/uploads')) ? 'hidden' : ''}`}>
+                  <span className="text-sm font-bold text-white">
                     {brand.name.split(' ').map((word: string) => word.charAt(0)).join('')}
                   </span>
                 </div>
               </div>
 
               {/* Brand Name */}
-              <h3 className="font-medium text-gray-900 text-xs sm:text-sm truncate">{brand.name}</h3>
+              <h3 className="font-medium text-gray-900 text-sm">{brand.name}</h3>
             </Link>
           ))}
         </div>
