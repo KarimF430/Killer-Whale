@@ -15,6 +15,7 @@ import VariantCard from '../car-model/VariantCard'
 import CarCard from '../home/CarCard'
 import UpcomingCars from '../home/UpcomingCars'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
+import UpcomingCarCard from '../home/UpcomingCarCard'
 
 interface VariantData {
   brand: string
@@ -41,6 +42,20 @@ interface VariantData {
     id: number
     name: string
   }>
+}
+
+interface UpcomingCar {
+  id: string
+  name: string
+  brandId: string
+  brandName: string
+  image: string
+  expectedPriceMin: number
+  expectedPriceMax: number
+  fuelTypes: string[]
+  expectedLaunchDate: string
+  isNew: boolean
+  isPopular: boolean
 }
 
 interface VariantPageProps {
@@ -96,6 +111,52 @@ export default function VariantPage({
   const [error, setError] = useState<string | null>(null)
   const [initialLoad, setInitialLoad] = useState(true)
   const [allModelVariants, setAllModelVariants] = useState<any[]>([])
+
+  // Upcoming Cars State
+  const [upcomingCars, setUpcomingCars] = useState<UpcomingCar[]>([])
+  const [loadingUpcomingCars, setLoadingUpcomingCars] = useState(true)
+
+  // Fetch upcoming cars for this brand
+  useEffect(() => {
+    async function fetchUpcomingCars() {
+      if (!brand?.id) return
+
+      try {
+        setLoadingUpcomingCars(true)
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+        const response = await fetch(`${backendUrl}/api/upcoming-cars`)
+
+        if (response.ok) {
+          const allUpcomingCars = await response.json()
+          // Filter by brandId and map to match UpcomingCar interface
+          const brandUpcomingCars = allUpcomingCars
+            .filter((car: any) => car.brandId === brand.id)
+            .map((car: any) => ({
+              id: car.id,
+              name: car.name,
+              brandId: car.brandId,
+              brandName: brand.name,
+              image: car.heroImage ? (car.heroImage.startsWith('http') ? car.heroImage : `${backendUrl}${car.heroImage}`) : '',
+              expectedPriceMin: car.expectedPriceMin,
+              expectedPriceMax: car.expectedPriceMax,
+              fuelTypes: car.fuelTypes || ['Petrol'],
+              expectedLaunchDate: car.expectedLaunchDate,
+              isNew: true,
+              isPopular: false
+            }))
+          setUpcomingCars(brandUpcomingCars)
+        }
+      } catch (error) {
+        console.error('Error fetching upcoming cars:', error)
+      } finally {
+        setLoadingUpcomingCars(false)
+      }
+    }
+
+    if (brand?.id) {
+      fetchUpcomingCars()
+    }
+  }, [brand?.id, brand?.name])
 
   // ... (existing code)
 
@@ -2841,13 +2902,54 @@ export default function VariantPage({
             <Ad3DCarousel className="mb-6" />
 
             {/* Upcoming Cars Section */}
-            <UpcomingCars />
+            {(loadingUpcomingCars || upcomingCars.length > 0) && (
+              <div className="py-6 sm:py-8 bg-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Upcoming Cars</h2>
+                <div className="relative">
+                  {loadingUpcomingCars ? (
+                    <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                          <div className="h-48 bg-gray-200 animate-pulse"></div>
+                          <div className="p-5 space-y-3">
+                            <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+                            <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
+                            <div className="space-y-2">
+                              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+                              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+                              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        {upcomingCars.map((car) => (
+                          <UpcomingCarCard
+                            key={car.id}
+                            car={car}
+                            onClick={() => {
+                              const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                              const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                              window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </PageSection>
 
         {/* Section 7: New Launched Cars, AD Banner & Feedback */}
         <PageSection background="white" maxWidth="7xl">
-          <div className="space-y-8">
+          <div className="space-y-12">
             {/* Similar Cars Section - Exact copy from CarModelPage */}
             <div className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">

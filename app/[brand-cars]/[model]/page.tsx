@@ -31,6 +31,179 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   return generateModelSEO(brandName, modelName)
 }
 
+async function getUpcomingCarData(brandSlug: string, modelSlug: string) {
+  try {
+    const brandName = brandSlug.replace('-cars', '')
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+
+    if (brandSlug.startsWith('.well-known') || brandSlug === 'well-known') {
+      throw new Error('Ignore well-known probe')
+    }
+
+    console.log('🔍 Trying to fetch as upcoming car...')
+
+    // Fetch brands to get brandId
+    const brandsResponse = await fetch(`${backendUrl}/api/brands`, { cache: 'no-store' })
+    if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
+    const brands = await brandsResponse.json()
+
+    const brandData = brands.find((brand: any) => {
+      const slug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      return slug === brandName
+    })
+
+    if (!brandData) throw new Error('Brand not found')
+
+    // Fetch upcoming cars for this brand
+    const upcomingCarsResponse = await fetch(`${backendUrl}/api/upcoming-cars`, { cache: 'no-store' })
+    if (!upcomingCarsResponse.ok) throw new Error('Failed to fetch upcoming cars')
+
+    const upcomingCars = await upcomingCarsResponse.json()
+    const upcomingCarData = upcomingCars.find((car: any) => {
+      const carSlug = car.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      return carSlug === modelSlug && car.brandId === brandData.id
+    })
+
+    if (!upcomingCarData) throw new Error('Upcoming car not found')
+
+    console.log('✅ Found upcoming car:', upcomingCarData.name)
+
+    // Format expected launch date
+    const formatExpectedLaunchDate = (dateString: string): string => {
+      if (!dateString) return 'Expected Soon'
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      try {
+        const parts = dateString.split('-')
+        if (parts.length === 2) {
+          const year = parts[0]
+          const monthIndex = parseInt(parts[1]) - 1
+          if (monthIndex >= 0 && monthIndex < 12) {
+            return `Expected ${months[monthIndex]} ${year}`
+          }
+        }
+        return `Expected ${dateString}`
+      } catch (e) {
+        return `Expected ${dateString}`
+      }
+    }
+
+    // Build gallery array
+    const galleryImages: string[] = []
+    const heroImageUrl = upcomingCarData.heroImage
+    if (heroImageUrl) {
+      galleryImages.push(heroImageUrl.startsWith('/uploads/') ? `${backendUrl}${heroImageUrl}` : heroImageUrl)
+    }
+
+    if (upcomingCarData.galleryImages && Array.isArray(upcomingCarData.galleryImages)) {
+      upcomingCarData.galleryImages.forEach((img: any) => {
+        if (img?.url) {
+          const fullUrl = img.url.startsWith('/uploads/') ? `${backendUrl}${img.url}` : img.url
+          if (!galleryImages.includes(fullUrl)) {
+            galleryImages.push(fullUrl)
+          }
+        }
+      })
+    }
+
+    // Fetch actual variants for this upcoming car
+    const variantsResponse = await fetch(`${backendUrl}/api/variants?modelId=${upcomingCarData.id}`, { cache: 'no-store' });
+    let variants = [];
+
+    if (variantsResponse.ok) {
+      variants = await variantsResponse.json();
+      console.log(`✅ Fetched ${variants.length} variants for upcoming car: ${upcomingCarData.name}`);
+    } else {
+      console.warn(`⚠️ Failed to fetch variants for upcoming car: ${upcomingCarData.name}`);
+    }
+
+    // If no variants found, create dummy variants as fallback
+    if (!variants || variants.length === 0) {
+      console.log('⚠️ No variants found, using fallback dummy variants');
+      variants = upcomingCarData.fuelTypes && upcomingCarData.fuelTypes.length > 0
+        ? upcomingCarData.fuelTypes.map((fuelType: string, index: number) => ({
+          id: `upcoming-${index}`,
+          name: `${upcomingCarData.name} ${fuelType}`,
+          price: index === 0 ? upcomingCarData.expectedPriceMin : upcomingCarData.expectedPriceMax,
+          fuelType: fuelType,
+          transmission: 'Automatic',
+          keyFeatures: []
+        }))
+        : [{
+          id: 'upcoming-default',
+          name: upcomingCarData.name,
+          price: upcomingCarData.expectedPriceMin,
+          fuelType: upcomingCarData.fuelTypes?.[0] || 'Electric',
+          transmission: 'Automatic',
+          keyFeatures: []
+        }];
+    }
+
+    // Return data in model page format
+    return {
+      isUpcomingCar: true,
+      id: upcomingCarData.id,
+      slug: modelSlug,
+      brand: brandData.name,
+      name: upcomingCarData.name,
+      heroImage: galleryImages[0] || '',
+      gallery: galleryImages,
+      rating: 0,
+      reviewCount: 0,
+      seoDescription: upcomingCarData.headerSeo || `The upcoming ${brandData.name} ${upcomingCarData.name} is set to launch ${formatExpectedLaunchDate(upcomingCarData.expectedLaunchDate)}.`,
+      startingPrice: upcomingCarData.expectedPriceMin,
+      endingPrice: upcomingCarData.expectedPriceMax,
+      bodyType: upcomingCarData.bodyType,
+      subBodyType: upcomingCarData.subBodyType,
+      expectedLaunchDate: upcomingCarData.expectedLaunchDate,
+      formattedLaunchDate: formatExpectedLaunchDate(upcomingCarData.expectedLaunchDate),
+      variants: variants,
+      cities: [
+        { name: 'Delhi', onRoadPrice: upcomingCarData.expectedPriceMin * 1.1 },
+        { name: 'Mumbai', onRoadPrice: upcomingCarData.expectedPriceMin * 1.15 },
+        { name: 'Bangalore', onRoadPrice: upcomingCarData.expectedPriceMin * 1.12 },
+        { name: 'Chennai', onRoadPrice: upcomingCarData.expectedPriceMin * 1.13 }
+      ],
+      emi: {
+        starting: Math.round((upcomingCarData.expectedPriceMin / 100000) * 1000),
+        tenure: 60
+      },
+      keySpecs: {
+        engine: '1199 cc',
+        groundClearance: '165 mm',
+        power: '85 PS',
+        torque: '110 Nm',
+        seatingCapacity: 5,
+        safetyRating: '4 Star'
+      },
+      keyFeatureImages: upcomingCarData.keyFeatureImages || [],
+      spaceComfortImages: upcomingCarData.spaceComfortImages || [],
+      storageConvenienceImages: upcomingCarData.storageConvenienceImages || [],
+      colorImages: upcomingCarData.colorImages || [],
+      pros: upcomingCarData.pros || [],
+      cons: upcomingCarData.cons || [],
+      description: upcomingCarData.description,
+      exteriorDesign: upcomingCarData.exteriorDesign,
+      comfortConvenience: upcomingCarData.comfortConvenience,
+      engineSummaries: upcomingCarData.engineSummaries || [],
+      mileageData: upcomingCarData.mileageData || [],
+      faqs: upcomingCarData.faqs || [],
+      highlights: {
+        keyFeatures: [],
+        spaceComfort: [],
+        storageConvenience: []
+      },
+      colors: [],
+      summary: upcomingCarData.summary || `The ${brandData.name} ${upcomingCarData.name} is an exciting upcoming vehicle.`,
+      engineHighlights: 'Engine details will be announced closer to launch.',
+      mileage: [],
+      similarCars: []
+    }
+  } catch (error) {
+    console.log('Not an upcoming car:', error)
+    return null
+  }
+}
+
 async function getModelData(brandSlug: string, modelSlug: string) {
   try {
     // Remove '-cars' suffix from brand slug to get actual brand name
@@ -251,6 +424,7 @@ async function getModelData(brandSlug: string, modelSlug: string) {
       ]
 
     const enhancedModelData = {
+      isUpcomingCar: false,
       id: modelData.id,
       slug: modelData.slug,
       brand: modelData.brandName,
@@ -264,6 +438,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
       endingPrice: highestPrice,
       bodyType: detailedModelData?.bodyType || modelData.bodyType,
       subBodyType: detailedModelData?.subBodyType || modelData.subBodyType,
+      expectedLaunchDate: '',
+      formattedLaunchDate: '',
       variants: transformedVariants,
       cities: [
         { name: 'Delhi', onRoadPrice: lowestPrice * 1.1 },
@@ -403,10 +579,16 @@ import { FloatingAIBot } from '@/components/FloatingAIBot'
 export default async function ModelPage({ params }: ModelPageProps) {
   const resolvedParams = await params
   if (resolvedParams['brand-cars'].startsWith('.well-known') || resolvedParams['brand-cars'] === 'well-known') {
-    // Return a minimal fragment instead of trying to resolve data
     return null as any
   }
-  const modelData = await getModelData(resolvedParams['brand-cars'], resolvedParams.model)
+
+  // Try fetching as upcoming car first
+  let modelData = await getUpcomingCarData(resolvedParams['brand-cars'], resolvedParams.model)
+
+  // If not found as upcoming car, try as regular model
+  if (!modelData) {
+    modelData = await getModelData(resolvedParams['brand-cars'], resolvedParams.model)
+  }
 
   if (!modelData) {
     notFound()
@@ -415,7 +597,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
   return (
     <>
       <CarModelPage
-        model={modelData}
+        model={modelData as any}
         initialVariants={modelData.variants}
         newsSlot={<BrandNews brandSlug={modelData.slug} brandName={modelData.name} />}
       />

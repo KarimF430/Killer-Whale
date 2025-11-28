@@ -79,19 +79,21 @@ async function getHomeData() {
   console.log('🔍 Fetching home data from:', backendUrl)
 
   try {
-    // Fetch all data in parallel (5 requests)
-    const [popularRes, modelsRes, brandsRes, comparisonsRes, newsRes] = await Promise.all([
+    // Fetch all data in parallel (6 requests)
+    const [popularRes, modelsRes, brandsRes, comparisonsRes, newsRes, upcomingCarsRes] = await Promise.all([
       fetch(`${backendUrl}/api/cars/popular`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/models-with-pricing?limit=100`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/popular-comparisons`, { next: { revalidate: 3600 } }),
-      fetch(`${backendUrl}/api/news?limit=6`, { next: { revalidate: 3600 } })
+      fetch(`${backendUrl}/api/news?limit=6`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/upcoming-cars`, { next: { revalidate: 3600 } })
     ])
 
     const popularData = await popularRes.json()
     const modelsData = await modelsRes.json()
     const brandsData = await brandsRes.json()
     const comparisonsData = await comparisonsRes.json()
+    const upcomingCarsData = await upcomingCarsRes.json()
 
     // Check news response
     let newsData = { articles: [] }
@@ -193,13 +195,29 @@ async function getHomeData() {
       })
       .filter((comp): comp is NonNullable<typeof comp> => comp !== null) : []
 
+    // Process Upcoming Cars
+    const upcomingCars = Array.isArray(upcomingCarsData) ? upcomingCarsData.map((car: any) => ({
+      id: car.id,
+      name: car.name,
+      brandId: car.brandId,
+      brandName: brandMap[car.brandId] || 'Unknown',
+      image: car.heroImage ? (car.heroImage.startsWith('http') ? car.heroImage : `${backendUrl}${car.heroImage}`) : '',
+      expectedPriceMin: car.expectedPriceMin,
+      expectedPriceMax: car.expectedPriceMax,
+      fuelTypes: (car.fuelTypes || ['Petrol']).map(normalizeFuelType),
+      expectedLaunchDate: car.expectedLaunchDate,
+      isNew: true,
+      isPopular: false
+    })) : []
+
     return {
       popularCars,
       allCars,
       newLaunchedCars,
       brands,
       comparisons: processedComparisons,
-      news: newsData.articles || []
+      news: newsData.articles || [],
+      upcomingCars
     }
   } catch (error) {
     console.error('Error fetching home data:', error)
@@ -209,13 +227,14 @@ async function getHomeData() {
       newLaunchedCars: [],
       brands: [],
       comparisons: [],
-      news: []
+      news: [],
+      upcomingCars: []
     }
   }
 }
 
 export default async function HomePage() {
-  const { popularCars, allCars, newLaunchedCars, brands, comparisons, news } = await getHomeData()
+  const { popularCars, allCars, newLaunchedCars, brands, comparisons, news, upcomingCars } = await getHomeData()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -242,7 +261,7 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="white">
-          <UpcomingCars />
+          <UpcomingCars initialCars={upcomingCars} />
         </PageSection>
 
         <PageSection background="white">

@@ -19,6 +19,7 @@ import ModelYouTube from './ModelYouTube'
 import ModelFAQ from './ModelFAQ'
 
 interface ModelData {
+  isUpcomingCar?: boolean
   id: string
   slug: string
   brand: string
@@ -32,6 +33,8 @@ interface ModelData {
   endingPrice: number
   bodyType?: string
   subBodyType?: string
+  expectedLaunchDate?: string
+  formattedLaunchDate?: string
   variants: Array<{
     id: string
     name: string
@@ -379,16 +382,31 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
     : model.endingPrice
 
   // Find fuel type of the lowest priced variant
+  // For upcoming cars, get fuel type from model data since they don't have variants
   const lowestPriceVariant = modelVariants.length > 0
     ? modelVariants.find(v => v.price === actualStartingPrice)
     : null
-  const lowestPriceFuelType = lowestPriceVariant?.fuelType || lowestPriceVariant?.fuel || model.variants?.[0]?.fuelType || 'Petrol'
+
+  // Get fuel types from variants or from model data for upcoming cars
+  const getModelFuelTypes = (): string[] => {
+    if (modelVariants.length > 0) {
+      return modelVariants.map(v => v.fuelType || v.fuel).filter(Boolean)
+    }
+    // For upcoming cars, try to get from model.variants or return default
+    if (model.variants && model.variants.length > 0) {
+      return model.variants.map(v => v.fuelType).filter(Boolean)
+    }
+    return ['Electric'] // Default for upcoming cars like e-Vitara
+  }
+
+  const modelFuelTypes = getModelFuelTypes()
+  const lowestPriceFuelType = lowestPriceVariant?.fuelType || lowestPriceVariant?.fuel || modelFuelTypes[0] || 'Petrol'
 
   // Find fuel type of the highest priced variant
   const highestPriceVariant = modelVariants.length > 0
     ? modelVariants.find(v => v.price === actualEndingPrice)
     : null
-  const highestPriceFuelType = highestPriceVariant?.fuelType || highestPriceVariant?.fuel || model.variants?.[0]?.fuelType || 'Petrol'
+  const highestPriceFuelType = highestPriceVariant?.fuelType || highestPriceVariant?.fuel || modelFuelTypes[0] || 'Petrol'
 
   // Get on-road prices for starting and ending prices
   const startingPriceData = useOnRoadPrice({
@@ -1020,17 +1038,19 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                   {model?.brand || 'Car Brand'} {model?.name || 'Car Model'}
                 </h1>
 
-                {/* Rating */}
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="flex items-center bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded">
-                    <Star className="w-4 h-4 mr-1 fill-current" />
-                    <span className="font-semibold">{model?.rating || 4.2}</span>
-                    <span className="ml-1">({model?.reviewCount || 1247})</span>
+                {/* Rating - Only show for regular models */}
+                {!model?.isUpcomingCar && (
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className="flex items-center bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded">
+                      <Star className="w-4 h-4 mr-1 fill-current" />
+                      <span className="font-semibold">{model?.rating || 4.2}</span>
+                      <span className="ml-1">({model?.reviewCount || 1247})</span>
+                    </div>
+                    <button className="text-red-600 hover:text-orange-600 font-medium">
+                      Rate & Review
+                    </button>
                   </div>
-                  <button className="text-red-600 hover:text-orange-600 font-medium">
-                    Rate & Review
-                  </button>
-                </div>
+                )}
               </div>
 
               {/* Share and Heart Icons */}
@@ -1094,7 +1114,9 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
               <div className="text-2xl sm:text-3xl font-bold text-green-600">
                 {formatPriceRange(displayStartPrice / 100000, displayEndPrice / 100000)}
               </div>
-              <div className="text-sm text-gray-500">*{priceLabel}</div>
+              <div className="text-sm text-gray-500">
+                *{model?.isUpcomingCar ? 'Expected On-Road Price' : priceLabel}
+              </div>
 
               <button
                 onClick={() => {
@@ -1104,9 +1126,36 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 }}
                 className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
-                Get On-Road Price
+                {model?.isUpcomingCar ? 'Pre Book Now' : 'Get On-Road Price'}
               </button>
             </div>
+
+            {/* Launch Date Section - Only for Upcoming Cars */}
+            {model?.isUpcomingCar && model?.formattedLaunchDate && (
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-xl font-bold text-gray-900">
+                  {model.brand} {model.name} Launch Date
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-start">
+                    <div className="w-2 h-2 bg-green-600 rounded-full mt-2 mr-3"></div>
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Launches on</span> {model.formattedLaunchDate.replace('Expected ', '')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    // WhatsApp alert functionality
+                    window.open(`https://wa.me/?text=I want to get launch alerts for ${model.brand} ${model.name}`, '_blank')
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Get Launch Alert on WhatsApp
+                </button>
+              </div>
+            )}
 
             {/* Variant and City Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

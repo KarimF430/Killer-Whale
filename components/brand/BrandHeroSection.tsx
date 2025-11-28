@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import BrandCarsList from './BrandCarsList'
+import BrandUpcomingCars from './BrandUpcomingCars'
 import AlternativeBrands from './AlternativeBrands'
 import BrandFAQ from './BrandFAQ'
 import BrandYouTube from './BrandYouTube'
@@ -178,147 +179,8 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
         <Ad3DCarousel className="my-3 sm:my-4" />
       </div>
 
-      {/* Section 4: Upcoming Cars Section - Using CarsByBudget Design */}
-      <section className="py-6 sm:py-8 bg-white">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brand.name} Upcoming Cars</h2>
-
-          {/* Cars Horizontal Scroll */}
-          {/* Popular Cars Horizontal Scroll */}
-          <div className="relative">
-            <div
-              className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {/* Upcoming Car 1 */}
-              {/* Upcoming Car 1 */}
-              <div className="flex-shrink-0 w-[280px] sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                {/* Car Image with Badges */}
-                {/* Car Image with Badges */}
-                <div className="relative h-44 sm:h-48 bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center overflow-hidden">
-                  {/* NEW Badge */}
-                  <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-red-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold z-10">
-                    NEW
-                  </div>
-
-                  {/* Heart Icon */}
-                  <button className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
-                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </button>
-
-                  {/* Car Image */}
-                  <div className="w-full h-full flex items-center justify-center">
-                    <img
-                      src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&h=300&fit=crop&crop=center"
-                      alt="Grand Vitara"
-                      className="w-full h-full object-contain object-center transition-transform duration-300"
-                    />
-                  </div>
-                </div>
-
-                {/* Car Info */}
-                <div className="p-5">
-                  <h3 className="font-bold text-gray-900 mb-2 text-lg sm:text-lg">{brand.name} Grand Vitara</h3>
-
-                  <div className="flex items-center text-red-600 font-bold text-xl sm:text-xl mb-3 sm:mb-4">
-                    <span>₹ 10.99 Lakh</span>
-                  </div>
-
-                  <div className="space-y-2 sm:space-y-2.5 text-base sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                    <div className="flex items-center">
-                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span>Launched January 2024</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      <span>Petrol/Hybrid</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      <span>5 Seater</span>
-                    </div>
-                  </div>
-
-                  <button className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-3 rounded-lg transition-all duration-200 text-sm font-semibold">
-                    View Details
-                  </button>
-                </div>
-              </div>
-
-              {/* Upcoming Car 2 */}
-              {/* Upcoming Car 2 */}
-              <div className="flex-shrink-0 w-[280px] sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                {/* Car Image with Badges */}
-                {/* Car Image with Badges */}
-                <div className="relative h-44 sm:h-48 bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center overflow-hidden">
-                  {/* NEW Badge */}
-                  <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-red-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold z-10">
-                    NEW
-                  </div>
-
-                  {/* Heart Icon */}
-                  <button className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors z-10">
-                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </button>
-
-                  {/* Car Image */}
-                  <div className="w-full h-full flex items-center justify-center">
-                    <img
-                      src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=300&fit=crop&crop=center"
-                      alt="Safari"
-                      className="w-full h-full object-contain object-center transition-transform duration-300"
-                    />
-                  </div>
-                </div>
-
-                {/* Car Info */}
-                <div className="p-5">
-                  <h3 className="font-bold text-gray-900 mb-2 text-lg sm:text-lg">Hyundai i20</h3>
-
-                  <div className="flex items-center text-red-600 font-bold text-xl sm:text-xl mb-3 sm:mb-4">
-                    <span>₹ 29.99 Lakh</span>
-                  </div>
-
-                  <div className="space-y-2 sm:space-y-2.5 text-base sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                    <div className="flex items-center">
-                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span>Launched March 2024</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      <span>Petrol/Diesel</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      <span>5 Seater</span>
-                    </div>
-                  </div>
-
-                  <button className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white py-2 sm:py-3 rounded-lg transition-all duration-200 text-sm font-semibold">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Section 4: Upcoming Cars Section - Using BrandUpcomingCars Component */}
+      {brandId && <BrandUpcomingCars brandId={brandId} brandName={brand.name} />}
 
       {/* Section 4: Ad Banner + Alternative Brands */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">

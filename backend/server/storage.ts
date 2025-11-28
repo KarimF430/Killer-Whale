@@ -1,4 +1,4 @@
-import type { Brand, InsertBrand, Model, InsertModel, Variant, InsertVariant, PopularComparison, InsertPopularComparison, AdminUser, InsertAdminUser } from "@shared/schema";
+import type { Brand, InsertBrand, Model, InsertModel, UpcomingCar, InsertUpcomingCar, Variant, InsertVariant, PopularComparison, InsertPopularComparison, AdminUser, InsertAdminUser } from "@shared/schema";
 import fs from "fs";
 import path from "path";
 import { hashPassword } from "./auth";
@@ -20,6 +20,13 @@ export interface IStorage {
   updateModel(id: string, model: Partial<InsertModel>): Promise<Model | undefined>;
   deleteModel(id: string): Promise<boolean>;
   getPopularModels(limit?: number): Promise<Model[]>;
+
+  // Upcoming Cars
+  getUpcomingCars(brandId?: string): Promise<UpcomingCar[]>;
+  getUpcomingCar(id: string): Promise<UpcomingCar | undefined>;
+  createUpcomingCar(car: InsertUpcomingCar): Promise<UpcomingCar>;
+  updateUpcomingCar(id: string, car: Partial<InsertUpcomingCar>): Promise<UpcomingCar | undefined>;
+  deleteUpcomingCar(id: string): Promise<boolean>;
 
   // Variants
   getVariants(modelId?: string, brandId?: string): Promise<Variant[]>;

@@ -1,14 +1,16 @@
 import mongoose from 'mongoose';
 import { IStorage } from '../storage';
-import { Brand as MongoBrand, Model as MongoModel, Variant as MongoVariant, AdminUser as MongoAdminUser, PopularComparison as MongoPopularComparison } from './schemas';
+import { Brand as MongoBrand, Model as MongoModel, UpcomingCar as MongoUpcomingCar, Variant as MongoVariant, AdminUser as MongoAdminUser, PopularComparison as MongoPopularComparison } from './schemas';
 import type {
   Brand,
   Model,
+  UpcomingCar,
   Variant,
   AdminUser,
   PopularComparison,
   InsertBrand,
   InsertModel,
+  InsertUpcomingCar,
   InsertVariant,
   InsertPopularComparison,
   InsertAdminUser
@@ -54,6 +56,44 @@ function mapModel(doc: any): Model {
     mileageData: doc.mileageData || [],
     faqs: doc.faqs || [],
     keySpecs: doc.keySpecs || [],
+    heroImage: doc.heroImage || null,
+    galleryImages: doc.galleryImages || [],
+    keyFeatureImages: doc.keyFeatureImages || [],
+    spaceComfortImages: doc.spaceComfortImages || [],
+    storageConvenienceImages: doc.storageConvenienceImages || [],
+    colorImages: doc.colorImages || [],
+    createdAt: doc.createdAt
+  };
+}
+
+function mapUpcomingCar(doc: any): UpcomingCar {
+  return {
+    id: doc.id,
+    brandId: doc.brandId,
+    name: doc.name,
+    isPopular: doc.isPopular || false,
+    isNew: doc.isNew || false,
+    popularRank: doc.popularRank || null,
+    newRank: doc.newRank || null,
+    bodyType: doc.bodyType || null,
+    subBodyType: doc.subBodyType || null,
+    expectedLaunchDate: doc.expectedLaunchDate || null,
+    expectedPriceMin: doc.expectedPriceMin || null,
+    expectedPriceMax: doc.expectedPriceMax || null,
+    fuelTypes: doc.fuelTypes || [],
+    transmissions: doc.transmissions || [],
+    brochureUrl: doc.brochureUrl || null,
+    status: doc.status,
+    headerSeo: doc.headerSeo || null,
+    pros: doc.pros || null,
+    cons: doc.cons || null,
+    description: doc.description || null,
+    exteriorDesign: doc.exteriorDesign || null,
+    comfortConvenience: doc.comfortConvenience || null,
+    summary: doc.summary || null,
+    engineSummaries: doc.engineSummaries || [],
+    mileageData: doc.mileageData || [],
+    faqs: doc.faqs || [],
     heroImage: doc.heroImage || null,
     galleryImages: doc.galleryImages || [],
     keyFeatureImages: doc.keyFeatureImages || [],
@@ -521,6 +561,89 @@ export class MongoDBStorage implements IStorage {
   }
 
   // ============================================
+  // UPCOMING CARS
+  // ============================================
+
+  async getUpcomingCars(brandId?: string): Promise<UpcomingCar[]> {
+    try {
+      const filter: any = {};
+      if (brandId) filter.brandId = brandId;
+
+      const upcomingCars = await MongoUpcomingCar.find(filter).sort({ name: 1 }).lean();
+      return upcomingCars.map(mapUpcomingCar);
+    } catch (error) {
+      console.error('getUpcomingCars error:', error);
+      throw new Error('Failed to fetch upcoming cars');
+    }
+  }
+
+  async getUpcomingCar(id: string): Promise<UpcomingCar | undefined> {
+    try {
+      const upcomingCar = await MongoUpcomingCar.findOne({ id }).lean();
+      return upcomingCar ? mapUpcomingCar(upcomingCar) : undefined;
+    } catch (error) {
+      console.error('getUpcomingCar error:', error);
+      throw new Error('Failed to fetch upcoming car');
+    }
+  }
+
+  async createUpcomingCar(car: InsertUpcomingCar): Promise<UpcomingCar> {
+    try {
+      // Get brand to generate proper ID
+      const brand = await MongoBrand.findOne({ id: car.brandId }).lean();
+      if (!brand) {
+        throw new Error(`Invalid brandId: ${car.brandId}. Brand does not exist.`);
+      }
+
+      // Generate upcoming car ID (format: "upcoming-brand-{brand-slug}-{car-slug}")
+      const brandSlug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const carSlug = car.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const id = `upcoming-brand-${brandSlug}-${carSlug}`;
+
+      // Check if upcoming car with this ID already exists
+      const existing = await MongoUpcomingCar.findOne({ id }).lean();
+      if (existing) {
+        throw new Error(`Upcoming car "${car.name}" already exists for brand "${brand.name}".`);
+      }
+
+      const newUpcomingCar = await MongoUpcomingCar.create({
+        ...car,
+        id,
+        createdAt: new Date()
+      });
+
+      return mapUpcomingCar(newUpcomingCar.toObject());
+    } catch (error) {
+      console.error('createUpcomingCar error:', error);
+      throw error instanceof Error ? error : new Error('Failed to create upcoming car');
+    }
+  }
+
+  async updateUpcomingCar(id: string, car: Partial<InsertUpcomingCar>): Promise<UpcomingCar | undefined> {
+    try {
+      const updatedUpcomingCar = await MongoUpcomingCar.findOneAndUpdate(
+        { id },
+        { $set: car },
+        { new: true }
+      ).lean();
+      return updatedUpcomingCar ? mapUpcomingCar(updatedUpcomingCar) : undefined;
+    } catch (error) {
+      console.error('updateUpcomingCar error:', error);
+      throw new Error('Failed to update upcoming car');
+    }
+  }
+
+  async deleteUpcomingCar(id: string): Promise<boolean> {
+    try {
+      const result = await MongoUpcomingCar.deleteOne({ id });
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error('deleteUpcomingCar error:', error);
+      throw new Error('Failed to delete upcoming car');
+    }
+  }
+
+  // ============================================
   // VARIANTS
   // ============================================
 
@@ -550,14 +673,30 @@ export class MongoDBStorage implements IStorage {
 
   async createVariant(variant: InsertVariant): Promise<Variant> {
     try {
-      // Get brand and model to generate proper ID
-      const [brand, model] = await Promise.all([
-        MongoBrand.findOne({ id: variant.brandId }).lean(),
-        MongoModel.findOne({ id: variant.modelId }).lean()
-      ]);
-
+      // Get brand
+      const brand = await MongoBrand.findOne({ id: variant.brandId }).lean();
       if (!brand) {
         throw new Error(`Invalid brandId: ${variant.brandId}. Brand does not exist.`);
+      }
+
+      // Try to find model in regular models
+      console.log(`🔍 Looking up model: ${variant.modelId}`);
+      let model = await MongoModel.findOne({ id: variant.modelId }).lean();
+      let isUpcoming = false;
+
+      // If not found, try upcoming cars
+      if (!model) {
+        console.log(`⚠️ Model not found in regular models, checking upcoming cars for: ${variant.modelId}`);
+        const upcomingCar = await MongoUpcomingCar.findOne({ id: variant.modelId }).lean();
+        if (upcomingCar) {
+          console.log(`✅ Found upcoming car: ${upcomingCar.name}`);
+          model = upcomingCar;
+          isUpcoming = true;
+        } else {
+          console.log(`❌ Model not found in upcoming cars either: ${variant.modelId}`);
+        }
+      } else {
+        console.log(`✅ Found regular model: ${model.name}`);
       }
 
       if (!model) {
@@ -572,11 +711,18 @@ export class MongoDBStorage implements IStorage {
       const brandSlug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+      // Ensure unique ID by appending random string if needed, or just standard format
+      // For upcoming cars, we might want to distinguish the ID, but the format seems generic enough
       const id = `variant-brand-${brandSlug}-model-${brandSlug}-${modelSlug}-${variantSlug}`;
 
       // Check if variant with this ID already exists
       const existing = await MongoVariant.findOne({ id }).lean();
       if (existing) {
+        // If it exists, we might want to update it or throw error. 
+        // For now, throwing error as per original logic, but maybe we should allow upsert?
+        // Let's stick to original logic but maybe append a suffix if it's a different variant with same name?
+        // No, name should be unique per model.
         throw new Error(`Variant "${variant.name}" already exists for model "${model.name}".`);
       }
 

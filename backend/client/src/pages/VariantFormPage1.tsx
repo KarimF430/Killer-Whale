@@ -30,9 +30,30 @@ export default function VariantFormPage1() {
     queryKey: ['/api/models?limit=all'],
   });
 
-  const models = Array.isArray(modelsResponse)
+  const { data: upcomingCarsResponse } = useQuery<any>({
+    queryKey: ['/api/upcoming-cars'],
+  });
+
+  const regularModels = Array.isArray(modelsResponse)
     ? modelsResponse
     : (modelsResponse?.data || []);
+
+  const upcomingCars = Array.isArray(upcomingCarsResponse)
+    ? upcomingCarsResponse
+    : (upcomingCarsResponse?.data || []);
+
+  // Combine regular models and upcoming cars, marking upcoming cars
+  const models = [
+    ...regularModels,
+    ...upcomingCars.map((car: any) => ({
+      ...car,
+      isUpcoming: true,
+      // Ensure upcoming cars have the same structure as models
+      name: car.name,
+      brandId: car.brandId,
+      id: car.id
+    }))
+  ];
 
   const { data: existingVariant } = useQuery<Variant>({
     queryKey: ['/api/variants', params.id],
@@ -348,7 +369,9 @@ export default function VariantFormPage1() {
             >
               <option value="">Choose Model</option>
               {filteredModels.map((model: any) => (
-                <option key={model.id} value={model.id}>{model.name}</option>
+                <option key={model.id} value={model.id}>
+                  {model.name}{model.isUpcoming ? ' (Upcoming)' : ''}
+                </option>
               ))}
             </select>
           </div>

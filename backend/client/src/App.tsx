@@ -28,13 +28,19 @@ import PopularComparisons from "@/pages/PopularComparisons";
 import News from "@/pages/News";
 import NewsForm from "@/pages/NewsForm";
 import NotFound from "@/pages/not-found";
+import UpcomingCarList from "@/pages/UpcomingCarList";
+import UpcomingCarFormPage1 from "@/pages/UpcomingCarFormPage1";
+import UpcomingCarFormPage2 from "@/pages/UpcomingCarFormPage2";
+import UpcomingCarFormPage3 from "@/pages/UpcomingCarFormPage3";
+import UpcomingCarFormPage4 from "@/pages/UpcomingCarFormPage4";
+import { UpcomingCarFormProvider } from "@/contexts/UpcomingCarFormContext";
 
 function Router() {
   return (
     <Switch>
       {/* Public route */}
       <Route path="/login" component={Login} />
-      
+
       {/* Protected routes */}
       <Route path="/">
         <ProtectedRoute>
@@ -99,6 +105,51 @@ function Router() {
       <Route path="/models/:id/edit/page4">
         <ProtectedRoute>
           <ModelFormPage4 />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars">
+        <ProtectedRoute>
+          <UpcomingCarList />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars/new">
+        <ProtectedRoute>
+          <UpcomingCarFormPage1 />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars/new/page2">
+        <ProtectedRoute>
+          <UpcomingCarFormPage2 />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars/new/page3">
+        <ProtectedRoute>
+          <UpcomingCarFormPage3 />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars/new/page4">
+        <ProtectedRoute>
+          <UpcomingCarFormPage4 />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars/:id/edit">
+        <ProtectedRoute>
+          <UpcomingCarFormPage1 />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars/:id/edit/page2">
+        <ProtectedRoute>
+          <UpcomingCarFormPage2 />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars/:id/edit/page3">
+        <ProtectedRoute>
+          <UpcomingCarFormPage3 />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/upcoming-cars/:id/edit/page4">
+        <ProtectedRoute>
+          <UpcomingCarFormPage4 />
         </ProtectedRoute>
       </Route>
       <Route path="/variants">
@@ -187,18 +238,20 @@ export default function App() {
       <AuthProvider>
         <TooltipProvider>
           <ModelFormProvider>
-            <SidebarProvider>
-              <div className="flex h-screen w-full">
-                <AppSidebar />
-                <div className="flex flex-col flex-1">
-                  <AppHeader />
-                  <main className="flex-1 overflow-auto">
-                    <Router />
-                  </main>
+            <UpcomingCarFormProvider>
+              <SidebarProvider>
+                <div className="flex h-screen w-full">
+                  <AppSidebar />
+                  <div className="flex flex-col flex-1">
+                    <AppHeader />
+                    <main className="flex-1 overflow-auto">
+                      <Router />
+                    </main>
+                  </div>
                 </div>
-              </div>
-            </SidebarProvider>
-            <Toaster />
+              </SidebarProvider>
+              <Toaster />
+            </UpcomingCarFormProvider>
           </ModelFormProvider>
         </TooltipProvider>
       </AuthProvider>

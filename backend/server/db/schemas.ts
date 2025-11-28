@@ -119,6 +119,109 @@ modelSchema.index({ bodyType: 1, status: 1 });
 modelSchema.index({ brandId: 1, status: 1, name: 1 }); // Sort models within brand
 modelSchema.index({ status: 1, launchDate: -1 }); // New launches
 
+// Upcoming Car Schema - Similar to Model but with expected launch date and price range
+const upcomingCarSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  brandId: { type: String, required: true },
+  status: { type: String, default: 'active' },
+
+  // Popularity & Rankings
+  isPopular: { type: Boolean, default: false },
+  isNew: { type: Boolean, default: false },
+  popularRank: { type: Number, default: null },
+  newRank: { type: Number, default: null },
+
+  // Basic Info
+  bodyType: { type: String, default: null },
+  subBodyType: { type: String, default: null },
+  expectedLaunchDate: { type: String, default: null }, // Different from model
+  seating: { type: Number, default: 5 },
+  fuelTypes: { type: [String], default: [] },
+  transmissions: { type: [String], default: [] },
+  brochureUrl: { type: String, default: null },
+
+  // Price Range (Different from model)
+  expectedPriceMin: { type: Number, default: null },
+  expectedPriceMax: { type: Number, default: null },
+
+  // SEO & Content
+  headerSeo: { type: String, default: null },
+  pros: { type: String, default: null },
+  cons: { type: String, default: null },
+  description: { type: String, default: null },
+  exteriorDesign: { type: String, default: null },
+  comfortConvenience: { type: String, default: null },
+  summary: { type: String, default: null },
+
+  // Engine Summaries
+  engineSummaries: [{
+    title: { type: String },
+    summary: { type: String },
+    transmission: { type: String },
+    power: { type: String },
+    torque: { type: String },
+    speed: { type: String }
+  }],
+
+  // Mileage Data
+  mileageData: [{
+    engineName: { type: String },
+    companyClaimed: { type: String },
+    cityRealWorld: { type: String },
+    highwayRealWorld: { type: String }
+  }],
+
+  // FAQs
+  faqs: [{
+    question: { type: String, required: true },
+    answer: { type: String, required: true }
+  }],
+
+  // Images
+  heroImage: { type: String, default: null },
+  galleryImages: [{
+    url: { type: String },
+    caption: { type: String }
+  }],
+  keyFeatureImages: [{
+    url: { type: String },
+    caption: { type: String }
+  }],
+  spaceComfortImages: [{
+    url: { type: String },
+    caption: { type: String }
+  }],
+  storageConvenienceImages: [{
+    url: { type: String },
+    caption: { type: String }
+  }],
+  colorImages: [{
+    url: { type: String },
+    caption: { type: String }
+  }],
+
+  createdAt: { type: Date, default: Date.now }
+});
+
+// Add foreign key validation for upcoming cars
+upcomingCarSchema.pre('save', async function () {
+  const Brand = mongoose.model('Brand');
+  const brand = await Brand.findOne({ id: this.brandId });
+  if (!brand) {
+    throw new Error(`Invalid brandId: ${this.brandId}. Brand does not exist.`);
+  }
+});
+
+upcomingCarSchema.index({ id: 1 }, { unique: true });
+upcomingCarSchema.index({ brandId: 1, status: 1 });
+upcomingCarSchema.index({ name: 1 });
+upcomingCarSchema.index({ isPopular: 1, popularRank: 1 });
+upcomingCarSchema.index({ isNew: 1, newRank: 1 });
+upcomingCarSchema.index({ bodyType: 1, status: 1 });
+upcomingCarSchema.index({ brandId: 1, status: 1, name: 1 });
+upcomingCarSchema.index({ status: 1, expectedLaunchDate: 1 }); // Upcoming launches
+
 // Variant Schema - Complete with all fields
 const variantSchema = new mongoose.Schema({
   id: { type: String, required: true },
@@ -347,14 +450,20 @@ const variantSchema = new mongoose.Schema({
 variantSchema.pre('save', async function () {
   const Brand = mongoose.model('Brand');
   const Model = mongoose.model('Model');
+  const UpcomingCar = mongoose.model('UpcomingCar');
 
-  const [brand, model] = await Promise.all([
-    Brand.findOne({ id: this.brandId }),
-    Model.findOne({ id: this.modelId })
-  ]);
+  const brand = await Brand.findOne({ id: this.brandId });
 
   if (!brand) {
     throw new Error(`Invalid brandId: ${this.brandId}. Brand does not exist.`);
+  }
+
+  // Try to find in regular models first
+  let model = await Model.findOne({ id: this.modelId });
+
+  // If not found, try upcoming cars
+  if (!model) {
+    model = await UpcomingCar.findOne({ id: this.modelId });
   }
 
   if (!model) {
@@ -546,6 +655,7 @@ newsMediaSchema.index({ type: 1 });
 // Export models
 export const Brand = mongoose.model('Brand', brandSchema);
 export const Model = mongoose.model('Model', modelSchema);
+export const UpcomingCar = mongoose.model('UpcomingCar', upcomingCarSchema);
 export const Variant = mongoose.model('Variant', variantSchema);
 export const AdminUser = mongoose.model('AdminUser', adminUserSchema);
 export const PopularComparison = mongoose.model('PopularComparison', popularComparisonSchema);

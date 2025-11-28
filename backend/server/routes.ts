@@ -1923,6 +1923,131 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
+  // ============================================
+  // UPCOMING CARS ROUTES
+  // ============================================
+
+  // Get all upcoming cars (public endpoint with caching)
+  app.get("/api/upcoming-cars", publicLimiter, redisCacheMiddleware(RedisCacheTTL.MODELS), async (req, res) => {
+    try {
+      // Set browser cache headers (15 minutes)
+      res.set('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=1800');
+
+      const brandId = req.query.brandId as string | undefined;
+      const upcomingCars = await storage.getUpcomingCars(brandId);
+      res.json(upcomingCars);
+    } catch (error) {
+      console.error('Get upcoming cars error:', error);
+      res.status(500).json({ error: "Failed to fetch upcoming cars" });
+    }
+  });
+
+  // Get single upcoming car by ID (public endpoint with caching)
+  app.get("/api/upcoming-cars/:id",
+    redisCacheMiddleware(RedisCacheTTL.MODEL_DETAILS),
+    async (req, res) => {
+      // Set browser cache headers (1 hour)
+      res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+
+      const upcomingCar = await storage.getUpcomingCar(req.params.id);
+      if (!upcomingCar) {
+        return res.status(404).json({ error: "Upcoming car not found" });
+      }
+      res.json(upcomingCar);
+    }
+  );
+
+  // Create upcoming car (authenticated)
+  app.post("/api/upcoming-cars", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
+    try {
+      console.log('Received upcoming car data:', JSON.stringify(req.body, null, 2));
+      const { insertUpcomingCarSchema } = await import('./validation/schemas');
+      const validatedData = insertUpcomingCarSchema.parse(req.body);
+      console.log('Validated data:', JSON.stringify(validatedData, null, 2));
+      const upcomingCar = await storage.createUpcomingCar(validatedData);
+
+      // Invalidate cache
+      // Key format: cache:v2:upcoming-cars:/api/upcoming-cars:...
+      await invalidateRedisCache('v2:upcoming-cars');
+
+      res.status(201).json(upcomingCar);
+    } catch (error) {
+      console.error('Upcoming car creation error:', error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(400).json({ error: "Invalid upcoming car data" });
+      }
+    }
+  });
+
+  // PUT route for upcoming car updates (used by progressive saving)
+  app.put("/api/upcoming-cars/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
+    try {
+      console.log('🔄 PUT - Updating upcoming car:', req.params.id);
+      console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
+
+      const upcomingCar = await storage.updateUpcomingCar(req.params.id, req.body);
+      if (!upcomingCar) {
+        return res.status(404).json({ error: "Upcoming car not found" });
+      }
+
+      console.log('✅ Upcoming car updated successfully via PUT');
+
+      // Invalidate cache
+      await invalidateRedisCache('v2:upcoming-cars');
+      console.log('🗑️ Upcoming cars cache invalidated');
+
+      res.json(upcomingCar);
+    } catch (error) {
+      console.error('❌ Upcoming car PUT update error:', error);
+      res.status(500).json({ error: "Failed to update upcoming car" });
+    }
+  });
+
+  // PATCH route for partial upcoming car updates
+  app.patch("/api/upcoming-cars/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
+    try {
+      console.log('🔄 PATCH - Updating upcoming car:', req.params.id);
+      console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
+
+      const upcomingCar = await storage.updateUpcomingCar(req.params.id, req.body);
+      if (!upcomingCar) {
+        return res.status(404).json({ error: "Upcoming car not found" });
+      }
+
+      console.log('✅ Upcoming car updated successfully via PATCH');
+
+      // Invalidate cache
+      await invalidateRedisCache('v2:upcoming-cars');
+      console.log('🗑️ Upcoming cars cache invalidated');
+
+      res.json(upcomingCar);
+    } catch (error) {
+      console.error('❌ Upcoming car PATCH update error:', error);
+      res.status(500).json({ error: "Failed to update upcoming car" });
+    }
+  });
+
+  // Delete upcoming car (authenticated)
+  app.delete("/api/upcoming-cars/:id", authenticateToken, modifyLimiter, async (req, res) => {
+    try {
+      console.log(`🗑️ DELETE request for upcoming car: ${req.params.id}`);
+      const success = await storage.deleteUpcomingCar(req.params.id);
+      if (!success) {
+        console.log(`❌ Upcoming car not found: ${req.params.id}`);
+        return res.status(404).json({ error: "Upcoming car not found" });
+      }
+      console.log(`✅ Upcoming car deleted successfully: ${req.params.id}`);
+      await invalidateRedisCache('v2:upcoming-cars');
+      await triggerBackup('upcoming-cars');
+      res.status(204).send();
+    } catch (error) {
+      console.error(`❌ Error deleting upcoming car ${req.params.id}:`, error);
+      res.status(500).json({ error: "Failed to delete upcoming car" });
+    }
+  });
+
   // Get popular cars (optimized endpoint)
   app.get("/api/cars/popular", publicLimiter, redisCacheMiddleware(RedisCacheTTL.POPULAR_CARS), async (req: Request, res: Response) => {
     try {

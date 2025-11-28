@@ -28,6 +28,11 @@ const menuItems = [
     icon: Car,
   },
   {
+    title: "Upcoming Cars",
+    url: "/upcoming-cars",
+    icon: Car,
+  },
+  {
     title: "Variants",
     url: "/variants",
     icon: Gauge,
@@ -56,7 +61,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
+                  <SidebarMenuButton
                     asChild
                     isActive={location === item.url}
                     data-testid={`link-${item.title.toLowerCase()}`}

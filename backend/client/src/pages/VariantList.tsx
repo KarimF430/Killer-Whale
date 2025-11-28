@@ -52,6 +52,15 @@ export default function VariantList() {
     ? modelsResponse
     : (modelsResponse?.data || []);
 
+  const { data: upcomingCarsResponse } = useQuery<any>({
+    queryKey: ['/api/upcoming-cars'],
+  });
+
+  // ✅ Handle both new array format and old cached paginated format
+  const upcomingCars = Array.isArray(upcomingCarsResponse)
+    ? upcomingCarsResponse
+    : (upcomingCarsResponse?.data || []);
+
   const { data: brandsResponse } = useQuery<any>({
     queryKey: ['/api/brands'],
   });
@@ -60,6 +69,14 @@ export default function VariantList() {
   const brands = Array.isArray(brandsResponse)
     ? brandsResponse
     : (brandsResponse?.data || brandsResponse || []);
+
+  // Combine models and upcoming cars for filtering
+  const allModels = useMemo(() => {
+    return [
+      ...models.map((m: any) => ({ ...m, isUpcoming: false })),
+      ...upcomingCars.map((c: any) => ({ ...c, isUpcoming: true }))
+    ];
+  }, [models, upcomingCars]);
 
   const deleteVariant = useMutation({
     mutationFn: async (id: string) => {
@@ -124,14 +141,15 @@ export default function VariantList() {
     return grouped;
   }, [filteredVariants]);
 
-  // Get model and brand info
+  // Get model and brand info (check both models and upcoming cars)
   const getModelInfo = (modelId: string) => {
-    const model = models.find((m: Model) => m.id === modelId);
-    if (!model) return { modelName: 'Unknown', brandName: 'Unknown' };
+    const model = allModels.find((m: any) => m.id === modelId);
+    if (!model) return { modelName: 'Unknown', brandName: 'Unknown', isUpcoming: false };
     const brand = brands.find((b: Brand) => b.id === model.brandId);
     return {
       modelName: model.name,
-      brandName: brand?.name || 'Unknown'
+      brandName: brand?.name || 'Unknown',
+      isUpcoming: model.isUpcoming || false
     };
   };
 
@@ -456,24 +474,36 @@ export default function VariantList() {
             {filteredVariants.length} {selectedModelId === 'all' ? 'Total' : 'Filtered'} Variants
           </Badge>
 
-          {/* Model Filter Dropdown */}
+          {/* Simplified Model Filter Dropdown */}
           <div className="relative">
             <select
               value={selectedModelId}
               onChange={(e) => setSelectedModelId(e.target.value)}
-              className="px-3 py-1.5 pr-8 border rounded-md text-sm bg-white appearance-none cursor-pointer hover:border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="px-4 py-2 pr-10 border rounded-md text-sm bg-white appearance-none cursor-pointer hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 min-w-[250px]"
             >
-              <option value="all">All Models</option>
-              {models.map((model: Model) => {
-                const brand = brands.find((b: Brand) => b.id === model.brandId);
-                return (
-                  <option key={model.id} value={model.id}>
-                    {brand?.name} {model.name}
-                  </option>
-                );
-              })}
+              <option value="all">All Models ({allModels.length})</option>
+              <optgroup label="Regular Models">
+                {allModels.filter((m: any) => !m.isUpcoming).map((model: any) => {
+                  const brand = brands.find((b: Brand) => b.id === model.brandId);
+                  return (
+                    <option key={model.id} value={model.id}>
+                      {brand?.name} {model.name}
+                    </option>
+                  );
+                })}
+              </optgroup>
+              <optgroup label="Upcoming Models">
+                {allModels.filter((m: any) => m.isUpcoming).map((model: any) => {
+                  const brand = brands.find((b: Brand) => b.id === model.brandId);
+                  return (
+                    <option key={model.id} value={model.id}>
+                      {brand?.name} {model.name}
+                    </option>
+                  );
+                })}
+              </optgroup>
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
 
@@ -556,12 +586,19 @@ export default function VariantList() {
           </div>
         ) : (
           Object.entries(variantsByModel).map(([modelId, modelVariants]) => {
-            const { modelName, brandName } = getModelInfo(modelId);
+            const { modelName, brandName, isUpcoming } = getModelInfo(modelId);
 
             return (
               <div key={modelId} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">{brandName} {modelName} Variants</h2>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-semibold">{brandName} {modelName} Variants</h2>
+                    {isUpcoming && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-300">
+                        Upcoming
+                      </Badge>
+                    )}
+                  </div>
                   <Button
                     onClick={() => setLocation('/variants/new')}
                     size="sm"

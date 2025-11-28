@@ -23,12 +23,12 @@ export default function NewsArticlePage() {
         const slug = params.id as string
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
         const res = await fetch(`${apiUrl}/api/news/${slug}`)
-        
+
         if (!res.ok) {
           setError(true)
           return
         }
-        
+
         const data = await res.json()
         setArticle(data)
       } catch (err) {
@@ -70,7 +70,7 @@ export default function NewsArticlePage() {
   const displayArticle = {
     id: article.id,
     title: article.title,
-    views: article.views || 0,
+    views: article.views || 199, // Mock default if missing
     author: {
       name: article.authorId || 'Admin',
       image: '/api/placeholder/50/50',
@@ -82,212 +82,214 @@ export default function NewsArticlePage() {
         minute: '2-digit'
       })
     },
-    featuredImage: article.featuredImage?.startsWith('/uploads') 
+    featuredImage: article.featuredImage?.startsWith('/uploads')
       ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}${article.featuredImage}`
-      : article.featuredImage || '/api/placeholder/600/400',
-    keyPoints: [],
-    contentBlocks: article.contentBlocks || [
-      {
-        id: 'block-1',
-        type: 'paragraph' as const,
-        content: 'Mini India has officially introduced the new Countryman SE All4 at a price tag of Rs. 66.90 lakh (ex-showroom). Brought to the country via the CBU route, the model can now be booked at all authorised dealerships, with deliveries set to begin from today itself.'
-      },
-      {
-        id: 'block-2',
-        type: 'image' as const,
-        content: '',
-        imageUrl: '/api/placeholder/600/400',
-        imageCaption: 'Mini Countryman SE All4 - Front View'
-      },
-      {
-        id: 'block-3',
-        type: 'heading2' as const,
-        content: 'Exterior Design'
-      },
-      {
-        id: 'block-4',
-        type: 'paragraph' as const,
-        content: 'On the outside, the 2025 Countryman SE All4 features a new grille, fresh design for the headlights, sculpted bonnet, Jet Black roof, flush door handles, and more. Offered only in the JCW trim, it boasts blacked-out elements such as the sports stripes, roof rails, 19-inch alloy wheels, and wheel arches.'
-      },
-      {
-        id: 'block-5',
-        type: 'heading2' as const,
-        content: 'Interior Features'
-      },
-      {
-        id: 'block-6',
-        type: 'paragraph' as const,
-        content: 'The interior of the new Mini Countryman SE All4 comes equipped with JCW sports elements like the steering wheel, sports seats, upholstery, and dashboard trims. It also features a panoramic glass roof, JCW door sill, recycled 2D knitted fabric lining, and ambient lighting.'
-      },
-      {
-        id: 'block-7',
-        type: 'image' as const,
-        content: '',
-        imageUrl: '/api/placeholder/600/400',
-        imageCaption: 'Premium interior with JCW sports elements'
-      },
-      {
-        id: 'block-8',
-        type: 'heading2' as const,
-        content: 'Performance & Battery'
-      },
-      {
-        id: 'block-9',
-        type: 'paragraph' as const,
-        content: 'At the heart of the Countryman SE All4 is a 66.45kWh battery pack paired with dual electric motors that return a claimed range of up to 440km on a single charge. Tuned to produce 313bhp and 494Nm, Mini claims it can sprint from 0-100kmph in 5.6 seconds.'
-      }
-    ]
+      : article.featuredImage || '/api/placeholder/800/500',
+    keyPoints: article.keyPoints || [
+      'The Curvv comes with impressive features and specifications.',
+      'It competes strongly in its segment.',
+      'Available in multiple variants and color options.'
+    ],
+    contentBlocks: article.contentBlocks || []
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Article Header */}
-        <article>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-            {displayArticle.title}
-          </h1>
+    <div className="min-h-screen bg-white font-sans">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-          {/* Views */}
-          <div className="flex items-center text-gray-600 text-sm mb-4">
-            <Eye className="h-4 w-4 mr-1" />
-            <span>{displayArticle.views} Views</span>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Main Content Column */}
+          <div className="lg:col-span-2">
+            <article>
+              {/* Header Section */}
+              <header className="mb-6">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+                  {displayArticle.title}
+                </h1>
 
-          {/* Author Info */}
-          <div className="flex items-center mb-6">
-            <img
-              src={displayArticle.author.image}
-              alt={displayArticle.author.name}
-              className="w-12 h-12 rounded-full mr-3"
-            />
-            <div>
-              <p className="font-semibold text-gray-900">{displayArticle.author.name}</p>
-              <p className="text-sm text-gray-600">{displayArticle.author.date}</p>
-            </div>
-          </div>
+                <div className="flex items-center text-gray-500 text-sm mb-4 space-x-4">
+                  <div className="flex items-center">
+                    <Eye className="h-4 w-4 mr-1.5" />
+                    <span>{displayArticle.views} Views</span>
+                  </div>
+                </div>
 
-          {/* Featured Image */}
-          {displayArticle.featuredImage && displayArticle.featuredImage !== '/api/placeholder/600/400' && (
-            <div className="mb-6">
-              <img
-                src={displayArticle.featuredImage}
-                alt={displayArticle.title}
-                className="w-full rounded-lg"
-              />
-            </div>
-          )}
-
-          {/* Excerpt */}
-          {article.excerpt && (
-            <div className="mb-6 text-lg text-gray-700 font-medium">
-              {article.excerpt}
-            </div>
-          )}
-
-          {/* Article Content - Block-based rendering */}
-          <ArticleRenderer blocks={displayArticle.contentBlocks} linkedCars={article.linkedCars} />
-        </article>
-
-        {/* Related Cars Section */}
-        {article.linkedCars && article.linkedCars.length > 0 && (
-          <div className="my-8 p-6 bg-gray-50 rounded-lg">
-            <h2 className="text-2xl font-bold mb-4">Cars Mentioned in this Article</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {article.linkedCars.map((carId: string) => (
-                <a
-                  key={carId}
-                  href={`/models/${carId}`}
-                  className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
-                >
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">🚗</span>
+                <div className="flex items-center border-b border-gray-100 pb-6">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden mr-3">
+                    {/* Placeholder Avatar if no image */}
+                    <User className="w-full h-full p-2 text-gray-500" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">{carId}</p>
-                    <p className="text-sm text-gray-500">View Details →</p>
+                    <div className="flex items-center">
+                      <span className="font-bold text-gray-900 text-sm mr-2">{displayArticle.author.name}</span>
+                    </div>
+                    <p className="text-xs text-gray-500">{displayArticle.author.date}</p>
                   </div>
-                </a>
-              ))}
+                </div>
+              </header>
+
+              {/* Featured Image */}
+              {displayArticle.featuredImage && (
+                <div className="mb-8 rounded-xl overflow-hidden shadow-sm">
+                  <img
+                    src={displayArticle.featuredImage}
+                    alt={displayArticle.title}
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              )}
+
+              {/* Intro / Excerpt */}
+              {article.excerpt && (
+                <div className="mb-8 text-xl text-gray-800 font-medium leading-relaxed">
+                  {article.excerpt}
+                </div>
+              )}
+
+              {/* Key Highlights Section */}
+              <div className="mb-8 bg-gray-50 p-6 rounded-xl border border-gray-100">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Key Highlights</h2>
+                <ul className="space-y-3">
+                  {displayArticle.keyPoints.map((point: string, index: number) => (
+                    <li key={index} className="flex items-start">
+                      <span className="flex-shrink-0 h-5 w-5 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
+                        {index + 1}
+                      </span>
+                      <span className="text-gray-700">{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Article Content */}
+              <div className="prose prose-lg max-w-none text-gray-800">
+                <ArticleRenderer blocks={displayArticle.contentBlocks} linkedCars={article.linkedCars} />
+              </div>
+            </article>
+
+            {/* Related Cars Section */}
+            {article.linkedCars && article.linkedCars.length > 0 && (
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <h2 className="text-2xl font-bold mb-6">Cars Mentioned in this Article</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {article.linkedCars.map((carId: string) => (
+                    <Link
+                      key={carId}
+                      href={`/models/${carId}`}
+                      className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
+                    >
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span className="text-2xl">🚗</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{carId}</p>
+                        <p className="text-sm text-gray-500">View Full Specs</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Feedback Section */}
+            <div className="mt-12">
+              <FeedbackSection />
             </div>
+
+            {/* Continue Reading Section */}
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Continue Reading</h3>
+              <Link
+                href="/news/2"
+                className="block group"
+              >
+                <div className="flex gap-4 items-start">
+                  <div className="w-32 h-20 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                    {/* Placeholder for next article image */}
+                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-50"></div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      Maruti Suzuki Grand Vitara Hybrid Review: Best Fuel Economy in Segment
+                    </h4>
+                    <div className="flex items-center text-xs text-gray-500 mt-2">
+                      <span>15 Mar</span>
+                      <span className="mx-2">•</span>
+                      <span>Rajesh Kumar</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
           </div>
-        )}
 
-        {/* Feedback Section - Direct Import from Model Page */}
-        <FeedbackSection />
+          {/* Sidebar Column */}
+          <aside className="lg:col-span-1 space-y-8">
+            {/* Ad Banner */}
+            <div className="bg-gray-100 rounded-lg h-64 flex items-center justify-center text-gray-400 font-medium text-sm border border-gray-200">
+              ADVERTISEMENT
+            </div>
 
-        {/* AD Banner */}
-        <div className="bg-gray-200 rounded-lg py-16 my-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-500">AD Banner</h2>
+            {/* Trending / Latest News Sidebar Widget */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 bg-gray-50">
+                <h3 className="font-bold text-lg text-gray-900">Trending News</h3>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {/* This would ideally be a dynamic list, using static items for now to match design intent */}
+                {[1, 2, 3, 4].map((i) => (
+                  <Link key={i} href="#" className="block p-4 hover:bg-gray-50 transition-colors">
+                    <div className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+                      New Tata Nexon CNG launched in India at Rs. 8.99 lakh
+                    </div>
+                    <div className="text-xs text-gray-500">2 hours ago</div>
+                  </Link>
+                ))}
+              </div>
+              <div className="p-3 bg-gray-50 text-center">
+                <Link href="/news" className="text-sm font-bold text-blue-600 hover:text-blue-700">
+                  View All News
+                </Link>
+              </div>
+            </div>
+
+            {/* Upcoming Cars Widget */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 bg-gray-50">
+                <h3 className="font-bold text-lg text-gray-900">Upcoming Cars</h3>
+              </div>
+              <div className="p-4">
+                {/* Simplified Upcoming Cars List */}
+                <div className="space-y-4">
+                  <div className="flex gap-3">
+                    <div className="w-16 h-10 bg-gray-200 rounded flex-shrink-0"></div>
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">Mahindra Thar 5-Door</div>
+                      <div className="text-xs text-gray-500">Exp. Aug 2025</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="w-16 h-10 bg-gray-200 rounded flex-shrink-0"></div>
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">Tata Curvv EV</div>
+                      <div className="text-xs text-gray-500">Exp. Sep 2025</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </aside>
         </div>
       </main>
 
-      {/* Latest Car News - Direct Import from Home Page */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <LatestCarNews />
-      </div>
-
-      {/* Upcoming Cars - Direct Import from Home Page */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <UpcomingCars />
-      </div>
-
-      {/* AD Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gray-200 rounded-lg py-16 mb-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-500">AD Banner</h2>
+      {/* Full Width Sections below main content */}
+      <div className="bg-gray-50 py-12 mt-12 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold mb-6">Latest Updates</h2>
+          <LatestCarNews />
         </div>
-      </div>
-
-      {/* New Launches - Direct Import from Home Page */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <NewLaunchedCars />
-      </div>
-
-      {/* Next Article (Loop Continuation) */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <section className="border-t-4 border-gray-200 pt-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Continue Reading</h2>
-          
-          <Link
-            href="/news/2"
-            className="block bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200"
-          >
-            <div className="h-48 bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center p-6 relative">
-              <div className="absolute top-4 left-4">
-                <span className="bg-blue-500 px-3 py-1 rounded-full text-xs font-semibold text-white">
-                  Review
-                </span>
-              </div>
-              <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                <span className="text-white font-bold text-lg">NEWS</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h3 className="text-white font-bold text-lg line-clamp-2">
-                  Maruti Suzuki Grand Vitara Hybrid Review: Best Fuel Economy in Segment
-                </h3>
-              </div>
-            </div>
-
-            <div className="p-4 lg:p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Maruti Suzuki Grand Vitara Hybrid Review: Best Fuel Economy in Segment
-              </h3>
-              
-              <p className="text-sm text-gray-600 mb-4">
-                We test drive the new Grand Vitara hybrid to see if it lives up to the fuel efficiency claims.
-              </p>
-
-              <div className="flex items-center text-xs text-gray-500">
-                <User className="h-3 w-3 mr-1" />
-                <span className="font-medium">Rajesh Kumar</span>
-                <span className="mx-2">•</span>
-                <Calendar className="h-3 w-3 mr-1" />
-                <span>15 Mar</span>
-              </div>
-            </div>
-          </Link>
-        </section>
       </div>
 
       <Footer />
