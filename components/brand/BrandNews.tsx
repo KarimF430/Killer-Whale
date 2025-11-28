@@ -1,240 +1,199 @@
-'use client'
-
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Calendar, Clock, Eye, MessageCircle, ArrowRight } from 'lucide-react'
+import { Calendar, Clock, Eye, MessageCircle, ArrowRight } from 'lucide-react'
+
+interface ContentBlock {
+  id: string
+  type: string
+  content: string
+  imageUrl?: string
+  imageCaption?: string
+}
 
 interface NewsArticle {
-  id: number
+  id: string
   title: string
   excerpt: string
-  category: string
-  author: string
+  categoryId: string
+  authorId: string
   publishDate: string
-  readTime: string
   views: number
-  comments: number
-  image: string
+  likes: number
+  contentBlocks: ContentBlock[]
   slug: string
-  featured: boolean
+  isFeatured: boolean
+  status: string
+  featuredImage?: string
+  tags: string[]
 }
 
 interface BrandNewsProps {
+  brandSlug: string
   brandName: string
 }
 
-export default function BrandNews({ brandName }: BrandNewsProps) {
-  // Mock news articles data
-  const newsArticles: NewsArticle[] = [
-    {
-      id: 1,
-      title: 'Maruti Suzuki Grand Vitara Hybrid Review: Best Fuel Economy in Segment',
-      excerpt: 'We test drive the new Grand Vitara hybrid to see if it lives up to the fuel efficiency claims.',
-      category: 'Review',
-      author: 'Rajesh Kumar',
-      publishDate: '2024-03-15',
-      readTime: '5 min read',
-      views: 12500,
-      comments: 45,
-      image: '/news/grand-vitara-review.jpg',
-      slug: 'maruti-suzuki-grand-vitara-hybrid-review',
-      featured: true
-    },
-    {
-      id: 2,
-      title: 'Upcoming Electric Cars in India 2024: Complete List with Expected Prices',
-      excerpt: 'From Tata to Mahindra, here are all the electric cars launching in India this year.',
-      category: 'News',
-      author: 'Priya Sharma',
-      publishDate: '2024-03-14',
-      readTime: '8 min read',
-      views: 18200,
-      comments: 67,
-      image: '/news/electric-cars-2024.jpg',
-      slug: 'upcoming-electric-cars-india-2024',
-      featured: true
-    },
-    {
-      id: 3,
-      title: 'Hyundai Creta vs Kia Seltos 2024: Which Compact SUV Should You Buy?',
-      excerpt: 'Detailed comparison of two popular compact SUVs with latest updates and pricing.',
-      category: 'Comparison',
-      author: 'Amit Singh',
-      publishDate: '2024-03-13',
-      readTime: '6 min read',
-      views: 9800,
-      comments: 32,
-      image: '/news/creta-vs-seltos.jpg',
-      slug: 'hyundai-creta-vs-kia-seltos-2024-comparison',
-      featured: false
-    },
-    {
-      id: 4,
-      title: 'Car Loan Interest Rates March 2024: Best Banks for Auto Financing',
-      excerpt: 'Compare car loan rates from top banks and NBFCs to get the best deal on your next car.',
-      category: 'Guide',
-      author: 'Neha Gupta',
-      publishDate: '2024-03-12',
-      readTime: '4 min read',
-      views: 7500,
-      comments: 28,
-      image: '/news/car-loan-rates.jpg',
-      slug: 'car-loan-interest-rates-march-2024',
-      featured: false
-    },
-    {
-      id: 5,
-      title: 'Tata Nexon EV Max Long Term Review: 6 Months and 15,000 KM Later',
-      excerpt: 'Our comprehensive long-term review of the Nexon EV Max after extensive real-world usage.',
-      category: 'Review',
-      author: 'Vikram Patel',
-      publishDate: '2024-03-11',
-      readTime: '7 min read',
-      views: 11200,
-      comments: 54,
-      image: '/news/nexon-ev-long-term.jpg',
-      slug: 'tata-nexon-ev-max-long-term-review',
-      featured: false
-    },
-    {
-      id: 6,
-      title: 'New Car Launches in April 2024: Mahindra XUV 3XO, Honda Elevate and More',
-      excerpt: 'Get ready for exciting new car launches coming to India next month.',
-      category: 'News',
-      author: 'Rohit Mehta',
-      publishDate: '2024-03-10',
-      readTime: '3 min read',
-      views: 6800,
-      comments: 19,
-      image: '/news/april-launches.jpg',
-      slug: 'new-car-launches-april-2024',
-      featured: false
-    }
-  ]
+async function getBrandNews(brandName: string): Promise<NewsArticle[]> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+    const fullUrl = `${apiUrl}/api/news?tag=${encodeURIComponent(brandName)}&limit=10`
 
-  const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
-      case 'review':
-        return 'bg-blue-100 text-blue-800'
-      case 'news':
-        return 'bg-green-100 text-green-800'
-      case 'comparison':
-        return 'bg-purple-100 text-purple-800'
-      case 'guide':
-        return 'bg-orange-100 text-orange-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+    const res = await fetch(fullUrl, { next: { revalidate: 3600 } }) // Cache for 1 hour
+
+    if (res.ok) {
+      const data = await res.json()
+      return data.articles || []
     }
+    return []
+  } catch (error) {
+    console.error('❌ Error fetching brand news:', error)
+    return []
+  }
+}
+
+export default async function BrandNews({ brandSlug, brandName }: BrandNewsProps) {
+  const articles = await getBrandNews(brandName)
+
+  // Get first image from featuredImage or contentBlocks
+  const getFirstImage = (article: NewsArticle) => {
+    // First, try featuredImage
+    if (article.featuredImage && article.featuredImage.trim() !== '') {
+      return article.featuredImage
+    }
+
+    // Fallback to contentBlocks
+    if (!article.contentBlocks || !Array.isArray(article.contentBlocks)) {
+      return null
+    }
+
+    const imageBlock = article.contentBlocks.find(block => block.type === 'image' && block.imageUrl)
+    if (!imageBlock?.imageUrl) return null
+
+    if (imageBlock.imageUrl.startsWith('/uploads')) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+      return `${apiUrl}${imageBlock.imageUrl}`
+    }
+    return imageBlock.imageUrl
   }
 
-  const scrollContainer = (direction: 'left' | 'right') => {
-    const container = document.getElementById('latest-news-scroll')
-    if (container) {
-      const scrollAmount = 350
-      container.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      })
-    }
+  // Calculate reading time from content blocks
+  const calculateReadTime = (blocks: ContentBlock[]) => {
+    const wordCount = blocks.reduce((count, block) => {
+      return count + (block.content?.split(' ').length || 0)
+    }, 0)
+    const minutes = Math.ceil(wordCount / 200)
+    return `${minutes} min read`
+  }
+
+  if (articles.length === 0) {
+    return null
   }
 
   return (
-    <section className="py-8 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Latest {brandName.charAt(0).toUpperCase() + brandName.slice(1)} News</h2>
-          <Link
-            href="/news"
-            className="flex items-center text-red-600 hover:text-orange-600 font-medium"
-          >
-            View All News
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Link>
-        </div>
+    <div>
+      <div className="flex items-center justify-between mb-4 sm:mb-6 lg:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{brandName} News</h2>
+        <Link
+          href="/news"
+          className="flex items-center text-red-600 hover:text-orange-600 font-medium text-sm sm:text-base"
+        >
+          <span className="hidden sm:inline">View All News</span>
+          <span className="sm:hidden">View All</span>
+          <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+        </Link>
+      </div>
 
-        {/* News Articles Horizontal Scroll */}
-        <div className="relative">
-          <div
-            id="latest-news-scroll"
-            className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {newsArticles.map((article) => (
-              <Link
-                key={article.id}
-                href={`/news/${article.slug}`}
-                className="flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden"
-              >
-                {/* Article Image with Gradient */}
-                <div className="h-40 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center relative">
-                  <div className="text-center text-white px-3">
-                    <div className="w-12 h-8 bg-white/20 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                      <span className="text-xs font-medium">NEWS</span>
+      {/* News Articles Horizontal Scroll */}
+      <div className="relative">
+        <div
+          id="brand-news-scroll"
+          className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {articles.map((article) => (
+            <Link
+              key={article.id}
+              href={`/news/${article.slug}`}
+              className="flex-shrink-0 w-[260px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden"
+            >
+              {/* Article Image - First image from featuredImage or contentBlocks or gradient */}
+              <div className="h-32 sm:h-40 relative overflow-hidden">
+                {getFirstImage(article) ? (
+                  <img
+                    src={getFirstImage(article)!}
+                    alt={article.title}
+                    className="w-full h-full object-cover bg-gray-100"
+                  />
+                ) : (
+                  <div className="h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">
+                    <div className="text-center text-white px-3">
+                      <div className="w-12 h-8 bg-white/20 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                        <span className="text-xs font-medium">NEWS</span>
+                      </div>
+                      <h3 className="text-sm font-bold leading-tight line-clamp-2">
+                        {article.title}
+                      </h3>
                     </div>
-                    <h3 className="text-sm font-bold leading-tight line-clamp-2">
-                      {article.title}
-                    </h3>
                   </div>
+                )}
 
-                  {/* Category Badge */}
-                  <div className="absolute top-3 left-3">
-                    <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                      {article.category}
+                {/* Category Badge */}
+                <div className="absolute top-3 left-3">
+                  <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                    News
+                  </span>
+                </div>
+
+                {/* Featured Badge */}
+                {article.isFeatured && (
+                  <div className="absolute top-3 right-3">
+                    <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                      Featured
                     </span>
                   </div>
+                )}
+              </div>
 
-                  {/* Featured Badge */}
-                  {article.featured && (
-                    <div className="absolute top-3 right-3">
-                      <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                        Featured
-                      </span>
-                    </div>
-                  )}
+              {/* Article Info */}
+              <div className="p-2.5 sm:p-3">
+                <h3 className="font-bold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base leading-tight line-clamp-2">
+                  {article.title}
+                </h3>
+
+                <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 leading-relaxed line-clamp-2">
+                  {article.excerpt}
+                </p>
+
+                {/* Author and Date */}
+                <div className="flex items-center text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
+                  <span className="font-medium truncate max-w-[80px]">Haji Karim</span>
+                  <span className="mx-1 sm:mx-2">•</span>
+                  <Calendar className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
+                  <span className="whitespace-nowrap">{new Date(article.publishDate).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'short'
+                  })}</span>
                 </div>
 
-                {/* Article Info */}
-                <div className="p-3">
-                  <h3 className="font-bold text-gray-900 mb-2 text-base leading-tight">
-                    {article.title}
-                  </h3>
-
-                  <p className="text-sm text-gray-600 mb-3 leading-relaxed line-clamp-2">
-                    {article.excerpt}
-                  </p>
-
-                  {/* Author and Date */}
-                  <div className="flex items-center text-xs text-gray-500 mb-3">
-                    <span className="font-medium">{article.author}</span>
-                    <span className="mx-2">•</span>
-                    <Calendar className="h-3 w-3 mr-1" />
-                    <span>{new Date(article.publishDate).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short'
-                    })}</span>
+                {/* Article Stats */}
+                <div className="flex items-center space-x-2 sm:space-x-3 text-[10px] sm:text-xs text-gray-500">
+                  <div className="flex items-center">
+                    <Clock className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{calculateReadTime(article.contentBlocks)}</span>
                   </div>
-
-                  {/* Article Stats */}
-                  <div className="flex items-center space-x-3 text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      <span>{article.readTime}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Eye className="h-3 w-3 mr-1" />
-                      <span>{article.views.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <MessageCircle className="h-3 w-3 mr-1" />
-                      <span>{article.comments}</span>
-                    </div>
+                  <div className="flex items-center">
+                    <Eye className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
+                    <span>{article.views.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <MessageCircle className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
+                    <span>{article.likes}</span>
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
-          <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
+              </div>
+            </Link>
+          ))}
         </div>
+        <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-gray-50 via-gray-50/80 to-transparent pointer-events-none sm:hidden -z-10" />
       </div>
-    </section >
+    </div>
   )
 }

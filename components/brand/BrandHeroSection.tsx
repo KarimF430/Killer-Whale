@@ -36,9 +36,10 @@ interface BrandHeroSectionProps {
   models?: any[]
   brandId?: string
   backendBrand?: any
+  newsSlot?: React.ReactNode
 }
 
-export default function BrandHeroSection({ brand, brands = [], models = [], brandId, backendBrand }: BrandHeroSectionProps) {
+export default function BrandHeroSection({ brand, brands = [], models = [], brandId, backendBrand, newsSlot }: BrandHeroSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const formatPrice = (price: number) => {
@@ -328,161 +329,11 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
       <AlternativeBrands currentBrand={brand.slug} initialBrands={brands} />
 
       {/* Section 6: Brand News and Videos */}
-      {/* Brand News Section - Copied from Home Page LatestCarNews */}
-      <section className="py-6 sm:py-8 bg-white">
+      <div className="py-6 sm:py-8 bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
-          <div className="flex items-center justify-between mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{brand.name} News</h2>
-            <div className="flex items-center text-red-600 hover:text-orange-600 font-medium cursor-pointer text-sm sm:text-base">
-              <span className="hidden sm:inline">View All News</span>
-              <span className="sm:hidden">View All</span>
-              <svg className="h-3 w-3 sm:h-4 sm:w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* News Articles Horizontal Scroll */}
-          {/* Upcoming Cars Horizontal Scroll */}
-          <div className="relative">
-            <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              {/* News Article 1 */}
-              {/* News Article 1 */}
-              <div className="flex-shrink-0 w-[280px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden cursor-pointer">
-                {/* Article Image with Gradient */}
-                {/* Article Image with Gradient */}
-                <div className="h-36 sm:h-40 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center relative">
-                  <div className="text-center text-white px-2 sm:px-3">
-                    <div className="w-10 h-7 sm:w-12 sm:h-8 bg-white/20 rounded-lg mx-auto mb-1.5 sm:mb-2 flex items-center justify-center">
-                      <span className="text-[10px] sm:text-xs font-medium">NEWS</span>
-                    </div>
-                    <h3 className="text-sm sm:text-sm font-bold leading-tight line-clamp-2">
-                      {brand.name} Grand Vitara Hybrid Review: Best Fuel Economy in Segment
-                    </h3>
-                  </div>
-
-                  {/* Category Badge */}
-                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-                    <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">
-                      Review
-                    </span>
-                  </div>
-
-                  {/* Featured Badge */}
-                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
-                    <span className="bg-red-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">
-                      Featured
-                    </span>
-                  </div>
-                </div>
-
-                {/* Article Info */}
-                <div className="p-4 sm:p-3">
-                  <h3 className="font-bold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base leading-tight">
-                    {brand.name} Grand Vitara Hybrid Review: Best Fuel Economy in Segment
-                  </h3>
-
-                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 leading-relaxed line-clamp-2">
-                    We test drive the new Grand Vitara hybrid to see if it lives up to the fuel efficiency claims.
-                  </p>
-
-                  {/* Author and Date */}
-                  <div className="flex items-center text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
-                    <span className="font-medium truncate max-w-[80px]">Rajesh Kumar</span>
-                    <span className="mx-1 sm:mx-2">•</span>
-                    <svg className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="whitespace-nowrap">15 Mar</span>
-                  </div>
-
-                  {/* Article Stats */}
-                  <div className="flex items-center space-x-2 sm:space-x-3 text-[10px] sm:text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <svg className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="whitespace-nowrap">5 min read</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <span>12,500</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                      <span>45</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* News Article 2 */}
-              {/* News Article 2 */}
-              <div className="flex-shrink-0 w-[280px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden cursor-pointer">
-                <div className="h-36 sm:h-40 bg-gradient-to-br from-green-400 via-blue-500 to-purple-500 flex items-center justify-center relative">
-                  <div className="text-center text-white px-2 sm:px-3">
-                    <div className="w-10 h-7 sm:w-12 sm:h-8 bg-white/20 rounded-lg mx-auto mb-1.5 sm:mb-2 flex items-center justify-center">
-                      <span className="text-[10px] sm:text-xs font-medium">NEWS</span>
-                    </div>
-                    <h3 className="text-sm sm:text-sm font-bold leading-tight line-clamp-2">
-                      Upcoming {brand.name} Cars 2024: Complete List with Expected Prices
-                    </h3>
-                  </div>
-
-                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-                    <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium">
-                      News
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-4 sm:p-3">
-                  <h3 className="font-bold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base leading-tight">
-                    Upcoming {brand.name} Cars 2024: Complete List with Expected Prices
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 leading-relaxed line-clamp-2">
-                    From new launches to facelifts, here are all the {brand.name} cars coming to India this year.
-                  </p>
-                  <div className="flex items-center text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
-                    <span className="font-medium truncate max-w-[80px]">Priya Sharma</span>
-                    <span className="mx-1 sm:mx-2">•</span>
-                    <svg className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="whitespace-nowrap">14 Mar</span>
-                  </div>
-                  <div className="flex items-center space-x-2 sm:space-x-3 text-[10px] sm:text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <svg className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="whitespace-nowrap">8 min read</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <span>18,200</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                      <span>67</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {newsSlot}
         </div>
-      </section>
+      </div>
 
       {/* Brand Videos Section - Using BrandYouTube Component */}
       <BrandYouTube brandName={brand.name} />

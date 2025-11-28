@@ -25,15 +25,22 @@ interface NewsArticle {
   slug: string
   isFeatured: boolean
   status: string
+  featuredImage?: string
 }
 
 export default function LatestCarNews({ initialNews = [] }: { initialNews?: NewsArticle[] }) {
   // Use prop data directly
   const newsArticles = initialNews
 
-  // Get first image from contentBlocks
-  const getFirstImage = (blocks: ContentBlock[]) => {
-    const imageBlock = blocks.find(block => block.type === 'image' && block.imageUrl)
+  // Get first image from featuredImage or contentBlocks
+  const getFirstImage = (article: NewsArticle) => {
+    // First, try featuredImage
+    if (article.featuredImage && article.featuredImage.trim() !== '') {
+      return article.featuredImage
+    }
+
+    // Fallback to contentBlocks
+    const imageBlock = article.contentBlocks.find(block => block.type === 'image' && block.imageUrl)
     if (!imageBlock?.imageUrl) return '/api/placeholder/400/300'
 
     // Handle blob URLs (shouldn't happen but fallback)
@@ -116,13 +123,13 @@ export default function LatestCarNews({ initialNews = [] }: { initialNews?: News
               href={`/news/${article.slug}`}
               className="flex-shrink-0 w-[260px] sm:w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden"
             >
-              {/* Article Image - First image from contentBlocks or gradient */}
+              {/* Article Image - First image from featuredImage or contentBlocks or gradient */}
               <div className="h-32 sm:h-40 relative overflow-hidden">
-                {getFirstImage(article.contentBlocks) !== '/api/placeholder/400/300' ? (
+                {getFirstImage(article) !== '/api/placeholder/400/300' ? (
                   <img
-                    src={getFirstImage(article.contentBlocks)}
+                    src={getFirstImage(article)}
                     alt={article.title}
-                    className="w-full h-full object-contain bg-gray-100"
+                    className="w-full h-full object-cover bg-gray-100"
                   />
                 ) : (
                   <div className="h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">
@@ -140,7 +147,7 @@ export default function LatestCarNews({ initialNews = [] }: { initialNews?: News
                 {/* Category Badge */}
                 <div className="absolute top-3 left-3">
                   <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                    {article.categoryId}
+                    News
                   </span>
                 </div>
 
@@ -166,7 +173,7 @@ export default function LatestCarNews({ initialNews = [] }: { initialNews?: News
 
                 {/* Author and Date */}
                 <div className="flex items-center text-[10px] sm:text-xs text-gray-500 mb-2 sm:mb-3">
-                  <span className="font-medium truncate max-w-[80px]">{article.authorId}</span>
+                  <span className="font-medium truncate max-w-[80px]">Haji Karim</span>
                   <span className="mx-1 sm:mx-2">•</span>
                   <Calendar className="h-3 w-3 mr-0.5 sm:mr-1 flex-shrink-0" />
                   <span className="whitespace-nowrap">{new Date(article.publishDate).toLocaleDateString('en-IN', {

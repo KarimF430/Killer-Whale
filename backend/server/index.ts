@@ -14,6 +14,7 @@ import monitoringRoutes from "./routes/monitoring";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import { apiLimiter } from "./middleware/rateLimiter";
+import { botDetector, ddosShield } from "./middleware/security";
 import { warmUpCache } from "./middleware/redis-cache";
 import compression from "compression";
 import pinoHttp from "pino-http";
@@ -106,6 +107,45 @@ app.use(helmet({
   // Allow cross-origin embedding of resources (images) in development
   crossOriginResourcePolicy: isProd ? undefined : { policy: 'cross-origin' },
 }));
+
+// SECURE CORS configuration - MUST come before security middleware
+const allowedOrigins = [
+  'https://motoroctane.com',
+  'https://www.motoroctane.com',
+  'https://killer-whale101.vercel.app',
+  'https://killer-whale.onrender.com',
+  'http://localhost:3000',
+  'http://localhost:5001',
+  'http://192.168.1.23:3000',
+  'http://192.168.1.23:5001',
+  process.env.FRONTEND_URL,
+  process.env.NEXT_PUBLIC_API_URL
+].filter(Boolean);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // Only allow whitelisted origins
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  } else if (process.env.NODE_ENV === 'development') {
+    // In development, allow localhost
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie');
+  res.header('Access-Control-Expose-Headers', 'RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-Cache, X-Cache-TTL');
+
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use('/api', apiLimiter);
 
 // Serve uploaded files statically from a canonical path
@@ -160,44 +200,6 @@ if (!isProd) {
 } else {
   app.use('/uploads', express.static(uploadsStaticPath));
 }
-
-// SECURE CORS configuration - whitelist specific origins
-const allowedOrigins = [
-  'https://motoroctane.com',
-  'https://www.motoroctane.com',
-  'https://killer-whale101.vercel.app', // Vercel deployment
-  'https://killer-whale.onrender.com', // Render backend (for internal API calls)
-  'http://localhost:3000',
-  'http://localhost:5001',
-  'http://192.168.1.23:3000', // Mobile testing
-  'http://192.168.1.23:5001',
-  process.env.FRONTEND_URL,
-  process.env.NEXT_PUBLIC_API_URL
-].filter(Boolean);
-
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  // Only allow whitelisted origins
-  if (origin && allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  } else if (process.env.NODE_ENV === 'development') {
-    // In development, allow localhost
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
-
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie');
-  res.header('Access-Control-Expose-Headers', 'RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, X-Cache, X-Cache-TTL');
-
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
 
 app.use((req, res, next) => {
   const start = Date.now();

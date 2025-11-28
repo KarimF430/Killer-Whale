@@ -106,6 +106,7 @@ interface ModelData {
 interface CarModelPageProps {
   model: ModelData
   initialVariants?: any[] // ✅ Server-rendered variants for AllVariantsClient
+  newsSlot?: React.ReactNode
 }
 
 // FAQ Data
@@ -258,7 +259,7 @@ const navigationSections = [
   { id: 'reviews', label: 'Reviews' }
 ]
 
-export default function CarModelPage({ model, initialVariants = [] }: CarModelPageProps) {
+export default function CarModelPage({ model, initialVariants = [], newsSlot }: CarModelPageProps) {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
@@ -2204,100 +2205,10 @@ export default function CarModelPage({ model, initialVariants = [] }: CarModelPa
         {/* Section 9: Model News & Videos */}
         <PageSection background="white" maxWidth="7xl">
           <div id="news-videos" className="space-y-8">
-            {/* Model News Section - Exact copy from home page */}
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{model?.brand || 'Car'} {model?.name || 'Model'} News</h2>
-                <Link
-                  href="/news"
-                  className="flex items-center text-red-600 hover:text-orange-600 font-medium"
-                >
-                  View All News
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Link>
-              </div>
-
-              {/* News Articles Horizontal Scroll */}
-              <div className="relative">
-                <div
-                  id="model-news-scroll"
-                  className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-4"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                  {newsArticles.map((article) => (
-                    <Link
-                      key={article.id}
-                      href={`/news/${article.slug}`}
-                      className="flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden"
-                    >
-                      {/* Article Image with Gradient */}
-                      <div className="h-40 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center relative">
-                        <div className="text-center text-white px-3">
-                          <div className="w-12 h-8 bg-white/20 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                            <span className="text-xs font-medium">NEWS</span>
-                          </div>
-                          <h3 className="text-sm font-bold leading-tight line-clamp-2">
-                            {article.title}
-                          </h3>
-                        </div>
-
-                        {/* Category Badge */}
-                        <div className="absolute top-3 left-3">
-                          <span className="bg-gradient-to-r from-red-600 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                            {article.category}
-                          </span>
-                        </div>
-
-                        {/* Featured Badge */}
-                        {article.featured && (
-                          <div className="absolute top-3 right-3">
-                            <span className="bg-gradient-to-r from-red-600 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                              Featured
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Article Info */}
-                      <div className="p-3">
-                        <h3 className="font-bold text-gray-900 mb-2 text-base leading-tight">
-                          {article.title}
-                        </h3>
-
-                        <p className="text-sm text-gray-600 mb-3 leading-relaxed line-clamp-2">
-                          {article.excerpt}
-                        </p>
-
-                        {/* Author and Date */}
-                        <div className="flex items-center text-xs text-gray-500 mb-3">
-                          <span className="font-medium">{article.author}</span>
-                          <span className="mx-2">•</span>
-                          <Calendar className="h-3 w-3 mr-1" />
-                          <span>{new Date(article.publishDate).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short'
-                          })}</span>
-                        </div>
-
-                        {/* Article Stats */}
-                        <div className="flex items-center space-x-3 text-xs text-gray-500">
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                            <span>{article.readTime}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Eye className="h-3 w-3 mr-1" />
-                            <span>{article.views.toLocaleString()}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <MessageCircle className="h-3 w-3 mr-1" />
-                            <span>{article.comments}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+            {/* Model News Section - Dynamic Slot */}
+            <div className="bg-white">
+              <div className="max-w-7xl mx-auto">
+                {newsSlot}
               </div>
             </div>
 

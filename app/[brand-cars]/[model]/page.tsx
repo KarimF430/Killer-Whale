@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import CarModelPage from '@/components/car-model/CarModelPage'
 import { notFound } from 'next/navigation'
 import { generateModelSEO } from '@/lib/seo'
+import BrandNews from '@/components/brand/BrandNews'
 
 interface ModelPageProps {
   params: Promise<{
@@ -413,7 +414,11 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
   return (
     <>
-      <CarModelPage model={modelData} initialVariants={modelData.variants} />
+      <CarModelPage
+        model={modelData}
+        initialVariants={modelData.variants}
+        newsSlot={<BrandNews brandSlug={modelData.slug} brandName={modelData.name} />}
+      />
       <FloatingAIBot type="model" id={modelData.id} name={modelData.name} />
     </>
   )

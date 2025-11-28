@@ -19,7 +19,7 @@ function generateSlug(title: string): string {
 // Get all articles with filters
 router.get('/', async (req, res) => {
   try {
-    const { category, status, search, page = '1', limit = '20' } = req.query
+    const { category, status, search, page = '1', limit = '1000' } = req.query
 
     let articles = await newsStorage.getAllArticles()
 
@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     // Search by title or content
     if (search && typeof search === 'string') {
       const searchLower = search.toLowerCase()
-      articles = articles.filter(a => 
+      articles = articles.filter(a =>
         a.title.toLowerCase().includes(searchLower) ||
         a.excerpt.toLowerCase().includes(searchLower)
       )
@@ -217,7 +217,7 @@ router.post('/bulk/update-status', async (req, res) => {
       articleIds.map(id => newsStorage.updateArticle(id, { status }))
     )
 
-    res.json({ 
+    res.json({
       message: `Updated ${results.filter(r => r !== null).length} articles`,
       updated: results.filter(r => r !== null).length
     })
@@ -240,7 +240,7 @@ router.post('/bulk/delete', async (req, res) => {
       articleIds.map(id => newsStorage.deleteArticle(id))
     )
 
-    res.json({ 
+    res.json({
       message: `Deleted ${results.filter(r => r === true).length} articles`,
       deleted: results.filter(r => r === true).length
     })

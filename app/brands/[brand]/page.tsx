@@ -23,7 +23,7 @@ async function fetchBrandData(brandSlug: string) {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-    
+
     const response = await fetch(`${backendUrl}/api/brands`, {
       cache: 'no-store',
       signal: controller.signal,
@@ -32,26 +32,26 @@ async function fetchBrandData(brandSlug: string) {
         'Content-Type': 'application/json'
       }
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch brands: ${response.status}`);
     }
-    
+
     const brands = await response.json();
     if (!Array.isArray(brands)) {
       throw new Error('Invalid response format');
     }
-    
+
     const brand = brands.find((b: any) => {
       const normalizedBrandName = b.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const normalizedSlug = brandSlug.toLowerCase();
-      
+
       return normalizedBrandName === normalizedSlug ||
-             b.name.toLowerCase() === normalizedSlug;
+        b.name.toLowerCase() === normalizedSlug;
     });
-    
+
     return brand || null;
   } catch (error) {
     console.error('❌ Error fetching brand data:', error);
@@ -64,7 +64,7 @@ async function fetchBrandModels(brandId: string) {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-    
+
     const response = await fetch(`${backendUrl}/api/frontend/brands/${brandId}/models`, {
       cache: 'no-store',
       signal: controller.signal,
@@ -73,13 +73,13 @@ async function fetchBrandModels(brandId: string) {
         'Content-Type': 'application/json'
       }
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch models: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data || { brand: null, models: [] };
   } catch (error) {
@@ -242,11 +242,11 @@ function SafeComponent({ children, name }: { children: React.ReactNode, name: st
 
 export default async function BrandPage({ params }: BrandPageProps) {
   const { brand: brandSlug } = await params
-  
+
   // Fetch real brand data from backend
   let backendBrand = await fetchBrandData(brandSlug)
   let brand = null
-  
+
   if (backendBrand) {
     // Map backend brand data to expected format
     brand = {
@@ -273,7 +273,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
     // Fallback to static data
     brand = brandData[brandSlug as keyof typeof brandData]
   }
-  
+
   if (!brand) {
     notFound()
   }
@@ -291,7 +291,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
         <SafeComponent name="BrandHeroSection">
           <BrandHeroSection brand={brand} />
         </SafeComponent>
-        
+
         {/* Section 2: Brand Cars List */}
         <SafeComponent name="BrandCarsList">
           <BrandCarsList brand={brandSlug} />
@@ -302,8 +302,17 @@ export default async function BrandPage({ params }: BrandPageProps) {
           <BrandCompareBox brandName={brandSlug} />
         </SafeComponent>
 
+        {/* Section 4: Latest Brand News */}
+        <PageSection background="white">
+          <div className="text-center py-8">
+            <h2 className="text-2xl font-bold mb-4">🔥 TEST: {brand.name} News Section 🔥</h2>
+            <p className="text-gray-600">If you see this, the section is rendering</p>
+            <BrandNews brandSlug={brandSlug} brandName={brand.name} />
+          </div>
+        </PageSection>
+
       </main>
-      
+
       <Footer />
     </div>
   )

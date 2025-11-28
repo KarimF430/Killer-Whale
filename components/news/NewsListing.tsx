@@ -57,11 +57,21 @@ export default function NewsListing() {
     return Math.max(1, Math.ceil(wordCount / 200))
   }
 
-  // Get first image from content blocks
-  const getFirstImage = (blocks: any[]) => {
-    const imageBlock = blocks.find(block => block.type === 'image' && block.imageUrl)
+  // Get first image from featuredImage or content blocks
+  const getFirstImage = (article: NewsArticle) => {
+    // First, try featuredImage
+    if (article.featuredImage && article.featuredImage.trim() !== '') {
+      return article.featuredImage
+    }
+
+    // Fallback to contentBlocks
+    if (!article.contentBlocks || !Array.isArray(article.contentBlocks)) {
+      return null
+    }
+
+    const imageBlock = article.contentBlocks.find(block => block.type === 'image' && block.imageUrl)
     if (!imageBlock?.imageUrl) return null
-    
+
     if (imageBlock.imageUrl.startsWith('/uploads')) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
       return `${apiUrl}${imageBlock.imageUrl}`
@@ -134,21 +144,19 @@ export default function NewsListing() {
             <div className="flex space-x-8">
               <button
                 onClick={() => setActiveTab('news-reviews')}
-                className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === 'news-reviews'
-                    ? 'border-red-600 text-red-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'news-reviews'
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 News & Reviews
               </button>
               <button
                 onClick={() => setActiveTab('images-videos')}
-                className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === 'images-videos'
-                    ? 'border-red-600 text-red-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'images-videos'
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Images & Videos
               </button>
@@ -165,11 +173,10 @@ export default function NewsListing() {
                   setSelectedFilter('news')
                   setCurrentPage(1)
                 }}
-                className={`px-5 py-2 rounded-full border font-medium text-sm transition-colors ${
-                  selectedFilter === 'news'
-                    ? 'border-red-600 bg-red-50 text-red-600'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                }`}
+                className={`px-5 py-2 rounded-full border font-medium text-sm transition-colors ${selectedFilter === 'news'
+                  ? 'border-red-600 bg-red-50 text-red-600'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  }`}
               >
                 News
               </button>
@@ -178,11 +185,10 @@ export default function NewsListing() {
                   setSelectedFilter('reviews')
                   setCurrentPage(1)
                 }}
-                className={`px-5 py-2 rounded-full border font-medium text-sm transition-colors ${
-                  selectedFilter === 'reviews'
-                    ? 'border-red-600 bg-red-50 text-red-600'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                }`}
+                className={`px-5 py-2 rounded-full border font-medium text-sm transition-colors ${selectedFilter === 'reviews'
+                  ? 'border-red-600 bg-red-50 text-red-600'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  }`}
               >
                 Reviews
               </button>
@@ -191,11 +197,10 @@ export default function NewsListing() {
                   setSelectedFilter('special-reports')
                   setCurrentPage(1)
                 }}
-                className={`px-5 py-2 rounded-full border font-medium text-sm transition-colors ${
-                  selectedFilter === 'special-reports'
-                    ? 'border-red-600 bg-red-50 text-red-600'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                }`}
+                className={`px-5 py-2 rounded-full border font-medium text-sm transition-colors ${selectedFilter === 'special-reports'
+                  ? 'border-red-600 bg-red-50 text-red-600'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  }`}
               >
                 Special Reports
               </button>
@@ -218,17 +223,17 @@ export default function NewsListing() {
                       {/* Gradient Header with Badges or Image */}
                       <div className="relative h-48 bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 flex items-center justify-center p-6">
                         {/* Show image if available */}
-                        {getFirstImage(article.contentBlocks || []) ? (
-                          <img 
-                            src={getFirstImage(article.contentBlocks || [])} 
+                        {getFirstImage(article) ? (
+                          <img
+                            src={getFirstImage(article)!}
                             alt={article.title}
                             className="absolute inset-0 w-full h-full object-cover"
                           />
                         ) : null}
-                        
+
                         {/* Overlay gradient for text readability */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        
+
                         {/* Badges */}
                         <div className="absolute top-4 left-4 flex gap-2 z-10">
                           {article.isFeatured && (
@@ -247,14 +252,14 @@ export default function NewsListing() {
                             </span>
                           )}
                         </div>
-                        
+
                         {/* NEWS Label */}
-                        {!getFirstImage(article.contentBlocks || []) && (
+                        {!getFirstImage(article) && (
                           <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg z-10">
                             <span className="text-white font-bold text-lg">NEWS</span>
                           </div>
                         )}
-                        
+
                         {/* Title Overlay */}
                         <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
                           <h3 className="text-white font-bold text-lg line-clamp-2">
@@ -268,14 +273,14 @@ export default function NewsListing() {
                         <h3 className="text-gray-900 font-bold text-lg mb-3 line-clamp-2">
                           {article.title}
                         </h3>
-                        
+
                         <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                           {article.excerpt || 'Read more...'}
                         </p>
 
                         {/* Author & Date */}
                         <div className="flex items-center text-sm text-gray-500 mb-3">
-                          <span className="font-medium">{article.authorId || 'admin'}</span>
+                          <span className="font-medium">Haji Karim</span>
                           <span className="mx-2">•</span>
                           <Calendar className="h-3.5 w-3.5 mr-1" />
                           <span>{new Date(article.publishDate || Date.now()).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}</span>
@@ -333,11 +338,10 @@ export default function NewsListing() {
                     ) : (
                       <button
                         onClick={() => goToPage(page as number)}
-                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                          currentPage === page
-                            ? 'bg-red-600 text-white'
-                            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                          ? 'bg-red-600 text-white'
+                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
                       >
                         {page}
                       </button>

@@ -382,6 +382,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
               models={models}
               brandId={backendBrand.id}
               backendBrand={backendBrand}
+              newsSlot={<BrandNews brandSlug={brandSlug} brandName={brand.name} />}
             />
           </SafeComponent>
         </main>

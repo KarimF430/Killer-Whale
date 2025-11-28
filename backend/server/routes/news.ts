@@ -22,9 +22,36 @@ router.get('/', redisCacheMiddleware(RedisCacheTTL.NEWS), async (req, res) => {
       articles = articles.filter(a => a.categoryId === category)
     }
 
+    // Debug info
+    const debugInfo: any = {
+      tagParam: tag,
+      articlesCount: articles.length
+    }
+
     // Filter by tag
     if (tag && typeof tag === 'string') {
-      articles = articles.filter(a => a.tags.includes(tag))
+      console.log(`🔍 Filtering by tag: ${tag}`)
+      // Check if tag is a name or ID
+      const allTags = await newsStorage.getAllTags()
+      const tagObj = allTags.find(t => t.name.toLowerCase() === tag.toLowerCase() || t.id === tag)
+
+      debugInfo.allTagsCount = allTags.length
+
+      if (tagObj) {
+        console.log(`✅ Found tag object: ${tagObj.name} (${tagObj.id})`)
+        debugInfo.foundTag = { name: tagObj.name, id: tagObj.id }
+
+        // Filter by tag ID (UUID)
+        const initialCount = articles.length
+        articles = articles.filter(a => a.tags.includes(tagObj.id))
+        console.log(`📊 Filtered from ${initialCount} to ${articles.length} articles`)
+        debugInfo.filteredCount = articles.length
+      } else {
+        console.log(`❌ Tag object not found for: ${tag}`)
+        debugInfo.tagFound = false
+        // Fallback: check if tag string is directly in tags array (for legacy/custom tags)
+        articles = articles.filter(a => a.tags.includes(tag))
+      }
     }
 
     // Search
@@ -40,8 +67,8 @@ router.get('/', redisCacheMiddleware(RedisCacheTTL.NEWS), async (req, res) => {
     articles.sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
 
     // Pagination
-    const pageNum = parseInt(page as string)
-    const limitNum = parseInt(limit as string)
+    const pageNum = parseInt(page as string) || 1
+    const limitNum = parseInt(limit as string) || 10
     const startIndex = (pageNum - 1) * limitNum
     const endIndex = startIndex + limitNum
     const paginatedArticles = articles.slice(startIndex, endIndex)
@@ -50,7 +77,8 @@ router.get('/', redisCacheMiddleware(RedisCacheTTL.NEWS), async (req, res) => {
       articles: paginatedArticles,
       total: articles.length,
       page: pageNum,
-      totalPages: Math.ceil(articles.length / limitNum)
+      totalPages: Math.ceil(articles.length / limitNum),
+      debug: debugInfo // Return debug info
     })
   } catch (error) {
     console.error('Get articles error:', error)

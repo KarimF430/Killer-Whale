@@ -74,7 +74,9 @@ const normalizeTransmission = (transmission: string): string => {
 }
 
 async function getHomeData() {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+  // Use BACKEND_URL for server-side fetching (not NEXT_PUBLIC_BACKEND_URL which is for client)
+  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+  console.log('🔍 Fetching home data from:', backendUrl)
 
   try {
     // Fetch all data in parallel (5 requests)
@@ -90,7 +92,19 @@ async function getHomeData() {
     const modelsData = await modelsRes.json()
     const brandsData = await brandsRes.json()
     const comparisonsData = await comparisonsRes.json()
-    const newsData = await newsRes.json()
+
+    // Check news response
+    let newsData = { articles: [] }
+    try {
+      if (newsRes.ok) {
+        newsData = await newsRes.json()
+        console.log('✅ News fetched:', newsData.articles?.length || 0, 'articles')
+      } else {
+        console.error('❌ News fetch failed:', newsRes.status, newsRes.statusText)
+      }
+    } catch (err) {
+      console.error('❌ News parse error:', err)
+    }
 
     const models = modelsData.data || modelsData
     const brands = brandsData
