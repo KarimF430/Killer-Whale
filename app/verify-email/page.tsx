@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { CheckCircle, XCircle, Loader2, RefreshCw } from 'lucide-react'
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const token = searchParams.get('token')
@@ -139,5 +139,17 @@ export default function VerifyEmailPage() {
                 )}
             </div>
         </div>
+    )
+}
+
+export default function VerifyEmailPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-b from-red-600 to-orange-500 flex items-center justify-center p-4">
+                <div className="text-white text-xl">Loading...</div>
+            </div>
+        }>
+            <VerifyEmailContent />
+        </Suspense>
     )
 }
