@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
 import { FavouritesProvider } from '@/lib/favourites-context'
+import { AuthProvider } from '@/lib/auth-context'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -121,10 +122,12 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen bg-gray-50`}>
-        <FavouritesProvider>
-          <Header />
-          {children}
-        </FavouritesProvider>
+        <AuthProvider>
+          <FavouritesProvider>
+            <Header />
+            {children}
+          </FavouritesProvider>
+        </AuthProvider>
       </body>
     </html>
   )

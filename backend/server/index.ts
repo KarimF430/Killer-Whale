@@ -281,6 +281,20 @@ app.use(
 // Initialize services
 (async () => {
   try {
+    // Security: trusted proxies for cloud deployments
+    if (isProd) {
+      app.set('trust proxy', 1);
+    }
+
+    // Import and initialize Passport for OAuth
+    const passportConfig = await import('./config/passport');
+    const passport = passportConfig.default;
+
+    // Initialize Passport middleware
+    app.use(passport.initialize());
+    app.use(passport.session());
+    console.log('✅ Passport.js initialized for OAuth');
+
     // Initialize MongoDB storage
     const storage = new MongoDBStorage();
     const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/motoroctane";
@@ -320,8 +334,19 @@ app.use(
     const cacheRoutes = (await import('./routes/cache')).default;
     app.use('/api/cache', cacheRoutes);
 
+    // Register user authentication routes (public)
+    const userAuthRoutes = (await import('./routes/user-auth')).default;
+    app.use('/api/user', userAuthRoutes);
+    console.log('✅ User authentication routes registered at /api/user');
+
+    // Register admin user management routes
+    const adminUsersRoutes = (await import('./routes/admin-users')).default;
+    app.use('/api/admin/users', adminUsersRoutes);
+    console.log('✅ Admin users routes registered at /api/admin/users');
+
     // Register API routes FIRST before Vite
     registerRoutes(app, storage);
+
 
     const server = createServer(app);
 

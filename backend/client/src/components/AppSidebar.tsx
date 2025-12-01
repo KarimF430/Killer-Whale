@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, Car, Gauge, GitCompare, Newspaper } from "lucide-react";
+import { LayoutDashboard, Building2, Car, Gauge, GitCompare, Newspaper, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -46,6 +46,11 @@ const menuItems = [
     title: "News",
     url: "/news",
     icon: Newspaper,
+  },
+  {
+    title: "Users",
+    url: "/users",
+    icon: Users,
   },
 ];
 

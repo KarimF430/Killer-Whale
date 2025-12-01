@@ -2,15 +2,25 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-
-import { Search, Menu, X, MapPin } from 'lucide-react'
+import { Search, Menu, X, MapPin, LogOut, User as UserIcon } from 'lucide-react'
+import { useAuth } from '@/lib/auth-context'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const { user, isAuthenticated, logout } = useAuth()
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      setIsMenuOpen(false)
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
 
   // Handle scroll for header visibility
   useEffect(() => {
@@ -122,6 +132,33 @@ export default function Header() {
               >
                 Car News
               </Link>
+
+              {/* Login / User Profile */}
+              {isAuthenticated && user ? (
+                <div className="border-t border-gray-200 pt-3 mt-2">
+                  <div className="px-4 py-2 text-gray-600 text-sm font-medium">
+                    <div className="flex items-center space-x-2">
+                      <UserIcon className="h-5 w-5" />
+                      <span>{user.firstName} {user.lastName}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left text-gray-700 hover:text-red-600 hover:bg-red-50 font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center space-x-2"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="text-white bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 font-medium py-3 px-4 rounded-lg transition-all duration-200 text-center shadow-md hover:shadow-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
             </nav>
           </div>
         )}

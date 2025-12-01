@@ -652,6 +652,50 @@ newsMediaSchema.index({ id: 1 }, { unique: true });
 newsMediaSchema.index({ uploaderId: 1, createdAt: -1 });
 newsMediaSchema.index({ type: 1 });
 
+// ==================== FRONTEND USER SCHEMA ====================
+
+// Frontend User Schema (for customer accounts)
+const userSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, default: null }, // null for OAuth users
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  phone: { type: String, default: null },
+  dateOfBirth: { type: Date, default: null },
+
+  // OAuth Integration
+  googleId: { type: String, default: null },
+  profileImage: { type: String, default: null },
+
+  // Verification & Status
+  isEmailVerified: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
+
+  // Email Verification
+  emailVerificationToken: { type: String, default: null },
+  emailVerificationExpires: { type: Date, default: null },
+
+  // Password Reset
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
+
+  // User Data
+  savedCars: [{ type: String }], // Array of variant IDs
+  comparisonHistory: [{ type: String }], // Array of model IDs
+
+  // Timestamps
+  lastLogin: { type: Date, default: null },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+// Indexes for User
+userSchema.index({ id: 1 }, { unique: true });
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ googleId: 1 }, { unique: true, sparse: true }); // sparse allows null values
+userSchema.index({ isActive: 1 });
+
 // Export models
 export const Brand = mongoose.model('Brand', brandSchema);
 export const Model = mongoose.model('Model', modelSchema);
@@ -666,3 +710,6 @@ export const NewsCategory = mongoose.model('NewsCategory', newsCategorySchema);
 export const NewsTag = mongoose.model('NewsTag', newsTagSchema);
 export const NewsAuthor = mongoose.model('NewsAuthor', newsAuthorSchema);
 export const NewsMedia = mongoose.model('NewsMedia', newsMediaSchema);
+
+// Export user model
+export const User = mongoose.model('User', userSchema);

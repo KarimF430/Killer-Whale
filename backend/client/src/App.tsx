@@ -27,6 +27,7 @@ import VariantFormPage5 from "@/pages/VariantFormPage5";
 import PopularComparisons from "@/pages/PopularComparisons";
 import News from "@/pages/News";
 import NewsForm from "@/pages/NewsForm";
+import Users from "@/pages/Users";
 import NotFound from "@/pages/not-found";
 import UpcomingCarList from "@/pages/UpcomingCarList";
 import UpcomingCarFormPage1 from "@/pages/UpcomingCarFormPage1";
@@ -225,6 +226,11 @@ function Router() {
       <Route path="/news/:id/edit">
         <ProtectedRoute>
           <NewsForm />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/users">
+        <ProtectedRoute>
+          <Users />
         </ProtectedRoute>
       </Route>
       <Route component={NotFound} />
