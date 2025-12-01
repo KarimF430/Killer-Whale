@@ -268,11 +268,11 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: isProd, // true in production
+      secure: isProd, // true in production (required for sameSite: 'none')
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: isProd ? 'lax' : 'lax', // lax is better for auth flows
-      domain: isProd ? '.motoroctane.com' : undefined
+      sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-domain OAuth on mobile
+      domain: isProd ? undefined : undefined // Let browser handle domain
     },
     name: 'sid', // Custom session ID name
   })
