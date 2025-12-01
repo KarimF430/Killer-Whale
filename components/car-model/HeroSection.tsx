@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Star, Share2, Heart, Camera, Play, Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { triggerCarInteraction, initializeAudioContext } from '@/utils/carInteraction'
 
 interface HeroSectionProps {
   carData: {
@@ -19,6 +20,40 @@ export default function HeroSection({ carData }: HeroSectionProps) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
+  const mainImageRef = useRef<HTMLImageElement>(null)
+
+  // Initialize audio context after component mounts (for better browser compatibility)
+  useEffect(() => {
+    // Initialize on first user interaction
+    const handleFirstInteraction = () => {
+      initializeAudioContext()
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+    }
+
+    document.addEventListener('click', handleFirstInteraction)
+    document.addEventListener('touchstart', handleFirstInteraction)
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+    }
+  }, [])
+
+  const handleHeartClick = () => {
+    console.log('🚗 Heart clicked!')
+    console.log('📸 Main image ref:', mainImageRef.current)
+    setIsWishlisted(!isWishlisted)
+
+    // Trigger headlight blink and honk sound
+    if (mainImageRef.current) {
+      console.log('✅ Triggering car interaction...')
+      triggerCarInteraction(mainImageRef.current)
+    } else {
+      console.error('❌ mainImageRef.current is null!')
+    }
+  }
+
 
   const nextImage = () => {
     setSelectedImage((prev) => (prev + 1) % carData.images.length)
@@ -55,10 +90,10 @@ export default function HeroSection({ carData }: HeroSectionProps) {
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsWishlisted(!isWishlisted)}
+              onClick={handleHeartClick}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${isWishlisted
-                  ? 'bg-red-50 border-red-200 text-red-700'
-                  : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                ? 'bg-red-50 border-red-200 text-red-700'
+                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
                 }`}
             >
               <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
@@ -93,6 +128,7 @@ export default function HeroSection({ carData }: HeroSectionProps) {
         <div className="lg:col-span-2">
           <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video sm:aspect-[4/3]">
             <img
+              ref={mainImageRef}
               src={carData.images[selectedImage] || '/api/placeholder/800/600'}
               alt={`${carData.fullName} - Image ${selectedImage + 1}`}
               className="w-full h-full object-cover"

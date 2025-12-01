@@ -17,6 +17,7 @@ import { useViewTracker } from '@/lib/use-view-tracker'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
 import ModelYouTube from './ModelYouTube'
 import ModelFAQ from './ModelFAQ'
+import { triggerCarInteraction, initializeAudioContext } from '@/utils/carInteraction'
 
 interface ModelData {
   isUpcomingCar?: boolean
@@ -499,6 +500,24 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isLiked, setIsLiked] = useState(false)
   const [selectedColor, setSelectedColor] = useState<string>('')
+  const mainCarImageRef = useRef<HTMLImageElement>(null)
+
+  // Initialize audio context for car interactions
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      initializeAudioContext()
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+    }
+
+    document.addEventListener('click', handleFirstInteraction)
+    document.addEventListener('touchstart', handleFirstInteraction)
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+    }
+  }, [])
 
   // Initialize selectedColor with first color when model loads
   useEffect(() => {
@@ -992,6 +1011,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 {model?.heroImage && (
                   <div className="w-full h-full flex-shrink-0 snap-center relative">
                     <img
+                      ref={mainCarImageRef}
                       src={model.heroImage}
                       alt={`${model?.brand || 'Car'} ${model?.name || 'Model'}`}
                       className="w-full h-full object-contain rounded-2xl"
@@ -1077,7 +1097,15 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                   <Share2 className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => setIsLiked(!isLiked)}
+                  onClick={() => {
+                    setIsLiked(!isLiked)
+                    // Trigger headlight blink and honk sound
+                    // Pass the image container (parent div) not the img element
+                    const imageContainer = mainCarImageRef.current?.parentElement
+                    if (imageContainer) {
+                      triggerCarInteraction(imageContainer)
+                    }
+                  }}
                   className={`p-2 transition-colors ${isLiked ? 'text-red-600' : 'text-gray-400 hover:text-red-600'
                     }`}
                 >
