@@ -30,7 +30,7 @@ export default function MileageInformation({ carName, mileageData }: MileageInfo
         {/* Horizontal Scrollable Container */}
         {/* Mileage Cards Horizontal Scroll */}
         <div className="relative">
-          <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {mileageData.map((mileage, index) => (
               <div
                 key={mileage.id}
@@ -77,8 +77,8 @@ export default function MileageInformation({ carName, mileageData }: MileageInfo
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`w-2 h-2 rounded-full transition-all duration-200 ${index === currentIndex
-                    ? 'bg-red-500'
-                    : 'bg-gray-400 hover:bg-gray-500'
+                  ? 'bg-red-500'
+                  : 'bg-gray-400 hover:bg-gray-500'
                   }`}
               />
             ))}

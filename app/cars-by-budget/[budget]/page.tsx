@@ -405,7 +405,7 @@ export default function BudgetCarsPage() {
                 {popularCars.length > 0 && (
                     <PageSection background="white">
                         <h2 className="text-2xl font-bold text-gray-900 mb-8">Popular Cars</h2>
-                        <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                             {popularCars.map((car) => (
                                 <CarCard
                                     key={car.id}
@@ -429,7 +429,7 @@ export default function BudgetCarsPage() {
                 {newLaunchedCars.length > 0 && (
                     <PageSection background="white">
                         <h2 className="text-2xl font-bold text-gray-900 mb-8">New Launches</h2>
-                        <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                             {newLaunchedCars.map((car) => (
                                 <CarCard
                                     key={car.id}

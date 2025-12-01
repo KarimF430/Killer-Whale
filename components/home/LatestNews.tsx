@@ -68,7 +68,7 @@ export default function LatestNews() {
     <section className="py-12 lg:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 lg:mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
             Latest Car News & Reviews
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -108,7 +108,7 @@ export default function LatestNews() {
                 <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
                   {article.title}
                 </h3>
-                
+
                 <p className="text-sm text-gray-600 mb-4 line-clamp-3">
                   {article.excerpt}
                 </p>

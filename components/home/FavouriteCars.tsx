@@ -32,7 +32,7 @@ export default function FavouriteCars() {
             {/* Cars Horizontal Scroll */}
             <div className="relative">
                 <div
-                    className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
+                    className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                     {favourites.map((car) => (

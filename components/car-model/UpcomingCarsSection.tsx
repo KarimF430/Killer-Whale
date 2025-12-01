@@ -50,14 +50,14 @@ export default function UpcomingCarsSection({ upcomingCars }: UpcomingCarsSectio
         {/* Cars Container */}
         <div className="relative mb-6">
           {/* Navigation Arrows */}
-          <button 
+          <button
             onClick={() => scroll('left')}
             className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
 
-          <button 
+          <button
             onClick={() => scroll('right')}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
           >
@@ -65,9 +65,9 @@ export default function UpcomingCarsSection({ upcomingCars }: UpcomingCarsSectio
           </button>
 
           {/* Horizontal Scroll Container */}
-          <div 
+          <div
             ref={scrollContainerRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide"
+            className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {upcomingCars.map((car) => (
@@ -76,9 +76,8 @@ export default function UpcomingCarsSection({ upcomingCars }: UpcomingCarsSectio
                   {/* Car Image */}
                   <div className="relative h-40 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center p-4">
                     {/* Status Badge */}
-                    <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium ${
-                      car.status === 'Coming' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
-                    }`}>
+                    <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium ${car.status === 'Coming' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
+                      }`}>
                       {car.status}
                     </div>
 
@@ -105,12 +104,12 @@ export default function UpcomingCarsSection({ upcomingCars }: UpcomingCarsSectio
                         <Calendar className="w-3 h-3 mr-2" />
                         <span>{car.launchDate}</span>
                       </div>
-                      
+
                       <div className="flex items-center text-gray-600 text-sm">
                         <Fuel className="w-3 h-3 mr-2" />
                         <span>{car.fuelType}</span>
                       </div>
-                      
+
                       <div className="flex items-center text-gray-600 text-sm">
                         <Users className="w-3 h-3 mr-2" />
                         <span>{car.seating}</span>

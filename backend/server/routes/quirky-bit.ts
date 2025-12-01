@@ -158,7 +158,7 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
                 Key Features: ${variant.keyFeatures || 'N/A'}
                 Value for Money: ${variant.isValueForMoney ? 'Yes' : 'No'}
                 Engine: ${variant.engineName || 'N/A'} - ${variant.power || 'N/A'} Power
-                Mileage: ${variant.mileage || 'N/A'}
+                Mileage: ${variant.mileageCompanyClaimed || variant.mileageCityRealWorld || 'N/A'}
                 `
             }
         } else if (type === 'price') {

@@ -1646,7 +1646,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
                   {/* Color Selector - Horizontal Scroll */}
                   <div className="relative">
-                    <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       {carColors.map((color) => (
                         <button
                           key={color.id}
@@ -2100,7 +2100,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
               {/* Cars Horizontal Scroll - Exact copy from home page */}
               <div className="relative">
                 {loadingSimilarCars ? (
-                  <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                  <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
                         <div className="h-48 bg-gray-200 animate-pulse"></div>

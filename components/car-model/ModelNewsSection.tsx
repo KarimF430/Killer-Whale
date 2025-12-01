@@ -95,7 +95,7 @@ export default function ModelNewsSection({ carName, newsArticles }: ModelNewsSec
           <div className="relative">
             <div
               ref={scrollContainerRef}
-              className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide"
+              className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {newsArticles.map((article) => {

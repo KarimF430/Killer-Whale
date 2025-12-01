@@ -543,7 +543,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
 
         {/* Comparison Cards - Side by Side, Mobile Friendly */}
-        <div className="flex gap-3 md:gap-6 overflow-x-auto scrollbar-hide pb-2 mb-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-2 mb-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {comparisonItems.map((item, index) => {
             // Handle empty slot
             if (!item) {
@@ -776,7 +776,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Compare With Similar Cars</h2>
 
           {loadingSimilarCars ? (
-            <div className="flex gap-4 overflow-x-auto pb-4">
+            <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl border border-gray-200 p-4">
                   <div className="h-32 bg-gray-200 animate-pulse rounded"></div>
@@ -788,7 +788,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
               <p>No cars available for comparison</p>
             </div>
           ) : (
-            <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
+            <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
               {similarCars.map((car) => {
                 const firstValidItem = comparisonItems.find((item): item is ComparisonItem => item !== null)
                 if (!firstValidItem) return null
@@ -887,7 +887,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
             {/* Cars Horizontal Scroll */}
             <div className="relative">
               {loadingSimilarCars ? (
-                <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
                       <div className="h-48 bg-gray-200 animate-pulse"></div>
@@ -904,7 +904,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                 </div>
               ) : (
                 <div
-                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   {similarCars.map((car) => (

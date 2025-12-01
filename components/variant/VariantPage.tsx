@@ -2907,7 +2907,7 @@ export default function VariantPage({
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Upcoming Cars</h2>
                 <div className="relative">
                   {loadingUpcomingCars ? (
-                    <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                    <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
                       {[1, 2, 3, 4].map((i) => (
                         <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
                           <div className="h-48 bg-gray-200 animate-pulse"></div>
@@ -2959,7 +2959,7 @@ export default function VariantPage({
               {/* Cars Horizontal Scroll - Exact copy from model page */}
               <div className="relative">
                 {loading ? (
-                  <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                  <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
                         <div className="h-48 bg-gray-200 animate-pulse"></div>
@@ -2976,7 +2976,7 @@ export default function VariantPage({
                   </div>
                 ) : (
                   <div
-                    className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                    className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
                     {(model?.similarCars || []).map((car: any) => {
@@ -3022,7 +3022,7 @@ export default function VariantPage({
               {/* Comparison Cards - Horizontal Scroll */}
               <div className="relative">
                 {loading ? (
-                  <div className="flex gap-4 overflow-x-auto pb-4">
+                  <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl border border-gray-200 p-4">
                         <div className="h-32 bg-gray-200 animate-pulse rounded"></div>
@@ -3035,7 +3035,7 @@ export default function VariantPage({
                   </div>
                 ) : (
                   <div
-                    className="flex gap-4 overflow-x-auto pb-4"
+                    className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4"
                     style={{ scrollbarWidth: 'thin', msOverflowStyle: 'auto' }}
                   >
                     {(model?.similarCars || []).map((car: any) => {

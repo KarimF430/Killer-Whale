@@ -84,9 +84,9 @@ export default function UpcomingCarCard({ car, onClick }: UpcomingCarCardProps) 
         >
             {/* Image Container */}
             <div className="relative h-40 sm:h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                {/* NEW Badge for upcoming cars */}
+                {/* UPCOMING Badge for upcoming cars */}
                 <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-gradient-to-r from-red-500 to-pink-600 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold z-10 shadow-md">
-                    NEW
+                    UPCOMING
                 </div>
 
                 {/* Wishlist Button */}
@@ -106,8 +106,8 @@ export default function UpcomingCarCard({ car, onClick }: UpcomingCarCardProps) 
                         toggleFavourite(carForFavourites)
                     }}
                     className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-2 sm:p-2.5 rounded-full shadow-md transition-all duration-200 z-10 ${isFav
-                            ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
-                            : 'bg-white hover:bg-red-50 active:bg-red-100'
+                        ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
+                        : 'bg-white hover:bg-red-50 active:bg-red-100'
                         }`}
                 >
                     <Heart

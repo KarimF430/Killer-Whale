@@ -520,40 +520,83 @@ export class MongoDBStorage implements IStorage {
 
   async getModelsWithPricing(brandId?: string): Promise<any[]> {
     try {
-      const filter: any = { status: 'active' };
-      if (brandId) filter.brandId = brandId;
+      const matchStage: any = { status: 'active' };
+      if (brandId) matchStage.brandId = brandId;
 
-      const models = await MongoModel.find(filter).sort({ name: 1 }).lean();
-      const results = [];
-
-      for (const model of models) {
-        const variants = await MongoVariant.find({ modelId: model.id, status: 'active' }).select('price fuel fuelType').lean();
-        const prices = variants.map(v => v.price).filter(p => p > 0);
-        const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
-        const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-
-        // Find the fuel type of the lowest priced variant
-        let lowestPriceFuelType = 'Petrol';
-        if (minPrice > 0) {
-          const minPriceVariant = variants.find(v => v.price === minPrice);
-          if (minPriceVariant) {
-            lowestPriceFuelType = minPriceVariant.fuel || minPriceVariant.fuelType || 'Petrol';
+      const results = await MongoModel.aggregate([
+        { $match: matchStage },
+        { $sort: { name: 1 } },
+        {
+          $lookup: {
+            from: 'variants',
+            localField: 'id',
+            foreignField: 'modelId',
+            pipeline: [
+              { $match: { status: 'active' } },
+              { $project: { price: 1, fuel: 1, fuelType: 1 } }
+            ],
+            as: 'variants'
+          }
+        },
+        {
+          $addFields: {
+            prices: {
+              $filter: {
+                input: { $map: { input: "$variants", as: "v", in: "$$v.price" } },
+                as: "p",
+                cond: { $gt: ["$$p", 0] }
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            startingPrice: { $min: "$prices" },
+            lowestPrice: { $min: "$prices" },
+            priceRange: {
+              min: { $ifNull: [{ $min: "$prices" }, 0] },
+              max: { $ifNull: [{ $max: "$prices" }, 0] }
+            },
+            // Find variant with lowest price to get fuel type
+            lowestPriceVariant: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: "$variants",
+                    as: "v",
+                    cond: { $eq: ["$$v.price", { $min: "$prices" }] }
+                  }
+                },
+                0
+              ]
+            }
+          }
+        },
+        {
+          $addFields: {
+            lowestPriceFuelType: {
+              $ifNull: ["$lowestPriceVariant.fuel", { $ifNull: ["$lowestPriceVariant.fuelType", "Petrol"] }]
+            }
+          }
+        },
+        {
+          $project: {
+            variants: 0,
+            prices: 0,
+            lowestPriceVariant: 0
           }
         }
+      ]);
 
-        results.push({
-          ...mapModel(model),
-          startingPrice: minPrice, // Standard field
-          lowestPrice: minPrice,   // Alias
-          lowestPriceFuelType,     // New field for accurate RTO calc
-          priceRange: {
-            min: minPrice,
-            max: maxPrice
-          }
-        });
-      }
+      // Map results to ensure they match the expected Model structure + pricing fields
+      return results.map(doc => ({
+        ...mapModel(doc),
+        startingPrice: doc.startingPrice || 0,
+        lowestPrice: doc.lowestPrice || 0,
+        lowestPriceFuelType: doc.lowestPriceFuelType,
+        priceRange: doc.priceRange
+      }));
 
-      return results;
     } catch (error) {
       console.error('getModelsWithPricing error:', error);
       throw new Error('Failed to fetch models with pricing');

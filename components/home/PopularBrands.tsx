@@ -13,7 +13,7 @@ export default function PopularBrands({ brands }: PopularBrandsProps) {
     <section className="py-12 lg:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 lg:mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
             Popular Car Brands
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -42,7 +42,7 @@ export default function PopularBrands({ brands }: PopularBrandsProps) {
                 <div className="w-16 h-16 mx-auto mb-4 bg-white rounded-full flex items-center justify-center shadow-sm">
                   <span className="text-2xl font-bold text-red-600">MS</span>
                 </div>
-                
+
                 {/* Brand Info */}
                 <div className="text-center">
                   <h3 className="font-bold text-gray-900 mb-1 group-hover:text-red-600 transition-colors">
@@ -80,7 +80,7 @@ export default function PopularBrands({ brands }: PopularBrandsProps) {
                       {brand.name.charAt(0)}
                     </span>
                   </div>
-                  
+
                   {/* Brand Info */}
                   <div className="text-center">
                     <h3 className="font-bold text-gray-900 mb-1 group-hover:text-red-600 transition-colors">

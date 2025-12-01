@@ -76,7 +76,7 @@ export default function BrandUpcomingCars({ brandId, brandName }: BrandUpcomingC
         {/* Cars Horizontal Scroll */}
         <div className="relative">
           {loading ? (
-            <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+            <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
                   <div className="h-48 bg-gray-200 animate-pulse"></div>

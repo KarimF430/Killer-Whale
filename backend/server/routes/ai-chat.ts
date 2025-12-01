@@ -158,7 +158,7 @@ You: "Both are excellent compact SUVs at ₹10.87L. Creta wins on resale value a
 
                     ragContext = '\n\n**Real-Time Database Data:**\n'
                     carData.forEach((car: any) => {
-                        ragContext += `\n${car.brand || 'Unknown'} ${car.name}:\n`
+                        ragContext += `\n${car.brandId || 'Unknown'} ${car.name}:\n`
                         ragContext += `- Price: ₹${(car.price / 100000).toFixed(2)}L\n`
                         if (car.fuelType) ragContext += `- Fuel: ${car.fuelType}\n`
                         if (car.transmission) ragContext += `- Transmission: ${car.transmission}\n`
@@ -191,7 +191,7 @@ You: "Both are excellent compact SUVs at ₹10.87L. Creta wins on resale value a
 
         // Check if AI wants to find cars
         if (aiResponse.includes('FIND_CARS:')) {
-            const match = aiResponse.match(/FIND_CARS:\s*({.*?})/s)
+            const match = aiResponse.match(/FIND_CARS:\s*({.*?})/)
             if (match) {
                 try {
                     const requirements = JSON.parse(match[1])
@@ -294,7 +294,8 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
             if (requirements.usage === 'city') {
                 const filtered = variants.filter(v => {
                     const isAutomatic = v.transmission && v.transmission.toLowerCase().includes('automatic')
-                    const goodMileage = v.mileage && v.mileage > 15
+                    const mileage = parseFloat(v.mileageCompanyClaimed || v.mileageCityRealWorld || '0')
+                    const goodMileage = mileage > 15
                     return isAutomatic || goodMileage
                 })
 
@@ -307,7 +308,8 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
             } else if (requirements.usage === 'highway') {
                 const filtered = variants.filter(v => {
                     const isDiesel = v.fuelType && v.fuelType.toLowerCase().includes('diesel')
-                    const goodMileage = v.mileage && v.mileage > 18
+                    const mileage = parseFloat(v.mileageCompanyClaimed || v.mileageHighwayRealWorld || '0')
+                    const goodMileage = mileage > 18
                     return isDiesel || goodMileage
                 })
 
@@ -332,7 +334,7 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
 
         // Take top 3
         const top3 = variants.slice(0, 3)
-        console.log(`🎯 Selected top 3 cars:`, top3.map(v => `${v.brand} ${v.name}`))
+        console.log(`🎯 Selected top 3 cars:`, top3.map(v => `${v.brandId} ${v.name}`))
 
         // Enrich with web intelligence
         const enrichedCars = await Promise.all(
@@ -340,13 +342,14 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
                 let intelligence = { imageUrl: '', ownerRecommendation: 0, totalReviews: 0, topPros: [], commonIssues: [] }
 
                 try {
-                    intelligence = await getCarIntelligence(`${car.brand} ${car.name}`)
+                    intelligence = await getCarIntelligence(`${car.brandId} ${car.name}`)
                 } catch (e) {
-                    console.error(`Web intelligence failed for ${car.brand} ${car.name}:`, e)
+                    console.error(`Web intelligence failed for ${car.brandId} ${car.name}:`, e)
                 }
 
                 // Build reasons
                 const reasons: string[] = []
+
 
                 if (requirements.budget) {
                     const budgetLakhs = (typeof requirements.budget === 'object' ? requirements.budget.max : requirements.budget) / 100000
@@ -354,8 +357,10 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
                     reasons.push(`₹${priceLakhs.toFixed(1)}L fits your ₹${budgetLakhs}L budget`)
                 }
 
-                if (car.mileage) {
-                    reasons.push(`${car.mileage} km/l mileage`)
+                // Use mileageCompanyClaimed from variant schema
+                const mileage = car.mileageCompanyClaimed || car.mileageCityRealWorld
+                if (mileage) {
+                    reasons.push(`${mileage} km/l mileage`)
                 }
 
                 if (requirements.usage === 'city' && car.transmission) {
@@ -367,15 +372,15 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
                 }
 
                 return {
-                    id: car._id,
-                    brand: car.brand,
+                    id: car._id.toString(),
+                    brand: car.brandId,  // Use brandId from schema
                     name: car.name,
-                    variant: car.variant || car.name,
+                    variant: car.name,  // Variant name is in name field
                     price: car.price,
-                    mileage: car.mileage,
-                    fuelType: car.fuelType,
-                    transmission: car.transmission,
-                    seatingCapacity: car.seatingCapacity,
+                    mileage: mileage || null,
+                    fuelType: car.fuelType || car.fuel || null,
+                    transmission: car.transmission || null,
+                    seatingCapacity: null,  // Not in variant schema
                     image: intelligence.imageUrl || 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400',
                     matchScore: 85 + Math.floor(Math.random() * 15), // 85-100
                     reasons: reasons.slice(0, 3), // Top 3 reasons

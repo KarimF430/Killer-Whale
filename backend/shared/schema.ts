@@ -304,8 +304,52 @@ export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
 
-// UpcomingCar types (imported from validation schemas since we use MongoDB)
-export type { InsertUpcomingCar } from '../validation/schemas';
+// UpcomingCar types (matching MongoDB schema structure)
+export interface InsertUpcomingCar {
+  brandId: string;
+  name: string;
+  isPopular?: boolean;
+  isNew?: boolean;
+  popularRank?: number | null;
+  newRank?: number | null;
+  bodyType?: string | null;
+  subBodyType?: string | null;
+  expectedLaunchDate?: string | null;
+  expectedPriceMin?: number | null;
+  expectedPriceMax?: number | null;
+  fuelTypes?: string[];
+  transmissions?: string[];
+  brochureUrl?: string | null;
+  status?: string;
+  headerSeo?: string | null;
+  pros?: string | null;
+  cons?: string | null;
+  description?: string | null;
+  exteriorDesign?: string | null;
+  comfortConvenience?: string | null;
+  summary?: string | null;
+  engineSummaries?: Array<{
+    title: string;
+    summary: string;
+    transmission: string;
+    power: string;
+    torque: string;
+    speed: string;
+  }>;
+  mileageData?: Array<{
+    engineName: string;
+    companyClaimed: string;
+    cityRealWorld: string;
+    highwayRealWorld: string;
+  }>;
+  faqs?: Array<{ question: string; answer: string }>;
+  heroImage?: string | null;
+  galleryImages?: Array<{ url: string; caption: string }>;
+  keyFeatureImages?: Array<{ url: string; caption: string }>;
+  spaceComfortImages?: Array<{ url: string; caption: string }>;
+  storageConvenienceImages?: Array<{ url: string; caption: string }>;
+  colorImages?: Array<{ url: string; caption: string }>;
+}
 export interface UpcomingCar {
   id: string;
   brandId: string;

@@ -133,7 +133,7 @@ export default function ModelMileage({ carData }: ModelMileageProps) {
       <div className="relative">
         <div
           ref={scrollRef}
-          className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 mb-6"
+          className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 mb-6"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {mileageOptions.map((option, index) => {
@@ -145,8 +145,8 @@ export default function ModelMileage({ carData }: ModelMileageProps) {
                 key={index}
                 onClick={() => setSelectedMileage(index)}
                 className={`flex-shrink-0 w-72 p-6 rounded-lg border-2 cursor-pointer transition-all ${isSelected
-                    ? `${colorClasses[option.color as keyof typeof colorClasses]} border-current shadow-lg`
-                    : 'bg-white border-gray-200 hover:border-gray-300'
+                  ? `${colorClasses[option.color as keyof typeof colorClasses]} border-current shadow-lg`
+                  : 'bg-white border-gray-200 hover:border-gray-300'
                   }`}
               >
                 <div className="flex items-center justify-between mb-4">

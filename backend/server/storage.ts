@@ -62,6 +62,7 @@ export interface IStorage {
 export class PersistentStorage implements IStorage {
   private brands: Brand[] = [];
   private models: Model[] = [];
+  private upcomingCars: UpcomingCar[] = [];
   private variants: Variant[] = [];
   private popularComparisons: PopularComparison[] = [];
   private adminUsers: AdminUser[] = [];
@@ -360,6 +361,46 @@ export class PersistentStorage implements IStorage {
     }
 
     return results;
+  }
+
+  // Upcoming Cars methods (stub implementation for PersistentStorage)
+  async getUpcomingCars(brandId?: string): Promise<UpcomingCar[]> {
+    let filtered = this.upcomingCars;
+    if (brandId) {
+      filtered = filtered.filter(c => c.brandId === brandId);
+    }
+    return filtered;
+  }
+
+  async getUpcomingCar(id: string): Promise<UpcomingCar | undefined> {
+    return this.upcomingCars.find(c => c.id === id);
+  }
+
+  async createUpcomingCar(car: InsertUpcomingCar): Promise<UpcomingCar> {
+    const newCar: UpcomingCar = {
+      ...car as any,
+      id: `upcoming-${Date.now()}`,
+      createdAt: new Date()
+    };
+    this.upcomingCars.push(newCar);
+    this.saveData();
+    return newCar;
+  }
+
+  async updateUpcomingCar(id: string, car: Partial<InsertUpcomingCar>): Promise<UpcomingCar | undefined> {
+    const index = this.upcomingCars.findIndex(c => c.id === id);
+    if (index === -1) return undefined;
+    this.upcomingCars[index] = { ...this.upcomingCars[index], ...car };
+    this.saveData();
+    return this.upcomingCars[index];
+  }
+
+  async deleteUpcomingCar(id: string): Promise<boolean> {
+    const index = this.upcomingCars.findIndex(c => c.id === id);
+    if (index === -1) return false;
+    this.upcomingCars.splice(index, 1);
+    this.saveData();
+    return true;
   }
 
   // Variant methods

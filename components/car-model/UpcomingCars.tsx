@@ -56,7 +56,7 @@ export default function UpcomingCars({ carData }: UpcomingCarsProps) {
       <div className="relative">
         <div
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+          className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {upcomingCars.map((car) => (
