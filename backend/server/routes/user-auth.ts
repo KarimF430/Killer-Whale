@@ -151,22 +151,32 @@ router.post('/login', async (req, res) => {
             req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours
         }
 
-        // Return user data (without password)
-        const userResponse = {
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            phone: user.phone,
-            dateOfBirth: user.dateOfBirth,
-            profileImage: user.profileImage,
-            savedCars: user.savedCars,
-            lastLogin: user.lastLogin
-        };
+        // Save session before responding
+        req.session.save((err) => {
+            if (err) {
+                console.error('❌ Session save error:', err);
+                return res.status(500).json({ message: 'Session creation failed. Please try again.' });
+            }
 
-        res.json({
-            message: 'Login successful',
-            user: userResponse
+            console.log('✅ Session saved successfully');
+
+            // Return user data (without password)
+            const userResponse = {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                dateOfBirth: user.dateOfBirth,
+                profileImage: user.profileImage,
+                savedCars: user.savedCars,
+                lastLogin: user.lastLogin
+            };
+
+            res.json({
+                message: 'Login successful',
+                user: userResponse
+            });
         });
 
     } catch (error) {
@@ -315,9 +325,19 @@ router.get('/auth/google/callback', (req, res, next) => {
             console.log('✅ Google OAuth successful for:', user.email);
             console.log('Session ID:', req.sessionID);
 
-            // Redirect to frontend home page
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-            res.redirect(`${frontendUrl}/?login=success`);
+            // IMPORTANT: Save session before redirect to ensure cookie is set
+            req.session.save((err) => {
+                if (err) {
+                    console.error('❌ Session save error:', err);
+                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                    return res.redirect(`${frontendUrl}/login?error=session_failed`);
+                }
+
+                console.log('✅ Session saved successfully');
+                // Redirect to frontend home page
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                res.redirect(`${frontendUrl}/?login=success`);
+            });
         } catch (error) {
             console.error('Session creation error:', error);
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -365,9 +385,19 @@ router.get('/verify-email/:token', async (req, res) => {
         (req.session as any).userId = user.id;
         (req.session as any).userEmail = user.email;
 
-        // Redirect to frontend with success
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        res.redirect(`${frontendUrl}/?verified=true`);
+        // Save session before redirect
+        req.session.save((err) => {
+            if (err) {
+                console.error('❌ Session save error after verification:', err);
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                return res.redirect(`${frontendUrl}/?verified=true&login=failed`);
+            }
+
+            console.log('✅ Session saved after email verification');
+            // Redirect to frontend with success
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            res.redirect(`${frontendUrl}/?verified=true`);
+        });
 
     } catch (error) {
         console.error('Email verification error:', error);
