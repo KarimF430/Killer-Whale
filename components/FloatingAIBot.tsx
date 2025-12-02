@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import './FloatingAIBot.css'
 
 interface FloatingAIBotProps {
-    type: 'brand' | 'model' | 'variant'
+    type: 'brand' | 'model' | 'variant' | 'comparison' | 'price'
     id: string
     name: string
 }
