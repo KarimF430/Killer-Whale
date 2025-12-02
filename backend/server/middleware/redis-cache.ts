@@ -37,8 +37,8 @@ if (useUrl || hasHost) {
     ? new Redis(process.env.REDIS_URL as string, {
       ...commonOpts,
       ...tlsOpt,
-      family: 6, // Use IPv6 if available, fallback to IPv4
-      lazyConnect: false,
+      family: 4, // Use IPv4 (Render + Upstash compatibility)
+      lazyConnect: true, // Don't crash server if Redis fails on startup
       showFriendlyErrorStack: true
     })
     : new Redis({
@@ -47,7 +47,16 @@ if (useUrl || hasHost) {
       password: process.env.REDIS_PASSWORD,
       ...commonOpts,
       ...tlsOpt,
+      lazyConnect: true,
     });
+
+  // Connect in background - don't block server startup
+  if (redis) {
+    redis.connect().catch(err => {
+      console.error('❌ Redis connection failed (continuing without cache):', err.message);
+      redis = null; // Set to null so middleware knows Redis is unavailable
+    });
+  }
 }
 
 // Redis connection events
