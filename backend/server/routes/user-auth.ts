@@ -5,8 +5,19 @@ import { v4 as uuidv4 } from 'uuid';
 import passport from '../config/passport';
 import crypto from 'crypto';
 import { sendEmail } from '../services/email.service';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
+
+// Login-specific rate limiter - prevents brute force attacks
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 login attempts per window
+    message: 'Too many login attempts from this IP, please try again after 15 minutes',
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true, // Don't count successful logins
+});
 
 /**
  * User Registration with Email Verification
@@ -101,7 +112,7 @@ router.post('/register', async (req, res) => {
  * User Login
  * POST /api/user/login
  */
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
     try {
         const { email, password, rememberMe } = req.body;
         console.log(`🔐 Login attempt for: ${email}`);
@@ -113,8 +124,26 @@ router.post('/login', async (req, res) => {
 
         // Find user
         const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user) {
+
+        // Security: Use generic message to prevent email enumeration
+        if (!user || !user.password) {
             return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        // Check if account is locked
+        if (user.lockUntil && user.lockUntil > new Date()) {
+            const remainingMinutes = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
+            return res.status(423).json({
+                message: `Account temporarily locked due to multiple failed login attempts. Please try again in ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}.`,
+                locked: true,
+                unlockTime: user.lockUntil
+            });
+        }
+
+        // If lock period has expired, reset failed attempts
+        if (user.lockUntil && user.lockUntil <= new Date()) {
+            user.failedLoginAttempts = 0;
+            user.lockUntil = null as any;
         }
 
         // Check if user is active
@@ -122,17 +151,44 @@ router.post('/login', async (req, res) => {
             return res.status(403).json({ message: 'Account is disabled. Please contact support.' });
         }
 
-        // Verify password
-        if (!user.password) {
-            return res.status(401).json({
-                message: 'This account uses Google Sign-In. Please use "Continue with Google"'
+        // Enforce email verification for password-based logins
+        if (!user.isEmailVerified) {
+            return res.status(403).json({
+                message: 'Please verify your email address before logging in. Check your inbox for the verification link.',
+                requiresVerification: true
             });
         }
 
+        // Verify password - use timing-safe comparison
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            // Increment failed attempts
+            user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
+            // Lock account after 5 failed attempts
+            if (user.failedLoginAttempts >= 5) {
+                user.lockUntil = new Date(Date.now() + 30 * 60 * 1000); // Lock for 30 minutes
+                await user.save();
+                console.log(`🔒 Account locked for user: ${user.email} (${user.failedLoginAttempts} failed attempts)`);
+                return res.status(423).json({
+                    message: 'Account locked due to multiple failed login attempts. Please try again in 30 minutes or reset your password.',
+                    locked: true
+                });
+            }
+
+            await user.save();
+            const remainingAttempts = 5 - user.failedLoginAttempts;
+            console.log(`⚠️ Failed login attempt for: ${user.email} (${remainingAttempts} attempts remaining)`);
+
+            return res.status(401).json({
+                message: 'Invalid email or password',
+                remainingAttempts: remainingAttempts > 0 ? remainingAttempts : 0
+            });
         }
+
+        // Successful login - reset failed attempts
+        user.failedLoginAttempts = 0;
+        user.lockUntil = null as any;
 
         // Update last login
         user.lastLogin = new Date();
@@ -307,39 +363,65 @@ router.get('/auth/google', (req, res, next) => {
 router.get('/auth/google/callback', (req, res, next) => {
     passport.authenticate('google', { session: false }, async (err: any, user: any) => {
         console.log('🔄 Google OAuth callback received');
+        console.log('   - Request origin:', req.headers.origin);
+        console.log('   - Request host:', req.headers.host);
+        console.log('   - Session ID before:', req.sessionID);
+
         if (err || !user) {
-            console.error('Google OAuth callback error:', err);
+            console.error('❌ Google OAuth callback error:', err);
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
             return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
         }
 
         try {
-            // Create session for the user
-            (req.session as any).userId = user.id;
-            (req.session as any).userEmail = user.email;
-
-            // Update last login
+            // Update last login first
             user.lastLogin = new Date();
             await user.save();
 
-            console.log('✅ Google OAuth successful for:', user.email);
-            console.log('Session ID:', req.sessionID);
-
-            // IMPORTANT: Save session before redirect to ensure cookie is set
-            req.session.save((err) => {
-                if (err) {
-                    console.error('❌ Session save error:', err);
+            // CRITICAL FIX: Regenerate session FIRST, THEN set data
+            // This prevents race condition where data set before regeneration is lost
+            req.session.regenerate((regenerateErr) => {
+                if (regenerateErr) {
+                    console.error('❌ Session regenerate error:', regenerateErr);
                     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
                     return res.redirect(`${frontendUrl}/login?error=session_failed`);
                 }
 
-                console.log('✅ Session saved successfully');
-                // Redirect to frontend home page
-                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-                res.redirect(`${frontendUrl}/?login=success`);
+                // NOW set session data on the NEW regenerated session
+                (req.session as any).userId = user.id;
+                (req.session as any).userEmail = user.email;
+
+                console.log('✅ Google OAuth successful for:', user.email);
+                console.log('   - User ID:', user.id);
+                console.log('   - Session ID after regeneration:', req.sessionID);
+                console.log('   - Session data:', { userId: (req.session as any).userId, userEmail: (req.session as any).userEmail });
+
+                // CRITICAL: Save session before redirect to ensure cookie is set
+                req.session.save((saveErr) => {
+                    if (saveErr) {
+                        console.error('❌ Session save error:', saveErr);
+                        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                        return res.redirect(`${frontendUrl}/login?error=session_failed`);
+                    }
+
+                    console.log('✅ Session saved successfully');
+                    console.log('   - Cookie settings:', req.session.cookie);
+                    console.log('   - Response headers will include Set-Cookie');
+
+                    // Verify session was saved by checking it exists
+                    const sessionUserId = (req.session as any)?.userId;
+                    if (!sessionUserId) {
+                        console.error('⚠️  Warning: Session save completed but userId not found in session');
+                    }
+
+                    // Redirect to frontend home page with success indicator
+                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                    console.log('🔀 Redirecting to:', `${frontendUrl}/?login=success`);
+                    res.redirect(`${frontendUrl}/?login=success`);
+                });
             });
         } catch (error) {
-            console.error('Session creation error:', error);
+            console.error('❌ Session creation error:', error);
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
             res.redirect(`${frontendUrl}/login?error=session_failed`);
         }

@@ -680,6 +680,10 @@ const userSchema = new mongoose.Schema({
   resetPasswordToken: { type: String, default: null },
   resetPasswordExpires: { type: Date, default: null },
 
+  // Account Lockout (Security)
+  failedLoginAttempts: { type: Number, default: 0 },
+  lockUntil: { type: Date, default: null },
+
   // User Data
   savedCars: [{ type: String }], // Array of variant IDs
   comparisonHistory: [{ type: String }], // Array of model IDs

@@ -273,24 +273,47 @@ const redisStore = new RedisStore({
 
 console.log('✅ Redis session store initialized');
 
-// Session Middleware
-app.use(
-  session({
-    store: redisStore,
-    secret: process.env.SESSION_SECRET || "motoroctane_secret_key_2024",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: isProd, // true in production (required for sameSite: 'none')
-      httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-domain OAuth on mobile
-      domain: isProd ? undefined : undefined // Let browser handle domain
-    },
-    name: 'sid', // Custom session ID name
-  })
-);
+// Session Middleware with enhanced cross-domain support
+const sessionConfig: any = {
+  store: redisStore,
+  secret: process.env.SESSION_SECRET || "motoroctane_secret_key_2024",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: isProd, // true in production (required for sameSite: 'none')
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-domain OAuth
+    domain: undefined, // Let browser handle domain automatically
+    path: '/', // Explicitly set cookie path
+  },
+  name: 'sid', // Custom session ID name
+  proxy: isProd, // Trust proxy in production for correct secure cookie handling
+};
+
+app.use(session(sessionConfig));
+
 console.log('✅ Session middleware configured');
+console.log(`   - Environment: ${isProd ? 'production' : 'development'}`);
+console.log(`   - Cookie secure: ${sessionConfig.cookie.secure}`);
+console.log(`   - Cookie sameSite: ${sessionConfig.cookie.sameSite}`);
+console.log(`   - Store: ${redisClient ? 'Redis' : 'MemoryStore (fallback)'}`);
+console.log(`   - Trust proxy: ${sessionConfig.proxy}`);
+
+// Debug middleware to log session info
+if (!isProd) {
+  app.use((req, res, next) => {
+    if (req.path.includes('/auth/')) {
+      console.log('🔍 Session Debug:', {
+        sessionID: req.sessionID,
+        userId: (req.session as any)?.userId,
+        cookie: req.session?.cookie,
+        path: req.path
+      });
+    }
+    next();
+  });
+}
 
 // Initialize services
 (async () => {
