@@ -238,21 +238,30 @@ app.use((req, res, next) => {
 });
 
 // Redis Client for Sessions
-const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
-  socket: {
-    reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
-    ...(process.env.REDIS_TLS === 'true' && {
-      tls: true,
-      rejectUnauthorized: false
-    }),
-  },
-});
+let redisClient: any = null;
+try {
+  // Convert redis:// to rediss:// if TLS is enabled
+  let redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+  if (process.env.REDIS_TLS === 'true' && redisUrl.startsWith('redis://')) {
+    redisUrl = redisUrl.replace('redis://', 'rediss://');
+  }
 
-redisClient.connect().catch((err) => {
-  console.error('Redis session client connection error:', err);
-  // Don't crash the server if Redis sessions fail
-});
+  redisClient = createClient({
+    url: redisUrl,
+    socket: {
+      reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
+    },
+  });
+
+  redisClient.connect().catch((err: Error) => {
+    console.error('❌ Redis session client connection error:', err.message);
+    console.warn('⚠️  Sessions will use memory store (not persistent)');
+    redisClient = null;
+  });
+} catch (err) {
+  console.error('❌ Redis session client initialization error:', err);
+  redisClient = null;
+}
 
 // Initialize Redis Store
 const redisStore = new RedisStore({
