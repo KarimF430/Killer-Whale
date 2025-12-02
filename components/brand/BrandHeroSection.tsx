@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import BrandCarsList from './BrandCarsList'
 import BrandUpcomingCars from './BrandUpcomingCars'
 import AlternativeBrands from './AlternativeBrands'
@@ -47,6 +48,41 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
     return (price / 100000).toFixed(2)
   }
 
+  // Get current month and year
+  const getCurrentMonthYear = () => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    const now = new Date()
+    return `${months[now.getMonth()]} ${now.getFullYear()}`
+  }
+
+  // Get all models sorted by price
+  const getAllModels = () => {
+    if (!models || models.length === 0) return []
+
+    // Filter models with valid prices and sort by lowest price
+    const validModels = models
+      .filter((m: any) => m.lowestPrice && m.lowestPrice > 0)
+      .sort((a: any, b: any) => a.lowestPrice - b.lowestPrice)
+
+    return validModels
+  }
+
+  // Get top 5 for the inline text
+  const getTop5Models = () => {
+    const allModels = getAllModels()
+    return allModels.slice(0, 5)
+  }
+
+  const allModels = getAllModels()
+  const top5Models = getTop5Models()
+
+  // Generate model slug for links
+  const generateModelSlug = (brandName: string, modelName: string) => {
+    const brandSlug = brandName.toLowerCase().replace(/\s+/g, '-')
+    const modelSlug = modelName.toLowerCase().replace(/\s+/g, '-')
+    return `/${brandSlug}-cars/${modelSlug}`
+  }
+
   return (
     <div className="bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
@@ -85,75 +121,64 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
               {isExpanded && (
                 <div className="mt-4 space-y-4">
                   {/* Full Description */}
-                  <div className="text-gray-700 text-base leading-relaxed space-y-4">
+                  <div className="text-gray-700 text-sm sm:text-base leading-relaxed space-y-4">
                     <p>{brand.fullDescription}</p>
                   </div>
 
                   {/* Price Information */}
                   <div className="mt-4 sm:mt-6">
                     <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">
-                      {brand.name} Cars Price List (September 2025) in India
+                      {brand.name} Cars Price List ({getCurrentMonthYear()}) in India
                     </h3>
                     <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4">
-                      {brand.name} car price starts at Rs. {formatPrice(brand.priceRange.min)} Lakh and goes upto Rs. {formatPrice(brand.priceRange.max)} Lakh (Avg. ex-showroom). The prices for the top 5 popular {brand.name} Cars are:
-                    </p>
-
-                    {/* Sample Car Models with Prices */}
-                    <div className="space-y-1 sm:space-y-2">
-                      <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-gray-300">
-                        <span className="font-bold text-gray-900 text-xs sm:text-sm">MODEL</span>
-                        <span className="font-bold text-gray-900 text-xs sm:text-sm">PRICE</span>
-                      </div>
-
-                      {brand.slug === 'maruti' && (
+                      {brand.name} car price starts at Rs. {formatPrice(brand.priceRange.min)} Lakh and goes upto Rs. {formatPrice(brand.priceRange.max)} Lakh (Avg. ex-showroom).
+                      {top5Models.length > 0 && (
                         <>
-                          <div className="flex justify-between items-center py-1">
-                            <span className="text-gray-700 text-xs sm:text-sm">Maruti Suzuki Swift</span>
-                            <span className="text-red-600 font-bold text-xs sm:text-sm">Rs. 5.79 Lakh</span>
-                          </div>
-                          <div className="flex justify-between items-center py-1">
-                            <span className="text-gray-700 text-xs sm:text-sm">Maruti Suzuki Vitoria</span>
-                            <span className="text-red-600 font-bold text-xs sm:text-sm">Rs. 10.50 Lakh</span>
-                          </div>
-                          <div className="flex justify-between items-center py-1">
-                            <span className="text-gray-700 text-xs sm:text-sm">Maruti Suzuki Brezza</span>
-                            <span className="text-red-600 font-bold text-xs sm:text-sm">Rs. 8.26 Lakh</span>
-                          </div>
+                          {' '}The prices for the top {top5Models.length} popular {brand.name} Cars are:{' '}
+                          {top5Models.map((model: any, index: number) => (
+                            <span key={index}>
+                              <Link
+                                href={generateModelSlug(brand.name, model.name)}
+                                className="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors"
+                                prefetch={true}
+                              >
+                                {brand.name} {model.name} Price
+                              </Link>
+                              {' '}is Rs. {formatPrice(model.lowestPrice)} Lakh
+                              {index < top5Models.length - 2 && ', '}
+                              {index === top5Models.length - 2 && ' and '}
+                              {index === top5Models.length - 1 && '.'}
+                            </span>
+                          ))}
                         </>
                       )}
-                    </div>
-                  </div>
+                    </p>
 
-                  {/* Nexa Cars Section */}
-                  {brand.slug === 'maruti' && (
-                    <div className="mt-4 sm:mt-6">
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">
-                        Nexa Cars Price List (September 2025) in India
-                      </h3>
-                      <p className="text-gray-700 text-sm sm:text-base mb-3 sm:mb-4">
-                        Maruti Suzuki Nexa car price starts at Rs. 5.85 Lakh and goes upto Rs. 24.97 Lakh (Avg. ex-showroom). The prices for the top 2 popular Nexa Cars are:
-                      </p>
-
+                    {/* Dynamic Car Models with Prices - Show ALL models */}
+                    {allModels.length > 0 && (
                       <div className="space-y-1 sm:space-y-2">
                         <div className="flex justify-between items-center py-1.5 sm:py-2 border-b border-gray-300">
                           <span className="font-bold text-gray-900 text-xs sm:text-sm">MODEL</span>
                           <span className="font-bold text-gray-900 text-xs sm:text-sm">PRICE</span>
                         </div>
-                        <div className="flex justify-between items-center py-1">
-                          <span className="text-gray-700 text-xs sm:text-sm">Maruti Suzuki Fronx</span>
-                          <span className="text-red-600 font-bold text-xs sm:text-sm">Rs. 6.85 Lakh</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1">
-                          <span className="text-gray-700 text-xs sm:text-sm">Maruti Suzuki Baleno</span>
-                          <span className="text-red-600 font-bold text-xs sm:text-sm">Rs. 5.99 Lakh</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1">
-                          <span className="text-gray-700 text-xs sm:text-sm">Maruti Suzuki Grand Vitara</span>
-                          <span className="text-red-600 font-bold text-xs sm:text-sm">Rs. 10.77 Lakh</span>
-                        </div>
+
+                        {allModels.map((model: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center py-1 hover:bg-gray-50 transition-colors rounded px-2">
+                            <Link
+                              href={generateModelSlug(brand.name, model.name)}
+                              className="text-gray-700 hover:text-blue-600 hover:underline text-xs sm:text-sm transition-colors font-medium"
+                              prefetch={true}
+                            >
+                              {brand.name} {model.name}
+                            </Link>
+                            <span className="text-red-600 font-bold text-xs sm:text-sm">
+                              Rs. {formatPrice(model.lowestPrice)} Lakh
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   {/* Collapse Button */}
                   <div className="text-right mt-3 sm:mt-4">

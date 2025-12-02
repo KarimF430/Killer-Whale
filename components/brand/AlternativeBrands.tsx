@@ -95,7 +95,7 @@ export default function AlternativeBrands({ currentBrand, initialBrands = [] }: 
               <>
                 <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
                 <span className="hidden sm:inline">Show All {allBrands.length} Brands</span>
-                <span className="sm:hidden">All {allBrands.length} Brands</span>
+                <span className="sm:hidden">Show All {allBrands.length} Brands</span>
               </>
             )}
           </button>

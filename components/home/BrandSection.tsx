@@ -114,17 +114,19 @@ export default function BrandSection() {
       <div className="text-center">
         <button
           onClick={() => setShowAllBrands(!showAllBrands)}
-          className="inline-flex items-center bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 shadow-md"
+          className="inline-flex items-center bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2.5 sm:px-8 sm:py-4 rounded-lg font-semibold text-sm sm:text-lg transition-all duration-200 shadow-md"
         >
           {showAllBrands ? (
             <>
-              <ChevronUp className="h-5 w-5 mr-2" />
-              Show Less Brands
+              <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+              <span className="hidden sm:inline">Show Less Brands</span>
+              <span className="sm:hidden">Show Less</span>
             </>
           ) : (
             <>
-              <ChevronDown className="h-5 w-5 mr-2" />
-              Show All {allBrands.length} Brands
+              <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+              <span className="hidden sm:inline">Show All {allBrands.length} Brands</span>
+              <span className="sm:hidden">Show All {allBrands.length} Brands</span>
             </>
           )}
         </button>
