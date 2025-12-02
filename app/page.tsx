@@ -12,6 +12,7 @@ import NewLaunchedCars from '@/components/home/NewLaunchedCars'
 import LatestCarNews from '@/components/home/LatestCarNews'
 import YouTubeVideoPlayer from '@/components/home/YouTubeVideoPlayer'
 import PopularComparisons from '@/components/home/PopularComparisons'
+import VideoAd from '@/components/ads/VideoAd'
 import PageSection from '@/components/common/PageSection'
 import Card from '@/components/common/Card'
 import { staticPageSEO } from '@/lib/seo'
@@ -155,6 +156,7 @@ async function getHomeData() {
         slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
         isNew: model.isNew || false,
         isPopular: model.isPopular || false,
+        popularRank: model.popularRank ?? null,
         newRank: model.newRank ?? null
       }
     }) : []
@@ -269,12 +271,9 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="gray">
-          <Card className="text-center">
-            <div className="bg-gradient-to-r from-red-600 to-orange-500 rounded-lg p-6 text-white">
-              <h3 className="text-xl font-bold mb-2">Get Best Car Deals</h3>
-              <p className="opacity-90">Compare prices from multiple dealers</p>
-            </div>
-          </Card>
+          <div className="max-w-4xl mx-auto">
+            <VideoAd videoId="MVYRGxM7NtU" variant="inline" />
+          </div>
         </PageSection>
 
         <PageSection background="white">
