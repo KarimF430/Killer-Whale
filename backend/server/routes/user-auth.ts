@@ -104,6 +104,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password, rememberMe } = req.body;
+        console.log(`🔐 Login attempt for: ${email}`);
 
         // Validation
         if (!email || !password) {
@@ -140,6 +141,8 @@ router.post('/login', async (req, res) => {
         // Create session
         (req.session as any).userId = user.id;
         (req.session as any).userEmail = user.email;
+        console.log(`✅ Session created for user: ${user.email} (ID: ${user.id})`);
+        console.log('Session ID:', req.sessionID);
 
         // Set session expiry based on "Remember Me"
         if (rememberMe) {
@@ -293,6 +296,7 @@ router.get('/auth/google', (req, res, next) => {
  */
 router.get('/auth/google/callback', (req, res, next) => {
     passport.authenticate('google', { session: false }, async (err: any, user: any) => {
+        console.log('🔄 Google OAuth callback received');
         if (err || !user) {
             console.error('Google OAuth callback error:', err);
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -309,6 +313,7 @@ router.get('/auth/google/callback', (req, res, next) => {
             await user.save();
 
             console.log('✅ Google OAuth successful for:', user.email);
+            console.log('Session ID:', req.sessionID);
 
             // Redirect to frontend home page
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';

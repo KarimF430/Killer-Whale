@@ -253,7 +253,9 @@ try {
     },
   });
 
-  redisClient.connect().catch((err: Error) => {
+  redisClient.connect().then(() => {
+    console.log('✅ Redis session client connected successfully');
+  }).catch((err: Error) => {
     console.error('❌ Redis session client connection error:', err.message);
     console.warn('⚠️  Sessions will use memory store (not persistent)');
     redisClient = null;
@@ -268,6 +270,8 @@ const redisStore = new RedisStore({
   client: redisClient,
   prefix: "sess:",
 });
+
+console.log('✅ Redis session store initialized');
 
 // Session Middleware
 app.use(
@@ -286,6 +290,7 @@ app.use(
     name: 'sid', // Custom session ID name
   })
 );
+console.log('✅ Session middleware configured');
 
 // Initialize services
 (async () => {
@@ -352,6 +357,11 @@ app.use(
     const adminUsersRoutes = (await import('./routes/admin-users')).default;
     app.use('/api/admin/users', adminUsersRoutes);
     console.log('✅ Admin users routes registered at /api/admin/users');
+
+    // Register diagnostics route
+    const diagnosticsRoutes = (await import('./routes/diagnostics')).default;
+    app.use('/api/diagnostics', diagnosticsRoutes);
+    console.log('✅ Diagnostics routes registered at /api/diagnostics');
 
     // Register API routes FIRST before Vite
     registerRoutes(app, storage);

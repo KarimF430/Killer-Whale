@@ -241,13 +241,13 @@ export async function cacheCarDetails(carId: string, carData: any, ttl: number =
 
     // Store as hash for efficient field access
     await redis.hset(hashKey, {
-      id: carData.id,
-      name: carData.name,
-      brand: carData.brand,
-      price: carData.price.toString(),
-      fuelType: carData.fuelType,
-      transmission: carData.transmission,
-      rating: carData.rating?.toString() || '0',
+      id: carData.id || '',
+      name: carData.name || '',
+      brand: carData.brand || '',
+      price: carData.price ? carData.price.toString() : '0',
+      fuelType: carData.fuelType || '',
+      transmission: carData.transmission || '',
+      rating: carData.rating ? carData.rating.toString() : '0',
       image: carData.image || '',
       updatedAt: Date.now().toString()
     });
