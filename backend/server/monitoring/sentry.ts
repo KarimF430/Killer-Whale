@@ -4,37 +4,37 @@
  */
 
 import * as Sentry from "@sentry/node";
-import { ProfilingIntegration } from "@sentry/profiling-node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 export function initSentry() {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    
+
     // Performance Monitoring
     tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-    
+
     // Profiling
     profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-    
+
     // Release tracking
     release: process.env.APP_VERSION || "1.0.0",
-    
+
     // Environment
     environment: process.env.NODE_ENV || "development",
-    
+
     // Integrations
     integrations: [
       // Profiling integration
-      new ProfilingIntegration(),
+      nodeProfilingIntegration(),
       // HTTP integration for tracing
-      new Sentry.Integrations.Http({ tracing: true }),
+      Sentry.httpIntegration(),
       // Express integration
-      new Sentry.Integrations.Express({ app: undefined }),
+      Sentry.expressIntegration(),
     ],
-    
+
     // Server-specific settings
-    autoSessionTracking: true,
-    
+    // autoSessionTracking: true,
+
     // Filtering
     beforeSend(event, hint) {
       // Filter out non-error events in development
@@ -42,14 +42,14 @@ export function initSentry() {
         console.log("🔍 Sentry Backend Event:", {
           level: event.level,
           message: event.message,
-          error: hint.originalException?.message
+          error: (hint as any).originalException?.message
         });
         // Still send to Sentry in development for testing
       }
-      
+
       // Filter out specific errors
       if (event.exception) {
-        const error = hint.originalException;
+        const error = hint.originalException as any;
         // Filter out MongoDB connection errors during startup
         if (error?.message?.includes("ECONNREFUSED") && error?.message?.includes("27017")) {
           return null;
@@ -59,10 +59,10 @@ export function initSentry() {
           return null;
         }
       }
-      
+
       return event;
     },
-    
+
     // Ignore specific errors
     ignoreErrors: [
       // Database connection errors during startup

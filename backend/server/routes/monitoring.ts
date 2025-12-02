@@ -100,7 +100,7 @@ router.get('/metrics', async (req, res) => {
     try {
       metrics.database.status = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
       // Get connection pool stats if available
-      const poolSize = mongoose.connection.db?.serverConfig?.s?.poolSize || 0;
+      const poolSize = (mongoose.connection.db as any)?.serverConfig?.s?.poolSize || 0;
       metrics.database.connections = poolSize;
     } catch (error) {
       metrics.database.status = 'error';
@@ -137,7 +137,7 @@ router.get('/ready', async (req, res) => {
   try {
     // Check if database is connected
     const dbReady = mongoose.connection.readyState === 1;
-    
+
     if (dbReady) {
       res.status(200).json({
         ready: true,

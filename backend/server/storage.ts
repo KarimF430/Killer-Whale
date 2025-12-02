@@ -142,7 +142,7 @@ export class PersistentStorage implements IStorage {
       if (fs.existsSync(this.youtubeCacheFile)) {
         const cacheData = fs.readFileSync(this.youtubeCacheFile, 'utf-8');
         this.youtubeCache = JSON.parse(cacheData);
-        console.log(`Loaded YouTube cache from storage (age: ${Math.floor((Date.now() - this.youtubeCache.timestamp) / 1000 / 60 / 60)} hours)`);
+        console.log(`Loaded YouTube cache from storage (age: ${Math.floor((Date.now() - (this.youtubeCache?.timestamp || 0)) / 1000 / 60 / 60)} hours)`);
       }
     } catch (error) {
       console.error('Error loading data:', error);

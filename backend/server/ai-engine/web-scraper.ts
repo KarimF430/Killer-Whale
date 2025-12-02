@@ -44,6 +44,7 @@ interface CarIntelligence {
     commonIssues: string[]
     ownerRecommendation: number // 0-100%
     lastUpdated: Date
+    imageUrl?: string
 }
 
 // ============================================

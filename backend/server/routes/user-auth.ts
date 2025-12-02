@@ -262,7 +262,7 @@ router.put('/profile', async (req, res) => {
         if (firstName) user.firstName = firstName;
         if (lastName) user.lastName = lastName;
         if (phone !== undefined) user.phone = phone;
-        if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;
+        if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null as any;
         user.updatedAt = new Date();
 
         await user.save();
@@ -367,8 +367,8 @@ router.get('/verify-email/:token', async (req, res) => {
 
         // Mark email as verified
         user.isEmailVerified = true;
-        user.emailVerificationToken = null;
-        user.emailVerificationExpires = null;
+        user.emailVerificationToken = null as any;
+        user.emailVerificationExpires = null as any;
         user.updatedAt = new Date();
         await user.save();
 
@@ -553,8 +553,8 @@ router.post('/reset-password', async (req, res) => {
 
         // Update password and clear reset token
         user.password = hashedPassword;
-        user.resetPasswordToken = null;
-        user.resetPasswordExpires = null;
+        user.resetPasswordToken = null as any;
+        user.resetPasswordExpires = null as any;
         user.updatedAt = new Date();
         await user.save();
 

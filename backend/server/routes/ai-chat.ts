@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import Groq from 'groq-sdk'
 import { Variant as CarVariant } from '../db/schemas'
-import { getCarIntelligence } from '../ai-engine/web-scraper'
+import { getCarIntelligence, type CarIntelligence } from '../ai-engine/web-scraper'
 import { handleQuestionWithRAG } from '../ai-engine/rag-system'
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || process.env.HF_API_KEY })
@@ -339,10 +339,11 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
         // Enrich with web intelligence
         const enrichedCars = await Promise.all(
             top3.map(async (car) => {
-                let intelligence = { imageUrl: '', ownerRecommendation: 0, totalReviews: 0, topPros: [], commonIssues: [] }
+                let intelligence: CarIntelligence = { imageUrl: '', ownerRecommendation: 0, totalReviews: 0, topPros: [], commonIssues: [], model: '', averageSentiment: 0, topCons: [], lastUpdated: new Date() }
 
                 try {
                     intelligence = await getCarIntelligence(`${car.brandId} ${car.name}`)
+                    if (!intelligence.imageUrl) intelligence.imageUrl = '';
                 } catch (e) {
                     console.error(`Web intelligence failed for ${car.brandId} ${car.name}:`, e)
                 }

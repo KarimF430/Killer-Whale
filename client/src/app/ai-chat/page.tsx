@@ -16,31 +16,31 @@ interface Car {
     imageUrl?: string
 }
 
-export default function AIChat Page() {
+export default function AIChatPage() {
     const searchParams = useSearchParams()
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
     const [cars, setCars] = useState<Car[]>([])
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    
+
     // Auto-scroll to bottom
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
-    
+
     useEffect(() => {
         scrollToBottom()
     }, [messages])
-    
+
     // Handle pre-filled message from quirky bot
     useEffect(() => {
         const message = searchParams.get('message')
         const autoSend = searchParams.get('autoSend')
-        
+
         if (message) {
             setInput(message)
-            
+
             if (autoSend === 'true') {
                 // Auto-send after a brief delay
                 setTimeout(() => {
@@ -49,17 +49,17 @@ export default function AIChat Page() {
             }
         }
     }, [searchParams])
-    
+
     const sendMessage = async (messageText?: string) => {
         const text = messageText || input.trim()
         if (!text) return
-        
+
         // Add user message
         const userMessage: Message = { role: 'user', content: text }
         setMessages(prev => [...prev, userMessage])
         setInput('')
         setLoading(true)
-        
+
         try {
             const response = await fetch('/api/ai-chat', {
                 method: 'POST',
@@ -70,18 +70,18 @@ export default function AIChat Page() {
                     conversationHistory: messages
                 })
             })
-            
+
             const data = await response.json()
-            
+
             // Add AI response
             const aiMessage: Message = { role: 'ai', content: data.reply }
             setMessages(prev => [...prev, aiMessage])
-            
+
             // Update cars if provided
             if (data.cars && data.cars.length > 0) {
                 setCars(data.cars)
             }
-            
+
         } catch (error) {
             console.error('Chat error:', error)
             const errorMessage: Message = {
@@ -93,12 +93,12 @@ export default function AIChat Page() {
             setLoading(false)
         }
     }
-    
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         sendMessage()
     }
-    
+
     return (
         <div className="ai-chat-page">
             <div className="chat-container">
@@ -112,7 +112,7 @@ export default function AIChat Page() {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Messages */}
                 <div className="messages-container">
                     {messages.length === 0 && (
@@ -120,7 +120,7 @@ export default function AIChat Page() {
                             <span className="welcome-icon">👋</span>
                             <h2>Hi! I'm your AI car assistant</h2>
                             <p>Ask me about car comparisons, recommendations, or any car-related questions!</p>
-                            
+
                             <div className="quick-questions">
                                 <button onClick={() => sendMessage('Which is better Creta or Seltos?')}>
                                     Creta vs Seltos?
@@ -134,7 +134,7 @@ export default function AIChat Page() {
                             </div>
                         </div>
                     )}
-                    
+
                     {messages.map((msg, idx) => (
                         <div key={idx} className={`message ${msg.role}`}>
                             <div className="message-avatar">
@@ -145,7 +145,7 @@ export default function AIChat Page() {
                             </div>
                         </div>
                     ))}
-                    
+
                     {loading && (
                         <div className="message ai">
                             <div className="message-avatar">🤖</div>
@@ -158,10 +158,10 @@ export default function AIChat Page() {
                             </div>
                         </div>
                     )}
-                    
+
                     <div ref={messagesEndRef} />
                 </div>
-                
+
                 {/* Cars Display */}
                 {cars.length > 0 && (
                     <div className="cars-display">
@@ -179,7 +179,7 @@ export default function AIChat Page() {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Input */}
                 <form className="chat-input-form" onSubmit={handleSubmit}>
                     <input
@@ -190,8 +190,8 @@ export default function AIChat Page() {
                         disabled={loading}
                         className="chat-input"
                     />
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         disabled={loading || !input.trim()}
                         className="send-button"
                     >

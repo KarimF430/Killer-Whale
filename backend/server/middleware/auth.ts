@@ -3,11 +3,12 @@ import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
 
-export interface AuthRequest extends Request {
+export interface AuthRequest extends Request<any, any, any, any> {
   user?: {
     id: string
     email: string
-    role: 'admin' | 'editor' | 'author'
+    name: string
+    role: string
   }
 }
 
@@ -26,13 +27,13 @@ export const verifyToken = (token: string): any => {
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '')
-    
+
     if (!token) {
       return res.status(401).json({ error: 'No token provided' })
     }
 
     const decoded = verifyToken(token)
-    
+
     if (!decoded) {
       return res.status(401).json({ error: 'Invalid token' })
     }
