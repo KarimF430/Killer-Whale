@@ -35,7 +35,7 @@ interface ScrapedReview {
     commonIssues: string[]
 }
 
-interface CarIntelligence {
+export interface CarIntelligence {
     model: string
     totalReviews: number
     averageSentiment: number // -1 to 1
