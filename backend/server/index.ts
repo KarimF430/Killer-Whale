@@ -363,6 +363,15 @@ app.use(
       console.warn('⚠️  Continuing without scheduler...');
     }
 
+    // Initialize YouTube Scheduler
+    try {
+      const { startYouTubeScheduler } = await import('./scheduled-youtube-fetch');
+      startYouTubeScheduler(storage);
+    } catch (error) {
+      console.error('❌ Failed to initialize YouTube scheduler:', error);
+      console.warn('⚠️  Continuing without YouTube scheduler...');
+    }
+
     // Sentry Error Handler must be before any other error middleware and after all controllers
     if (sentryEnabled) {
       try {

@@ -929,4 +929,20 @@ export class MongoDBStorage implements IStorage {
       throw new Error('Failed to fetch stats');
     }
   }
+
+  // ============================================
+  // YOUTUBE CACHE
+  // ============================================
+  // Note: YouTube cache is stored in-memory for MongoDB implementation
+  // The persistent storage implementation uses file-based storage
+  private youtubeCache: { data: any; timestamp: number } | null = null;
+
+  async getYouTubeCache(): Promise<{ data: any; timestamp: number } | null> {
+    return this.youtubeCache;
+  }
+
+  async saveYouTubeCache(data: any, timestamp: number): Promise<void> {
+    this.youtubeCache = { data, timestamp };
+    console.log('✅ YouTube cache saved (in-memory for MongoDB storage)');
+  }
 }

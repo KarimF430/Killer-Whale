@@ -276,15 +276,6 @@ NextJS App → API Routes → Express Backend → MongoDB
    - Automated backups
    - Global clusters for low latency
 
-### **Environment Variables** (29 total)
-- Database: `MONGODB_URI`, `REDIS_URL`
-- Auth: `JWT_SECRET`, `SESSION_SECRET`
-- APIs: `NEXT_PUBLIC_API_URL`, `BACKEND_URL`
-- AI: `GROQ_API_KEY`, `HUGGINGFACE_API_KEY`
-- Monitoring: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`
-- Email: `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`
-- Storage: `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`
-
 ---
 
 ## 🧪 Testing Coverage

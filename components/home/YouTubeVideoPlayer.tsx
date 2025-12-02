@@ -24,53 +24,6 @@ export default function YouTubeVideoPlayer() {
 
   useEffect(() => {
     const fetchYouTubeVideos = async () => {
-      const setFallbackData = () => {
-        setFeaturedVideo({
-          id: 'placeholder',
-          title: 'Maruti Suzuki Grand Vitara Detailed Review | Hybrid vs Petrol | Which One to Buy?',
-          thumbnail: 'https://img.youtube.com/vi/hVdKkXyXkS0/maxresdefault.jpg',
-          duration: '12:45',
-          views: '2.5M',
-          likes: '45K',
-          publishedAt: '2 days ago',
-          channelName: 'MotorOctane'
-        })
-
-        setRelatedVideos([
-          {
-            id: 'placeholder1',
-            title: 'Top 5 Cars Under 10 Lakhs in 2024',
-            thumbnail: 'https://img.youtube.com/vi/Qy8qg5y5x5c/maxresdefault.jpg',
-            duration: '8:30',
-            views: '1.2M',
-            likes: '28K',
-            publishedAt: '1 week ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder2',
-            title: 'Electric vs Petrol Cars: Complete Cost Analysis',
-            thumbnail: 'https://img.youtube.com/vi/7y8qg5y5x5c/maxresdefault.jpg',
-            duration: '15:20',
-            views: '890K',
-            likes: '19K',
-            publishedAt: '3 days ago',
-            channelName: 'MotorOctane'
-          },
-          {
-            id: 'placeholder3',
-            title: 'Hyundai Creta 2024 First Drive Review',
-            thumbnail: 'https://img.youtube.com/vi/9y8qg5y5x5c/maxresdefault.jpg',
-            duration: '10:15',
-            views: '1.8M',
-            likes: '35K',
-            publishedAt: '5 days ago',
-            channelName: 'MotorOctane'
-          }
-        ])
-        setLoading(false)
-      }
-
       try {
         setLoading(true)
 
@@ -78,6 +31,11 @@ export default function YouTubeVideoPlayer() {
         const response = await fetch('/api/youtube/videos')
 
         if (!response.ok) {
+          const data = await response.json().catch(() => ({}))
+          // If it's a 503 (cache expired/empty), show the specific message
+          if (response.status === 503 && data.message) {
+            throw new Error(data.message)
+          }
           throw new Error('Failed to fetch YouTube videos')
         }
 
@@ -91,12 +49,14 @@ export default function YouTubeVideoPlayer() {
         setFeaturedVideo(data.featuredVideo)
         setRelatedVideos(data.relatedVideos)
         setError(null)
-        setLoading(false)
 
       } catch (err) {
         console.error('Error fetching YouTube videos:', err)
         setError(err instanceof Error ? err.message : 'Failed to load videos')
-        setFallbackData()
+        setFeaturedVideo(null)
+        setRelatedVideos([])
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -121,7 +81,7 @@ export default function YouTubeVideoPlayer() {
     setPlayingVideo(videoId)
   }
 
-  if (loading || !featuredVideo) {
+  if (loading) {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
@@ -144,6 +104,22 @@ export default function YouTubeVideoPlayer() {
             ))}
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (error || !featuredVideo) {
+    // If there's an error (e.g. cache expired) or no video, we show a message or hide the section
+    // Requirement: "show no videos until the next scheduled fetch"
+    // We'll show a polite message instead of broken UI
+    return (
+      <div className="py-8 text-center bg-gray-50 rounded-lg border border-gray-200">
+        <p className="text-gray-500 font-medium">
+          {error || 'Fresh content will be available soon'}
+        </p>
+        <p className="text-sm text-gray-400 mt-1">
+          Daily updates at 11:00 AM
+        </p>
       </div>
     )
   }

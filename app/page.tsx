@@ -35,8 +35,8 @@ interface Car {
   slug: string
   isNew: boolean
   isPopular: boolean
-  popularRank?: number | null
-  newRank?: number | null
+  popularRank: number | null
+  newRank: number | null
 }
 
 const formatLaunchDate = (date: string): string => {
@@ -257,7 +257,7 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="gray">
-          <BrandSection />
+          <BrandSection initialBrands={brands} />
         </PageSection>
 
         <PageSection background="white">
@@ -282,7 +282,7 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="white">
-          <PopularComparisons />
+          <PopularComparisons initialComparisons={comparisons} />
         </PageSection>
 
         <PageSection background="white">

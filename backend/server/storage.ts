@@ -51,6 +51,10 @@ export interface IStorage {
   invalidateSession(userId: string): Promise<void>;
   isSessionValid(userId: string, token: string): Promise<boolean>;
 
+  // YouTube Cache
+  getYouTubeCache(): Promise<{ data: any; timestamp: number } | null>;
+  saveYouTubeCache(data: any, timestamp: number): Promise<void>;
+
   // Stats
   getStats(): Promise<{
     totalBrands: number;
@@ -67,12 +71,14 @@ export class PersistentStorage implements IStorage {
   private popularComparisons: PopularComparison[] = [];
   private adminUsers: AdminUser[] = [];
   private activeSessions: Map<string, string> = new Map(); // userId -> token
+  private youtubeCache: { data: any; timestamp: number } | null = null;
   private dataDir: string;
   private brandsFile: string;
   private modelsFile: string;
   private variantsFile: string;
   private popularComparisonsFile: string;
   private adminUsersFile: string;
+  private youtubeCacheFile: string;
 
   constructor() {
     this.dataDir = path.join(process.cwd(), 'data');
@@ -81,6 +87,7 @@ export class PersistentStorage implements IStorage {
     this.variantsFile = path.join(this.dataDir, 'variants.json');
     this.popularComparisonsFile = path.join(this.dataDir, 'popular-comparisons.json');
     this.adminUsersFile = path.join(this.dataDir, 'admin-users.json');
+    this.youtubeCacheFile = path.join(this.dataDir, 'youtube-cache.json');
 
     // Create data directory if it doesn't exist
     if (!fs.existsSync(this.dataDir)) {
@@ -130,6 +137,13 @@ export class PersistentStorage implements IStorage {
         // Create default admin user if none exists
         this.createDefaultAdmin();
       }
+
+      // Load YouTube cache
+      if (fs.existsSync(this.youtubeCacheFile)) {
+        const cacheData = fs.readFileSync(this.youtubeCacheFile, 'utf-8');
+        this.youtubeCache = JSON.parse(cacheData);
+        console.log(`Loaded YouTube cache from storage (age: ${Math.floor((Date.now() - this.youtubeCache.timestamp) / 1000 / 60 / 60)} hours)`);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       // Initialize with empty arrays if loading fails
@@ -138,6 +152,7 @@ export class PersistentStorage implements IStorage {
       this.variants = [];
       this.popularComparisons = [];
       this.adminUsers = [];
+      this.youtubeCache = null;
     }
   }
 
@@ -174,6 +189,8 @@ export class PersistentStorage implements IStorage {
 
       // Save admin users
       fs.writeFileSync(this.adminUsersFile, JSON.stringify(this.adminUsers, null, 2));
+
+      // Save YouTube cache (saved separately via saveYouTubeCache)
 
       console.log('Data saved to persistent storage');
     } catch (error) {
@@ -569,6 +586,21 @@ export class PersistentStorage implements IStorage {
   async isSessionValid(userId: string, token: string): Promise<boolean> {
     const activeToken = this.activeSessions.get(userId);
     return activeToken === token;
+  }
+
+  // YouTube Cache
+  async getYouTubeCache(): Promise<{ data: any; timestamp: number } | null> {
+    return this.youtubeCache;
+  }
+
+  async saveYouTubeCache(data: any, timestamp: number): Promise<void> {
+    this.youtubeCache = { data, timestamp };
+    try {
+      fs.writeFileSync(this.youtubeCacheFile, JSON.stringify(this.youtubeCache, null, 2));
+      console.log('✅ YouTube cache saved to persistent storage');
+    } catch (error) {
+      console.error('Error saving YouTube cache:', error);
+    }
   }
 
   // Stats

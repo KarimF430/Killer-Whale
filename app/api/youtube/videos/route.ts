@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server'
-
-// In-memory cache as fallback
-let videoCache: {
-    data: any
-    timestamp: number
-} | null = null
+import { storage } from '../../../backend/server/storage'
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 
@@ -46,52 +41,6 @@ function parseDuration(duration: string): string {
         return `${hours}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')}`
     }
     return `${minutes || '0'}:${seconds.padStart(2, '0')}`
-}
-
-// Fallback static data
-const FALLBACK_DATA = {
-    featuredVideo: {
-        id: 'hVdKkXyXkS0',
-        title: 'Maruti Suzuki Grand Vitara Detailed Review | Hybrid vs Petrol | Which One to Buy?',
-        thumbnail: 'https://img.youtube.com/vi/hVdKkXyXkS0/maxresdefault.jpg',
-        duration: '12:45',
-        views: '2.5M',
-        likes: '45K',
-        publishedAt: '2 days ago',
-        channelName: 'MotorOctane'
-    },
-    relatedVideos: [
-        {
-            id: 'Qy8qg5y5x5c',
-            title: 'Top 5 Cars Under 10 Lakhs in 2024',
-            thumbnail: 'https://img.youtube.com/vi/Qy8qg5y5x5c/maxresdefault.jpg',
-            duration: '8:30',
-            views: '1.2M',
-            likes: '28K',
-            publishedAt: '1 week ago',
-            channelName: 'MotorOctane'
-        },
-        {
-            id: '7y8qg5y5x5c',
-            title: 'Electric vs Petrol Cars: Complete Cost Analysis',
-            thumbnail: 'https://img.youtube.com/vi/7y8qg5y5x5c/maxresdefault.jpg',
-            duration: '15:20',
-            views: '890K',
-            likes: '19K',
-            publishedAt: '3 days ago',
-            channelName: 'MotorOctane'
-        },
-        {
-            id: '9y8qg5y5x5c',
-            title: 'Hyundai Creta 2024 First Drive Review',
-            thumbnail: 'https://img.youtube.com/vi/9y8qg5y5x5c/maxresdefault.jpg',
-            duration: '10:15',
-            views: '1.8M',
-            likes: '35K',
-            publishedAt: '5 days ago',
-            channelName: 'MotorOctane'
-        }
-    ]
 }
 
 async function fetchYouTubeVideos(apiKey: string, channelId: string, searchQuery?: string) {
@@ -172,77 +121,50 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url)
         const searchQuery = searchParams.get('search')
 
-        // Check in-memory cache first (only for general videos, not search)
-        if (!searchQuery && videoCache && Date.now() - videoCache.timestamp < CACHE_DURATION) {
-            console.log('✅ Serving YouTube videos from cache (age: ' +
-                Math.floor((Date.now() - videoCache.timestamp) / 1000 / 60) + ' minutes)')
+        // Construct backend URL
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+        let url = `${backendUrl}/api/youtube/videos`;
+
+        if (searchQuery) {
+            url += `?search=${encodeURIComponent(searchQuery)}`;
+        }
+
+        console.log(`[YouTube API] Fetching from: ${url}`);
+
+        // Fetch from backend
+        const response = await fetch(url, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            cache: 'no-store'
+        });
+
+        console.log(`[YouTube API] Response status: ${response.status}, Content-Type: ${response.headers.get('content-type')}`);
+
+        // Check if response is JSON before parsing
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('[YouTube API] Received non-JSON response:', text.substring(0, 200));
             return NextResponse.json({
-                ...videoCache.data,
-                cached: true,
-                cacheAge: Math.floor((Date.now() - videoCache.timestamp) / 1000 / 60)
-            })
+                error: 'Backend returned invalid response',
+                message: 'Unexpected response format from backend'
+            }, { status: 500 });
         }
 
-        // Get API key from environment variables (server-side only)
-        const apiKey = process.env.YOUTUBE_API_KEY
-        const channelId = process.env.YOUTUBE_CHANNEL_ID || '@motoroctane'
+        const data = await response.json();
 
-        if (!apiKey) {
-            console.log('ℹ️ YouTube API key not configured - returning fallback videos')
-            return NextResponse.json(FALLBACK_DATA)
+        if (!response.ok) {
+            return NextResponse.json(data, { status: response.status });
         }
 
-        // Try to fetch fresh data
-        try {
-            const freshData = await fetchYouTubeVideos(apiKey, channelId, searchQuery || undefined)
-
-            // Update cache only for general videos (not search results)
-            if (!searchQuery) {
-                videoCache = {
-                    data: freshData,
-                    timestamp: Date.now()
-                }
-                console.log('✅ Fetched fresh YouTube videos and updated cache')
-            } else {
-                console.log(`✅ Fetched model-specific videos for: ${searchQuery}`)
-            }
-
-            return NextResponse.json({
-                ...freshData,
-                cached: false
-            })
-        } catch (error) {
-            // If quota exceeded or API error, use cached data if available (for general videos only)
-            if (!searchQuery && videoCache) {
-                console.warn('⚠️ YouTube API error - serving stale cache (age: ' +
-                    Math.floor((Date.now() - videoCache.timestamp) / 1000 / 60 / 60) + ' hours)')
-                return NextResponse.json({
-                    ...videoCache.data,
-                    cached: true,
-                    stale: true,
-                    cacheAge: Math.floor((Date.now() - videoCache.timestamp) / 1000 / 60 / 60)
-                })
-            }
-
-            // If no cache available, use fallback
-            console.warn('⚠️ YouTube API error and no cache - using fallback data')
-            console.error('YouTube API Error:', error)
-            return NextResponse.json(FALLBACK_DATA)
-        }
+        return NextResponse.json(data);
 
     } catch (error) {
         console.error('Error in YouTube API route:', error)
-
-        // Try to serve from cache even on unexpected errors
-        if (videoCache) {
-            return NextResponse.json({
-                ...videoCache.data,
-                cached: true,
-                stale: true
-            })
-        }
-
-        // Last resort: fallback data
-        return NextResponse.json(FALLBACK_DATA)
+        return NextResponse.json({
+            error: 'Internal server error',
+            message: 'Failed to retrieve videos'
+        }, { status: 500 })
     }
 }

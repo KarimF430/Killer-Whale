@@ -43,6 +43,7 @@ import adminMediaRoutes from "./routes/admin-media";
 import adminAnalyticsRoutes from "./routes/admin-analytics";
 import aiChatHandler from "./routes/ai-chat";
 import quirkyBitRoutes from "./routes/quirky-bit";
+import createYouTubeRoutes from "./routes/youtube";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -2603,6 +2604,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
   // Quirky Bits endpoint (for floating AI bot)
   app.use('/api/quirky-bit', publicLimiter, quirkyBitRoutes);
+
+  // YouTube endpoint
+  app.use('/api/youtube', publicLimiter, createYouTubeRoutes(storage));
 
 
   // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
