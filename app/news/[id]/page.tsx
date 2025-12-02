@@ -1,96 +1,121 @@
-'use client'
-
 import Link from 'next/link'
-import { Eye, Calendar, User } from 'lucide-react'
+import { Eye, User } from 'lucide-react'
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import Footer from '@/components/Footer'
 import FeedbackSection from '@/components/car-model/FeedbackSection'
 import LatestCarNews from '@/components/home/LatestCarNews'
-import UpcomingCars from '@/components/home/UpcomingCars'
-import NewLaunchedCars from '@/components/home/NewLaunchedCars'
 import ArticleRenderer from '@/components/news/ArticleRenderer'
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
 
-export default function NewsArticlePage() {
-  const params = useParams()
-  const [article, setArticle] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-  useEffect(() => {
-    async function fetchArticle() {
-      try {
-        const slug = params.id as string
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
-        const res = await fetch(`${apiUrl}/api/news/${slug}`)
+// Enable ISR with 2-hour revalidation for news articles
+export const revalidate = 7200
 
-        if (!res.ok) {
-          setError(true)
-          return
-        }
+// Generate dynamic metadata for SEO
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params
 
-        const data = await res.json()
-        setArticle(data)
-      } catch (err) {
-        console.error('Error fetching article:', err)
-        setError(true)
-      } finally {
-        setLoading(false)
+  try {
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+    const res = await fetch(`${backendUrl}/api/news/${id}`, {
+      next: { revalidate: 7200 }
+    })
+
+    if (!res.ok) {
+      return {
+        title: 'Article Not Found | MotorOctane',
+        description: 'The requested article could not be found.'
       }
     }
 
-    fetchArticle()
-  }, [params.id])
+    const article = await res.json()
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p>Loading article...</p>
-        </div>
-      </div>
-    )
+    return {
+      title: `${article.title} | MotorOctane News`,
+      description: article.excerpt || article.title,
+      keywords: article.tags?.join(', ') || 'car news, automotive news, latest cars',
+      openGraph: {
+        title: article.title,
+        description: article.excerpt || article.title,
+        type: 'article',
+        publishedTime: article.publishDate,
+        authors: [article.authorId || 'MotorOctane'],
+        images: article.featuredImage ? [{
+          url: article.featuredImage.startsWith('http')
+            ? article.featuredImage
+            : `${backendUrl}${article.featuredImage}`
+        }] : []
+      },
+      alternates: {
+        canonical: `/news/${id}`
+      }
+    }
+  } catch (error) {
+    console.error('Error generating metadata:', error)
+    return {
+      title: 'Car News | MotorOctane',
+      description: 'Latest automotive news and updates'
+    }
   }
+}
 
-  if (error || !article) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Article Not Found</h1>
-          <Link href="/news" className="text-blue-600 hover:underline">
-            Back to News
-          </Link>
-        </div>
-      </div>
-    )
+// Server-side data fetching
+async function getArticle(id: string) {
+  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+
+  try {
+    const res = await fetch(`${backendUrl}/api/news/${id}`, {
+      next: { revalidate: 7200 }
+    })
+
+    if (!res.ok) {
+      return null
+    }
+
+    const article = await res.json()
+
+    // Format for display
+    return {
+      id: article.id,
+      title: article.title,
+      views: article.views || 199,
+      author: {
+        name: article.authorId || 'Admin',
+        image: '/api/placeholder/50/50',
+        date: new Date(article.publishDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      },
+      featuredImage: article.featuredImage?.startsWith('/uploads')
+        ? `${backendUrl}${article.featuredImage}`
+        : article.featuredImage || '/api/placeholder/800/500',
+      keyPoints: article.keyPoints || [
+        'The Curvv comes with impressive features and specifications.',
+        'It competes strongly in its segment.',
+        'Available in multiple variants and color options.'
+      ],
+      contentBlocks: article.contentBlocks || [],
+      linkedCars: article.linkedCars || []
+    }
+  } catch (error) {
+    console.error('Error fetching article:', error)
+    return null
   }
+}
 
-  // Format for display
-  const displayArticle = {
-    id: article.id,
-    title: article.title,
-    views: article.views || 199, // Mock default if missing
-    author: {
-      name: article.authorId || 'Admin',
-      image: '/api/placeholder/50/50',
-      date: new Date(article.publishDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    },
-    featuredImage: article.featuredImage?.startsWith('/uploads')
-      ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}${article.featuredImage}`
-      : article.featuredImage || '/api/placeholder/800/500',
-    keyPoints: article.keyPoints || [
-      'The Curvv comes with impressive features and specifications.',
-      'It competes strongly in its segment.',
-      'Available in multiple variants and color options.'
-    ],
-    contentBlocks: article.contentBlocks || []
+export default async function NewsArticlePage({ params }: PageProps) {
+  const { id } = await params
+  const article = await getArticle(id)
+
+  if (!article) {
+    notFound()
   }
 
   return (
@@ -104,13 +129,13 @@ export default function NewsArticlePage() {
               {/* Header Section */}
               <header className="mb-6">
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                  {displayArticle.title}
+                  {article.title}
                 </h1>
 
                 <div className="flex items-center text-gray-500 text-sm mb-4 space-x-4">
                   <div className="flex items-center">
                     <Eye className="h-4 w-4 mr-1.5" />
-                    <span>{displayArticle.views} Views</span>
+                    <span>{article.views} Views</span>
                   </div>
                 </div>
 
@@ -121,28 +146,21 @@ export default function NewsArticlePage() {
                   </div>
                   <div>
                     <div className="flex items-center">
-                      <span className="font-bold text-gray-900 text-sm mr-2">{displayArticle.author.name}</span>
+                      <span className="font-bold text-gray-900 text-sm mr-2">{article.author.name}</span>
                     </div>
-                    <p className="text-xs text-gray-500">{displayArticle.author.date}</p>
+                    <p className="text-xs text-gray-500">{article.author.date}</p>
                   </div>
                 </div>
               </header>
 
               {/* Featured Image */}
-              {displayArticle.featuredImage && (
+              {article.featuredImage && (
                 <div className="mb-8 rounded-xl overflow-hidden shadow-sm">
                   <img
-                    src={displayArticle.featuredImage}
-                    alt={displayArticle.title}
+                    src={article.featuredImage}
+                    alt={article.title}
                     className="w-full h-auto object-cover"
                   />
-                </div>
-              )}
-
-              {/* Intro / Excerpt */}
-              {article.excerpt && (
-                <div className="mb-8 text-xl text-gray-800 font-medium leading-relaxed">
-                  {article.excerpt}
                 </div>
               )}
 
@@ -150,7 +168,7 @@ export default function NewsArticlePage() {
               <div className="mb-8 bg-gray-50 p-6 rounded-xl border border-gray-100">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Key Highlights</h2>
                 <ul className="space-y-3">
-                  {displayArticle.keyPoints.map((point: string, index: number) => (
+                  {article.keyPoints.map((point: string, index: number) => (
                     <li key={index} className="flex items-start">
                       <span className="flex-shrink-0 h-5 w-5 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
                         {index + 1}
@@ -163,7 +181,7 @@ export default function NewsArticlePage() {
 
               {/* Article Content */}
               <div className="prose prose-lg max-w-none text-gray-800">
-                <ArticleRenderer blocks={displayArticle.contentBlocks} linkedCars={article.linkedCars} />
+                <ArticleRenderer blocks={article.contentBlocks} linkedCars={article.linkedCars} />
               </div>
             </article>
 
