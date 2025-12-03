@@ -23,6 +23,7 @@ interface ModelData {
   isUpcomingCar?: boolean
   id: string
   slug: string
+  brandSlug: string
   brand: string
   name: string
   heroImage: string
@@ -955,10 +956,8 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
   // Handle variant card click to navigate to variant page
   const handleVariantClick = (variant: any) => {
-    const brandSlug = model?.brand?.toLowerCase().replace(/\s+/g, '-')
-    const modelSlug = model?.name?.toLowerCase().replace(/\s+/g, '-')
     const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
-    const variantUrl = `/${brandSlug}-cars/${modelSlug}/variant/${variantSlug}`
+    const variantUrl = `/${model.brandSlug}-cars/${model.slug}/${variantSlug}`
     console.log('Navigating to variant page:', variantUrl)
     router.push(variantUrl)
   }
@@ -1204,7 +1203,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                     {(model?.variants || []).map((variant) => (
                       <Link
                         key={variant.id}
-                        href={`/${model.brand.toLowerCase().replace(/\s+/g, '-')}-cars/${model.name.toLowerCase().replace(/\s+/g, '-')}/${variant.name.toLowerCase().replace(/\s+/g, '-')}`}
+                        href={`/${model.brandSlug}-cars/${model.slug}/${variant.name.toLowerCase().replace(/\s+/g, '-')}`}
                         onClick={() => {
                           setSelectedVariant(variant.name)
                           setShowVariantDropdown(false)

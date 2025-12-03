@@ -1043,7 +1043,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                     const brandSlug = brandName?.toLowerCase().replace(/\s+/g, '-')
                     const modelSlug = modelName?.toLowerCase().replace(/\s+/g, '-')
                     const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
-                    router.push(`/${brandSlug}-cars/${modelSlug}/variant/${variantSlug}`)
+                    router.push(`/${brandSlug}-cars/${modelSlug}/${variantSlug}`)
                   }}
                   onGetPrice={(e) => {
                     e.stopPropagation()

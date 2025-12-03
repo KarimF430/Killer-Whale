@@ -128,7 +128,7 @@ export default function AllVariantsClient({
     const finalBrandSlug = brandSlug || (model?.brandName?.toLowerCase().replace(/\s+/g, '-') + '-cars')
     const finalModelSlug = modelSlug || model?.name?.toLowerCase().replace(/\s+/g, '-')
     const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
-    const variantUrl = `/${finalBrandSlug}/${finalModelSlug}/variant/${variantSlug}`
+    const variantUrl = `/${finalBrandSlug}/${finalModelSlug}/${variantSlug}`
     console.log('Navigating to variant page:', variantUrl)
     router.push(variantUrl)
   }

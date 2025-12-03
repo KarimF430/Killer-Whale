@@ -50,8 +50,13 @@ export default async function VariantDetailPage({ params }: PageProps) {
       next: { revalidate: 3600 } // Cache for 1 hour
     })
     const brands = await brandsRes.json()
+
+    // Normalize slug for matching (same logic as model page)
+    const normalizeBrandSlug = (name: string) =>
+      name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+
     const brand = brands.find((b: any) =>
-      b.name.toLowerCase().replace(/\s+/g, '-') === brandSlug
+      normalizeBrandSlug(b.name) === brandSlug
     )
 
     if (!brand) {
@@ -64,7 +69,7 @@ export default async function VariantDetailPage({ params }: PageProps) {
     })
     const models = await modelsRes.json()
     const model = models.find((m: any) =>
-      m.name.toLowerCase().replace(/\s+/g, '-') === modelSlug
+      m.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') === modelSlug
     )
 
     if (!model) {

@@ -2543,7 +2543,7 @@ export default function VariantPage({
                         const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                         const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
                         const variantSlug = variantItem.name.toLowerCase().replace(/\s+/g, '-')
-                        router.push(`/${brandSlug}-cars/${modelSlug}/variant/${variantSlug}`)
+                        router.push(`/${brandSlug}-cars/${modelSlug}/${variantSlug}`)
                       }}
                       onGetPrice={(e) => {
                         e.stopPropagation()
