@@ -5,7 +5,11 @@ import axios from 'axios'
 import * as cheerio from 'cheerio'
 
 const router = Router()
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || process.env.HF_API_KEY })
+
+// Initialize Groq client only if API key is available (prevents test failures)
+const groqApiKey = process.env.GROQ_API_KEY || process.env.HF_API_KEY || ''
+const groq = groqApiKey ? new Groq({ apiKey: groqApiKey }) : null
+
 
 // Cache for quirky bits (1 hour TTL)
 const cache = new Map<string, { data: any; timestamp: number }>()
@@ -282,6 +286,20 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
         console.log(`🤖 Generating quirky bit for: ${context}`)
 
         // Generate quirky bit using Groq with STRICT data adherence
+        if (!groq) {
+            // Fallback when Groq is not available
+            const result = {
+                text: `${entityName} is a great choice. Ask me for more details!`,
+                ctaText: type === 'brand' ? 'Tell me more' :
+                    type === 'model' ? `Ask about ${entityName}` : 'Compare variants',
+                chatContext: `Tell me more about ${context}`,
+                type,
+                entityName
+            }
+            cache.set(cacheKey, { data: result, timestamp: Date.now() })
+            return res.json(result)
+        }
+
         const prompt = `
         Based ONLY on the provided car data below, write ONE quirky, interesting fact for Indian car buyers.
         
