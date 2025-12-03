@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Star, Heart, Fuel, Users, Zap, ArrowRight } from 'lucide-react'
+import { OptimizedImage } from '@/components/common/OptimizedImage'
 
 interface CarData {
   id: number
@@ -32,10 +33,10 @@ interface CarProductBoxProps {
   className?: string
 }
 
-export default function CarProductBox({ 
-  car, 
-  size = 'medium', 
-  showCompare = true, 
+export default function CarProductBox({
+  car,
+  size = 'medium',
+  showCompare = true,
   showWishlist = true,
   className = ''
 }: CarProductBoxProps) {
@@ -79,13 +80,15 @@ export default function CarProductBox({
     <Link href={modelPageUrl} className={`block ${sizeClasses[size]} ${className}`}>
       <div className="bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-all duration-300 hover:border-blue-300 group">
         {/* Car Image */}
-        <div className="relative overflow-hidden rounded-t-lg">
-          <img
+        <div className="relative h-48 overflow-hidden rounded-t-lg">
+          <OptimizedImage
             src={car.image}
             alt={car.fullName}
-            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          
+
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col space-y-2">
             {car.isNew && (
@@ -109,11 +112,11 @@ export default function CarProductBox({
           {showWishlist && (
             <button
               onClick={toggleWishlist}
-              className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
-                isWishlisted
-                  ? 'bg-red-500 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
+              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              className={`absolute top-3 right-3 p-2 rounded-full transition-all ${isWishlisted
+                ? 'bg-red-500 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100'
+                }`}
             >
               <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
             </button>

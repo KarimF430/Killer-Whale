@@ -12,7 +12,7 @@ export const runtime = 'nodejs'
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  // Removed maximumScale to allow user zooming (accessibility)
 }
 
 export const metadata: Metadata = {
@@ -83,9 +83,18 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#dc2626" />
 
+        {/* Preconnect to external domains for faster loading */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.google-analytics.com" />
+        {process.env.NEXT_PUBLIC_API_URL && (
+          <link rel="preconnect" href={new URL(process.env.NEXT_PUBLIC_API_URL).origin} />
+        )}
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
         {/* Google Analytics */}
         {GA_ID && (
           <>
+            <link rel="preload" as="script" href={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
             <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
             <script
               dangerouslySetInnerHTML={{

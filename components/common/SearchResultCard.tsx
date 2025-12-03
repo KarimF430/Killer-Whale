@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Star, Fuel, Users, ArrowRight, TrendingUp } from 'lucide-react'
+import { OptimizedImage } from '@/components/common/OptimizedImage'
 
 interface SearchCarData {
   id: number
@@ -37,11 +38,11 @@ export default function SearchResultCard({ car, searchTerm, className = '' }: Se
   // Highlight search term in text
   const highlightText = (text: string, term?: string) => {
     if (!term) return text
-    
+
     const regex = new RegExp(`(${term})`, 'gi')
     const parts = text.split(regex)
-    
-    return parts.map((part, index) => 
+
+    return parts.map((part, index) =>
       regex.test(part) ? (
         <mark key={index} className="bg-yellow-200 px-1 rounded">
           {part}
@@ -56,10 +57,12 @@ export default function SearchResultCard({ car, searchTerm, className = '' }: Se
         <div className="flex items-start space-x-4">
           {/* Car Image */}
           <div className="flex-shrink-0">
-            <img
+            <OptimizedImage
               src={car.image}
               alt={car.fullName}
-              className="w-24 h-16 object-cover rounded-lg"
+              width={96}
+              height={64}
+              className="object-cover rounded-lg"
             />
           </div>
 
@@ -71,13 +74,13 @@ export default function SearchResultCard({ car, searchTerm, className = '' }: Se
                 <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors truncate" title={car.fullName}>
                   {highlightText(car.fullName, searchTerm)}
                 </h3>
-                
+
                 {/* Category */}
                 <p className="text-sm text-gray-500 mb-2">{car.category}</p>
-                
+
                 {/* Price */}
                 <p className="text-lg font-bold text-blue-600 mb-2">{car.priceRange}</p>
-                
+
                 {/* Key Specs */}
                 <div className="flex items-center space-x-4 text-sm text-gray-600">
                   <div className="flex items-center space-x-1">

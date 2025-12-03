@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Star, Share2, Heart, Camera, Play, Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { triggerCarInteraction, initializeAudioContext } from '@/utils/carInteraction'
+import { OptimizedImage } from '@/components/common/OptimizedImage'
 
 interface HeroSectionProps {
   carData: {
@@ -90,7 +91,8 @@ export default function HeroSection({ carData }: HeroSectionProps) {
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
-              onClick={handleHeartClick}
+              onClick={() => setIsWishlisted(!isWishlisted)}
+              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${isWishlisted
                 ? 'bg-red-50 border-red-200 text-red-700'
                 : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
@@ -114,6 +116,7 @@ export default function HeroSection({ carData }: HeroSectionProps) {
                   alert('Link copied to clipboard!');
                 }
               }}
+              aria-label="Share this car"
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors"
             >
               <Share2 className="h-4 w-4" />
@@ -127,25 +130,27 @@ export default function HeroSection({ carData }: HeroSectionProps) {
         {/* Main Image */}
         <div className="lg:col-span-2">
           <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video sm:aspect-[4/3]">
-            <img
+            <OptimizedImage
               ref={mainImageRef}
               src={carData.images[selectedImage] || '/api/placeholder/800/600'}
               alt={`${carData.fullName} - Image ${selectedImage + 1}`}
-              className="w-full h-full object-cover"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
+              priority={true}
+              className="object-cover"
             />
 
             {/* Navigation Arrows */}
             <button
               onClick={prevImage}
+              aria-label="Previous image"
               className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
             >
               <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" />
             </button>
             <button
               onClick={nextImage}
+              aria-label="Next image"
               className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
             >
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" />
@@ -155,11 +160,15 @@ export default function HeroSection({ carData }: HeroSectionProps) {
             <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex gap-2">
               <button
                 onClick={() => setIsFullscreen(true)}
+                aria-label="View fullscreen"
                 className="w-8 h-8 sm:w-10 sm:h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
               >
                 <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" />
               </button>
-              <button className="w-8 h-8 sm:w-10 sm:h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors">
+              <button
+                aria-label="View all images"
+                className="w-8 h-8 sm:w-10 sm:h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+              >
                 <Camera className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" />
               </button>
             </div>
@@ -179,12 +188,12 @@ export default function HeroSection({ carData }: HeroSectionProps) {
                 className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-orange-500' : 'border-gray-200 hover:border-gray-300'
                   }`}
               >
-                <img
+                <OptimizedImage
                   src={image || '/api/placeholder/80/60'}
                   alt={`${carData.fullName} thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
+                  fill
+                  sizes="80px"
+                  className="object-cover"
                 />
               </button>
             ))}
@@ -224,11 +233,15 @@ export default function HeroSection({ carData }: HeroSectionProps) {
           >
             <X className="h-6 w-6" />
           </button>
-          <img
-            src={carData.images[selectedImage] || '/api/placeholder/800/600'}
-            alt={`${carData.fullName} - Fullscreen`}
-            className="max-w-full max-h-full object-contain"
-          />
+          <div className="relative w-full h-full max-w-5xl max-h-[90vh]">
+            <OptimizedImage
+              src={carData.images[selectedImage] || '/api/placeholder/800/600'}
+              alt={`${carData.fullName} - Fullscreen`}
+              fill
+              sizes="100vw"
+              className="object-contain"
+            />
+          </div>
         </div>
       )}
     </div>

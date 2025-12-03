@@ -244,21 +244,11 @@ const redisClient = getSessionRedisClient();
 if (redisClient) {
   console.log('✅ Using unified Redis client for sessions');
 } else {
-  console.warn('⚠️  Redis not configured. Sessions will use memory store (not persistent)');
+  console.warn('⚠️  Redis not configured. Sessions will use memory store (not persistent across restarts)');
 }
-
-
-// Initialize Redis Store
-const redisStore = new RedisStore({
-  client: redisClient,
-  prefix: "sess:",
-});
-
-console.log('✅ Redis session store initialized');
 
 // Session Middleware with enhanced cross-domain support
 const sessionConfig: any = {
-  store: redisStore,
   secret: process.env.SESSION_SECRET || "motoroctane_secret_key_2024",
   resave: false,
   saveUninitialized: false,
@@ -274,13 +264,25 @@ const sessionConfig: any = {
   proxy: isProd, // Trust proxy in production for correct secure cookie handling
 };
 
+// Only use RedisStore if Redis client is available and connected
+if (redisClient) {
+  const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: "sess:",
+  });
+  sessionConfig.store = redisStore;
+  console.log('✅ Redis session store initialized');
+} else {
+  console.warn('⚠️  Using MemoryStore for sessions (fallback - not production-ready)');
+}
+
 app.use(session(sessionConfig));
 
 console.log('✅ Session middleware configured');
 console.log(`   - Environment: ${isProd ? 'production' : 'development'}`);
 console.log(`   - Cookie secure: ${sessionConfig.cookie.secure}`);
 console.log(`   - Cookie sameSite: ${sessionConfig.cookie.sameSite}`);
-console.log(`   - Store: ${redisClient ? 'Redis' : 'MemoryStore (fallback)'}`);
+console.log(`   - Store: ${redisClient ? 'Redis (persistent)' : 'MemoryStore (fallback - sessions lost on restart)'}`);
 console.log(`   - Trust proxy: ${sessionConfig.proxy}`);
 
 // Debug middleware to log session info
