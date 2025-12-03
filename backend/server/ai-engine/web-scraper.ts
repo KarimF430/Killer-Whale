@@ -262,7 +262,7 @@ export function aggregateReviews(reviews: ScrapedReview[]): CarIntelligence {
         if (r.sentiment === 'negative') return -1
         return 0
     })
-    const avgSentiment = sentimentScores.reduce((a, b) => a + b, 0) / sentimentScores.length
+    const avgSentiment = sentimentScores.reduce((a, b) => a + b, 0 as number) / sentimentScores.length
 
     // Aggregate pros
     const prosCount: { [key: string]: number } = {}
