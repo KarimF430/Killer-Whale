@@ -931,18 +931,58 @@ export class MongoDBStorage implements IStorage {
   }
 
   // ============================================
-  // YOUTUBE CACHE
+  // YOUTUBE CACHE (Redis-based for persistence)
   // ============================================
-  // Note: YouTube cache is stored in-memory for MongoDB implementation
-  // The persistent storage implementation uses file-based storage
-  private youtubeCache: { data: any; timestamp: number } | null = null;
 
   async getYouTubeCache(): Promise<{ data: any; timestamp: number } | null> {
-    return this.youtubeCache;
+    try {
+      // Import Redis client
+      const { getCacheRedisClient } = await import('../config/redis-config');
+      const redis = getCacheRedisClient();
+
+      if (!redis) {
+        console.warn('⚠️  Redis not available - YouTube cache unavailable');
+        return null;
+      }
+
+      const cacheKey = 'youtube:cache:motoroctane';
+      const cachedData = await redis.get(cacheKey);
+
+      if (!cachedData) {
+        console.log('📺 YouTube cache miss (Redis)');
+        return null;
+      }
+
+      const parsed = JSON.parse(cachedData);
+      console.log('✅ YouTube cache hit (Redis) - age:', Math.floor((Date.now() - parsed.timestamp) / 1000 / 60), 'minutes');
+      return parsed;
+
+    } catch (error) {
+      console.error('❌ Error fetching YouTube cache from Redis:', error);
+      return null;
+    }
   }
 
   async saveYouTubeCache(data: any, timestamp: number): Promise<void> {
-    this.youtubeCache = { data, timestamp };
-    console.log('✅ YouTube cache saved (in-memory for MongoDB storage)');
+    try {
+      // Import Redis client
+      const { getCacheRedisClient } = await import('../config/redis-config');
+      const redis = getCacheRedisClient();
+
+      if (!redis) {
+        console.warn('⚠️  Redis not available - YouTube cache not saved');
+        return;
+      }
+
+      const cacheKey = 'youtube:cache:motoroctane';
+      const cacheData = { data, timestamp };
+      const TTL = 48 * 60 * 60; // 48 hours in seconds (allows overlap for safety)
+
+      await redis.setex(cacheKey, TTL, JSON.stringify(cacheData));
+      console.log('✅ YouTube cache saved to Redis (TTL: 48 hours)');
+
+    } catch (error) {
+      console.error('❌ Error saving YouTube cache to Redis:', error);
+    }
   }
 }

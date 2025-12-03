@@ -145,17 +145,4 @@ export function startYouTubeScheduler(storage: IStorage): void {
     });
 
     console.log(`✅ YouTube scheduler started - will fetch daily at ${fetchHour}:00`);
-
-    // Optional: Fetch immediately on startup if cache is empty or expired
-    storage.getYouTubeCache().then((cache) => {
-        const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-
-        if (!cache || (Date.now() - cache.timestamp >= CACHE_DURATION)) {
-            console.log('📺 Cache empty or expired - fetching immediately...');
-            fetchAndCacheYouTubeVideos(storage);
-        } else {
-            const hoursRemaining = Math.floor((CACHE_DURATION - (Date.now() - cache.timestamp)) / 1000 / 60 / 60);
-            console.log(`📺 YouTube cache valid for ${hoursRemaining} more hours`);
-        }
-    });
 }
