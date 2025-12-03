@@ -1,11 +1,14 @@
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
-import { redis } from './redis-cache';
+import { getRedisClient } from './redis-cache';
 
 /**
  * Rate Limiting Middleware for API Protection
  * Prevents DDoS attacks and API abuse
  */
+
+// Get Redis client instance
+const redis = getRedisClient();
 
 // Create a fresh Redis store per limiter with unique prefix.
 function makeStore(prefix: string) {

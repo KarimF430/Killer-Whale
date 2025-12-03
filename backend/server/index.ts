@@ -20,7 +20,6 @@ import compression from "compression";
 import pinoHttp from "pino-http";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
-import { createClient } from "redis";
 import { init as sentryInit, setupExpressErrorHandler } from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
@@ -237,33 +236,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Redis Client for Sessions
-let redisClient: any = null;
-try {
-  // Convert redis:// to rediss:// if TLS is enabled
-  let redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-  if (process.env.REDIS_TLS === 'true' && redisUrl.startsWith('redis://')) {
-    redisUrl = redisUrl.replace('redis://', 'rediss://');
-  }
+// Redis Client for Sessions (unified configuration)
+import { getSessionRedisClient, isRedisReady } from './config/redis-config';
 
-  redisClient = createClient({
-    url: redisUrl,
-    socket: {
-      reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
-    },
-  });
+const redisClient = getSessionRedisClient();
 
-  redisClient.connect().then(() => {
-    console.log('✅ Redis session client connected successfully');
-  }).catch((err: Error) => {
-    console.error('❌ Redis session client connection error:', err.message);
-    console.warn('⚠️  Sessions will use memory store (not persistent)');
-    redisClient = null;
-  });
-} catch (err) {
-  console.error('❌ Redis session client initialization error:', err);
-  redisClient = null;
+if (redisClient) {
+  console.log('✅ Using unified Redis client for sessions');
+} else {
+  console.warn('⚠️  Redis not configured. Sessions will use memory store (not persistent)');
 }
+
 
 // Initialize Redis Store
 const redisStore = new RedisStore({
@@ -445,8 +428,13 @@ if (!isProd) {
     });
 
     // Graceful shutdown
-    const shutdown = () => {
+    const shutdown = async () => {
       log('received shutdown signal, closing server');
+
+      // Close Redis connection
+      const { closeRedisConnection } = await import('./config/redis-config');
+      await closeRedisConnection();
+
       server.close(() => {
         log('server closed');
         process.exit(0);

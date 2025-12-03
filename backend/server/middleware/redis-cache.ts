@@ -1,80 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
-import Redis from 'ioredis';
+import { getCacheRedisClient } from '../config/redis-config';
+import type Redis from 'ioredis';
 
 /**
  * CarWale-Style Redis Cache Middleware
  * Production-ready distributed caching with advanced features
  */
 
-// Initialize Redis client (only if configured)
-const useUrl = !!process.env.REDIS_URL;
-const hasHost = !!process.env.REDIS_HOST;
-const commonOpts = {
-  maxRetriesPerRequest: 3,
-  enableOfflineQueue: false,
-  retryStrategy: (times: number) => {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  },
-  reconnectOnError: (err: Error) => {
-    const targetError = 'READONLY';
-    if ((err as any).message && (err as any).message.includes(targetError)) {
-      return true;
-    }
-    return false;
-  },
-} as const;
+// Get unified Redis client instance
+const redis: Redis | null = getCacheRedisClient();
 
-const tlsOpt = process.env.REDIS_TLS === 'true' ? {
-  tls: {
-    rejectUnauthorized: false // Required for Upstash
-  }
-} : {};
-
-let redis: Redis | null = null;
-if (useUrl || hasHost) {
-  redis = useUrl
-    ? new Redis(process.env.REDIS_URL as string, {
-      ...commonOpts,
-      ...tlsOpt,
-      family: 4, // Use IPv4 (Render + Upstash compatibility)
-      lazyConnect: true, // Don't crash server if Redis fails on startup
-      showFriendlyErrorStack: true
-    })
-    : new Redis({
-      host: process.env.REDIS_HOST as string,
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      ...commonOpts,
-      ...tlsOpt,
-      lazyConnect: true,
-    });
-
-  // Connect in background - don't block server startup
-  if (redis) {
-    redis.connect().catch(err => {
-      console.error('❌ Redis connection failed (continuing without cache):', err.message);
-      redis = null; // Set to null so middleware knows Redis is unavailable
-    });
-  }
-}
-
-// Redis connection events
 if (redis) {
-  redis.on('connect', () => {
-    console.log('✅ Redis connected successfully');
-  });
-
-  redis.on('error', (err) => {
-    console.error('❌ Redis connection error:', err);
-  });
-
-  redis.on('ready', () => {
-    console.log('🚀 Redis ready for operations');
-  });
+  console.log('✅ Using unified Redis client for caching');
 } else {
-  console.log('ℹ️ Redis not configured (set REDIS_URL or REDIS_HOST). Caching disabled.');
+  console.log('ℹ️  Redis not configured. Caching disabled.');
 }
+
 
 /**
  * Cache Middleware with Stale-While-Revalidate (SWR)
@@ -479,5 +420,6 @@ export const CacheTags = {
   ALL: '*'
 };
 
-// Export Redis client for direct use
-export { redis };
+// Export Redis client for direct use (re-export from unified config)
+export { getCacheRedisClient as getRedisClient };
+

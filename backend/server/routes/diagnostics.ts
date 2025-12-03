@@ -1,7 +1,10 @@
 import express, { Router } from 'express';
-import { redis } from '../middleware/redis-cache';
+import { getRedisClient } from '../middleware/redis-cache';
 
 const router = Router();
+
+// Get Redis client instance
+const redis = getRedisClient();
 
 /**
  * System Diagnostics
