@@ -254,5 +254,33 @@ export default function createYouTubeRoutes(storage: IStorage): Router {
         }
     });
 
+    // GET version for easy browser access
+    router.get('/force-refresh', async (req, res) => {
+        try {
+            console.log('🔄 Manual YouTube fetch triggered via browser');
+            const { fetchAndCacheYouTubeVideos } = await import('../scheduled-youtube-fetch');
+            await fetchAndCacheYouTubeVideos(storage);
+            return res.send(`
+                <html>
+                    <body style="font-family: Arial; padding: 40px; text-align: center;">
+                        <h1 style="color: green;">✅ Success!</h1>
+                        <p>YouTube cache has been refreshed successfully.</p>
+                        <p>You can now close this window and check your website.</p>
+                    </body>
+                </html>
+            `);
+        } catch (error) {
+            console.error('Manual fetch failed:', error);
+            return res.status(500).send(`
+                <html>
+                    <body style="font-family: Arial; padding: 40px; text-align: center;">
+                        <h1 style="color: red;">❌ Error</h1>
+                        <p>Failed to refresh cache: ${error instanceof Error ? error.message : 'Unknown error'}</p>
+                    </body>
+                </html>
+            `);
+        }
+    });
+
     return router;
 }
