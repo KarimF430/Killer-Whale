@@ -97,13 +97,7 @@ export default function Header() {
         {isMenuOpen && (
           <div className="py-4 border-t border-gray-200 bg-white">
             <nav className="flex flex-col space-y-1">
-              <Link
-                href="/new-cars"
-                className="text-gray-700 hover:text-red-600 hover:bg-red-50 font-medium py-3 px-4 rounded-lg transition-all duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                New Cars
-              </Link>
+
               <Link
                 href="/compare"
                 className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg transition-all duration-200"
@@ -111,13 +105,7 @@ export default function Header() {
               >
                 Compare Cars
               </Link>
-              <Link
-                href="/brands"
-                className="text-gray-700 hover:text-red-600 hover:bg-red-50 font-medium py-3 px-4 rounded-lg transition-all duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Car Brands
-              </Link>
+
               <Link
                 href="/emi-calculator"
                 className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg transition-all duration-200"

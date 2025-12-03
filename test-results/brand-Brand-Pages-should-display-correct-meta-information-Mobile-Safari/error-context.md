@@ -1,0 +1,801 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "MotorOctane MotorOctane" [ref=e5]:
+        - /url: /
+        - generic [ref=e6]:
+          - img "MotorOctane" [ref=e7]
+          - generic [ref=e8]: MotorOctane
+      - generic [ref=e9]:
+        - link "Search cars" [ref=e10]:
+          - /url: /search
+          - img [ref=e11]
+        - link "Select location" [ref=e14]:
+          - /url: /location
+          - img [ref=e15]
+        - button "Open menu" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+  - generic [ref=e20]:
+    - main [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e24]:
+          - button "Close carousel" [ref=e25] [cursor=pointer]:
+            - img [ref=e26]
+          - generic [ref=e29]:
+            - generic [ref=e32]:
+              - generic [ref=e34]: LIMITED
+              - generic [ref=e35]:
+                - generic [ref=e36]:
+                  - generic [ref=e37]:
+                    - paragraph [ref=e38]: Free 40-Point Checkup
+                    - heading "Monsoon Service Camp" [level=2] [ref=e39]
+                  - paragraph [ref=e40]: Ensure your car is monsoon ready. 20% off on labor.
+                  - link "Book Service" [ref=e41]:
+                    - /url: /service
+                    - text: Book Service
+                    - img [ref=e42]
+                - img "Monsoon Service Camp" [ref=e46]
+            - generic [ref=e49]:
+              - generic [ref=e51]: LAUNCH
+              - generic [ref=e52]:
+                - generic [ref=e53]:
+                  - generic [ref=e54]:
+                    - paragraph [ref=e55]: Way Ahead
+                    - heading "New Tata Nexon" [level=2] [ref=e56]
+                  - paragraph [ref=e57]: Book now and get priority delivery + accessories worth ₹15k
+                  - link "Check Offers" [ref=e58]:
+                    - /url: /tata-cars/nexon
+                    - text: Check Offers
+                    - img [ref=e59]
+                - img "New Tata Nexon" [ref=e63]
+            - generic [ref=e66]:
+              - generic [ref=e68]: SAVE 40%
+              - generic [ref=e69]:
+                - generic [ref=e70]:
+                  - generic [ref=e71]:
+                    - paragraph [ref=e72]: Starting @ ₹2099
+                    - heading "Zero Dep Insurance" [level=2] [ref=e73]
+                  - paragraph [ref=e74]: Protect your car with comprehensive coverage. Cashless claims.
+                  - link "Get Quote" [ref=e75]:
+                    - /url: /insurance
+                    - text: Get Quote
+                    - img [ref=e76]
+                - img "Zero Dep Insurance" [ref=e80]
+            - generic [ref=e83]:
+              - generic [ref=e85]: INSTANT
+              - generic [ref=e86]:
+                - generic [ref=e87]:
+                  - generic [ref=e88]:
+                    - paragraph [ref=e89]: Best Price Guarantee
+                    - heading "Sell Your Car" [level=2] [ref=e90]
+                  - paragraph [ref=e91]: Get instant valuation and payment in 1 hour. Free RC transfer.
+                  - link "Get Value" [ref=e92]:
+                    - /url: /sell-car
+                    - text: Get Value
+                    - img [ref=e93]
+                - img "Sell Your Car" [ref=e97]
+            - generic [ref=e100]:
+              - generic [ref=e102]: OFFER
+              - generic [ref=e103]:
+                - generic [ref=e104]:
+                  - generic [ref=e105]:
+                    - paragraph [ref=e106]: Buy 3 Get 1 Free
+                    - heading "Premium Tyres" [level=2] [ref=e107]
+                  - paragraph [ref=e108]: Upgrade your ride with premium tyres. Michelin, Bridgestone & more.
+                  - link "Shop Now" [ref=e109]:
+                    - /url: /accessories/tyres
+                    - text: Shop Now
+                    - img [ref=e110]
+                - img "Premium Tyres" [ref=e114]
+          - button "Previous slide" [ref=e116] [cursor=pointer]:
+            - img [ref=e117]
+          - button "Next slide" [ref=e119] [cursor=pointer]:
+            - img [ref=e120]
+          - generic [ref=e122]:
+            - button "Go to slide 1" [ref=e123] [cursor=pointer]
+            - button "Go to slide 2" [ref=e124] [cursor=pointer]
+            - button "Go to slide 3" [ref=e125] [cursor=pointer]
+            - button "Go to slide 4" [ref=e126] [cursor=pointer]
+            - button "Go to slide 5" [ref=e127] [cursor=pointer]
+        - generic [ref=e131]:
+          - heading "Maruti Suzuki Cars" [level=1] [ref=e132]
+          - paragraph [ref=e135]:
+            - text: Maruti Suzuki India Limited is India's largest automobile manufacturer by market share, commanding over 50% of the passenger car market. Established in 1981 as a joint venture between the Government
+            - button "...read more" [ref=e136] [cursor=pointer]
+        - generic [ref=e139]:
+          - button "Petrol" [ref=e140] [cursor=pointer]
+          - button "Diesel" [ref=e141] [cursor=pointer]
+          - button "CNG" [ref=e142] [cursor=pointer]
+          - button "Electric" [ref=e143] [cursor=pointer]
+          - button "Hybrid" [ref=e144] [cursor=pointer]
+          - button "Manual" [ref=e145] [cursor=pointer]
+          - button "Automatic" [ref=e146] [cursor=pointer]
+        - paragraph [ref=e151]: No models found for Maruti Suzuki
+        - generic [ref=e153]:
+          - button "Close carousel" [ref=e154] [cursor=pointer]:
+            - img [ref=e155]
+          - generic [ref=e158]:
+            - generic [ref=e161]:
+              - generic [ref=e163]: LIMITED
+              - generic [ref=e164]:
+                - generic [ref=e165]:
+                  - generic [ref=e166]:
+                    - paragraph [ref=e167]: Free 40-Point Checkup
+                    - heading "Monsoon Service Camp" [level=2] [ref=e168]
+                  - paragraph [ref=e169]: Ensure your car is monsoon ready. 20% off on labor.
+                  - link "Book Service" [ref=e170]:
+                    - /url: /service
+                    - text: Book Service
+                    - img [ref=e171]
+                - img "Monsoon Service Camp" [ref=e175]
+            - generic [ref=e178]:
+              - generic [ref=e180]: LAUNCH
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - generic [ref=e183]:
+                    - paragraph [ref=e184]: Way Ahead
+                    - heading "New Tata Nexon" [level=2] [ref=e185]
+                  - paragraph [ref=e186]: Book now and get priority delivery + accessories worth ₹15k
+                  - link "Check Offers" [ref=e187]:
+                    - /url: /tata-cars/nexon
+                    - text: Check Offers
+                    - img [ref=e188]
+                - img "New Tata Nexon" [ref=e192]
+            - generic [ref=e195]:
+              - generic [ref=e197]: SAVE 40%
+              - generic [ref=e198]:
+                - generic [ref=e199]:
+                  - generic [ref=e200]:
+                    - paragraph [ref=e201]: Starting @ ₹2099
+                    - heading "Zero Dep Insurance" [level=2] [ref=e202]
+                  - paragraph [ref=e203]: Protect your car with comprehensive coverage. Cashless claims.
+                  - link "Get Quote" [ref=e204]:
+                    - /url: /insurance
+                    - text: Get Quote
+                    - img [ref=e205]
+                - img "Zero Dep Insurance" [ref=e209]
+            - generic [ref=e212]:
+              - generic [ref=e214]: INSTANT
+              - generic [ref=e215]:
+                - generic [ref=e216]:
+                  - generic [ref=e217]:
+                    - paragraph [ref=e218]: Best Price Guarantee
+                    - heading "Sell Your Car" [level=2] [ref=e219]
+                  - paragraph [ref=e220]: Get instant valuation and payment in 1 hour. Free RC transfer.
+                  - link "Get Value" [ref=e221]:
+                    - /url: /sell-car
+                    - text: Get Value
+                    - img [ref=e222]
+                - img "Sell Your Car" [ref=e226]
+            - generic [ref=e229]:
+              - generic [ref=e231]: OFFER
+              - generic [ref=e232]:
+                - generic [ref=e233]:
+                  - generic [ref=e234]:
+                    - paragraph [ref=e235]: Buy 3 Get 1 Free
+                    - heading "Premium Tyres" [level=2] [ref=e236]
+                  - paragraph [ref=e237]: Upgrade your ride with premium tyres. Michelin, Bridgestone & more.
+                  - link "Shop Now" [ref=e238]:
+                    - /url: /accessories/tyres
+                    - text: Shop Now
+                    - img [ref=e239]
+                - img "Premium Tyres" [ref=e243]
+          - button "Previous slide" [ref=e245] [cursor=pointer]:
+            - img [ref=e246]
+          - button "Next slide" [ref=e248] [cursor=pointer]:
+            - img [ref=e249]
+          - generic [ref=e251]:
+            - button "Go to slide 1" [ref=e252] [cursor=pointer]
+            - button "Go to slide 2" [ref=e253] [cursor=pointer]
+            - button "Go to slide 3" [ref=e254] [cursor=pointer]
+            - button "Go to slide 4" [ref=e255] [cursor=pointer]
+            - button "Go to slide 5" [ref=e256] [cursor=pointer]
+        - generic [ref=e260]:
+          - button "Close carousel" [ref=e261] [cursor=pointer]:
+            - img [ref=e262]
+          - generic [ref=e265]:
+            - generic [ref=e268]:
+              - generic [ref=e270]: LIMITED
+              - generic [ref=e271]:
+                - generic [ref=e272]:
+                  - generic [ref=e273]:
+                    - paragraph [ref=e274]: Free 40-Point Checkup
+                    - heading "Monsoon Service Camp" [level=2] [ref=e275]
+                  - paragraph [ref=e276]: Ensure your car is monsoon ready. 20% off on labor.
+                  - link "Book Service" [ref=e277]:
+                    - /url: /service
+                    - text: Book Service
+                    - img [ref=e278]
+                - img "Monsoon Service Camp" [ref=e282]
+            - generic [ref=e285]:
+              - generic [ref=e287]: LAUNCH
+              - generic [ref=e288]:
+                - generic [ref=e289]:
+                  - generic [ref=e290]:
+                    - paragraph [ref=e291]: Way Ahead
+                    - heading "New Tata Nexon" [level=2] [ref=e292]
+                  - paragraph [ref=e293]: Book now and get priority delivery + accessories worth ₹15k
+                  - link "Check Offers" [ref=e294]:
+                    - /url: /tata-cars/nexon
+                    - text: Check Offers
+                    - img [ref=e295]
+                - img "New Tata Nexon" [ref=e299]
+            - generic [ref=e302]:
+              - generic [ref=e304]: SAVE 40%
+              - generic [ref=e305]:
+                - generic [ref=e306]:
+                  - generic [ref=e307]:
+                    - paragraph [ref=e308]: Starting @ ₹2099
+                    - heading "Zero Dep Insurance" [level=2] [ref=e309]
+                  - paragraph [ref=e310]: Protect your car with comprehensive coverage. Cashless claims.
+                  - link "Get Quote" [ref=e311]:
+                    - /url: /insurance
+                    - text: Get Quote
+                    - img [ref=e312]
+                - img "Zero Dep Insurance" [ref=e316]
+            - generic [ref=e319]:
+              - generic [ref=e321]: INSTANT
+              - generic [ref=e322]:
+                - generic [ref=e323]:
+                  - generic [ref=e324]:
+                    - paragraph [ref=e325]: Best Price Guarantee
+                    - heading "Sell Your Car" [level=2] [ref=e326]
+                  - paragraph [ref=e327]: Get instant valuation and payment in 1 hour. Free RC transfer.
+                  - link "Get Value" [ref=e328]:
+                    - /url: /sell-car
+                    - text: Get Value
+                    - img [ref=e329]
+                - img "Sell Your Car" [ref=e333]
+            - generic [ref=e336]:
+              - generic [ref=e338]: OFFER
+              - generic [ref=e339]:
+                - generic [ref=e340]:
+                  - generic [ref=e341]:
+                    - paragraph [ref=e342]: Buy 3 Get 1 Free
+                    - heading "Premium Tyres" [level=2] [ref=e343]
+                  - paragraph [ref=e344]: Upgrade your ride with premium tyres. Michelin, Bridgestone & more.
+                  - link "Shop Now" [ref=e345]:
+                    - /url: /accessories/tyres
+                    - text: Shop Now
+                    - img [ref=e346]
+                - img "Premium Tyres" [ref=e350]
+          - button "Previous slide" [ref=e352] [cursor=pointer]:
+            - img [ref=e353]
+          - button "Next slide" [ref=e355] [cursor=pointer]:
+            - img [ref=e356]
+          - generic [ref=e358]:
+            - button "Go to slide 1" [ref=e359] [cursor=pointer]
+            - button "Go to slide 2" [ref=e360] [cursor=pointer]
+            - button "Go to slide 3" [ref=e361] [cursor=pointer]
+            - button "Go to slide 4" [ref=e362] [cursor=pointer]
+            - button "Go to slide 5" [ref=e363] [cursor=pointer]
+        - generic [ref=e367]:
+          - heading "Alternative Brands" [level=2] [ref=e368]
+          - button "Show All 0 Brands" [ref=e370] [cursor=pointer]:
+            - img [ref=e371]
+            - generic [ref=e373]: Show All 0 Brands
+        - heading "Maruti Suzuki Videos" [level=2] [ref=e378]
+        - generic [ref=e394]:
+          - button "Close carousel" [ref=e395] [cursor=pointer]:
+            - img [ref=e396]
+          - generic [ref=e399]:
+            - generic [ref=e402]:
+              - generic [ref=e404]: LIMITED
+              - generic [ref=e405]:
+                - generic [ref=e406]:
+                  - generic [ref=e407]:
+                    - paragraph [ref=e408]: Free 40-Point Checkup
+                    - heading "Monsoon Service Camp" [level=2] [ref=e409]
+                  - paragraph [ref=e410]: Ensure your car is monsoon ready. 20% off on labor.
+                  - link "Book Service" [ref=e411]:
+                    - /url: /service
+                    - text: Book Service
+                    - img [ref=e412]
+                - img "Monsoon Service Camp" [ref=e416]
+            - generic [ref=e419]:
+              - generic [ref=e421]: LAUNCH
+              - generic [ref=e422]:
+                - generic [ref=e423]:
+                  - generic [ref=e424]:
+                    - paragraph [ref=e425]: Way Ahead
+                    - heading "New Tata Nexon" [level=2] [ref=e426]
+                  - paragraph [ref=e427]: Book now and get priority delivery + accessories worth ₹15k
+                  - link "Check Offers" [ref=e428]:
+                    - /url: /tata-cars/nexon
+                    - text: Check Offers
+                    - img [ref=e429]
+                - img "New Tata Nexon" [ref=e433]
+            - generic [ref=e436]:
+              - generic [ref=e438]: SAVE 40%
+              - generic [ref=e439]:
+                - generic [ref=e440]:
+                  - generic [ref=e441]:
+                    - paragraph [ref=e442]: Starting @ ₹2099
+                    - heading "Zero Dep Insurance" [level=2] [ref=e443]
+                  - paragraph [ref=e444]: Protect your car with comprehensive coverage. Cashless claims.
+                  - link "Get Quote" [ref=e445]:
+                    - /url: /insurance
+                    - text: Get Quote
+                    - img [ref=e446]
+                - img "Zero Dep Insurance" [ref=e450]
+            - generic [ref=e453]:
+              - generic [ref=e455]: INSTANT
+              - generic [ref=e456]:
+                - generic [ref=e457]:
+                  - generic [ref=e458]:
+                    - paragraph [ref=e459]: Best Price Guarantee
+                    - heading "Sell Your Car" [level=2] [ref=e460]
+                  - paragraph [ref=e461]: Get instant valuation and payment in 1 hour. Free RC transfer.
+                  - link "Get Value" [ref=e462]:
+                    - /url: /sell-car
+                    - text: Get Value
+                    - img [ref=e463]
+                - img "Sell Your Car" [ref=e467]
+            - generic [ref=e470]:
+              - generic [ref=e472]: OFFER
+              - generic [ref=e473]:
+                - generic [ref=e474]:
+                  - generic [ref=e475]:
+                    - paragraph [ref=e476]: Buy 3 Get 1 Free
+                    - heading "Premium Tyres" [level=2] [ref=e477]
+                  - paragraph [ref=e478]: Upgrade your ride with premium tyres. Michelin, Bridgestone & more.
+                  - link "Shop Now" [ref=e479]:
+                    - /url: /accessories/tyres
+                    - text: Shop Now
+                    - img [ref=e480]
+                - img "Premium Tyres" [ref=e484]
+          - button "Previous slide" [ref=e486] [cursor=pointer]:
+            - img [ref=e487]
+          - button "Next slide" [ref=e489] [cursor=pointer]:
+            - img [ref=e490]
+          - generic [ref=e492]:
+            - button "Go to slide 1" [ref=e493] [cursor=pointer]
+            - button "Go to slide 2" [ref=e494] [cursor=pointer]
+            - button "Go to slide 3" [ref=e495] [cursor=pointer]
+            - button "Go to slide 4" [ref=e496] [cursor=pointer]
+            - button "Go to slide 5" [ref=e497] [cursor=pointer]
+        - generic [ref=e501]:
+          - generic [ref=e502]:
+            - heading "Maruti Suzuki FAQ" [level=2] [ref=e503]
+            - paragraph [ref=e504]: No FAQs available
+          - paragraph [ref=e506]: No FAQs available for Maruti Suzuki yet. Check back soon for answers to common questions!
+        - generic [ref=e508]:
+          - heading "Maruti Suzuki Owner Reviews" [level=2] [ref=e509]
+          - generic [ref=e510]:
+            - generic [ref=e512]:
+              - img [ref=e513]
+              - img [ref=e515]
+              - img [ref=e517]
+              - img [ref=e519]
+              - img [ref=e521]
+              - generic [ref=e523]: "4.2"
+              - generic [ref=e524]: (1,543 reviews)
+            - generic [ref=e525]:
+              - heading "Rating Breakdown" [level=3] [ref=e526]
+              - generic [ref=e527]:
+                - generic [ref=e528]:
+                  - generic [ref=e529]: 5★
+                  - generic [ref=e532]: "856"
+                - generic [ref=e533]:
+                  - generic [ref=e534]: 4★
+                  - generic [ref=e537]: "324"
+                - generic [ref=e538]:
+                  - generic [ref=e539]: 3★
+                  - generic [ref=e542]: "189"
+                - generic [ref=e543]:
+                  - generic [ref=e544]: 2★
+                  - generic [ref=e547]: "26"
+                - generic [ref=e548]:
+                  - generic [ref=e549]: 1★
+                  - generic [ref=e552]: "13"
+            - generic [ref=e553]:
+              - generic [ref=e554]:
+                - generic [ref=e555]: "Filter by rating:"
+                - combobox [ref=e556]:
+                  - option "All Ratings" [selected]
+                  - option "5 Stars"
+                  - option "4 Stars"
+                  - option "3 Stars"
+                  - option "2 Stars"
+                  - option "1 Star"
+              - generic [ref=e557]:
+                - generic [ref=e558]: "Sort by:"
+                - combobox [ref=e559]:
+                  - option "Most Recent" [selected]
+                  - option "Most Helpful"
+                  - option "Highest Rating"
+                  - option "Lowest Rating"
+            - generic [ref=e560]:
+              - generic [ref=e562]:
+                - generic [ref=e564]: R
+                - generic [ref=e565]:
+                  - generic [ref=e566]:
+                    - generic [ref=e567]:
+                      - heading "Rajesh Kumar" [level=4] [ref=e568]:
+                        - text: Rajesh Kumar
+                        - img [ref=e569]
+                      - paragraph [ref=e571]: 15/01/2024
+                    - generic [ref=e572]:
+                      - img [ref=e573]
+                      - img [ref=e575]
+                      - img [ref=e577]
+                      - img [ref=e579]
+                      - img [ref=e581]
+                  - heading "Excellent car with great mileage" [level=5] [ref=e583]
+                  - paragraph [ref=e584]: I have been using this car for 6 months now. The mileage is excellent in city conditions. Build quality is good and maintenance cost is reasonable.
+                  - generic [ref=e585]:
+                    - button "24" [ref=e586] [cursor=pointer]:
+                      - img [ref=e587]
+                      - text: "24"
+                    - button "2" [ref=e589] [cursor=pointer]:
+                      - img [ref=e590]
+                      - text: "2"
+              - generic [ref=e593]:
+                - generic [ref=e595]: P
+                - generic [ref=e596]:
+                  - generic [ref=e597]:
+                    - generic [ref=e598]:
+                      - heading "Priya Sharma" [level=4] [ref=e599]:
+                        - text: Priya Sharma
+                        - img [ref=e600]
+                      - paragraph [ref=e602]: 12/01/2024
+                    - generic [ref=e603]:
+                      - img [ref=e604]
+                      - img [ref=e606]
+                      - img [ref=e608]
+                      - img [ref=e610]
+                      - img [ref=e612]
+                  - heading "Good family car" [level=5] [ref=e614]
+                  - paragraph [ref=e615]: Perfect for family use. Spacious interior and comfortable seats. Only issue is the road noise at high speeds.
+                  - generic [ref=e616]:
+                    - button "18" [ref=e617] [cursor=pointer]:
+                      - img [ref=e618]
+                      - text: "18"
+                    - button "1" [ref=e620] [cursor=pointer]:
+                      - img [ref=e621]
+                      - text: "1"
+            - button "Read More" [ref=e624] [cursor=pointer]
+            - generic [ref=e625]:
+              - heading "Own a maruti suzuki car? Share your experience!" [level=3] [ref=e626]
+              - paragraph [ref=e627]: Help other buyers make informed decisions by sharing your honest review
+              - button "Write a Review" [ref=e628] [cursor=pointer]
+      - generic [ref=e631]:
+        - button "Petrol" [ref=e632] [cursor=pointer]
+        - button "Diesel" [ref=e633] [cursor=pointer]
+        - button "CNG" [ref=e634] [cursor=pointer]
+        - button "Electric" [ref=e635] [cursor=pointer]
+        - button "Hybrid" [ref=e636] [cursor=pointer]
+        - button "Manual" [ref=e637] [cursor=pointer]
+        - button "Automatic" [ref=e638] [cursor=pointer]
+      - paragraph [ref=e643]: No models found for Maruti Suzuki
+      - heading "Compare Maruti-suzuki Cars" [level=2] [ref=e646]
+      - generic [ref=e663]:
+        - 'heading "🔥 TEST: Maruti Suzuki News Section 🔥" [level=2] [ref=e664]'
+        - paragraph [ref=e665]: If you see this, the section is rendering
+        - generic [ref=e666]:
+          - generic [ref=e667]:
+            - heading "Maruti Suzuki News" [level=2] [ref=e668]
+            - link "View All" [ref=e669]:
+              - /url: /news
+              - generic [ref=e670]: View All
+              - img [ref=e671]
+          - generic [ref=e674]:
+            - 'link "Maruti Suzuki Baleno Price Hike Expected Next Month News Maruti Suzuki Baleno Price Hike Expected Next Month Read everything about the Maruti Suzuki Baleno. {Model} Price Hike Expected Next Month - full details inside. Haji Karim • 28 Nov 1 min read 413 28" [ref=e675]':
+              - /url: /news/maruti-suzuki-baleno-price-hike-expected-next-month-507e5602
+              - generic [ref=e676]:
+                - img "Maruti Suzuki Baleno Price Hike Expected Next Month" [ref=e677]
+                - generic [ref=e678]: News
+              - generic [ref=e679]:
+                - heading "Maruti Suzuki Baleno Price Hike Expected Next Month" [level=3] [ref=e680]
+                - paragraph [ref=e681]: "Read everything about the Maruti Suzuki Baleno. {Model} Price Hike Expected Next Month - full details inside."
+                - generic [ref=e682]:
+                  - generic [ref=e683]: Haji Karim
+                  - generic [ref=e684]: •
+                  - img [ref=e685]
+                  - generic [ref=e687]: 28 Nov
+                - generic [ref=e688]:
+                  - generic [ref=e689]:
+                    - img [ref=e690]
+                    - generic [ref=e693]: 1 min read
+                  - generic [ref=e694]:
+                    - img [ref=e695]
+                    - generic [ref=e698]: "413"
+                  - generic [ref=e699]:
+                    - img [ref=e700]
+                    - generic [ref=e702]: "28"
+            - 'link "New Maruti Suzuki Fronx Facelift: What We Know So Far News New Maruti Suzuki Fronx Facelift: What We Know So Far Read everything about the Maruti Suzuki Fronx. New {Model} Facelift: What We Know So Far - full details inside. Haji Karim • 28 Nov 1 min read 40 11" [ref=e703]':
+              - /url: /news/new-maruti-suzuki-fronx-facelift-what-we-know-so-far-8cc228af
+              - generic [ref=e704]:
+                - 'img "New Maruti Suzuki Fronx Facelift: What We Know So Far" [ref=e705]'
+                - generic [ref=e706]: News
+              - generic [ref=e707]:
+                - 'heading "New Maruti Suzuki Fronx Facelift: What We Know So Far" [level=3] [ref=e708]'
+                - paragraph [ref=e709]: "Read everything about the Maruti Suzuki Fronx. New {Model} Facelift: What We Know So Far - full details inside."
+                - generic [ref=e710]:
+                  - generic [ref=e711]: Haji Karim
+                  - generic [ref=e712]: •
+                  - img [ref=e713]
+                  - generic [ref=e715]: 28 Nov
+                - generic [ref=e716]:
+                  - generic [ref=e717]:
+                    - img [ref=e718]
+                    - generic [ref=e721]: 1 min read
+                  - generic [ref=e722]:
+                    - img [ref=e723]
+                    - generic [ref=e726]: "40"
+                  - generic [ref=e727]:
+                    - img [ref=e728]
+                    - generic [ref=e730]: "11"
+            - 'link "Why the Maruti Suzuki Fronx is a Great Choice for Families News Why the Maruti Suzuki Fronx is a Great Choice for Families Read everything about the Maruti Suzuki Fronx. Why the {Model} is a Great Choice for Families - full details inside. Haji Karim • 28 Nov 1 min read 12 76" [ref=e731]':
+              - /url: /news/why-the-maruti-suzuki-fronx-is-a-great-choice-for-families-1e39018e
+              - generic [ref=e732]:
+                - img "Why the Maruti Suzuki Fronx is a Great Choice for Families" [ref=e733]
+                - generic [ref=e734]: News
+              - generic [ref=e735]:
+                - heading "Why the Maruti Suzuki Fronx is a Great Choice for Families" [level=3] [ref=e736]
+                - paragraph [ref=e737]: "Read everything about the Maruti Suzuki Fronx. Why the {Model} is a Great Choice for Families - full details inside."
+                - generic [ref=e738]:
+                  - generic [ref=e739]: Haji Karim
+                  - generic [ref=e740]: •
+                  - img [ref=e741]
+                  - generic [ref=e743]: 28 Nov
+                - generic [ref=e744]:
+                  - generic [ref=e745]:
+                    - img [ref=e746]
+                    - generic [ref=e749]: 1 min read
+                  - generic [ref=e750]:
+                    - img [ref=e751]
+                    - generic [ref=e754]: "12"
+                  - generic [ref=e755]:
+                    - img [ref=e756]
+                    - generic [ref=e758]: "76"
+            - 'link "Maruti Suzuki Fronx vs Competitors: Detailed Comparison News Maruti Suzuki Fronx vs Competitors: Detailed Comparison Read everything about the Maruti Suzuki Fronx. {Model} vs Competitors: Detailed Comparison - full details inside. Haji Karim • 28 Nov 1 min read 708 8" [ref=e759]':
+              - /url: /news/maruti-suzuki-fronx-vs-competitors-detailed-comparison-7d39bbf9
+              - generic [ref=e760]:
+                - 'img "Maruti Suzuki Fronx vs Competitors: Detailed Comparison" [ref=e761]'
+                - generic [ref=e762]: News
+              - generic [ref=e763]:
+                - 'heading "Maruti Suzuki Fronx vs Competitors: Detailed Comparison" [level=3] [ref=e764]'
+                - paragraph [ref=e765]: "Read everything about the Maruti Suzuki Fronx. {Model} vs Competitors: Detailed Comparison - full details inside."
+                - generic [ref=e766]:
+                  - generic [ref=e767]: Haji Karim
+                  - generic [ref=e768]: •
+                  - img [ref=e769]
+                  - generic [ref=e771]: 28 Nov
+                - generic [ref=e772]:
+                  - generic [ref=e773]:
+                    - img [ref=e774]
+                    - generic [ref=e777]: 1 min read
+                  - generic [ref=e778]:
+                    - img [ref=e779]
+                    - generic [ref=e782]: "708"
+                  - generic [ref=e783]:
+                    - img [ref=e784]
+                    - generic [ref=e786]: "8"
+            - 'link "Maruti Suzuki Fronx Price Hike Expected Next Month News Maruti Suzuki Fronx Price Hike Expected Next Month Read everything about the Maruti Suzuki Fronx. {Model} Price Hike Expected Next Month - full details inside. Haji Karim • 28 Nov 1 min read 679 20" [ref=e787]':
+              - /url: /news/maruti-suzuki-fronx-price-hike-expected-next-month-55774c7a
+              - generic [ref=e788]:
+                - img "Maruti Suzuki Fronx Price Hike Expected Next Month" [ref=e789]
+                - generic [ref=e790]: News
+              - generic [ref=e791]:
+                - heading "Maruti Suzuki Fronx Price Hike Expected Next Month" [level=3] [ref=e792]
+                - paragraph [ref=e793]: "Read everything about the Maruti Suzuki Fronx. {Model} Price Hike Expected Next Month - full details inside."
+                - generic [ref=e794]:
+                  - generic [ref=e795]: Haji Karim
+                  - generic [ref=e796]: •
+                  - img [ref=e797]
+                  - generic [ref=e799]: 28 Nov
+                - generic [ref=e800]:
+                  - generic [ref=e801]:
+                    - img [ref=e802]
+                    - generic [ref=e805]: 1 min read
+                  - generic [ref=e806]:
+                    - img [ref=e807]
+                    - generic [ref=e810]: "679"
+                  - generic [ref=e811]:
+                    - img [ref=e812]
+                    - generic [ref=e814]: "20"
+            - 'link "New Maruti Suzuki Grand Vitara Facelift: What We Know So Far News New Maruti Suzuki Grand Vitara Facelift: What We Know So Far Read everything about the Maruti Suzuki Grand Vitara. New {Model} Facelift: What We Know So Far - full details inside. Haji Karim • 28 Nov 1 min read 191 24" [ref=e815]':
+              - /url: /news/new-maruti-suzuki-grand-vitara-facelift-what-we-know-so-far-e87935ab
+              - generic [ref=e816]:
+                - 'img "New Maruti Suzuki Grand Vitara Facelift: What We Know So Far" [ref=e817]'
+                - generic [ref=e818]: News
+              - generic [ref=e819]:
+                - 'heading "New Maruti Suzuki Grand Vitara Facelift: What We Know So Far" [level=3] [ref=e820]'
+                - paragraph [ref=e821]: "Read everything about the Maruti Suzuki Grand Vitara. New {Model} Facelift: What We Know So Far - full details inside."
+                - generic [ref=e822]:
+                  - generic [ref=e823]: Haji Karim
+                  - generic [ref=e824]: •
+                  - img [ref=e825]
+                  - generic [ref=e827]: 28 Nov
+                - generic [ref=e828]:
+                  - generic [ref=e829]:
+                    - img [ref=e830]
+                    - generic [ref=e833]: 1 min read
+                  - generic [ref=e834]:
+                    - img [ref=e835]
+                    - generic [ref=e838]: "191"
+                  - generic [ref=e839]:
+                    - img [ref=e840]
+                    - generic [ref=e842]: "24"
+            - 'link "Why the Maruti Suzuki Grand Vitara is a Great Choice for Families News Why the Maruti Suzuki Grand Vitara is a Great Choice for Families Read everything about the Maruti Suzuki Grand Vitara. Why the {Model} is a Great Choice for Families - full details inside. Haji Karim • 28 Nov 1 min read 800 40" [ref=e843]':
+              - /url: /news/why-the-maruti-suzuki-grand-vitara-is-a-great-choice-for-families-31ff46b2
+              - generic [ref=e844]:
+                - img "Why the Maruti Suzuki Grand Vitara is a Great Choice for Families" [ref=e845]
+                - generic [ref=e846]: News
+              - generic [ref=e847]:
+                - heading "Why the Maruti Suzuki Grand Vitara is a Great Choice for Families" [level=3] [ref=e848]
+                - paragraph [ref=e849]: "Read everything about the Maruti Suzuki Grand Vitara. Why the {Model} is a Great Choice for Families - full details inside."
+                - generic [ref=e850]:
+                  - generic [ref=e851]: Haji Karim
+                  - generic [ref=e852]: •
+                  - img [ref=e853]
+                  - generic [ref=e855]: 28 Nov
+                - generic [ref=e856]:
+                  - generic [ref=e857]:
+                    - img [ref=e858]
+                    - generic [ref=e861]: 1 min read
+                  - generic [ref=e862]:
+                    - img [ref=e863]
+                    - generic [ref=e866]: "800"
+                  - generic [ref=e867]:
+                    - img [ref=e868]
+                    - generic [ref=e870]: "40"
+            - 'link "Maruti Suzuki Grand Vitara vs Competitors: Detailed Comparison News Maruti Suzuki Grand Vitara vs Competitors: Detailed Comparison Read everything about the Maruti Suzuki Grand Vitara. {Model} vs Competitors: Detailed Comparison - full details inside. Haji Karim • 28 Nov 1 min read 482 1" [ref=e871]':
+              - /url: /news/maruti-suzuki-grand-vitara-vs-competitors-detailed-comparison-58d7bc35
+              - generic [ref=e872]:
+                - 'img "Maruti Suzuki Grand Vitara vs Competitors: Detailed Comparison" [ref=e873]'
+                - generic [ref=e874]: News
+              - generic [ref=e875]:
+                - 'heading "Maruti Suzuki Grand Vitara vs Competitors: Detailed Comparison" [level=3] [ref=e876]'
+                - paragraph [ref=e877]: "Read everything about the Maruti Suzuki Grand Vitara. {Model} vs Competitors: Detailed Comparison - full details inside."
+                - generic [ref=e878]:
+                  - generic [ref=e879]: Haji Karim
+                  - generic [ref=e880]: •
+                  - img [ref=e881]
+                  - generic [ref=e883]: 28 Nov
+                - generic [ref=e884]:
+                  - generic [ref=e885]:
+                    - img [ref=e886]
+                    - generic [ref=e889]: 1 min read
+                  - generic [ref=e890]:
+                    - img [ref=e891]
+                    - generic [ref=e894]: "482"
+                  - generic [ref=e895]:
+                    - img [ref=e896]
+                    - generic [ref=e898]: "1"
+            - 'link "Maruti Suzuki Grand Vitara Price Hike Expected Next Month News Maruti Suzuki Grand Vitara Price Hike Expected Next Month Read everything about the Maruti Suzuki Grand Vitara. {Model} Price Hike Expected Next Month - full details inside. Haji Karim • 28 Nov 1 min read 707 38" [ref=e899]':
+              - /url: /news/maruti-suzuki-grand-vitara-price-hike-expected-next-month-9aaa5d5b
+              - generic [ref=e900]:
+                - img "Maruti Suzuki Grand Vitara Price Hike Expected Next Month" [ref=e901]
+                - generic [ref=e902]: News
+              - generic [ref=e903]:
+                - heading "Maruti Suzuki Grand Vitara Price Hike Expected Next Month" [level=3] [ref=e904]
+                - paragraph [ref=e905]: "Read everything about the Maruti Suzuki Grand Vitara. {Model} Price Hike Expected Next Month - full details inside."
+                - generic [ref=e906]:
+                  - generic [ref=e907]: Haji Karim
+                  - generic [ref=e908]: •
+                  - img [ref=e909]
+                  - generic [ref=e911]: 28 Nov
+                - generic [ref=e912]:
+                  - generic [ref=e913]:
+                    - img [ref=e914]
+                    - generic [ref=e917]: 1 min read
+                  - generic [ref=e918]:
+                    - img [ref=e919]
+                    - generic [ref=e922]: "707"
+                  - generic [ref=e923]:
+                    - img [ref=e924]
+                    - generic [ref=e926]: "38"
+            - 'link "New Maruti Suzuki XL6 Facelift: What We Know So Far News New Maruti Suzuki XL6 Facelift: What We Know So Far Read everything about the Maruti Suzuki XL6. New {Model} Facelift: What We Know So Far - full details inside. Haji Karim • 28 Nov 1 min read 665 11" [ref=e927]':
+              - /url: /news/new-maruti-suzuki-xl6-facelift-what-we-know-so-far-785dda30
+              - generic [ref=e928]:
+                - 'img "New Maruti Suzuki XL6 Facelift: What We Know So Far" [ref=e929]'
+                - generic [ref=e930]: News
+              - generic [ref=e931]:
+                - 'heading "New Maruti Suzuki XL6 Facelift: What We Know So Far" [level=3] [ref=e932]'
+                - paragraph [ref=e933]: "Read everything about the Maruti Suzuki XL6. New {Model} Facelift: What We Know So Far - full details inside."
+                - generic [ref=e934]:
+                  - generic [ref=e935]: Haji Karim
+                  - generic [ref=e936]: •
+                  - img [ref=e937]
+                  - generic [ref=e939]: 28 Nov
+                - generic [ref=e940]:
+                  - generic [ref=e941]:
+                    - img [ref=e942]
+                    - generic [ref=e945]: 1 min read
+                  - generic [ref=e946]:
+                    - img [ref=e947]
+                    - generic [ref=e950]: "665"
+                  - generic [ref=e951]:
+                    - img [ref=e952]
+                    - generic [ref=e954]: "11"
+    - contentinfo [ref=e955]:
+      - generic [ref=e956]:
+        - generic [ref=e957]:
+          - generic [ref=e958]:
+            - link "MotorOctane - Aapka Auto Expert MotorOctane" [ref=e959]:
+              - /url: /
+              - img "MotorOctane - Aapka Auto Expert" [ref=e960]
+              - generic [ref=e961]: MotorOctane
+            - paragraph [ref=e962]: Your trusted partner for finding the perfect new car in India. Compare prices, specifications, reviews, and get the best deals from authorized dealers.
+            - generic [ref=e963]:
+              - link "Follow us on Facebook" [ref=e964]:
+                - /url: https://facebook.com/motoroctane
+                - img [ref=e965]
+              - link "Follow us on Twitter" [ref=e967]:
+                - /url: https://twitter.com/motoroctane
+                - img [ref=e968]
+              - link "Follow us on Instagram" [ref=e970]:
+                - /url: https://instagram.com/motoroctane
+                - img [ref=e971]
+              - link "Subscribe to our YouTube channel" [ref=e974]:
+                - /url: https://youtube.com/motoroctane
+                - img [ref=e975]
+          - generic [ref=e978]:
+            - heading "Quick Links" [level=3] [ref=e979]
+            - list [ref=e980]:
+              - listitem [ref=e981]:
+                - link "New Cars" [ref=e982]:
+                  - /url: /new-cars
+              - listitem [ref=e983]:
+                - link "Compare Cars" [ref=e984]:
+                  - /url: /compare
+              - listitem [ref=e985]:
+                - link "Car Brands" [ref=e986]:
+                  - /url: /brands
+              - listitem [ref=e987]:
+                - link "EMI Calculator" [ref=e988]:
+                  - /url: /emi-calculator
+              - listitem [ref=e989]:
+                - link "Car News" [ref=e990]:
+                  - /url: /news
+          - generic [ref=e991]:
+            - heading "Popular Brands" [level=3] [ref=e992]
+            - list [ref=e993]:
+              - listitem [ref=e994]:
+                - link "Maruti Suzuki" [ref=e995]:
+                  - /url: /cars/maruti-suzuki
+              - listitem [ref=e996]:
+                - link "Hyundai" [ref=e997]:
+                  - /url: /cars/hyundai
+              - listitem [ref=e998]:
+                - link "Tata" [ref=e999]:
+                  - /url: /cars/tata
+              - listitem [ref=e1000]:
+                - link "Mahindra" [ref=e1001]:
+                  - /url: /cars/mahindra
+              - listitem [ref=e1002]:
+                - link "Kia" [ref=e1003]:
+                  - /url: /cars/kia
+          - generic [ref=e1004]:
+            - heading "Contact Us" [level=3] [ref=e1005]
+            - generic [ref=e1006]:
+              - generic [ref=e1007]:
+                - img [ref=e1008]
+                - link "info@motoroctane.com" [ref=e1011]:
+                  - /url: mailto:info@motoroctane.com
+              - generic [ref=e1012]:
+                - img [ref=e1013]
+                - link "+91 98765 43210" [ref=e1015]:
+                  - /url: tel:+919876543210
+              - generic [ref=e1016]:
+                - img [ref=e1017]
+                - generic [ref=e1020]:
+                  - text: MotorOctane Technologies Pvt. Ltd.
+                  - text: Cyber City, Gurgaon, Haryana 122002
+        - generic [ref=e1022]:
+          - paragraph [ref=e1023]: © 2024 MotorOctane. All rights reserved.
+          - generic [ref=e1024]:
+            - link "Privacy Policy" [ref=e1025]:
+              - /url: /privacy-policy
+            - link "Terms of Service" [ref=e1026]:
+              - /url: /terms-of-service
+            - link "About Us" [ref=e1027]:
+              - /url: /about
+            - link "Contact" [ref=e1028]:
+              - /url: /contact
+```

@@ -1,0 +1,49 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "MotorOctane MotorOctane" [ref=e5]:
+        - /url: /
+        - generic [ref=e6]:
+          - img "MotorOctane" [ref=e7]
+          - generic [ref=e8]: MotorOctane
+      - generic [ref=e9]:
+        - link "Search cars" [ref=e10]:
+          - /url: /search
+          - img [ref=e11]
+        - link "Select location" [ref=e14]:
+          - /url: /location
+          - img [ref=e15]
+        - button "Open menu" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+  - generic [ref=e20]:
+    - generic [ref=e21]:
+      - heading "Sign in to your Account" [level=1] [ref=e22]
+      - paragraph [ref=e23]: Enter your email and password to log in
+    - generic [ref=e25]:
+      - button "Continue with Google" [ref=e26] [cursor=pointer]:
+        - img [ref=e27]
+        - generic [ref=e32]: Continue with Google
+      - generic [ref=e37]: Or
+      - textbox "Loisbecket@gmail.com" [ref=e39]
+      - generic [ref=e40]:
+        - textbox "********" [ref=e41]
+        - button [ref=e42] [cursor=pointer]:
+          - img [ref=e43]
+      - generic [ref=e46]:
+        - generic [ref=e47] [cursor=pointer]:
+          - checkbox "Remember me" [ref=e48]
+          - generic [ref=e49]: Remember me
+        - link "Forgot Password?" [ref=e50]:
+          - /url: /forgot-password
+      - button "Log In" [ref=e51] [cursor=pointer]
+      - paragraph [ref=e52]:
+        - text: Don't have an account?
+        - link "Sign Up" [ref=e53]:
+          - /url: /signup
+  - button "Open Next.js Dev Tools" [ref=e59] [cursor=pointer]:
+    - img [ref=e60]
+  - alert [ref=e65]
+```

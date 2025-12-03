@@ -1,0 +1,41 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "MotorOctane MotorOctane" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img "MotorOctane" [ref=e7]
+          - generic [ref=e8]: MotorOctane
+      - generic [ref=e9]:
+        - link "Search cars" [ref=e10] [cursor=pointer]:
+          - /url: /search
+          - img [ref=e11]
+        - link "Select location" [ref=e14] [cursor=pointer]:
+          - /url: /location
+          - img [ref=e15]
+        - button "Open menu" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+  - generic [ref=e20]:
+    - generic [ref=e23]:
+      - button "Go back" [ref=e24] [cursor=pointer]:
+        - img [ref=e25]
+      - generic [ref=e27]:
+        - img [ref=e28]
+        - textbox "Search for cars..." [active] [ref=e31]
+    - generic [ref=e33]:
+      - img [ref=e35]
+      - heading "Search for Cars" [level=2] [ref=e38]
+      - paragraph [ref=e39]: Find cars by name, brand, or model
+      - generic [ref=e40]:
+        - heading "Popular Searches" [level=3] [ref=e41]
+        - generic [ref=e42]:
+          - button "Honda Amaze" [ref=e43] [cursor=pointer]
+          - button "Hyundai Creta" [ref=e44] [cursor=pointer]
+          - button "Maruti Swift" [ref=e45] [cursor=pointer]
+          - button "Tata Nexon" [ref=e46] [cursor=pointer]
+          - button "Mahindra Scorpio" [ref=e47] [cursor=pointer]
+  - alert [ref=e48]
+```

@@ -1,0 +1,1993 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "MotorOctane MotorOctane" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img "MotorOctane" [ref=e7]
+          - generic [ref=e8]: MotorOctane
+      - generic [ref=e9]:
+        - link "Search cars" [ref=e10] [cursor=pointer]:
+          - /url: /search
+          - img [ref=e11]
+        - link "Select location" [ref=e14] [cursor=pointer]:
+          - /url: /location
+          - img [ref=e15]
+        - button "Open menu" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+  - generic [ref=e20]:
+    - main [ref=e21]:
+      - generic [ref=e23]:
+        - button "Close carousel" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+        - generic [ref=e28]:
+          - generic [ref=e31]:
+            - generic [ref=e33]: LIMITED
+            - generic [ref=e34]:
+              - generic [ref=e35]:
+                - generic [ref=e36]:
+                  - paragraph [ref=e37]: Free 40-Point Checkup
+                  - heading "Monsoon Service Camp" [level=2] [ref=e38]
+                - paragraph [ref=e39]: Ensure your car is monsoon ready. 20% off on labor.
+                - link "Book Service" [ref=e40] [cursor=pointer]:
+                  - /url: /service
+                  - text: Book Service
+                  - img [ref=e41]
+              - img "Monsoon Service Camp" [ref=e45]
+          - generic [ref=e48]:
+            - generic [ref=e50]: LAUNCH
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - generic [ref=e53]:
+                  - paragraph [ref=e54]: Way Ahead
+                  - heading "New Tata Nexon" [level=2] [ref=e55]
+                - paragraph [ref=e56]: Book now and get priority delivery + accessories worth ₹15k
+                - link "Check Offers" [ref=e57] [cursor=pointer]:
+                  - /url: /tata-cars/nexon
+                  - text: Check Offers
+                  - img [ref=e58]
+              - img "New Tata Nexon" [ref=e62]
+          - generic [ref=e65]:
+            - generic [ref=e67]: SAVE 40%
+            - generic [ref=e68]:
+              - generic [ref=e69]:
+                - generic [ref=e70]:
+                  - paragraph [ref=e71]: Starting @ ₹2099
+                  - heading "Zero Dep Insurance" [level=2] [ref=e72]
+                - paragraph [ref=e73]: Protect your car with comprehensive coverage. Cashless claims.
+                - link "Get Quote" [ref=e74] [cursor=pointer]:
+                  - /url: /insurance
+                  - text: Get Quote
+                  - img [ref=e75]
+              - img "Zero Dep Insurance" [ref=e79]
+          - generic [ref=e82]:
+            - generic [ref=e84]: INSTANT
+            - generic [ref=e85]:
+              - generic [ref=e86]:
+                - generic [ref=e87]:
+                  - paragraph [ref=e88]: Best Price Guarantee
+                  - heading "Sell Your Car" [level=2] [ref=e89]
+                - paragraph [ref=e90]: Get instant valuation and payment in 1 hour. Free RC transfer.
+                - link "Get Value" [ref=e91] [cursor=pointer]:
+                  - /url: /sell-car
+                  - text: Get Value
+                  - img [ref=e92]
+              - img "Sell Your Car" [ref=e96]
+          - generic [ref=e99]:
+            - generic [ref=e101]: OFFER
+            - generic [ref=e102]:
+              - generic [ref=e103]:
+                - generic [ref=e104]:
+                  - paragraph [ref=e105]: Buy 3 Get 1 Free
+                  - heading "Premium Tyres" [level=2] [ref=e106]
+                - paragraph [ref=e107]: Upgrade your ride with premium tyres. Michelin, Bridgestone & more.
+                - link "Shop Now" [ref=e108] [cursor=pointer]:
+                  - /url: /accessories/tyres
+                  - text: Shop Now
+                  - img [ref=e109]
+              - img "Premium Tyres" [ref=e113]
+        - button "Previous slide" [ref=e115] [cursor=pointer]:
+          - img [ref=e116]
+        - button "Next slide" [ref=e118] [cursor=pointer]:
+          - img [ref=e119]
+        - generic [ref=e121]:
+          - button "Go to slide 1" [ref=e122] [cursor=pointer]
+          - button "Go to slide 2" [ref=e123] [cursor=pointer]
+          - button "Go to slide 3" [ref=e124] [cursor=pointer]
+          - button "Go to slide 4" [ref=e125] [cursor=pointer]
+          - button "Go to slide 5" [ref=e126] [cursor=pointer]
+      - generic [ref=e130]:
+        - heading "Find Your Perfect Car" [level=1] [ref=e132]
+        - generic [ref=e134]:
+          - generic [ref=e135]:
+            - textbox "Search for cars with AI" [ref=e136] [cursor=pointer]:
+              - /placeholder: Best car for family under 15 lakhs
+            - button "Voice search" [ref=e138] [cursor=pointer]:
+              - img [ref=e139]
+          - button "Start AI Search" [ref=e142] [cursor=pointer]:
+            - img [ref=e143]
+            - generic [ref=e146]: Start AI Search
+          - paragraph [ref=e147]: Our AI will ask you a few questions to find your perfect match
+      - generic [ref=e150]:
+        - heading "Cars by Budget" [level=2] [ref=e151]
+        - generic [ref=e152]:
+          - button "Under ₹8 Lakh" [ref=e153] [cursor=pointer]
+          - button "Under ₹15 Lakh" [ref=e154] [cursor=pointer]
+          - button "Under ₹25 Lakh" [ref=e155] [cursor=pointer]
+          - button "Under ₹50 Lakh" [ref=e156] [cursor=pointer]
+          - button "Above ₹50 Lakh" [ref=e157] [cursor=pointer]
+        - generic [ref=e160]:
+          - generic [ref=e161] [cursor=pointer]:
+            - generic [ref=e162]:
+              - generic [ref=e163]: NEW
+              - button [ref=e164]:
+                - img [ref=e165]
+              - img "Maruti Suzuki Swift" [ref=e168]
+            - generic [ref=e169]:
+              - heading "Maruti Suzuki Swift" [level=3] [ref=e170]
+              - generic [ref=e171]:
+                - generic [ref=e172]:
+                  - generic [ref=e173]: ₹ 5.50 Lakh
+                  - generic [ref=e174]: Onwards
+                - generic [ref=e175]: Ex-Showroom Price
+              - generic [ref=e176]:
+                - generic [ref=e177]:
+                  - img [ref=e178]
+                  - generic [ref=e181]: Petrol/CNG
+                - generic [ref=e182]:
+                  - img [ref=e183]
+                  - generic [ref=e186]: Manual/Automatic
+              - button "View Details" [ref=e187]
+          - generic [ref=e188] [cursor=pointer]:
+            - generic [ref=e189]:
+              - generic [ref=e190]: POPULAR
+              - button [ref=e191]:
+                - img [ref=e192]
+              - img "Maruti Suzuki Eeco" [ref=e195]
+            - generic [ref=e196]:
+              - heading "Maruti Suzuki Eeco" [level=3] [ref=e197]
+              - generic [ref=e198]:
+                - generic [ref=e199]:
+                  - generic [ref=e200]: ₹ 7.50 Lakh
+                  - generic [ref=e201]: Onwards
+                - generic [ref=e202]: Ex-Showroom Price
+              - generic [ref=e203]:
+                - generic [ref=e204]:
+                  - img [ref=e205]
+                  - generic [ref=e208]: Petrol/CNG
+                - generic [ref=e209]:
+                  - img [ref=e210]
+                  - generic [ref=e213]: Manual
+              - button "View Details" [ref=e214]
+          - generic [ref=e215] [cursor=pointer]:
+            - generic [ref=e216]:
+              - generic [ref=e217]: POPULAR
+              - button [ref=e218]:
+                - img [ref=e219]
+              - img "Maruti Suzuki Alto K10" [ref=e222]
+            - generic [ref=e223]:
+              - heading "Maruti Suzuki Alto K10" [level=3] [ref=e224]
+              - generic [ref=e225]:
+                - generic [ref=e226]:
+                  - generic [ref=e227]: ₹ 5.50 Lakh
+                  - generic [ref=e228]: Onwards
+                - generic [ref=e229]: Ex-Showroom Price
+              - generic [ref=e230]:
+                - generic [ref=e231]:
+                  - img [ref=e232]
+                  - generic [ref=e235]: Petrol/CNG
+                - generic [ref=e236]:
+                  - img [ref=e237]
+                  - generic [ref=e240]: Manual/AMT
+              - button "View Details" [ref=e241]
+          - generic [ref=e242] [cursor=pointer]:
+            - generic [ref=e243]:
+              - generic [ref=e244]: POPULAR
+              - button [ref=e245]:
+                - img [ref=e246]
+              - img "Toyota Glanza" [ref=e249]
+            - generic [ref=e250]:
+              - heading "Toyota Glanza" [level=3] [ref=e251]
+              - generic [ref=e252]:
+                - generic [ref=e253]:
+                  - generic [ref=e254]: ₹ 5.50 Lakh
+                  - generic [ref=e255]: Onwards
+                - generic [ref=e256]: Ex-Showroom Price
+              - generic [ref=e257]:
+                - generic [ref=e258]:
+                  - img [ref=e259]
+                  - generic [ref=e262]: Petrol/CNG
+                - generic [ref=e263]:
+                  - img [ref=e264]
+                  - generic [ref=e267]: Manual/Automatic
+              - button "View Details" [ref=e268]
+          - generic [ref=e269] [cursor=pointer]:
+            - generic [ref=e270]:
+              - generic [ref=e271]: POPULAR
+              - button [ref=e272]:
+                - img [ref=e273]
+              - img "Maruti Suzuki Baleno" [ref=e276]
+            - generic [ref=e277]:
+              - heading "Maruti Suzuki Baleno" [level=3] [ref=e278]
+              - generic [ref=e279]:
+                - generic [ref=e280]:
+                  - generic [ref=e281]: ₹ 5.50 Lakh
+                  - generic [ref=e282]: Onwards
+                - generic [ref=e283]: Ex-Showroom Price
+              - generic [ref=e284]:
+                - generic [ref=e285]:
+                  - img [ref=e286]
+                  - generic [ref=e289]: Petrol/CNG
+                - generic [ref=e290]:
+                  - img [ref=e291]
+                  - generic [ref=e294]: Manual/Automatic
+              - button "View Details" [ref=e295]
+          - generic [ref=e296] [cursor=pointer]:
+            - generic [ref=e297]:
+              - generic [ref=e298]: POPULAR
+              - button [ref=e299]:
+                - img [ref=e300]
+              - img "Maruti Suzuki Celerio" [ref=e303]
+            - generic [ref=e304]:
+              - heading "Maruti Suzuki Celerio" [level=3] [ref=e305]
+              - generic [ref=e306]:
+                - generic [ref=e307]:
+                  - generic [ref=e308]: ₹ 5.50 Lakh
+                  - generic [ref=e309]: Onwards
+                - generic [ref=e310]: Ex-Showroom Price
+              - generic [ref=e311]:
+                - generic [ref=e312]:
+                  - img [ref=e313]
+                  - generic [ref=e316]: Petrol/CNG
+                - generic [ref=e317]:
+                  - img [ref=e318]
+                  - generic [ref=e321]: Manual/AMT
+              - button "View Details" [ref=e322]
+          - generic [ref=e323] [cursor=pointer]:
+            - generic [ref=e324]:
+              - generic [ref=e325]: POPULAR
+              - button [ref=e326]:
+                - img [ref=e327]
+              - img "Hyundai i20 N Line" [ref=e330]
+            - generic [ref=e331]:
+              - heading "Hyundai i20 N Line" [level=3] [ref=e332]
+              - generic [ref=e333]:
+                - generic [ref=e334]:
+                  - generic [ref=e335]: ₹ 6.00 Lakh
+                  - generic [ref=e336]: Onwards
+                - generic [ref=e337]: Ex-Showroom Price
+              - generic [ref=e338]:
+                - generic [ref=e339]:
+                  - img [ref=e340]
+                  - generic [ref=e343]: Petrol
+                - generic [ref=e344]:
+                  - img [ref=e345]
+                  - generic [ref=e348]: Manual/Automatic
+              - button "View Details" [ref=e349]
+          - generic [ref=e350] [cursor=pointer]:
+            - generic [ref=e351]:
+              - generic [ref=e352]: POPULAR
+              - button [ref=e353]:
+                - img [ref=e354]
+              - img "Tata Tiago NRG" [ref=e357]
+            - generic [ref=e358]:
+              - heading "Tata Tiago NRG" [level=3] [ref=e359]
+              - generic [ref=e360]:
+                - generic [ref=e361]:
+                  - generic [ref=e362]: ₹ 6.00 Lakh
+                  - generic [ref=e363]: Onwards
+                - generic [ref=e364]: Ex-Showroom Price
+              - generic [ref=e365]:
+                - generic [ref=e366]:
+                  - img [ref=e367]
+                  - generic [ref=e370]: Petrol
+                - generic [ref=e371]:
+                  - img [ref=e372]
+                  - generic [ref=e375]: Manual
+              - button "View Details" [ref=e376]
+          - generic [ref=e377] [cursor=pointer]:
+            - generic [ref=e378]:
+              - generic [ref=e379]: POPULAR
+              - button [ref=e380]:
+                - img [ref=e381]
+              - img "Hyundai i20" [ref=e384]
+            - generic [ref=e385]:
+              - heading "Hyundai i20" [level=3] [ref=e386]
+              - generic [ref=e387]:
+                - generic [ref=e388]:
+                  - generic [ref=e389]: ₹ 6.00 Lakh
+                  - generic [ref=e390]: Onwards
+                - generic [ref=e391]: Ex-Showroom Price
+              - generic [ref=e392]:
+                - generic [ref=e393]:
+                  - img [ref=e394]
+                  - generic [ref=e397]: Petrol
+                - generic [ref=e398]:
+                  - img [ref=e399]
+                  - generic [ref=e402]: Manual/Automatic
+              - button "View Details" [ref=e403]
+          - generic [ref=e404] [cursor=pointer]:
+            - generic [ref=e405]:
+              - generic [ref=e406]: POPULAR
+              - button [ref=e407]:
+                - img [ref=e408]
+              - img "Maruti Suzuki Ignis" [ref=e411]
+            - generic [ref=e412]:
+              - heading "Maruti Suzuki Ignis" [level=3] [ref=e413]
+              - generic [ref=e414]:
+                - generic [ref=e415]:
+                  - generic [ref=e416]: ₹ 6.00 Lakh
+                  - generic [ref=e417]: Onwards
+                - generic [ref=e418]: Ex-Showroom Price
+              - generic [ref=e419]:
+                - generic [ref=e420]:
+                  - img [ref=e421]
+                  - generic [ref=e424]: Petrol
+                - generic [ref=e425]:
+                  - img [ref=e426]
+                  - generic [ref=e429]: Manual/AMT
+              - button "View Details" [ref=e430]
+          - link "See More Under ₹8 Lakh Cars View All Cars" [ref=e431] [cursor=pointer]:
+            - /url: /cars-by-budget/under-8
+            - heading "See More" [level=3] [ref=e434]
+            - generic [ref=e435]:
+              - heading "Under ₹8 Lakh Cars" [level=4] [ref=e436]
+              - generic [ref=e438]: View All Cars
+      - generic [ref=e440]:
+        - button "Close carousel" [ref=e441] [cursor=pointer]:
+          - img [ref=e442]
+        - generic [ref=e445]:
+          - generic [ref=e448]:
+            - generic [ref=e450]: LIMITED
+            - generic [ref=e451]:
+              - generic [ref=e452]:
+                - generic [ref=e453]:
+                  - paragraph [ref=e454]: Free 40-Point Checkup
+                  - heading "Monsoon Service Camp" [level=2] [ref=e455]
+                - paragraph [ref=e456]: Ensure your car is monsoon ready. 20% off on labor.
+                - link "Book Service" [ref=e457] [cursor=pointer]:
+                  - /url: /service
+                  - text: Book Service
+                  - img [ref=e458]
+              - img "Monsoon Service Camp" [ref=e462]
+          - generic [ref=e465]:
+            - generic [ref=e467]: LAUNCH
+            - generic [ref=e468]:
+              - generic [ref=e469]:
+                - generic [ref=e470]:
+                  - paragraph [ref=e471]: Way Ahead
+                  - heading "New Tata Nexon" [level=2] [ref=e472]
+                - paragraph [ref=e473]: Book now and get priority delivery + accessories worth ₹15k
+                - link "Check Offers" [ref=e474] [cursor=pointer]:
+                  - /url: /tata-cars/nexon
+                  - text: Check Offers
+                  - img [ref=e475]
+              - img "New Tata Nexon" [ref=e479]
+          - generic [ref=e482]:
+            - generic [ref=e484]: SAVE 40%
+            - generic [ref=e485]:
+              - generic [ref=e486]:
+                - generic [ref=e487]:
+                  - paragraph [ref=e488]: Starting @ ₹2099
+                  - heading "Zero Dep Insurance" [level=2] [ref=e489]
+                - paragraph [ref=e490]: Protect your car with comprehensive coverage. Cashless claims.
+                - link "Get Quote" [ref=e491] [cursor=pointer]:
+                  - /url: /insurance
+                  - text: Get Quote
+                  - img [ref=e492]
+              - img "Zero Dep Insurance" [ref=e496]
+          - generic [ref=e499]:
+            - generic [ref=e501]: INSTANT
+            - generic [ref=e502]:
+              - generic [ref=e503]:
+                - generic [ref=e504]:
+                  - paragraph [ref=e505]: Best Price Guarantee
+                  - heading "Sell Your Car" [level=2] [ref=e506]
+                - paragraph [ref=e507]: Get instant valuation and payment in 1 hour. Free RC transfer.
+                - link "Get Value" [ref=e508] [cursor=pointer]:
+                  - /url: /sell-car
+                  - text: Get Value
+                  - img [ref=e509]
+              - img "Sell Your Car" [ref=e513]
+          - generic [ref=e516]:
+            - generic [ref=e518]: OFFER
+            - generic [ref=e519]:
+              - generic [ref=e520]:
+                - generic [ref=e521]:
+                  - paragraph [ref=e522]: Buy 3 Get 1 Free
+                  - heading "Premium Tyres" [level=2] [ref=e523]
+                - paragraph [ref=e524]: Upgrade your ride with premium tyres. Michelin, Bridgestone & more.
+                - link "Shop Now" [ref=e525] [cursor=pointer]:
+                  - /url: /accessories/tyres
+                  - text: Shop Now
+                  - img [ref=e526]
+              - img "Premium Tyres" [ref=e530]
+        - button "Previous slide" [ref=e532] [cursor=pointer]:
+          - img [ref=e533]
+        - button "Next slide" [ref=e535] [cursor=pointer]:
+          - img [ref=e536]
+        - generic [ref=e538]:
+          - button "Go to slide 1" [ref=e539] [cursor=pointer]
+          - button "Go to slide 2" [ref=e540] [cursor=pointer]
+          - button "Go to slide 3" [ref=e541] [cursor=pointer]
+          - button "Go to slide 4" [ref=e542] [cursor=pointer]
+          - button "Go to slide 5" [ref=e543] [cursor=pointer]
+      - generic [ref=e548]:
+        - heading "Popular Cars" [level=2] [ref=e549]
+        - generic [ref=e552]:
+          - generic [ref=e553] [cursor=pointer]:
+            - generic [ref=e554]:
+              - generic [ref=e555]: NEW
+              - button [ref=e556]:
+                - img [ref=e557]
+              - img "Hyundai Creta" [ref=e560]
+            - generic [ref=e561]:
+              - heading "Hyundai Creta" [level=3] [ref=e562]
+              - generic [ref=e563]:
+                - generic [ref=e564]:
+                  - generic [ref=e565]: ₹ 11.11 Lakh
+                  - generic [ref=e566]: Onwards
+                - generic [ref=e567]: Ex-Showroom Price
+              - generic [ref=e568]:
+                - generic [ref=e569]:
+                  - img [ref=e570]
+                  - generic [ref=e573]: Petrol/Diesel
+                - generic [ref=e574]:
+                  - img [ref=e575]
+                  - generic [ref=e578]: Manual/Automatic/CVT
+              - button "View Details" [ref=e579]
+          - generic [ref=e580] [cursor=pointer]:
+            - generic [ref=e581]:
+              - generic [ref=e582]: POPULAR
+              - button [ref=e583]:
+                - img [ref=e584]
+              - img "Maruti Suzuki Alto K10" [ref=e587]
+            - generic [ref=e588]:
+              - heading "Maruti Suzuki Alto K10" [level=3] [ref=e589]
+              - generic [ref=e590]:
+                - generic [ref=e591]:
+                  - generic [ref=e592]: ₹ 5.50 Lakh
+                  - generic [ref=e593]: Onwards
+                - generic [ref=e594]: Ex-Showroom Price
+              - generic [ref=e595]:
+                - generic [ref=e596]:
+                  - img [ref=e597]
+                  - generic [ref=e600]: Petrol/CNG
+                - generic [ref=e601]:
+                  - img [ref=e602]
+                  - generic [ref=e605]: Manual/AMT
+              - button "View Details" [ref=e606]
+          - generic [ref=e607] [cursor=pointer]:
+            - generic [ref=e608]:
+              - generic [ref=e609]: NEW
+              - button [ref=e610]:
+                - img [ref=e611]
+              - img "Honda Amaze" [ref=e614]
+            - generic [ref=e615]:
+              - heading "Honda Amaze" [level=3] [ref=e616]
+              - generic [ref=e617]:
+                - generic [ref=e618]:
+                  - generic [ref=e619]: ₹ 9.00 Lakh
+                  - generic [ref=e620]: Onwards
+                - generic [ref=e621]: Ex-Showroom Price
+              - generic [ref=e622]:
+                - generic [ref=e623]:
+                  - img [ref=e624]
+                  - generic [ref=e627]: Petrol
+                - generic [ref=e628]:
+                  - img [ref=e629]
+                  - generic [ref=e632]: Manual/Automatic
+              - button "View Details" [ref=e633]
+          - generic [ref=e634] [cursor=pointer]:
+            - generic [ref=e635]:
+              - generic [ref=e636]: POPULAR
+              - button [ref=e637]:
+                - img [ref=e638]
+              - img "Hyundai Grand i10 Nios" [ref=e641]
+            - generic [ref=e642]:
+              - heading "Hyundai Grand i10 Nios" [level=3] [ref=e643]
+              - generic [ref=e644]:
+                - generic [ref=e645]:
+                  - generic [ref=e646]: ₹ 5.50 Lakh
+                  - generic [ref=e647]: Onwards
+                - generic [ref=e648]: Ex-Showroom Price
+              - generic [ref=e649]:
+                - generic [ref=e650]:
+                  - img [ref=e651]
+                  - generic [ref=e654]: Petrol/CNG
+                - generic [ref=e655]:
+                  - img [ref=e656]
+                  - generic [ref=e659]: Manual/Automatic
+              - button "View Details" [ref=e660]
+          - generic [ref=e661] [cursor=pointer]:
+            - generic [ref=e662]:
+              - generic [ref=e663]: NEW
+              - button [ref=e664]:
+                - img [ref=e665]
+              - img "Kia Sonet" [ref=e668]
+            - generic [ref=e669]:
+              - heading "Kia Sonet" [level=3] [ref=e670]
+              - generic [ref=e671]:
+                - generic [ref=e672]:
+                  - generic [ref=e673]: ₹ 12.00 Lakh
+                  - generic [ref=e674]: Onwards
+                - generic [ref=e675]: Ex-Showroom Price
+              - generic [ref=e676]:
+                - generic [ref=e677]:
+                  - img [ref=e678]
+                  - generic [ref=e681]: Petrol/Diesel
+                - generic [ref=e682]:
+                  - img [ref=e683]
+                  - generic [ref=e686]: Manual/Automatic
+              - button "View Details" [ref=e687]
+          - generic [ref=e688] [cursor=pointer]:
+            - generic [ref=e689]:
+              - generic [ref=e690]: POPULAR
+              - button [ref=e691]:
+                - img [ref=e692]
+              - img "Mahindra Bolero" [ref=e695]
+            - generic [ref=e696]:
+              - heading "Mahindra Bolero" [level=3] [ref=e697]
+              - generic [ref=e698]:
+                - generic [ref=e699]:
+                  - generic [ref=e700]: ₹ 13.50 Lakh
+                  - generic [ref=e701]: Onwards
+                - generic [ref=e702]: Ex-Showroom Price
+              - generic [ref=e703]:
+                - generic [ref=e704]:
+                  - img [ref=e705]
+                  - generic [ref=e708]: Diesel
+                - generic [ref=e709]:
+                  - img [ref=e710]
+                  - generic [ref=e713]: Manual
+              - button "View Details" [ref=e714]
+          - generic [ref=e715] [cursor=pointer]:
+            - generic [ref=e716]:
+              - generic [ref=e717]: POPULAR
+              - button [ref=e718]:
+                - img [ref=e719]
+              - img "MG Motor Comet EV" [ref=e722]
+            - generic [ref=e723]:
+              - heading "MG Motor Comet EV" [level=3] [ref=e724]
+              - generic [ref=e725]:
+                - generic [ref=e726]:
+                  - generic [ref=e727]: ₹ 10.90 Lakh
+                  - generic [ref=e728]: Onwards
+                - generic [ref=e729]: Ex-Showroom Price
+              - generic [ref=e730]:
+                - generic [ref=e731]:
+                  - img [ref=e732]
+                  - generic [ref=e735]: Electric
+                - generic [ref=e736]:
+                  - img [ref=e737]
+                  - generic [ref=e740]: Automatic
+              - button "View Details" [ref=e741]
+          - generic [ref=e742] [cursor=pointer]:
+            - generic [ref=e743]:
+              - generic [ref=e744]: POPULAR
+              - button [ref=e745]:
+                - img [ref=e746]
+              - img "Toyota Glanza" [ref=e749]
+            - generic [ref=e750]:
+              - heading "Toyota Glanza" [level=3] [ref=e751]
+              - generic [ref=e752]:
+                - generic [ref=e753]:
+                  - generic [ref=e754]: ₹ 5.50 Lakh
+                  - generic [ref=e755]: Onwards
+                - generic [ref=e756]: Ex-Showroom Price
+              - generic [ref=e757]:
+                - generic [ref=e758]:
+                  - img [ref=e759]
+                  - generic [ref=e762]: Petrol/CNG
+                - generic [ref=e763]:
+                  - img [ref=e764]
+                  - generic [ref=e767]: Manual/Automatic
+              - button "View Details" [ref=e768]
+          - generic [ref=e769] [cursor=pointer]:
+            - generic [ref=e770]:
+              - generic [ref=e771]: POPULAR
+              - button [ref=e772]:
+                - img [ref=e773]
+              - img "Tata Tiago" [ref=e776]
+            - generic [ref=e777]:
+              - heading "Tata Tiago" [level=3] [ref=e778]
+              - generic [ref=e779]:
+                - generic [ref=e780]:
+                  - generic [ref=e781]: ₹ 6.00 Lakh
+                  - generic [ref=e782]: Onwards
+                - generic [ref=e783]: Ex-Showroom Price
+              - generic [ref=e784]:
+                - generic [ref=e785]:
+                  - img [ref=e786]
+                  - generic [ref=e789]: Petrol
+                - generic [ref=e790]:
+                  - img [ref=e791]
+                  - generic [ref=e794]: Manual/Automatic
+              - button "View Details" [ref=e795]
+          - generic [ref=e796] [cursor=pointer]:
+            - generic [ref=e797]:
+              - generic [ref=e798]: NEW
+              - button [ref=e799]:
+                - img [ref=e800]
+              - img "Hyundai Venue" [ref=e803]
+            - generic [ref=e804]:
+              - heading "Hyundai Venue" [level=3] [ref=e805]
+              - generic [ref=e806]:
+                - generic [ref=e807]:
+                  - generic [ref=e808]: ₹ 12.00 Lakh
+                  - generic [ref=e809]: Onwards
+                - generic [ref=e810]: Ex-Showroom Price
+              - generic [ref=e811]:
+                - generic [ref=e812]:
+                  - img [ref=e813]
+                  - generic [ref=e816]: Petrol/Diesel
+                - generic [ref=e817]:
+                  - img [ref=e818]
+                  - generic [ref=e821]: Manual/Automatic/CVT/DCT
+              - button "View Details" [ref=e822]
+          - generic [ref=e823] [cursor=pointer]:
+            - generic [ref=e824]:
+              - generic [ref=e825]: POPULAR
+              - button [ref=e826]:
+                - img [ref=e827]
+              - img "Maruti Suzuki Ciaz" [ref=e830]
+            - generic [ref=e831]:
+              - heading "Maruti Suzuki Ciaz" [level=3] [ref=e832]
+              - generic [ref=e833]:
+                - generic [ref=e834]:
+                  - generic [ref=e835]: ₹ 9.00 Lakh
+                  - generic [ref=e836]: Onwards
+                - generic [ref=e837]: Ex-Showroom Price
+              - generic [ref=e838]:
+                - generic [ref=e839]:
+                  - img [ref=e840]
+                  - generic [ref=e843]: Petrol
+                - generic [ref=e844]:
+                  - img [ref=e845]
+                  - generic [ref=e848]: Manual/Automatic
+              - button "View Details" [ref=e849]
+          - generic [ref=e850] [cursor=pointer]:
+            - generic [ref=e851]:
+              - generic [ref=e852]: POPULAR
+              - button [ref=e853]:
+                - img [ref=e854]
+              - img "Honda City" [ref=e857]
+            - generic [ref=e858]:
+              - heading "Honda City" [level=3] [ref=e859]
+              - generic [ref=e860]:
+                - generic [ref=e861]:
+                  - generic [ref=e862]: ₹ 9.00 Lakh
+                  - generic [ref=e863]: Onwards
+                - generic [ref=e864]: Ex-Showroom Price
+              - generic [ref=e865]:
+                - generic [ref=e866]:
+                  - img [ref=e867]
+                  - generic [ref=e870]: Petrol
+                - generic [ref=e871]:
+                  - img [ref=e872]
+                  - generic [ref=e875]: Manual/Automatic
+              - button "View Details" [ref=e876]
+          - generic [ref=e877] [cursor=pointer]:
+            - generic [ref=e878]:
+              - generic [ref=e879]: POPULAR
+              - button [ref=e880]:
+                - img [ref=e881]
+              - img "Hyundai i20" [ref=e884]
+            - generic [ref=e885]:
+              - heading "Hyundai i20" [level=3] [ref=e886]
+              - generic [ref=e887]:
+                - generic [ref=e888]:
+                  - generic [ref=e889]: ₹ 6.00 Lakh
+                  - generic [ref=e890]: Onwards
+                - generic [ref=e891]: Ex-Showroom Price
+              - generic [ref=e892]:
+                - generic [ref=e893]:
+                  - img [ref=e894]
+                  - generic [ref=e897]: Petrol
+                - generic [ref=e898]:
+                  - img [ref=e899]
+                  - generic [ref=e902]: Manual/Automatic
+              - button "View Details" [ref=e903]
+          - generic [ref=e904] [cursor=pointer]:
+            - generic [ref=e905]:
+              - generic [ref=e906]: NEW
+              - button [ref=e907]:
+                - img [ref=e908]
+              - img "Kia Syros" [ref=e911]
+            - generic [ref=e912]:
+              - heading "Kia Syros" [level=3] [ref=e913]
+              - generic [ref=e914]:
+                - generic [ref=e915]:
+                  - generic [ref=e916]: ₹ 12.00 Lakh
+                  - generic [ref=e917]: Onwards
+                - generic [ref=e918]: Ex-Showroom Price
+              - generic [ref=e919]:
+                - generic [ref=e920]:
+                  - img [ref=e921]
+                  - generic [ref=e924]: Petrol/Diesel
+                - generic [ref=e925]:
+                  - img [ref=e926]
+                  - generic [ref=e929]: Manual/Automatic
+              - button "View Details" [ref=e930]
+          - generic [ref=e931] [cursor=pointer]:
+            - generic [ref=e932]:
+              - generic [ref=e933]: POPULAR
+              - button [ref=e934]:
+                - img [ref=e935]
+              - img "Mahindra Bolero Neo" [ref=e938]
+            - generic [ref=e939]:
+              - heading "Mahindra Bolero Neo" [level=3] [ref=e940]
+              - generic [ref=e941]:
+                - generic [ref=e942]:
+                  - generic [ref=e943]: ₹ 13.50 Lakh
+                  - generic [ref=e944]: Onwards
+                - generic [ref=e945]: Ex-Showroom Price
+              - generic [ref=e946]:
+                - generic [ref=e947]:
+                  - img [ref=e948]
+                  - generic [ref=e951]: Diesel
+                - generic [ref=e952]:
+                  - img [ref=e953]
+                  - generic [ref=e956]: Manual
+              - button "View Details" [ref=e957]
+          - generic [ref=e958] [cursor=pointer]:
+            - generic [ref=e959]:
+              - generic [ref=e960]: NEW
+              - button [ref=e961]:
+                - img [ref=e962]
+              - img "MG Motor Windsor EV" [ref=e965]
+            - generic [ref=e966]:
+              - heading "MG Motor Windsor EV" [level=3] [ref=e967]
+              - generic [ref=e968]:
+                - generic [ref=e969]:
+                  - generic [ref=e970]: ₹ 17.80 Lakh
+                  - generic [ref=e971]: Onwards
+                - generic [ref=e972]: Ex-Showroom Price
+              - generic [ref=e973]:
+                - generic [ref=e974]:
+                  - img [ref=e975]
+                  - generic [ref=e978]: Electric
+                - generic [ref=e979]:
+                  - img [ref=e980]
+                  - generic [ref=e983]: Automatic
+              - button "View Details" [ref=e984]
+          - generic [ref=e985] [cursor=pointer]:
+            - generic [ref=e986]:
+              - generic [ref=e987]: NEW
+              - button [ref=e988]:
+                - img [ref=e989]
+              - img "Toyota Urban Cruiser Taisor" [ref=e992]
+            - generic [ref=e993]:
+              - heading "Toyota Urban Cruiser Taisor" [level=3] [ref=e994]
+              - generic [ref=e995]:
+                - generic [ref=e996]:
+                  - generic [ref=e997]: ₹ 11.50 Lakh
+                  - generic [ref=e998]: Onwards
+                - generic [ref=e999]: Ex-Showroom Price
+              - generic [ref=e1000]:
+                - generic [ref=e1001]:
+                  - img [ref=e1002]
+                  - generic [ref=e1005]: Petrol/CNG
+                - generic [ref=e1006]:
+                  - img [ref=e1007]
+                  - generic [ref=e1010]: Manual/Automatic
+              - button "View Details" [ref=e1011]
+          - generic [ref=e1012] [cursor=pointer]:
+            - generic [ref=e1013]:
+              - generic [ref=e1014]: POPULAR
+              - button [ref=e1015]:
+                - img [ref=e1016]
+              - img "Tata Tiago NRG" [ref=e1019]
+            - generic [ref=e1020]:
+              - heading "Tata Tiago NRG" [level=3] [ref=e1021]
+              - generic [ref=e1022]:
+                - generic [ref=e1023]:
+                  - generic [ref=e1024]: ₹ 6.00 Lakh
+                  - generic [ref=e1025]: Onwards
+                - generic [ref=e1026]: Ex-Showroom Price
+              - generic [ref=e1027]:
+                - generic [ref=e1028]:
+                  - img [ref=e1029]
+                  - generic [ref=e1032]: Petrol
+                - generic [ref=e1033]:
+                  - img [ref=e1034]
+                  - generic [ref=e1037]: Manual
+              - button "View Details" [ref=e1038]
+          - generic [ref=e1039] [cursor=pointer]:
+            - generic [ref=e1040]:
+              - generic [ref=e1041]: NEW
+              - button [ref=e1042]:
+                - img [ref=e1043]
+              - img "Hyundai Venue N Line" [ref=e1046]
+            - generic [ref=e1047]:
+              - heading "Hyundai Venue N Line" [level=3] [ref=e1048]
+              - generic [ref=e1049]:
+                - generic [ref=e1050]:
+                  - generic [ref=e1051]: ₹ 12.00 Lakh
+                  - generic [ref=e1052]: Onwards
+                - generic [ref=e1053]: Ex-Showroom Price
+              - generic [ref=e1054]:
+                - generic [ref=e1055]:
+                  - img [ref=e1056]
+                  - generic [ref=e1059]: Petrol
+                - generic [ref=e1060]:
+                  - img [ref=e1061]
+                  - generic [ref=e1064]: Manual/DCT
+              - button "View Details" [ref=e1065]
+          - generic [ref=e1066] [cursor=pointer]:
+            - generic [ref=e1067]:
+              - generic [ref=e1068]: POPULAR
+              - button [ref=e1069]:
+                - img [ref=e1070]
+              - img "Maruti Suzuki S-Presso" [ref=e1073]
+            - generic [ref=e1074]:
+              - heading "Maruti Suzuki S-Presso" [level=3] [ref=e1075]
+              - generic [ref=e1076]:
+                - generic [ref=e1077]:
+                  - generic [ref=e1078]: ₹ 7.50 Lakh
+                  - generic [ref=e1079]: Onwards
+                - generic [ref=e1080]: Ex-Showroom Price
+              - generic [ref=e1081]:
+                - generic [ref=e1082]:
+                  - img [ref=e1083]
+                  - generic [ref=e1086]: Petrol/CNG
+                - generic [ref=e1087]:
+                  - img [ref=e1088]
+                  - generic [ref=e1091]: Manual/AMT
+              - button "View Details" [ref=e1092]
+      - generic [ref=e1095]:
+        - heading "Popular Brands" [level=2] [ref=e1096]
+        - generic [ref=e1097]:
+          - link "Hyundai logo Hyundai" [ref=e1098] [cursor=pointer]:
+            - /url: /hyundai-cars
+            - img "Hyundai logo" [ref=e1100]
+            - heading "Hyundai" [level=3] [ref=e1101]
+          - link "Maruti Suzuki logo Maruti Suzuki" [ref=e1102] [cursor=pointer]:
+            - /url: /maruti-suzuki-cars
+            - img "Maruti Suzuki logo" [ref=e1104]
+            - heading "Maruti Suzuki" [level=3] [ref=e1105]
+          - link "Mahindra logo Mahindra" [ref=e1106] [cursor=pointer]:
+            - /url: /mahindra-cars
+            - img "Mahindra logo" [ref=e1108]
+            - heading "Mahindra" [level=3] [ref=e1109]
+          - link "Tata logo Tata" [ref=e1110] [cursor=pointer]:
+            - /url: /tata-cars
+            - img "Tata logo" [ref=e1112]
+            - heading "Tata" [level=3] [ref=e1113]
+          - link "Toyota logo Toyota" [ref=e1114] [cursor=pointer]:
+            - /url: /toyota-cars
+            - img "Toyota logo" [ref=e1116]
+            - heading "Toyota" [level=3] [ref=e1117]
+          - link "Kia logo Kia" [ref=e1118] [cursor=pointer]:
+            - /url: /kia-cars
+            - img "Kia logo" [ref=e1120]
+            - heading "Kia" [level=3] [ref=e1121]
+        - button "Show All 36 Brands" [ref=e1123] [cursor=pointer]:
+          - img [ref=e1124]
+          - generic [ref=e1126]: Show All 36 Brands
+      - generic [ref=e1129]:
+        - heading "Upcoming Cars" [level=2] [ref=e1130]
+        - generic [ref=e1133]:
+          - generic [ref=e1134] [cursor=pointer]:
+            - generic [ref=e1135]:
+              - generic [ref=e1136]: UPCOMING
+              - button [ref=e1137]:
+                - img [ref=e1138]
+              - img "Hyundai Alcazar 2025" [ref=e1141]
+            - generic [ref=e1142]:
+              - heading "Hyundai Alcazar 2025" [level=3] [ref=e1143]
+              - generic [ref=e1144]:
+                - generic [ref=e1145]:
+                  - generic [ref=e1146]: ₹ 17.00 Lakh
+                  - generic [ref=e1147]: Onwards
+                - generic [ref=e1148]: Ex-Showroom Price
+              - generic [ref=e1149]:
+                - generic [ref=e1150]:
+                  - img [ref=e1151]
+                  - generic [ref=e1153]: Expected Jun 2025
+                - generic [ref=e1154]:
+                  - img [ref=e1155]
+                  - generic [ref=e1158]: Petrol/Diesel/Petrol/Diesel
+              - button "View Details" [ref=e1159]
+          - generic [ref=e1160] [cursor=pointer]:
+            - generic [ref=e1161]:
+              - generic [ref=e1162]: UPCOMING
+              - button [ref=e1163]:
+                - img [ref=e1164]
+              - img "Honda Amaze 2025" [ref=e1167]
+            - generic [ref=e1168]:
+              - heading "Honda Amaze 2025" [level=3] [ref=e1169]
+              - generic [ref=e1170]:
+                - generic [ref=e1171]:
+                  - generic [ref=e1172]: ₹ 7.50 Lakh
+                  - generic [ref=e1173]: Onwards
+                - generic [ref=e1174]: Ex-Showroom Price
+              - generic [ref=e1175]:
+                - generic [ref=e1176]:
+                  - img [ref=e1177]
+                  - generic [ref=e1179]: Expected Jul 2025
+                - generic [ref=e1180]:
+                  - img [ref=e1181]
+                  - generic [ref=e1184]: Petrol
+              - button "View Details" [ref=e1185]
+          - generic [ref=e1186] [cursor=pointer]:
+            - generic [ref=e1187]:
+              - generic [ref=e1188]: UPCOMING
+              - button [ref=e1189]:
+                - img [ref=e1190]
+              - img "MG Motor Cloud EV" [ref=e1193]
+            - generic [ref=e1194]:
+              - heading "MG Motor Cloud EV" [level=3] [ref=e1195]
+              - generic [ref=e1196]:
+                - generic [ref=e1197]:
+                  - generic [ref=e1198]: ₹ 20.00 Lakh
+                  - generic [ref=e1199]: Onwards
+                - generic [ref=e1200]: Ex-Showroom Price
+              - generic [ref=e1201]:
+                - generic [ref=e1202]:
+                  - img [ref=e1203]
+                  - generic [ref=e1205]: Expected Aug 2025
+                - generic [ref=e1206]:
+                  - img [ref=e1207]
+                  - generic [ref=e1210]: Electric
+              - button "View Details" [ref=e1211]
+          - generic [ref=e1212] [cursor=pointer]:
+            - generic [ref=e1213]:
+              - generic [ref=e1214]: UPCOMING
+              - button [ref=e1215]:
+                - img [ref=e1216]
+              - img "Tata Curvv EV" [ref=e1219]
+            - generic [ref=e1220]:
+              - heading "Tata Curvv EV" [level=3] [ref=e1221]
+              - generic [ref=e1222]:
+                - generic [ref=e1223]:
+                  - generic [ref=e1224]: ₹ 16.00 Lakh
+                  - generic [ref=e1225]: Onwards
+                - generic [ref=e1226]: Ex-Showroom Price
+              - generic [ref=e1227]:
+                - generic [ref=e1228]:
+                  - img [ref=e1229]
+                  - generic [ref=e1231]: Expected Apr 2025
+                - generic [ref=e1232]:
+                  - img [ref=e1233]
+                  - generic [ref=e1236]: Electric
+              - button "View Details" [ref=e1237]
+          - generic [ref=e1238] [cursor=pointer]:
+            - generic [ref=e1239]:
+              - generic [ref=e1240]: UPCOMING
+              - button [ref=e1241]:
+                - img [ref=e1242]
+              - img "Skoda Kodiaq 2025" [ref=e1245]
+            - generic [ref=e1246]:
+              - heading "Skoda Kodiaq 2025" [level=3] [ref=e1247]
+              - generic [ref=e1248]:
+                - generic [ref=e1249]:
+                  - generic [ref=e1250]: ₹ 40.00 Lakh
+                  - generic [ref=e1251]: Onwards
+                - generic [ref=e1252]: Ex-Showroom Price
+              - generic [ref=e1253]:
+                - generic [ref=e1254]:
+                  - img [ref=e1255]
+                  - generic [ref=e1257]: Expected Nov 2025
+                - generic [ref=e1258]:
+                  - img [ref=e1259]
+                  - generic [ref=e1262]: Petrol
+              - button "View Details" [ref=e1263]
+          - generic [ref=e1264] [cursor=pointer]:
+            - generic [ref=e1265]:
+              - generic [ref=e1266]: UPCOMING
+              - button [ref=e1267]:
+                - img [ref=e1268]
+              - img "Tata Nexon EV Long Range" [ref=e1271]
+            - generic [ref=e1272]:
+              - heading "Tata Nexon EV Long Range" [level=3] [ref=e1273]
+              - generic [ref=e1274]:
+                - generic [ref=e1275]:
+                  - generic [ref=e1276]: ₹ 18.00 Lakh
+                  - generic [ref=e1277]: Onwards
+                - generic [ref=e1278]: Ex-Showroom Price
+              - generic [ref=e1279]:
+                - generic [ref=e1280]:
+                  - img [ref=e1281]
+                  - generic [ref=e1283]: Expected Jun 2025
+                - generic [ref=e1284]:
+                  - img [ref=e1285]
+                  - generic [ref=e1288]: Electric
+              - button "View Details" [ref=e1289]
+          - generic [ref=e1290] [cursor=pointer]:
+            - generic [ref=e1291]:
+              - generic [ref=e1292]: UPCOMING
+              - button [ref=e1293]:
+                - img [ref=e1294]
+              - img "Tata Skyraptor" [ref=e1297]
+            - generic [ref=e1298]:
+              - heading "Tata Skyraptor" [level=3] [ref=e1299]
+              - generic [ref=e1300]:
+                - generic [ref=e1301]:
+                  - generic [ref=e1302]: ₹ 25.00 Lakh
+                  - generic [ref=e1303]: Onwards
+                - generic [ref=e1304]: Ex-Showroom Price
+              - generic [ref=e1305]:
+                - generic [ref=e1306]:
+                  - img [ref=e1307]
+                  - generic [ref=e1309]: Expected Oct 2025
+                - generic [ref=e1310]:
+                  - img [ref=e1311]
+                  - generic [ref=e1314]: Electric
+              - button "View Details" [ref=e1315]
+          - generic [ref=e1316] [cursor=pointer]:
+            - generic [ref=e1317]:
+              - generic [ref=e1318]: UPCOMING
+              - button [ref=e1319]:
+                - img [ref=e1320]
+              - img "Maruti Suzuki Swift 2025" [ref=e1323]
+            - generic [ref=e1324]:
+              - heading "Maruti Suzuki Swift 2025" [level=3] [ref=e1325]
+              - generic [ref=e1326]:
+                - generic [ref=e1327]:
+                  - generic [ref=e1328]: ₹ 6.50 Lakh
+                  - generic [ref=e1329]: Onwards
+                - generic [ref=e1330]: Ex-Showroom Price
+              - generic [ref=e1331]:
+                - generic [ref=e1332]:
+                  - img [ref=e1333]
+                  - generic [ref=e1335]: Expected May 2025
+                - generic [ref=e1336]:
+                  - img [ref=e1337]
+                  - generic [ref=e1340]: Petrol/CNG
+              - button "View Details" [ref=e1341]
+          - generic [ref=e1342] [cursor=pointer]:
+            - generic [ref=e1343]:
+              - generic [ref=e1344]: UPCOMING
+              - button [ref=e1345]:
+                - img [ref=e1346]
+              - img "Mahindra Thar 5-Door" [ref=e1349]
+            - generic [ref=e1350]:
+              - heading "Mahindra Thar 5-Door" [level=3] [ref=e1351]
+              - generic [ref=e1352]:
+                - generic [ref=e1353]:
+                  - generic [ref=e1354]: ₹ 15.00 Lakh
+                  - generic [ref=e1355]: Onwards
+                - generic [ref=e1356]: Ex-Showroom Price
+              - generic [ref=e1357]:
+                - generic [ref=e1358]:
+                  - img [ref=e1359]
+                  - generic [ref=e1361]: Expected Aug 2025
+                - generic [ref=e1362]:
+                  - img [ref=e1363]
+                  - generic [ref=e1366]: Petrol/Diesel
+              - button "View Details" [ref=e1367]
+          - generic [ref=e1368] [cursor=pointer]:
+            - generic [ref=e1369]:
+              - generic [ref=e1370]: UPCOMING
+              - button [ref=e1371]:
+                - img [ref=e1372]
+              - img "Mahindra XUV500 2025" [ref=e1375]
+            - generic [ref=e1376]:
+              - heading "Mahindra XUV500 2025" [level=3] [ref=e1377]
+              - generic [ref=e1378]:
+                - generic [ref=e1379]:
+                  - generic [ref=e1380]: ₹ 16.00 Lakh
+                  - generic [ref=e1381]: Onwards
+                - generic [ref=e1382]: Ex-Showroom Price
+              - generic [ref=e1383]:
+                - generic [ref=e1384]:
+                  - img [ref=e1385]
+                  - generic [ref=e1387]: Expected Sep 2025
+                - generic [ref=e1388]:
+                  - img [ref=e1389]
+                  - generic [ref=e1392]: Petrol/Diesel
+              - button "View Details" [ref=e1393]
+          - generic [ref=e1394] [cursor=pointer]:
+            - generic [ref=e1395]:
+              - generic [ref=e1396]: UPCOMING
+              - button [ref=e1397]:
+                - img [ref=e1398]
+              - img "Maruti Suzuki e-Vitara" [ref=e1401]
+            - generic [ref=e1402]:
+              - heading "Maruti Suzuki e-Vitara" [level=3] [ref=e1403]
+              - generic [ref=e1404]:
+                - generic [ref=e1405]:
+                  - generic [ref=e1406]: ₹ 27.98 Lakh
+                  - generic [ref=e1407]: Onwards
+                - generic [ref=e1408]: Ex-Showroom Price
+              - generic [ref=e1409]:
+                - generic [ref=e1410]:
+                  - img [ref=e1411]
+                  - generic [ref=e1413]: Expected Dec 2025
+                - generic [ref=e1414]:
+                  - img [ref=e1415]
+                  - generic [ref=e1418]: Electric
+              - button "View Details" [ref=e1419]
+      - generic [ref=e1426]: Loading Advertisement...
+      - generic [ref=e1429]:
+        - heading "New Launches" [level=2] [ref=e1430]
+        - generic [ref=e1433]:
+          - generic [ref=e1434] [cursor=pointer]:
+            - generic [ref=e1435]:
+              - generic [ref=e1436]: NEW
+              - button [ref=e1437]:
+                - img [ref=e1438]
+              - img "Hyundai Creta" [ref=e1441]
+            - generic [ref=e1442]:
+              - heading "Hyundai Creta" [level=3] [ref=e1443]
+              - generic [ref=e1444]:
+                - generic [ref=e1445]:
+                  - generic [ref=e1446]: ₹ 11.11 Lakh
+                  - generic [ref=e1447]: Onwards
+                - generic [ref=e1448]: Ex-Showroom Price
+              - generic [ref=e1449]:
+                - generic [ref=e1450]:
+                  - img [ref=e1451]
+                  - generic [ref=e1454]: Petrol/Diesel
+                - generic [ref=e1455]:
+                  - img [ref=e1456]
+                  - generic [ref=e1459]: Manual/Automatic/CVT
+              - button "View Details" [ref=e1460]
+          - generic [ref=e1461] [cursor=pointer]:
+            - generic [ref=e1462]:
+              - generic [ref=e1463]: NEW
+              - button [ref=e1464]:
+                - img [ref=e1465]
+              - img "Hyundai Venue" [ref=e1468]
+            - generic [ref=e1469]:
+              - heading "Hyundai Venue" [level=3] [ref=e1470]
+              - generic [ref=e1471]:
+                - generic [ref=e1472]:
+                  - generic [ref=e1473]: ₹ 12.00 Lakh
+                  - generic [ref=e1474]: Onwards
+                - generic [ref=e1475]: Ex-Showroom Price
+              - generic [ref=e1476]:
+                - generic [ref=e1477]:
+                  - img [ref=e1478]
+                  - generic [ref=e1481]: Petrol/Diesel
+                - generic [ref=e1482]:
+                  - img [ref=e1483]
+                  - generic [ref=e1486]: Manual/Automatic/CVT/DCT
+              - button "View Details" [ref=e1487]
+          - generic [ref=e1488] [cursor=pointer]:
+            - generic [ref=e1489]:
+              - generic [ref=e1490]: NEW
+              - button [ref=e1491]:
+                - img [ref=e1492]
+              - img "Maruti Suzuki Swift" [ref=e1495]
+            - generic [ref=e1496]:
+              - heading "Maruti Suzuki Swift" [level=3] [ref=e1497]
+              - generic [ref=e1498]:
+                - generic [ref=e1499]:
+                  - generic [ref=e1500]: ₹ 5.50 Lakh
+                  - generic [ref=e1501]: Onwards
+                - generic [ref=e1502]: Ex-Showroom Price
+              - generic [ref=e1503]:
+                - generic [ref=e1504]:
+                  - img [ref=e1505]
+                  - generic [ref=e1508]: Petrol/CNG
+                - generic [ref=e1509]:
+                  - img [ref=e1510]
+                  - generic [ref=e1513]: Manual/Automatic
+              - button "View Details" [ref=e1514]
+          - generic [ref=e1515] [cursor=pointer]:
+            - generic [ref=e1516]:
+              - generic [ref=e1517]: NEW
+              - button [ref=e1518]:
+                - img [ref=e1519]
+              - img "Hyundai Venue N Line" [ref=e1522]
+            - generic [ref=e1523]:
+              - heading "Hyundai Venue N Line" [level=3] [ref=e1524]
+              - generic [ref=e1525]:
+                - generic [ref=e1526]:
+                  - generic [ref=e1527]: ₹ 12.00 Lakh
+                  - generic [ref=e1528]: Onwards
+                - generic [ref=e1529]: Ex-Showroom Price
+              - generic [ref=e1530]:
+                - generic [ref=e1531]:
+                  - img [ref=e1532]
+                  - generic [ref=e1535]: Petrol
+                - generic [ref=e1536]:
+                  - img [ref=e1537]
+                  - generic [ref=e1540]: Manual/DCT
+              - button "View Details" [ref=e1541]
+          - generic [ref=e1542] [cursor=pointer]:
+            - generic [ref=e1543]:
+              - generic [ref=e1544]: NEW
+              - button [ref=e1545]:
+                - img [ref=e1546]
+              - img "Kia Clavis EV" [ref=e1549]
+            - generic [ref=e1550]:
+              - heading "Kia Clavis EV" [level=3] [ref=e1551]
+              - generic [ref=e1552]:
+                - generic [ref=e1553]:
+                  - generic [ref=e1554]: ₹ 17.80 Lakh
+                  - generic [ref=e1555]: Onwards
+                - generic [ref=e1556]: Ex-Showroom Price
+              - generic [ref=e1557]:
+                - generic [ref=e1558]:
+                  - img [ref=e1559]
+                  - generic [ref=e1562]: Electric
+                - generic [ref=e1563]:
+                  - img [ref=e1564]
+                  - generic [ref=e1567]: Automatic
+              - button "View Details" [ref=e1568]
+          - generic [ref=e1569] [cursor=pointer]:
+            - generic [ref=e1570]:
+              - generic [ref=e1571]: NEW
+              - button [ref=e1572]:
+                - img [ref=e1573]
+              - img "Kia Clavis" [ref=e1576]
+            - generic [ref=e1577]:
+              - heading "Kia Clavis" [level=3] [ref=e1578]
+              - generic [ref=e1579]:
+                - generic [ref=e1580]:
+                  - generic [ref=e1581]: ₹ 12.00 Lakh
+                  - generic [ref=e1582]: Onwards
+                - generic [ref=e1583]: Ex-Showroom Price
+              - generic [ref=e1584]:
+                - generic [ref=e1585]:
+                  - img [ref=e1586]
+                  - generic [ref=e1589]: Petrol
+                - generic [ref=e1590]:
+                  - img [ref=e1591]
+                  - generic [ref=e1594]: Manual/Automatic
+              - button "View Details" [ref=e1595]
+          - generic [ref=e1596] [cursor=pointer]:
+            - generic [ref=e1597]:
+              - generic [ref=e1598]: NEW
+              - button [ref=e1599]:
+                - img [ref=e1600]
+              - img "MG Motor M9 EV" [ref=e1603]
+            - generic [ref=e1604]:
+              - heading "MG Motor M9 EV" [level=3] [ref=e1605]
+              - generic [ref=e1606]:
+                - generic [ref=e1607]:
+                  - generic [ref=e1608]: ₹ 16.65 Lakh
+                  - generic [ref=e1609]: Onwards
+                - generic [ref=e1610]: Ex-Showroom Price
+              - generic [ref=e1611]:
+                - generic [ref=e1612]:
+                  - img [ref=e1613]
+                  - generic [ref=e1616]: Electric
+                - generic [ref=e1617]:
+                  - img [ref=e1618]
+                  - generic [ref=e1621]: Automatic
+              - button "View Details" [ref=e1622]
+          - generic [ref=e1623] [cursor=pointer]:
+            - generic [ref=e1624]:
+              - generic [ref=e1625]: NEW
+              - button [ref=e1626]:
+                - img [ref=e1627]
+              - img "MG Motor Cyberster" [ref=e1630]
+            - generic [ref=e1631]:
+              - heading "MG Motor Cyberster" [level=3] [ref=e1632]
+              - generic [ref=e1633]:
+                - generic [ref=e1634]:
+                  - generic [ref=e1635]: ₹ 13.20 Lakh
+                  - generic [ref=e1636]: Onwards
+                - generic [ref=e1637]: Ex-Showroom Price
+              - generic [ref=e1638]:
+                - generic [ref=e1639]:
+                  - img [ref=e1640]
+                  - generic [ref=e1643]: Electric
+                - generic [ref=e1644]:
+                  - img [ref=e1645]
+                  - generic [ref=e1648]: Automatic
+              - button "View Details" [ref=e1649]
+          - generic [ref=e1650] [cursor=pointer]:
+            - generic [ref=e1651]:
+              - generic [ref=e1652]: NEW
+              - button [ref=e1653]:
+                - img [ref=e1654]
+              - img "Kia Syros" [ref=e1657]
+            - generic [ref=e1658]:
+              - heading "Kia Syros" [level=3] [ref=e1659]
+              - generic [ref=e1660]:
+                - generic [ref=e1661]:
+                  - generic [ref=e1662]: ₹ 12.00 Lakh
+                  - generic [ref=e1663]: Onwards
+                - generic [ref=e1664]: Ex-Showroom Price
+              - generic [ref=e1665]:
+                - generic [ref=e1666]:
+                  - img [ref=e1667]
+                  - generic [ref=e1670]: Petrol/Diesel
+                - generic [ref=e1671]:
+                  - img [ref=e1672]
+                  - generic [ref=e1675]: Manual/Automatic
+              - button "View Details" [ref=e1676]
+          - generic [ref=e1677] [cursor=pointer]:
+            - generic [ref=e1678]:
+              - generic [ref=e1679]: NEW
+              - button [ref=e1680]:
+                - img [ref=e1681]
+              - img "Mahindra BE 6" [ref=e1684]
+            - generic [ref=e1685]:
+              - heading "Mahindra BE 6" [level=3] [ref=e1686]
+              - generic [ref=e1687]:
+                - generic [ref=e1688]:
+                  - generic [ref=e1689]: ₹ 17.80 Lakh
+                  - generic [ref=e1690]: Onwards
+                - generic [ref=e1691]: Ex-Showroom Price
+              - generic [ref=e1692]:
+                - generic [ref=e1693]:
+                  - img [ref=e1694]
+                  - generic [ref=e1697]: Electric
+                - generic [ref=e1698]:
+                  - img [ref=e1699]
+                  - generic [ref=e1702]: Automatic
+              - button "View Details" [ref=e1703]
+          - generic [ref=e1704] [cursor=pointer]:
+            - generic [ref=e1705]:
+              - generic [ref=e1706]: NEW
+              - button [ref=e1707]:
+                - img [ref=e1708]
+              - img "Mahindra XEV 9e" [ref=e1711]
+            - generic [ref=e1712]:
+              - heading "Mahindra XEV 9e" [level=3] [ref=e1713]
+              - generic [ref=e1714]:
+                - generic [ref=e1715]:
+                  - generic [ref=e1716]: ₹ 17.80 Lakh
+                  - generic [ref=e1717]: Onwards
+                - generic [ref=e1718]: Ex-Showroom Price
+              - generic [ref=e1719]:
+                - generic [ref=e1720]:
+                  - img [ref=e1721]
+                  - generic [ref=e1724]: Electric
+                - generic [ref=e1725]:
+                  - img [ref=e1726]
+                  - generic [ref=e1729]: Automatic
+              - button "View Details" [ref=e1730]
+          - generic [ref=e1731] [cursor=pointer]:
+            - generic [ref=e1732]:
+              - generic [ref=e1733]: NEW
+              - button [ref=e1734]:
+                - img [ref=e1735]
+              - img "Hyundai Creta EV" [ref=e1738]
+            - generic [ref=e1739]:
+              - heading "Hyundai Creta EV" [level=3] [ref=e1740]
+              - generic [ref=e1741]:
+                - generic [ref=e1742]:
+                  - generic [ref=e1743]: ₹ 17.80 Lakh
+                  - generic [ref=e1744]: Onwards
+                - generic [ref=e1745]: Ex-Showroom Price
+              - generic [ref=e1746]:
+                - generic [ref=e1747]:
+                  - img [ref=e1748]
+                  - generic [ref=e1751]: Electric
+                - generic [ref=e1752]:
+                  - img [ref=e1753]
+                  - generic [ref=e1756]: Automatic
+              - button "View Details" [ref=e1757]
+          - generic [ref=e1758] [cursor=pointer]:
+            - generic [ref=e1759]:
+              - generic [ref=e1760]: NEW
+              - button [ref=e1761]:
+                - img [ref=e1762]
+              - img "Tata Punch EV" [ref=e1765]
+            - generic [ref=e1766]:
+              - heading "Tata Punch EV" [level=3] [ref=e1767]
+              - generic [ref=e1768]:
+                - generic [ref=e1769]:
+                  - generic [ref=e1770]: ₹ 17.80 Lakh
+                  - generic [ref=e1771]: Onwards
+                - generic [ref=e1772]: Ex-Showroom Price
+              - generic [ref=e1773]:
+                - generic [ref=e1774]:
+                  - img [ref=e1775]
+                  - generic [ref=e1778]: Electric
+                - generic [ref=e1779]:
+                  - img [ref=e1780]
+                  - generic [ref=e1783]: Automatic
+              - button "View Details" [ref=e1784]
+          - generic [ref=e1785] [cursor=pointer]:
+            - generic [ref=e1786]:
+              - generic [ref=e1787]: NEW
+              - button [ref=e1788]:
+                - img [ref=e1789]
+              - img "Tata Harrier EV" [ref=e1792]
+            - generic [ref=e1793]:
+              - heading "Tata Harrier EV" [level=3] [ref=e1794]
+              - generic [ref=e1795]:
+                - generic [ref=e1796]:
+                  - generic [ref=e1797]: ₹ 17.80 Lakh
+                  - generic [ref=e1798]: Onwards
+                - generic [ref=e1799]: Ex-Showroom Price
+              - generic [ref=e1800]:
+                - generic [ref=e1801]:
+                  - img [ref=e1802]
+                  - generic [ref=e1805]: Electric
+                - generic [ref=e1806]:
+                  - img [ref=e1807]
+                  - generic [ref=e1810]: Automatic
+              - button "View Details" [ref=e1811]
+          - generic [ref=e1812] [cursor=pointer]:
+            - generic [ref=e1813]:
+              - generic [ref=e1814]: NEW
+              - button [ref=e1815]:
+                - img [ref=e1816]
+              - img "Honda Amaze" [ref=e1819]
+            - generic [ref=e1820]:
+              - heading "Honda Amaze" [level=3] [ref=e1821]
+              - generic [ref=e1822]:
+                - generic [ref=e1823]:
+                  - generic [ref=e1824]: ₹ 9.00 Lakh
+                  - generic [ref=e1825]: Onwards
+                - generic [ref=e1826]: Ex-Showroom Price
+              - generic [ref=e1827]:
+                - generic [ref=e1828]:
+                  - img [ref=e1829]
+                  - generic [ref=e1832]: Petrol
+                - generic [ref=e1833]:
+                  - img [ref=e1834]
+                  - generic [ref=e1837]: Manual/Automatic
+              - button "View Details" [ref=e1838]
+          - generic [ref=e1839] [cursor=pointer]:
+            - generic [ref=e1840]:
+              - generic [ref=e1841]: NEW
+              - button [ref=e1842]:
+                - img [ref=e1843]
+              - img "Kia Sonet" [ref=e1846]
+            - generic [ref=e1847]:
+              - heading "Kia Sonet" [level=3] [ref=e1848]
+              - generic [ref=e1849]:
+                - generic [ref=e1850]:
+                  - generic [ref=e1851]: ₹ 12.00 Lakh
+                  - generic [ref=e1852]: Onwards
+                - generic [ref=e1853]: Ex-Showroom Price
+              - generic [ref=e1854]:
+                - generic [ref=e1855]:
+                  - img [ref=e1856]
+                  - generic [ref=e1859]: Petrol/Diesel
+                - generic [ref=e1860]:
+                  - img [ref=e1861]
+                  - generic [ref=e1864]: Manual/Automatic
+              - button "View Details" [ref=e1865]
+          - generic [ref=e1866] [cursor=pointer]:
+            - generic [ref=e1867]:
+              - generic [ref=e1868]: NEW
+              - button [ref=e1869]:
+                - img [ref=e1870]
+              - img "Kia Carnival" [ref=e1873]
+            - generic [ref=e1874]:
+              - heading "Kia Carnival" [level=3] [ref=e1875]
+              - generic [ref=e1876]:
+                - generic [ref=e1877]:
+                  - generic [ref=e1878]: ₹ 14.15 Lakh
+                  - generic [ref=e1879]: Onwards
+                - generic [ref=e1880]: Ex-Showroom Price
+              - generic [ref=e1881]:
+                - generic [ref=e1882]:
+                  - img [ref=e1883]
+                  - generic [ref=e1886]: Diesel
+                - generic [ref=e1887]:
+                  - img [ref=e1888]
+                  - generic [ref=e1891]: Automatic
+              - button "View Details" [ref=e1892]
+          - generic [ref=e1893] [cursor=pointer]:
+            - generic [ref=e1894]:
+              - generic [ref=e1895]: NEW
+              - button [ref=e1896]:
+                - img [ref=e1897]
+              - img "Kia EV9" [ref=e1900]
+            - generic [ref=e1901]:
+              - heading "Kia EV9" [level=3] [ref=e1902]
+              - generic [ref=e1903]:
+                - generic [ref=e1904]:
+                  - generic [ref=e1905]: ₹ 17.80 Lakh
+                  - generic [ref=e1906]: Onwards
+                - generic [ref=e1907]: Ex-Showroom Price
+              - generic [ref=e1908]:
+                - generic [ref=e1909]:
+                  - img [ref=e1910]
+                  - generic [ref=e1913]: Electric
+                - generic [ref=e1914]:
+                  - img [ref=e1915]
+                  - generic [ref=e1918]: Automatic
+              - button "View Details" [ref=e1919]
+          - generic [ref=e1920] [cursor=pointer]:
+            - generic [ref=e1921]:
+              - generic [ref=e1922]: NEW
+              - button [ref=e1923]:
+                - img [ref=e1924]
+              - img "MG Motor Windsor EV" [ref=e1927]
+            - generic [ref=e1928]:
+              - heading "MG Motor Windsor EV" [level=3] [ref=e1929]
+              - generic [ref=e1930]:
+                - generic [ref=e1931]:
+                  - generic [ref=e1932]: ₹ 17.80 Lakh
+                  - generic [ref=e1933]: Onwards
+                - generic [ref=e1934]: Ex-Showroom Price
+              - generic [ref=e1935]:
+                - generic [ref=e1936]:
+                  - img [ref=e1937]
+                  - generic [ref=e1940]: Electric
+                - generic [ref=e1941]:
+                  - img [ref=e1942]
+                  - generic [ref=e1945]: Automatic
+              - button "View Details" [ref=e1946]
+          - generic [ref=e1947] [cursor=pointer]:
+            - generic [ref=e1948]:
+              - generic [ref=e1949]: NEW
+              - button [ref=e1950]:
+                - img [ref=e1951]
+              - img "Tata Nexon EV" [ref=e1954]
+            - generic [ref=e1955]:
+              - heading "Tata Nexon EV" [level=3] [ref=e1956]
+              - generic [ref=e1957]:
+                - generic [ref=e1958]:
+                  - generic [ref=e1959]: ₹ 17.80 Lakh
+                  - generic [ref=e1960]: Onwards
+                - generic [ref=e1961]: Ex-Showroom Price
+              - generic [ref=e1962]:
+                - generic [ref=e1963]:
+                  - img [ref=e1964]
+                  - generic [ref=e1967]: Electric
+                - generic [ref=e1968]:
+                  - img [ref=e1969]
+                  - generic [ref=e1972]: Automatic
+              - button "View Details" [ref=e1973]
+          - generic [ref=e1974] [cursor=pointer]:
+            - generic [ref=e1975]:
+              - generic [ref=e1976]: NEW
+              - button [ref=e1977]:
+                - img [ref=e1978]
+              - img "Tata Curvv" [ref=e1981]
+            - generic [ref=e1982]:
+              - heading "Tata Curvv" [level=3] [ref=e1983]
+              - generic [ref=e1984]:
+                - generic [ref=e1985]:
+                  - generic [ref=e1986]: ₹ 12.00 Lakh
+                  - generic [ref=e1987]: Onwards
+                - generic [ref=e1988]: Ex-Showroom Price
+              - generic [ref=e1989]:
+                - generic [ref=e1990]:
+                  - img [ref=e1991]
+                  - generic [ref=e1994]: Petrol
+                - generic [ref=e1995]:
+                  - img [ref=e1996]
+                  - generic [ref=e1999]: Manual/Automatic
+              - button "View Details" [ref=e2000]
+          - generic [ref=e2001] [cursor=pointer]:
+            - generic [ref=e2002]:
+              - generic [ref=e2003]: NEW
+              - button [ref=e2004]:
+                - img [ref=e2005]
+              - img "Mahindra Thar Roxx" [ref=e2008]
+            - generic [ref=e2009]:
+              - heading "Mahindra Thar Roxx" [level=3] [ref=e2010]
+              - generic [ref=e2011]:
+                - generic [ref=e2012]:
+                  - generic [ref=e2013]: ₹ 12.00 Lakh
+                  - generic [ref=e2014]: Onwards
+                - generic [ref=e2015]: Ex-Showroom Price
+              - generic [ref=e2016]:
+                - generic [ref=e2017]:
+                  - img [ref=e2018]
+                  - generic [ref=e2021]: Petrol/Diesel
+                - generic [ref=e2022]:
+                  - img [ref=e2023]
+                  - generic [ref=e2026]: Manual/Automatic
+              - button "View Details" [ref=e2027]
+          - generic [ref=e2028] [cursor=pointer]:
+            - generic [ref=e2029]:
+              - generic [ref=e2030]: NEW
+              - button [ref=e2031]:
+                - img [ref=e2032]
+              - img "Toyota Land Cruiser LC300" [ref=e2035]
+            - generic [ref=e2036]:
+              - heading "Toyota Land Cruiser LC300" [level=3] [ref=e2037]
+              - generic [ref=e2038]:
+                - generic [ref=e2039]:
+                  - generic [ref=e2040]: ₹ 15.30 Lakh
+                  - generic [ref=e2041]: Onwards
+                - generic [ref=e2042]: Ex-Showroom Price
+              - generic [ref=e2043]:
+                - generic [ref=e2044]:
+                  - img [ref=e2045]
+                  - generic [ref=e2048]: Diesel
+                - generic [ref=e2049]:
+                  - img [ref=e2050]
+                  - generic [ref=e2053]: Automatic
+              - button "View Details" [ref=e2054]
+          - generic [ref=e2055] [cursor=pointer]:
+            - generic [ref=e2056]:
+              - generic [ref=e2057]: NEW
+              - button [ref=e2058]:
+                - img [ref=e2059]
+              - img "Tata Curvv EV" [ref=e2062]
+            - generic [ref=e2063]:
+              - heading "Tata Curvv EV" [level=3] [ref=e2064]
+              - generic [ref=e2065]:
+                - generic [ref=e2066]:
+                  - generic [ref=e2067]: ₹ 17.80 Lakh
+                  - generic [ref=e2068]: Onwards
+                - generic [ref=e2069]: Ex-Showroom Price
+              - generic [ref=e2070]:
+                - generic [ref=e2071]:
+                  - img [ref=e2072]
+                  - generic [ref=e2075]: Electric
+                - generic [ref=e2076]:
+                  - img [ref=e2077]
+                  - generic [ref=e2080]: Automatic
+              - button "View Details" [ref=e2081]
+          - generic [ref=e2082] [cursor=pointer]:
+            - generic [ref=e2083]:
+              - generic [ref=e2084]: NEW
+              - button [ref=e2085]:
+                - img [ref=e2086]
+              - img "Mahindra XUV 3XO" [ref=e2089]
+            - generic [ref=e2090]:
+              - heading "Mahindra XUV 3XO" [level=3] [ref=e2091]
+              - generic [ref=e2092]:
+                - generic [ref=e2093]:
+                  - generic [ref=e2094]: ₹ 12.00 Lakh
+                  - generic [ref=e2095]: Onwards
+                - generic [ref=e2096]: Ex-Showroom Price
+              - generic [ref=e2097]:
+                - generic [ref=e2098]:
+                  - img [ref=e2099]
+                  - generic [ref=e2102]: Petrol/Diesel
+                - generic [ref=e2103]:
+                  - img [ref=e2104]
+                  - generic [ref=e2107]: Manual/Automatic
+              - button "View Details" [ref=e2108]
+          - generic [ref=e2109] [cursor=pointer]:
+            - generic [ref=e2110]:
+              - generic [ref=e2111]: NEW
+              - button [ref=e2112]:
+                - img [ref=e2113]
+              - img "Toyota Urban Cruiser Taisor" [ref=e2116]
+            - generic [ref=e2117]:
+              - heading "Toyota Urban Cruiser Taisor" [level=3] [ref=e2118]
+              - generic [ref=e2119]:
+                - generic [ref=e2120]:
+                  - generic [ref=e2121]: ₹ 11.50 Lakh
+                  - generic [ref=e2122]: Onwards
+                - generic [ref=e2123]: Ex-Showroom Price
+              - generic [ref=e2124]:
+                - generic [ref=e2125]:
+                  - img [ref=e2126]
+                  - generic [ref=e2129]: Petrol/CNG
+                - generic [ref=e2130]:
+                  - img [ref=e2131]
+                  - generic [ref=e2134]: Manual/Automatic
+              - button "View Details" [ref=e2135]
+          - generic [ref=e2136] [cursor=pointer]:
+            - generic [ref=e2137]:
+              - generic [ref=e2138]: NEW
+              - button [ref=e2139]:
+                - img [ref=e2140]
+              - img "Hyundai Creta N Line" [ref=e2143]
+            - generic [ref=e2144]:
+              - heading "Hyundai Creta N Line" [level=3] [ref=e2145]
+              - generic [ref=e2146]:
+                - generic [ref=e2147]:
+                  - generic [ref=e2148]: ₹ 12.00 Lakh
+                  - generic [ref=e2149]: Onwards
+                - generic [ref=e2150]: Ex-Showroom Price
+              - generic [ref=e2151]:
+                - generic [ref=e2152]:
+                  - img [ref=e2153]
+                  - generic [ref=e2156]: Petrol
+                - generic [ref=e2157]:
+                  - img [ref=e2158]
+                  - generic [ref=e2161]: Manual/Automatic
+              - button "View Details" [ref=e2162]
+          - generic [ref=e2163] [cursor=pointer]:
+            - generic [ref=e2164]:
+              - generic [ref=e2165]: NEW
+              - button [ref=e2166]:
+                - img [ref=e2167]
+              - img "MG Motor ZS EV" [ref=e2170]
+            - generic [ref=e2171]:
+              - heading "MG Motor ZS EV" [level=3] [ref=e2172]
+              - generic [ref=e2173]:
+                - generic [ref=e2174]:
+                  - generic [ref=e2175]: ₹ 17.80 Lakh
+                  - generic [ref=e2176]: Onwards
+                - generic [ref=e2177]: Ex-Showroom Price
+              - generic [ref=e2178]:
+                - generic [ref=e2179]:
+                  - img [ref=e2180]
+                  - generic [ref=e2183]: Electric
+                - generic [ref=e2184]:
+                  - img [ref=e2185]
+                  - generic [ref=e2188]: Automatic
+              - button "View Details" [ref=e2189]
+          - generic [ref=e2190] [cursor=pointer]:
+            - generic [ref=e2191]:
+              - generic [ref=e2192]: NEW
+              - button [ref=e2193]:
+                - img [ref=e2194]
+              - img "Toyota Camry" [ref=e2197]
+            - generic [ref=e2198]:
+              - heading "Toyota Camry" [level=3] [ref=e2199]
+              - generic [ref=e2200]:
+                - generic [ref=e2201]:
+                  - generic [ref=e2202]: ₹ 9.00 Lakh
+                  - generic [ref=e2203]: Onwards
+                - generic [ref=e2204]: Ex-Showroom Price
+              - generic [ref=e2205]:
+                - generic [ref=e2206]:
+                  - img [ref=e2207]
+                  - generic [ref=e2210]: Strong hybrid
+                - generic [ref=e2211]:
+                  - img [ref=e2212]
+                  - generic [ref=e2215]: E-CVT
+              - button "View Details" [ref=e2216]
+      - generic [ref=e2219]:
+        - heading "Popular Comparison" [level=2] [ref=e2220]
+        - generic [ref=e2222]:
+          - generic [ref=e2223]:
+            - generic [ref=e2224]:
+              - generic [ref=e2225]:
+                - img "Toyota Fortuner" [ref=e2227]
+                - generic [ref=e2228]:
+                  - generic [ref=e2229]: Toyota
+                  - generic [ref=e2230]: Fortuner
+                  - generic [ref=e2231]: ₹ 14.26 Lakh
+                  - generic [ref=e2232]: On-Road Price
+              - generic [ref=e2235]: VS
+              - generic [ref=e2236]:
+                - img "Tata Harrier EV" [ref=e2238]
+                - generic [ref=e2239]:
+                  - generic [ref=e2240]: Tata
+                  - generic [ref=e2241]: Harrier EV
+                  - generic [ref=e2242]: ₹ 18.89 Lakh
+                  - generic [ref=e2243]: On-Road Price
+            - button "Compare Now" [ref=e2244] [cursor=pointer]
+          - generic [ref=e2245]:
+            - generic [ref=e2246]:
+              - generic [ref=e2247]:
+                - img "Hyundai Venue" [ref=e2249]
+                - generic [ref=e2250]:
+                  - generic [ref=e2251]: Hyundai
+                  - generic [ref=e2252]: Venue
+                  - generic [ref=e2253]: ₹ 14.26 Lakh
+                  - generic [ref=e2254]: On-Road Price
+              - generic [ref=e2257]: VS
+              - generic [ref=e2258]:
+                - img "Tata Nexon" [ref=e2260]
+                - generic [ref=e2261]:
+                  - generic [ref=e2262]: Tata
+                  - generic [ref=e2263]: Nexon
+                  - generic [ref=e2264]: ₹ 14.26 Lakh
+                  - generic [ref=e2265]: On-Road Price
+            - button "Compare Now" [ref=e2266] [cursor=pointer]
+        - button "Compare Cars of Your Choice" [ref=e2268] [cursor=pointer]
+      - generic [ref=e2271]:
+        - generic [ref=e2272]:
+          - heading "Latest Car News" [level=2] [ref=e2273]
+          - link "View All" [ref=e2274] [cursor=pointer]:
+            - /url: /news
+            - generic [ref=e2275]: View All
+            - img [ref=e2276]
+        - generic [ref=e2279]:
+          - 'link "Why the Tata Curvv is a Great Choice for Families News Why the Tata Curvv is a Great Choice for Families Read everything about the Tata Curvv. Why the {Model} is a Great Choice for Families - full details inside. Haji Karim • 28 Nov 1 min read 201 4" [ref=e2280] [cursor=pointer]':
+            - /url: /news/why-the-tata-curvv-is-a-great-choice-for-families-81b1d50d
+            - generic [ref=e2281]:
+              - img "Why the Tata Curvv is a Great Choice for Families" [ref=e2282]
+              - generic [ref=e2283]: News
+            - generic [ref=e2284]:
+              - heading "Why the Tata Curvv is a Great Choice for Families" [level=3] [ref=e2285]
+              - paragraph [ref=e2286]: "Read everything about the Tata Curvv. Why the {Model} is a Great Choice for Families - full details inside."
+              - generic [ref=e2287]:
+                - generic [ref=e2288]: Haji Karim
+                - generic [ref=e2289]: •
+                - img [ref=e2290]
+                - generic [ref=e2292]: 28 Nov
+              - generic [ref=e2293]:
+                - generic [ref=e2294]:
+                  - img [ref=e2295]
+                  - generic [ref=e2298]: 1 min read
+                - generic [ref=e2299]:
+                  - img [ref=e2300]
+                  - generic [ref=e2303]: "201"
+                - generic [ref=e2304]:
+                  - img [ref=e2305]
+                  - generic [ref=e2307]: "4"
+          - 'link "Tata Curvv vs Competitors: Detailed Comparison News Featured Tata Curvv vs Competitors: Detailed Comparison Read everything about the Tata Curvv. {Model} vs Competitors: Detailed Comparison - full details inside. Haji Karim • 28 Nov 1 min read 184 87" [ref=e2308] [cursor=pointer]':
+            - /url: /news/tata-curvv-vs-competitors-detailed-comparison-569e1ff3
+            - generic [ref=e2309]:
+              - 'img "Tata Curvv vs Competitors: Detailed Comparison" [ref=e2310]'
+              - generic [ref=e2311]: News
+              - generic [ref=e2312]: Featured
+            - generic [ref=e2313]:
+              - 'heading "Tata Curvv vs Competitors: Detailed Comparison" [level=3] [ref=e2314]'
+              - paragraph [ref=e2315]: "Read everything about the Tata Curvv. {Model} vs Competitors: Detailed Comparison - full details inside."
+              - generic [ref=e2316]:
+                - generic [ref=e2317]: Haji Karim
+                - generic [ref=e2318]: •
+                - img [ref=e2319]
+                - generic [ref=e2321]: 28 Nov
+              - generic [ref=e2322]:
+                - generic [ref=e2323]:
+                  - img [ref=e2324]
+                  - generic [ref=e2327]: 1 min read
+                - generic [ref=e2328]:
+                  - img [ref=e2329]
+                  - generic [ref=e2332]: "184"
+                - generic [ref=e2333]:
+                  - img [ref=e2334]
+                  - generic [ref=e2336]: "87"
+          - 'link "Tata Curvv Price Hike Expected Next Month News Tata Curvv Price Hike Expected Next Month Read everything about the Tata Curvv. {Model} Price Hike Expected Next Month - full details inside. Haji Karim • 28 Nov 1 min read 891 98" [ref=e2337] [cursor=pointer]':
+            - /url: /news/tata-curvv-price-hike-expected-next-month-14cb3a3a
+            - generic [ref=e2338]:
+              - img "Tata Curvv Price Hike Expected Next Month" [ref=e2339]
+              - generic [ref=e2340]: News
+            - generic [ref=e2341]:
+              - heading "Tata Curvv Price Hike Expected Next Month" [level=3] [ref=e2342]
+              - paragraph [ref=e2343]: "Read everything about the Tata Curvv. {Model} Price Hike Expected Next Month - full details inside."
+              - generic [ref=e2344]:
+                - generic [ref=e2345]: Haji Karim
+                - generic [ref=e2346]: •
+                - img [ref=e2347]
+                - generic [ref=e2349]: 28 Nov
+              - generic [ref=e2350]:
+                - generic [ref=e2351]:
+                  - img [ref=e2352]
+                  - generic [ref=e2355]: 1 min read
+                - generic [ref=e2356]:
+                  - img [ref=e2357]
+                  - generic [ref=e2360]: "891"
+                - generic [ref=e2361]:
+                  - img [ref=e2362]
+                  - generic [ref=e2364]: "98"
+          - 'link "New Tata Curvv EV Facelift: What We Know So Far News New Tata Curvv EV Facelift: What We Know So Far Read everything about the Tata Curvv EV. New {Model} Facelift: What We Know So Far - full details inside. Haji Karim • 28 Nov 1 min read 724 41" [ref=e2365] [cursor=pointer]':
+            - /url: /news/new-tata-curvv-ev-facelift-what-we-know-so-far-20ecac59
+            - generic [ref=e2366]:
+              - 'img "New Tata Curvv EV Facelift: What We Know So Far" [ref=e2367]'
+              - generic [ref=e2368]: News
+            - generic [ref=e2369]:
+              - 'heading "New Tata Curvv EV Facelift: What We Know So Far" [level=3] [ref=e2370]'
+              - paragraph [ref=e2371]: "Read everything about the Tata Curvv EV. New {Model} Facelift: What We Know So Far - full details inside."
+              - generic [ref=e2372]:
+                - generic [ref=e2373]: Haji Karim
+                - generic [ref=e2374]: •
+                - img [ref=e2375]
+                - generic [ref=e2377]: 28 Nov
+              - generic [ref=e2378]:
+                - generic [ref=e2379]:
+                  - img [ref=e2380]
+                  - generic [ref=e2383]: 1 min read
+                - generic [ref=e2384]:
+                  - img [ref=e2385]
+                  - generic [ref=e2388]: "724"
+                - generic [ref=e2389]:
+                  - img [ref=e2390]
+                  - generic [ref=e2392]: "41"
+          - 'link "Why the Tata Curvv EV is a Great Choice for Families News Featured Why the Tata Curvv EV is a Great Choice for Families Read everything about the Tata Curvv EV. Why the {Model} is a Great Choice for Families - full details inside. Haji Karim • 28 Nov 1 min read 423 76" [ref=e2393] [cursor=pointer]':
+            - /url: /news/why-the-tata-curvv-ev-is-a-great-choice-for-families-5c20c806
+            - generic [ref=e2394]:
+              - img "Why the Tata Curvv EV is a Great Choice for Families" [ref=e2395]
+              - generic [ref=e2396]: News
+              - generic [ref=e2397]: Featured
+            - generic [ref=e2398]:
+              - heading "Why the Tata Curvv EV is a Great Choice for Families" [level=3] [ref=e2399]
+              - paragraph [ref=e2400]: "Read everything about the Tata Curvv EV. Why the {Model} is a Great Choice for Families - full details inside."
+              - generic [ref=e2401]:
+                - generic [ref=e2402]: Haji Karim
+                - generic [ref=e2403]: •
+                - img [ref=e2404]
+                - generic [ref=e2406]: 28 Nov
+              - generic [ref=e2407]:
+                - generic [ref=e2408]:
+                  - img [ref=e2409]
+                  - generic [ref=e2412]: 1 min read
+                - generic [ref=e2413]:
+                  - img [ref=e2414]
+                  - generic [ref=e2417]: "423"
+                - generic [ref=e2418]:
+                  - img [ref=e2419]
+                  - generic [ref=e2421]: "76"
+          - 'link "Tata Curvv EV vs Competitors: Detailed Comparison News Tata Curvv EV vs Competitors: Detailed Comparison Read everything about the Tata Curvv EV. {Model} vs Competitors: Detailed Comparison - full details inside. Haji Karim • 28 Nov 1 min read 488 93" [ref=e2422] [cursor=pointer]':
+            - /url: /news/tata-curvv-ev-vs-competitors-detailed-comparison-cba1090b
+            - generic [ref=e2423]:
+              - 'img "Tata Curvv EV vs Competitors: Detailed Comparison" [ref=e2424]'
+              - generic [ref=e2425]: News
+            - generic [ref=e2426]:
+              - 'heading "Tata Curvv EV vs Competitors: Detailed Comparison" [level=3] [ref=e2427]'
+              - paragraph [ref=e2428]: "Read everything about the Tata Curvv EV. {Model} vs Competitors: Detailed Comparison - full details inside."
+              - generic [ref=e2429]:
+                - generic [ref=e2430]: Haji Karim
+                - generic [ref=e2431]: •
+                - img [ref=e2432]
+                - generic [ref=e2434]: 28 Nov
+              - generic [ref=e2435]:
+                - generic [ref=e2436]:
+                  - img [ref=e2437]
+                  - generic [ref=e2440]: 1 min read
+                - generic [ref=e2441]:
+                  - img [ref=e2442]
+                  - generic [ref=e2445]: "488"
+                - generic [ref=e2446]:
+                  - img [ref=e2447]
+                  - generic [ref=e2449]: "93"
+      - heading "Latest Videos" [level=2] [ref=e2454]
+    - contentinfo [ref=e2469]:
+      - generic [ref=e2470]:
+        - generic [ref=e2471]:
+          - generic [ref=e2472]:
+            - link "MotorOctane - Aapka Auto Expert MotorOctane" [ref=e2473] [cursor=pointer]:
+              - /url: /
+              - img "MotorOctane - Aapka Auto Expert" [ref=e2474]
+              - generic [ref=e2475]: MotorOctane
+            - paragraph [ref=e2476]: Your trusted partner for finding the perfect new car in India. Compare prices, specifications, reviews, and get the best deals from authorized dealers.
+            - generic [ref=e2477]:
+              - link "Follow us on Facebook" [ref=e2478] [cursor=pointer]:
+                - /url: https://facebook.com/motoroctane
+                - img [ref=e2479]
+              - link "Follow us on Twitter" [ref=e2481] [cursor=pointer]:
+                - /url: https://twitter.com/motoroctane
+                - img [ref=e2482]
+              - link "Follow us on Instagram" [ref=e2484] [cursor=pointer]:
+                - /url: https://instagram.com/motoroctane
+                - img [ref=e2485]
+              - link "Subscribe to our YouTube channel" [ref=e2488] [cursor=pointer]:
+                - /url: https://youtube.com/motoroctane
+                - img [ref=e2489]
+          - generic [ref=e2492]:
+            - heading "Quick Links" [level=3] [ref=e2493]
+            - list [ref=e2494]:
+              - listitem [ref=e2495]:
+                - link "New Cars" [ref=e2496] [cursor=pointer]:
+                  - /url: /new-cars
+              - listitem [ref=e2497]:
+                - link "Compare Cars" [ref=e2498] [cursor=pointer]:
+                  - /url: /compare
+              - listitem [ref=e2499]:
+                - link "Car Brands" [ref=e2500] [cursor=pointer]:
+                  - /url: /brands
+              - listitem [ref=e2501]:
+                - link "EMI Calculator" [ref=e2502] [cursor=pointer]:
+                  - /url: /emi-calculator
+              - listitem [ref=e2503]:
+                - link "Car News" [ref=e2504] [cursor=pointer]:
+                  - /url: /news
+          - generic [ref=e2505]:
+            - heading "Popular Brands" [level=3] [ref=e2506]
+            - list [ref=e2507]:
+              - listitem [ref=e2508]:
+                - link "Maruti Suzuki" [ref=e2509] [cursor=pointer]:
+                  - /url: /cars/maruti-suzuki
+              - listitem [ref=e2510]:
+                - link "Hyundai" [ref=e2511] [cursor=pointer]:
+                  - /url: /cars/hyundai
+              - listitem [ref=e2512]:
+                - link "Tata" [ref=e2513] [cursor=pointer]:
+                  - /url: /cars/tata
+              - listitem [ref=e2514]:
+                - link "Mahindra" [ref=e2515] [cursor=pointer]:
+                  - /url: /cars/mahindra
+              - listitem [ref=e2516]:
+                - link "Kia" [ref=e2517] [cursor=pointer]:
+                  - /url: /cars/kia
+          - generic [ref=e2518]:
+            - heading "Contact Us" [level=3] [ref=e2519]
+            - generic [ref=e2520]:
+              - generic [ref=e2521]:
+                - img [ref=e2522]
+                - link "info@motoroctane.com" [ref=e2525] [cursor=pointer]:
+                  - /url: mailto:info@motoroctane.com
+              - generic [ref=e2526]:
+                - img [ref=e2527]
+                - link "+91 98765 43210" [ref=e2529] [cursor=pointer]:
+                  - /url: tel:+919876543210
+              - generic [ref=e2530]:
+                - img [ref=e2531]
+                - generic [ref=e2534]:
+                  - text: MotorOctane Technologies Pvt. Ltd.
+                  - text: Cyber City, Gurgaon, Haryana 122002
+        - generic [ref=e2536]:
+          - paragraph [ref=e2537]: © 2024 MotorOctane. All rights reserved.
+          - generic [ref=e2538]:
+            - link "Privacy Policy" [ref=e2539] [cursor=pointer]:
+              - /url: /privacy-policy
+            - link "Terms of Service" [ref=e2540] [cursor=pointer]:
+              - /url: /terms-of-service
+            - link "About Us" [ref=e2541] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=e2542] [cursor=pointer]:
+              - /url: /contact
+  - alert [ref=e2543]
+```

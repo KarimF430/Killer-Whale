@@ -4,12 +4,13 @@ import { useState, useEffect, useRef } from 'react'
 import { MapPin, ArrowLeft, X, Navigation, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { searchCities, type City } from '@/lib/cities-data'
-import {
-    detectLocationAndGetCity,
-    searchCitiesWithGoogle,
-    getPlaceDetails,
-    loadGoogleMapsAPI
-} from '@/lib/google-maps'
+// Google Maps integration disabled - will be re-enabled later
+// import {
+//     detectLocationAndGetCity,
+//     searchCitiesWithGoogle,
+//     getPlaceDetails,
+//     loadGoogleMapsAPI
+// } from '@/lib/google-maps'
 
 interface GoogleCity {
     description: string
@@ -43,18 +44,18 @@ export default function LocationSelector({ popularCities }: LocationSelectorProp
         }
     }, [])
 
-    // Initialize Google Maps API
-    useEffect(() => {
-        loadGoogleMapsAPI()
-            .then(() => {
-                setUseGoogleMaps(true)
-                console.log('Google Maps API loaded successfully')
-            })
-            .catch((error) => {
-                console.warn('Google Maps API not available, using fallback:', error)
-                setUseGoogleMaps(false)
-            })
-    }, [])
+    // Google Maps API disabled for now
+    // useEffect(() => {
+    //     loadGoogleMapsAPI()
+    //         .then(() => {
+    //             setUseGoogleMaps(true)
+    //             console.log('Google Maps API loaded successfully')
+    //         })
+    //         .catch((error) => {
+    //             console.warn('Google Maps API not available, using fallback:', error)
+    //             setUseGoogleMaps(false)
+    //         })
+    // }, [])
 
     // Search functionality with Google Maps integration
     useEffect(() => {
@@ -73,28 +74,29 @@ export default function LocationSelector({ popularCities }: LocationSelectorProp
 
         // Debounce search
         searchTimeoutRef.current = setTimeout(async () => {
-            if (useGoogleMaps) {
-                try {
-                    const predictions = await searchCitiesWithGoogle(searchQuery)
-                    const formattedResults: GoogleCity[] = predictions.map(p => ({
-                        description: p.description,
-                        place_id: p.place_id,
-                        structured_formatting: {
-                            main_text: p.structured_formatting.main_text,
-                            secondary_text: p.structured_formatting.secondary_text || ''
-                        }
-                    }))
-                    setGoogleResults(formattedResults)
-                } catch (error) {
-                    console.error('Google search failed, using fallback:', error)
-                    const results = searchCities(searchQuery)
-                    setSearchResults(results)
-                }
-            } else {
-                // Fallback to local search
-                const results = searchCities(searchQuery)
-                setSearchResults(results)
-            }
+            // Google Maps disabled - using local search only
+            // if (useGoogleMaps) {
+            //     try {
+            //         const predictions = await searchCitiesWithGoogle(searchQuery)
+            //         const formattedResults: GoogleCity[] = predictions.map(p => ({
+            //             description: p.description,
+            //             place_id: p.place_id,
+            //             structured_formatting: {
+            //                 main_text: p.structured_formatting.main_text,
+            //                 secondary_text: p.structured_formatting.secondary_text || ''
+            //             }
+            //         }))
+            //         setGoogleResults(formattedResults)
+            //     } catch (error) {
+            //         console.error('Google search failed, using fallback:', error)
+            //         const results = searchCities(searchQuery)
+            //         setSearchResults(results)
+            //     }
+            // } else {
+            // Fallback to local search
+            const results = searchCities(searchQuery)
+            setSearchResults(results)
+            // }
             setIsSearching(false)
         }, 300)
 
@@ -113,58 +115,64 @@ export default function LocationSelector({ popularCities }: LocationSelectorProp
         setTimeout(() => router.back(), 300)
     }
 
-    const handleGoogleCitySelect = async (googleCity: GoogleCity) => {
-        try {
-            const details = await getPlaceDetails(googleCity.place_id)
-            if (details && details.city && details.state) {
-                const cityName = `${details.city}, ${details.state}`
-                setSelectedCity(cityName)
-                localStorage.setItem('selectedCity', cityName)
-                window.dispatchEvent(new Event('storage'))
-                setTimeout(() => router.back(), 300)
-            } else {
-                const cityName = googleCity.structured_formatting.main_text
-                setSelectedCity(cityName)
-                localStorage.setItem('selectedCity', cityName)
-                window.dispatchEvent(new Event('storage'))
-                setTimeout(() => router.back(), 300)
-            }
-        } catch (error) {
-            const cityName = googleCity.structured_formatting.main_text
-            setSelectedCity(cityName)
-            localStorage.setItem('selectedCity', cityName)
-            window.dispatchEvent(new Event('storage'))
-            setTimeout(() => router.back(), 300)
-        }
-    }
+    // Google Maps city selection disabled
+    // const handleGoogleCitySelect = async (googleCity: GoogleCity) => {
+    //     try {
+    //         const details = await getPlaceDetails(googleCity.place_id)
+    //         if (details && details.city && details.state) {
+    //             const cityName = `${details.city}, ${details.state}`
+    //             setSelectedCity(cityName)
+    //             localStorage.setItem('selectedCity', cityName)
+    //             window.dispatchEvent(new Event('storage'))
+    //             setTimeout(() => router.back(), 300)
+    //         } else {
+    //             const cityName = googleCity.structured_formatting.main_text
+    //             setSelectedCity(cityName)
+    //             localStorage.setItem('selectedCity', cityName)
+    //             window.dispatchEvent(new Event('storage'))
+    //             setTimeout(() => router.back(), 300)
+    //         }
+    //     } catch (error) {
+    //         const cityName = googleCity.structured_formatting.main_text
+    //         setSelectedCity(cityName)
+    //         localStorage.setItem('selectedCity', cityName)
+    //         window.dispatchEvent(new Event('storage'))
+    //         setTimeout(() => router.back(), 300)
+    //     }
+    // }
 
     const handleDetectLocation = async () => {
-        if (!useGoogleMaps) {
-            alert('Location detection requires Google Maps API. Please select a city manually.')
-            return
-        }
+        // Google Maps disabled - show message
+        alert('Location detection is currently disabled. Please select a city manually.')
+        return
 
-        setIsDetectingLocation(true)
-
-        try {
-            const result = await detectLocationAndGetCity()
-
-            if (result && result.city && result.state) {
-                const cityName = `${result.city}, ${result.state}`
-                setSelectedCity(cityName)
-                localStorage.setItem('selectedCity', cityName)
-                window.dispatchEvent(new Event('storage'))
-                alert(`Location detected: ${cityName}`)
-                setTimeout(() => router.back(), 1000)
-            } else {
-                alert('Could not determine city from your location. Please select manually.')
-            }
-        } catch (error: any) {
-            console.error('Location detection error:', error)
-            alert(error.message || 'Unable to detect location. Please select manually.')
-        } finally {
-            setIsDetectingLocation(false)
-        }
+        // Original Google Maps code (disabled):
+        // if (!useGoogleMaps) {
+        //     alert('Location detection requires Google Maps API. Please select a city manually.')
+        //     return
+        // }
+        //
+        // setIsDetectingLocation(true)
+        //
+        // try {
+        //     const result = await detectLocationAndGetCity()
+        //
+        //     if (result && result.city && result.state) {
+        //         const cityName = `${result.city}, ${result.state}`
+        //         setSelectedCity(cityName)
+        //         localStorage.setItem('selectedCity', cityName)
+        //         window.dispatchEvent(new Event('storage'))
+        //         alert(`Location detected: ${cityName}`)
+        //         setTimeout(() => router.back(), 1000)
+        //     } else {
+        //         alert('Could not determine city from your location. Please select manually.')
+        //     }
+        // } catch (error: any) {
+        //     console.error('Location detection error:', error)
+        //     alert(error.message || 'Unable to detect location. Please select manually.')
+        // } finally {
+        //     setIsDetectingLocation(false)
+        // }
     }
 
     return (
@@ -290,8 +298,8 @@ export default function LocationSelector({ popularCities }: LocationSelectorProp
                     </div>
                 ) : (
                     <div>
-                        {/* Google Maps Results */}
-                        {googleResults.length > 0 && (
+                        {/* Google Maps Results - DISABLED */}
+                        {/* {googleResults.length > 0 && (
                             <div>
                                 <div className="mb-4 text-sm text-gray-600 flex items-center gap-2">
                                     <span>Found {googleResults.length} {googleResults.length === 1 ? 'city' : 'cities'}</span>
@@ -326,7 +334,7 @@ export default function LocationSelector({ popularCities }: LocationSelectorProp
                                     ))}
                                 </div>
                             </div>
-                        )}
+                        )} */}
 
                         {/* Local Fallback Results */}
                         {searchResults.length > 0 && googleResults.length === 0 && (

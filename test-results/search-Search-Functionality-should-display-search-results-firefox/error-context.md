@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "MotorOctane MotorOctane" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img "MotorOctane" [ref=e7]
+          - generic [ref=e8]: MotorOctane
+      - generic [ref=e9]:
+        - link "Search cars" [ref=e10] [cursor=pointer]:
+          - /url: /search
+          - img [ref=e11]
+        - link "Select location" [ref=e14] [cursor=pointer]:
+          - /url: /location
+          - img [ref=e15]
+        - button "Open menu" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+  - generic [ref=e23]:
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - button "Go back" [ref=e27] [cursor=pointer]:
+          - img [ref=e28]
+        - generic [ref=e31]:
+          - img [ref=e32]
+          - textbox "Search for cars..." [active] [ref=e35]: swift
+          - button "Clear search" [ref=e36] [cursor=pointer]:
+            - img [ref=e37]
+      - generic [ref=e40]: Found 1 results in 90ms
+    - generic [ref=e42]:
+      - generic [ref=e43]: 1 result
+      - link "Maruti Suzuki Swift Maruti Suzuki Swift Maruti Suzuki" [ref=e45] [cursor=pointer]:
+        - /url: /maruti-suzuki-cars/swift
+        - generic [ref=e46]:
+          - img "Maruti Suzuki Swift" [ref=e48]
+          - generic [ref=e49]:
+            - heading "Maruti Suzuki Swift" [level=3] [ref=e50]
+            - paragraph [ref=e51]: Maruti Suzuki
+          - img [ref=e53]
+  - button "Open Next.js Dev Tools" [ref=e60] [cursor=pointer]:
+    - img [ref=e61]
+  - alert [ref=e65]
+```
