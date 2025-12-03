@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Google Maps API Key
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAgdH5fe85ebUcYAzYY_MLq3U_8fOPLrlc';
+const GOOGLE_MAPS_API_KEY = 'null';
 
 // RTO State Mapping (from existing rto-data.ts)
 const RTO_STATE_MAPPING = {
