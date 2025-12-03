@@ -227,7 +227,7 @@ export default function YouTubeVideoPlayer() {
               <div className="flex">
                 {/* Video Thumbnail */}
                 <div
-                  className="relative w-32 h-20 bg-gradient-to-r from-blue-400 to-purple-500 flex-shrink-0"
+                  className="relative w-32 min-h-[5rem] bg-gradient-to-r from-blue-400 to-purple-500 flex-shrink-0"
                   style={{
                     backgroundImage: video.thumbnail ? `url(${video.thumbnail})` : undefined,
                     backgroundSize: 'cover',

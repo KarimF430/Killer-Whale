@@ -90,7 +90,14 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
               <div key={video.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="flex">
                   {/* Video Thumbnail */}
-                  <div className="relative w-32 h-20 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <div
+                    className="relative w-32 min-h-[5rem] bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center flex-shrink-0"
+                    style={{
+                      backgroundImage: video.thumbnail ? `url(${video.thumbnail})` : undefined,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  >
                     <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
                       <Play className="w-4 h-4 text-white ml-0.5" fill="white" />
                     </div>
