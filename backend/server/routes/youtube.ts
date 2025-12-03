@@ -234,5 +234,25 @@ export default function createYouTubeRoutes(storage: IStorage): Router {
         }
     });
 
+    // Manual refresh endpoint (for production when Shell is not available)
+    router.post('/force-refresh', async (req, res) => {
+        try {
+            console.log('🔄 Manual YouTube fetch triggered via API');
+            const { fetchAndCacheYouTubeVideos } = await import('../scheduled-youtube-fetch');
+            await fetchAndCacheYouTubeVideos(storage);
+            return res.json({
+                success: true,
+                message: 'YouTube cache refreshed successfully'
+            });
+        } catch (error) {
+            console.error('Manual fetch failed:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Fetch failed',
+                message: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    });
+
     return router;
 }
