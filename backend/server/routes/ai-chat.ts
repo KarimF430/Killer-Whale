@@ -4,7 +4,10 @@ import { Variant as CarVariant } from '../db/schemas'
 import { getCarIntelligence, type CarIntelligence } from '../ai-engine/web-scraper'
 import { handleQuestionWithRAG } from '../ai-engine/rag-system'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || process.env.HF_API_KEY })
+// Initialize Groq client only if API key is available (prevents test failures)
+const groqApiKey = process.env.GROQ_API_KEY || process.env.HF_API_KEY || ''
+const groq = groqApiKey ? new Groq({ apiKey: groqApiKey }) : null
+
 
 // ============================================
 // HELPER FUNCTIONS
@@ -179,6 +182,13 @@ You: "Both are excellent compact SUVs at ₹10.87L. Creta wins on resale value a
         })
 
         // Let AI decide what to do
+        if (!groq) {
+            return res.status(503).json({
+                error: 'AI service unavailable',
+                reply: "Sorry, the AI service is currently unavailable. Please try again later!"
+            })
+        }
+
         const completion = await groq.chat.completions.create({
             model: 'llama-3.1-8b-instant',
             messages,
