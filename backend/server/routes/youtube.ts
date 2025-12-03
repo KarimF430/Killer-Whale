@@ -124,6 +124,33 @@ export default function createYouTubeRoutes(storage: IStorage): Router {
 
             // For search queries, fetch fresh data (model-specific videos)
             if (searchQuery) {
+                // Try to get from Redis cache first
+                try {
+                    const { getCacheRedisClient } = await import('../config/redis-config');
+                    const redis = getCacheRedisClient();
+
+                    if (redis) {
+                        const cacheKey = `youtube:search:${searchQuery.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                        const cachedData = await redis.get(cacheKey);
+
+                        if (cachedData) {
+                            const parsed = JSON.parse(cachedData);
+                            const cacheAge = Date.now() - parsed.timestamp;
+                            const minutesOld = Math.floor(cacheAge / 1000 / 60);
+
+                            console.log(`✅ YouTube search cache hit for "${searchQuery}" (age: ${minutesOld} minutes)`);
+                            return res.json({
+                                ...parsed.data,
+                                cached: true,
+                                cacheAge: minutesOld
+                            });
+                        }
+                    }
+                } catch (cacheError) {
+                    console.warn('⚠️ Redis cache check failed for search query:', cacheError);
+                    // Continue to fetch fresh data if cache fails
+                }
+
                 const apiKey = process.env.YOUTUBE_API_KEY;
                 const channelId = process.env.YOUTUBE_CHANNEL_ID || '@motoroctane';
 
@@ -135,6 +162,27 @@ export default function createYouTubeRoutes(storage: IStorage): Router {
                 try {
                     const freshData = await fetchYouTubeVideos(apiKey, channelId, searchQuery);
                     console.log(`✅ Fetched model-specific videos for: ${searchQuery}`);
+
+                    // Save to Redis cache
+                    try {
+                        const { getCacheRedisClient } = await import('../config/redis-config');
+                        const redis = getCacheRedisClient();
+
+                        if (redis) {
+                            const cacheKey = `youtube:search:${searchQuery.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                            const cacheData = {
+                                data: freshData,
+                                timestamp: Date.now()
+                            };
+                            const TTL = 48 * 60 * 60; // 48 hours
+
+                            await redis.setex(cacheKey, TTL, JSON.stringify(cacheData));
+                            console.log(`💾 Cached search results for "${searchQuery}" (TTL: 48h)`);
+                        }
+                    } catch (saveError) {
+                        console.warn('⚠️ Failed to save search results to Redis:', saveError);
+                    }
+
                     return res.json({
                         ...freshData,
                         cached: false
