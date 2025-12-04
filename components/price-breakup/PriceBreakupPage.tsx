@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronDown, Share2, Heart, Calendar, Fuel, Users } from 'lucide-react'
@@ -31,6 +31,25 @@ const formatLaunchDate = (date: string): string => {
     return `${months[monthIndex]} ${year}`
   }
   return date
+}
+
+// Helper function to normalize variant names for matching - moved outside component for SSR initialization
+const normalizeForMatch = (str: string) =>
+  str
+    .toLowerCase()
+    .replace(/\s*\(([^)]*)\)/g, '-$1-') // Extract content from parentheses: "S (O)" -> "s-o-"
+    .replace(/[()]/g, '')  // Remove any remaining parentheses
+    .replace(/\s+/g, '-')  // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, '') // Remove all non-alphanumeric except hyphens
+    .replace(/-+/g, '-')   // Replace multiple consecutive hyphens with single hyphen
+    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+
+// Helper to find lowest price variant from array
+const findLowestPriceVariant = (variants: any[]) => {
+  if (!variants || variants.length === 0) return null
+  return variants.reduce((lowest, current) =>
+    (current.price < lowest.price) ? current : lowest, variants[0]
+  )
 }
 
 interface PriceBreakupPageProps {
@@ -97,7 +116,30 @@ export default function PriceBreakupPage({
   const modelName = getModelName()
   const variantParam = searchParams.get('variant')
   const [selectedCity, setSelectedCity] = useState(() => getCityName())
-  const [selectedVariantName, setSelectedVariantName] = useState<string>('')
+
+  // Initialize selectedVariantName from SSR data immediately (no waiting for useEffect)
+  const [selectedVariantName, setSelectedVariantName] = useState<string>(() => {
+    if (initialVariants && initialVariants.length > 0) {
+      // Try to match variant from URL param first
+      if (variantParam) {
+        const normalizedParam = normalizeForMatch(variantParam)
+        const matched = initialVariants.find((v: any) =>
+          normalizeForMatch(v.name) === normalizedParam
+        )
+        if (matched) return matched.name
+        // Try partial match
+        const partial = initialVariants.find((v: any) => {
+          const normalized = normalizeForMatch(v.name)
+          return normalized.includes(normalizedParam) || normalizedParam.includes(normalized)
+        })
+        if (partial) return partial.name
+      }
+      // Fallback to lowest price variant
+      const lowest = findLowestPriceVariant(initialVariants)
+      return lowest?.name || ''
+    }
+    return ''
+  })
   const [activeSection, setActiveSection] = useState('overview')
 
   // Section navigation data
@@ -189,8 +231,18 @@ export default function PriceBreakupPage({
   const [popularCars, setPopularCars] = useState<any[]>([])
   const [loadingPopularCars, setLoadingPopularCars] = useState(true)
 
-  // On-Road Price Calculation
-  const [priceBreakup, setPriceBreakup] = useState<OnRoadPriceBreakup | null>(null)
+  // On-Road Price Calculation - Calculate immediately from SSR data
+  const initialPriceBreakup = useMemo(() => {
+    if (!selectedVariantName || !initialVariants || initialVariants.length === 0) return null
+    const variant = initialVariants.find((v: any) => v.name === selectedVariantName)
+    if (!variant) return null
+    const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
+    const fuelType = variant.fuel || variant.fuelType || 'Petrol'
+    console.log('⚡ Instant SSR price calculation:', { variant: variant.name, price: variant.price, state, fuel: fuelType })
+    return calculateOnRoadPrice(variant.price, state, fuelType)
+  }, [selectedVariantName, selectedCity, initialVariants])
+
+  const [priceBreakup, setPriceBreakup] = useState<OnRoadPriceBreakup | null>(initialPriceBreakup)
 
   // Calculate EMI for display (20% down, 7 years, 8% interest)
   const calculateDisplayEMI = (price: number) => {
@@ -207,15 +259,30 @@ export default function PriceBreakupPage({
 
   const displayEMI = priceBreakup ? calculateDisplayEMI(priceBreakup.totalOnRoadPrice) : 0
 
-  // Hero image from backend
-  const [heroImage, setHeroImage] = useState<string>('https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&h=500&fit=crop')
+  // Hero image - use SSR data if available
+  const [heroImage, setHeroImage] = useState<string>(() => {
+    if (initialModel?.heroImage) {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+      return initialModel.heroImage.startsWith('http')
+        ? initialModel.heroImage
+        : `${backendUrl}${initialModel.heroImage}`
+    }
+    return 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&h=500&fit=crop'
+  })
 
-  // Model and Brand data
-  const [model, setModel] = useState<any>(null)
-  const [brand, setBrand] = useState<any>(null)
+  // Model and Brand data - initialize from SSR props
+  const [model, setModel] = useState<any>(initialModel || null)
+  const [brand, setBrand] = useState<any>(initialBrand || null)
 
-  // Fetch model, brand, and variants from backend
+  // Fetch model, brand, and variants from backend - SKIP if SSR data exists
   useEffect(() => {
+    // Skip fetch if we have SSR data
+    if (initialVariants && initialVariants.length > 0 && initialModel) {
+      console.log('✅ Using SSR data, skipping client-side fetch. Variants:', initialVariants.length)
+      setLoadingVariants(false)
+      return
+    }
+
     const fetchData = async () => {
       try {
         setLoadingVariants(true)
@@ -248,8 +315,8 @@ export default function PriceBreakupPage({
             console.warn('⚠️ No hero image found for model:', foundModel.name)
           }
 
-          // Fetch variants for this model
-          const variantsRes = await fetch(`${backendUrl}/api/variants?modelId=${foundModel.id}&fields=minimal`)
+          // Fetch variants for this model - use full=true to get keyFeatures and power
+          const variantsRes = await fetch(`${backendUrl}/api/variants?modelId=${foundModel.id}&full=true`)
           const variants = await variantsRes.json()
 
           console.log('✅ Fetched variants:', variants.length)
@@ -260,8 +327,9 @@ export default function PriceBreakupPage({
             name: v.name,
             fuel: v.fuel || v.fuelType || 'Petrol',
             transmission: v.transmission || 'Manual',
-            power: v.maxPower || 'N/A',
-            features: Array.isArray(v.keyFeatures) ? v.keyFeatures.join(', ') : (v.keyFeatures || 'Standard features'),
+            power: v.maxPower || v.power || '',
+            keyFeatures: v.keyFeatures || [],
+            features: Array.isArray(v.keyFeatures) ? v.keyFeatures.join(', ') : (v.keyFeatures || ''),
             price: v.price // Keep in rupees for exact calculation
           }))
 
@@ -359,7 +427,7 @@ export default function PriceBreakupPage({
     }
 
     fetchData()
-  }, [brandName, modelName, variantParam])
+  }, [brandName, modelName, variantParam, initialVariants, initialModel])
 
   // Fetch popular cars from backend
   useEffect(() => {
@@ -592,20 +660,37 @@ export default function PriceBreakupPage({
     return automaticTypes.some(type => transmission.toLowerCase().includes(type))
   }
 
-  // Generate dynamic filters based on available variants
+  // Helper function to check if transmission is manual type
+  const isManualTransmission = (transmission: string) => {
+    return transmission.toLowerCase().includes('manual') ||
+      (transmission.toLowerCase() === 'mt') ||
+      (!isAutomaticTransmission(transmission) && transmission.toLowerCase() !== '')
+  }
+
+  // Generate dynamic filters based on available variants - matches VariantPage
   const getDynamicFilters = () => {
     const filters = ['All']
     const fuelTypes = new Set<string>()
     let hasAutomatic = false
+    let hasManual = false
 
     allVariants.forEach(variant => {
       if (variant.fuel) fuelTypes.add(variant.fuel)
-      if (variant.transmission && isAutomaticTransmission(variant.transmission)) {
-        hasAutomatic = true
+      if (variant.transmission) {
+        if (isAutomaticTransmission(variant.transmission)) {
+          hasAutomatic = true
+        }
+        if (isManualTransmission(variant.transmission)) {
+          hasManual = true
+        }
       }
     })
 
+    // Add fuel types first
     fuelTypes.forEach(fuel => filters.push(fuel))
+
+    // Add transmission types (Manual before Automatic like VariantPage)
+    if (hasManual) filters.push('Manual')
     if (hasAutomatic) filters.push('Automatic')
 
     return filters
@@ -624,10 +709,12 @@ export default function PriceBreakupPage({
       const matchesFuel = selectedFilters.some(filter =>
         ['Petrol', 'Diesel', 'CNG', 'Electric'].includes(filter) && variant.fuel === filter
       )
-      const matchesTransmission = selectedFilters.includes('Automatic') &&
+      const matchesAutomatic = selectedFilters.includes('Automatic') &&
         variant.transmission && isAutomaticTransmission(variant.transmission)
+      const matchesManual = selectedFilters.includes('Manual') &&
+        variant.transmission && isManualTransmission(variant.transmission)
 
-      return matchesFuel || matchesTransmission
+      return matchesFuel || matchesAutomatic || matchesManual
     })
   }
 
@@ -956,79 +1043,75 @@ export default function PriceBreakupPage({
               </Link>
             </div>
 
-            {/* Right: On-Road Price Breakdown */}
+            {/* Right: On-Road Price Breakdown - Refined & Mobile-Friendly */}
             <div id="price-breakup">
-              <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-red-600 to-orange-500 px-6 py-5">
-                  <h3 className="text-2xl font-bold text-white">On-Road Price</h3>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                {/* Header - Standard red-orange gradient theme */}
+                <div className="bg-gradient-to-r from-red-600 to-orange-500 px-4 sm:px-6 py-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">On-Road Price</h3>
                 </div>
 
-                <div className="p-6">
+                <div className="p-4 sm:p-5">
                   {priceBreakup ? (
                     <>
-                      {/* Price Items - Cleaner spacing */}
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="text-gray-700 font-medium">Ex-Showroom Price</span>
-                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.exShowroomPrice)}</span>
+                      {/* Price Items - Compact mobile-first design */}
+                      <div className="divide-y divide-gray-100">
+                        <div className="flex justify-between items-center py-2.5 sm:py-3">
+                          <span className="text-sm sm:text-base text-gray-600">Ex-Showroom Price</span>
+                          <span className="font-semibold text-gray-900 text-sm sm:text-base">₹ {formatIndianPrice(priceBreakup.exShowroomPrice)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="text-gray-700 font-medium">RTO Charges</span>
-                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.rtoCharges)}</span>
+                        <div className="flex justify-between items-center py-2.5 sm:py-3">
+                          <span className="text-sm sm:text-base text-gray-600">RTO Charges</span>
+                          <span className="font-semibold text-gray-900 text-sm sm:text-base">₹ {formatIndianPrice(priceBreakup.rtoCharges)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="text-gray-700 font-medium">Road Safety Tax/Cess</span>
-                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.roadSafetyTax)}</span>
+                        <div className="flex justify-between items-center py-2.5 sm:py-3">
+                          <span className="text-sm sm:text-base text-gray-600">Road Safety Tax/Cess</span>
+                          <span className="font-semibold text-gray-900 text-sm sm:text-base">₹ {formatIndianPrice(priceBreakup.roadSafetyTax)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="text-gray-700 font-medium">Insurance Cost</span>
-                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.insurance)}</span>
+                        <div className="flex justify-between items-center py-2.5 sm:py-3">
+                          <span className="text-sm sm:text-base text-gray-600">Insurance Cost</span>
+                          <span className="font-semibold text-gray-900 text-sm sm:text-base">₹ {formatIndianPrice(priceBreakup.insurance)}</span>
                         </div>
 
                         {priceBreakup.tcs > 0 && (
-                          <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                            <span className="text-gray-700 font-medium">Tax Collected at Source (TCS)</span>
-                            <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.tcs)}</span>
+                          <div className="flex justify-between items-center py-2.5 sm:py-3">
+                            <span className="text-sm sm:text-base text-gray-600">TCS</span>
+                            <span className="font-semibold text-gray-900 text-sm sm:text-base">₹ {formatIndianPrice(priceBreakup.tcs)}</span>
                           </div>
                         )}
 
-                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="text-gray-700 font-medium">Other Charges</span>
-                          <span className="font-semibold text-gray-900 text-lg">₹ {formatIndianPrice(priceBreakup.otherCharges)}</span>
+                        <div className="flex justify-between items-center py-2.5 sm:py-3">
+                          <span className="text-sm sm:text-base text-gray-600">Other Charges</span>
+                          <span className="font-semibold text-gray-900 text-sm sm:text-base">₹ {formatIndianPrice(priceBreakup.otherCharges)}</span>
                         </div>
 
-                        {/* Optional Charges - Lighter styling */}
-                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="text-gray-500">Hypothecation Charges</span>
-                          <span className="font-medium text-gray-500">₹ {formatIndianPrice(priceBreakup.hypothecation)}</span>
+                        {/* Optional Charges - Subtle styling */}
+                        <div className="flex justify-between items-center py-2.5 sm:py-3">
+                          <span className="text-sm text-gray-400">Hypothecation</span>
+                          <span className="text-sm text-gray-400">₹ {formatIndianPrice(priceBreakup.hypothecation)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                          <span className="text-gray-500">FasTag Charges</span>
-                          <span className="font-medium text-gray-500">₹ {formatIndianPrice(priceBreakup.fasTag)}</span>
+                        <div className="flex justify-between items-center py-2.5 sm:py-3">
+                          <span className="text-sm text-gray-400">FASTag</span>
+                          <span className="text-sm text-gray-400">₹ {formatIndianPrice(priceBreakup.fasTag)}</span>
                         </div>
                       </div>
 
-                      {/* Total On-Road Price - Compact */}
-                      <div className="mt-6">
-                        <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 rounded-xl p-4 border-2 border-green-200">
-                          <div className="flex flex-col space-y-1">
-                            <span className="text-sm font-semibold text-gray-700">On-Road Price in {selectedCity.split(',')[0]}</span>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-green-600 text-2xl font-bold">₹</span>
-                              <span className="text-green-600 text-3xl font-bold tracking-tight">
-                                {formatIndianPrice(priceBreakup.totalOnRoadPrice)}
-                              </span>
-                            </div>
+                      {/* Total On-Road Price - Clean highlight */}
+                      <div className="mt-4 sm:mt-5">
+                        <div className="bg-green-50 rounded-lg p-3 sm:p-4 border border-green-100">
+                          <div className="text-xs sm:text-sm text-gray-500 mb-1">On-Road Price in {selectedCity.split(',')[0]}</div>
+                          <div className="text-xl sm:text-2xl font-bold text-green-600">
+                            ₹ {formatIndianPrice(priceBreakup.totalOnRoadPrice)}
                           </div>
                         </div>
                       </div>
                     </>
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-6 text-gray-400 text-sm">
                       Calculating price...
                     </div>
                   )}

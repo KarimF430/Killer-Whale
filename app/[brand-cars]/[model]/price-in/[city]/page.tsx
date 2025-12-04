@@ -153,6 +153,9 @@ async function getPriceBreakupData(brandSlug: string, modelSlug: string, citySlu
         fuel: v.fuel || v.fuelType,
         transmission: v.transmission,
         mileage: v.mileage,
+        power: v.maxPower || v.power || '',
+        keyFeatures: v.keyFeatures || [],
+        features: Array.isArray(v.keyFeatures) ? v.keyFeatures.join(', ') : (v.keyFeatures || ''),
       })),
     }
   } catch (error) {
