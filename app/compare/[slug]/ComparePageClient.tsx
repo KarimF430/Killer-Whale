@@ -791,7 +791,7 @@ export default function ComparePageClient({
                           />
                         </div>
                         <div className="text-left">
-                          <div className="text-xs text-gray-500">{car.brand}</div>
+                          <div className="text-xs text-gray-500">{car.brandName || car.brand}</div>
                           <div className="font-bold text-sm text-gray-900 mb-1">{car.name}</div>
                           <div className="text-red-600 font-bold text-sm">
                             ₹ {(compareCarOnRoad / 100000).toFixed(2)} Lakh
@@ -803,9 +803,11 @@ export default function ComparePageClient({
 
                     <button
                       onClick={() => {
-                        const currentModelSlug = `${firstValidItem.model.brandName.toLowerCase().replace(/\s+/g, '-')}-${firstValidItem.model.name.toLowerCase().replace(/\s+/g, '-')}`
-                        const compareModelSlug = `${car.brand.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
-                        router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
+                        const brand1 = firstValidItem.model.brandName.toLowerCase().replace(/\s+/g, '-')
+                        const model1 = firstValidItem.model.name.toLowerCase().replace(/\s+/g, '-')
+                        const brand2 = (car.brandName || car.brand || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^brand-/, '')
+                        const model2 = car.name.toLowerCase().replace(/\s+/g, '-')
+                        router.push(`/compare/${brand1}-${model1}-vs-${brand2}-${model2}`)
                       }}
                       className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all text-sm font-semibold shadow-sm"
                     >
@@ -1022,7 +1024,7 @@ export default function ComparePageClient({
         id={comparisonItems.length > 0
           ? comparisonItems
             .filter((item): item is ComparisonItem => item !== null)
-            .map(item => item.variant.id)
+            .map(item => item.model.id) // Use Model IDs for stability
             .join(',')
           : "general"
         }
