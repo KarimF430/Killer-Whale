@@ -80,12 +80,16 @@ const nextConfig = {
     const csp = [
       "default-src 'self'",
       // Allow unsafe-eval only in development for Next/Webpack dev tooling
-      `script-src 'self' 'unsafe-inline'${unsafeEval} https://www.googletagmanager.com https://www.google-analytics.com`,
+      // Added unpkg.com and lottie hosts for Killer Whale loading animation
+      `script-src 'self' 'unsafe-inline'${unsafeEval} https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: http: blob:",
       "font-src 'self' data:",
-      `connect-src 'self' ${connectSrc} https://www.google-analytics.com https://*.sentry.io https://images.unsplash.com https://www.googleapis.com`,
+      // Added lottie.host, unpkg.com, cdn.jsdelivr.net for Killer Whale animation
+      `connect-src 'self' ${connectSrc} https://www.google-analytics.com https://*.sentry.io https://images.unsplash.com https://www.googleapis.com https://lottie.host https://unpkg.com https://cdn.jsdelivr.net`,
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+      // Added wasm-unsafe-eval for Lottie WASM player
+      "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net",
     ].join('; ')
 
     return [

@@ -18,6 +18,7 @@ import Ad3DCarousel from '../ads/Ad3DCarousel'
 import ModelYouTube from './ModelYouTube'
 import ModelFAQ from './ModelFAQ'
 import { triggerCarInteraction, initializeAudioContext } from '@/utils/carInteraction'
+import { KillerWhaleSpinner } from '../common/KillerWhaleLoader'
 
 interface ModelData {
   isUpcomingCar?: boolean
@@ -1536,8 +1537,8 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
               <div className="space-y-4">
                 {loadingVariants ? (
                   <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
-                    <p className="text-gray-500">Loading variants...</p>
+                    <KillerWhaleSpinner size={60} />
+                    <p className="text-gray-500 mt-4">Loading variants...</p>
                   </div>
                 ) : filteredVariants.length > 0 ? (
                   filteredVariants.slice(0, 8).map((variant) => (

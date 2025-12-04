@@ -91,6 +91,13 @@ export default function RootLayout({
         )}
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
 
+        {/* Lottie Files Web Component for Killer Whale Loading Animation */}
+        <script
+          src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.5/dist/dotlottie-wc.js"
+          type="module"
+          async
+        />
+
         {/* Google Analytics */}
         {GA_ID && (
           <>
