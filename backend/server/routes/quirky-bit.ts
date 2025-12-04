@@ -15,7 +15,7 @@ const groq = groqApiKey ? new Groq({ apiKey: groqApiKey }) : null
 const cache = new Map<string, { data: any; timestamp: number }>()
 const CACHE_TTL = 3600000 // 1 hour
 
-// Helper to fetch real-time news
+// Helper to fetch real-time news with relevance filtering
 async function fetchRealTimeNews(query: string) {
     try {
         // Search for specific car news in India
@@ -23,14 +23,32 @@ async function fetchRealTimeNews(query: string) {
         const { data } = await axios.get(searchUrl, { timeout: 3000 })
         const $ = cheerio.load(data, { xmlMode: true })
 
+        // Extract key words from query for relevance check
+        const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2)
+
         const newsItems: string[] = []
-        $('item').slice(0, 2).each((_, elem) => {
+        $('item').each((_, elem) => {
+            if (newsItems.length >= 2) return false // Stop after 2 relevant items
+
             const title = $(elem).find('title').text()
+            const titleLower = title.toLowerCase()
             const pubDate = $(elem).find('pubDate').text()
-            // Remove source name from title (usually at the end after ' - ')
-            const cleanTitle = title.split(' - ').slice(0, -1).join(' - ') || title
-            newsItems.push(`- ${cleanTitle} (${new Date(pubDate).toLocaleDateString()})`)
+
+            // Check if news is relevant (contains at least one query keyword)
+            const isRelevant = queryWords.some(word => titleLower.includes(word))
+
+            if (isRelevant) {
+                // Remove source name from title (usually at the end after ' - ')
+                const cleanTitle = title.split(' - ').slice(0, -1).join(' - ') || title
+                newsItems.push(`- ${cleanTitle} (${new Date(pubDate).toLocaleDateString()})`)
+            }
         })
+
+        if (newsItems.length === 0) {
+            console.log(`⚠️ No relevant news found for: ${query}`)
+        } else {
+            console.log(`✅ Found ${newsItems.length} relevant news for: ${query}`)
+        }
 
         return newsItems.join('\n')
     } catch (error) {

@@ -14,18 +14,62 @@ const groq = groqApiKey ? new Groq({ apiKey: groqApiKey }) : null
 // ============================================
 
 /**
- * Extract car names from user query for RAG
+ * Get all active car names from database for RAG matching
+ * This replaces the hardcoded list for better accuracy
  */
-function extractCarNamesFromQuery(query: string): string[] {
+let cachedCarNames: string[] | null = null
+let cacheTimestamp = 0
+const CAR_NAMES_CACHE_TTL = 300000 // 5 minutes
+
+async function getActiveCarNames(): Promise<string[]> {
+    // Return cached names if still valid
+    if (cachedCarNames && Date.now() - cacheTimestamp < CAR_NAMES_CACHE_TTL) {
+        return cachedCarNames
+    }
+
+    try {
+        // Fetch unique car names from variants
+        const variants = await CarVariant.find({ status: 'active' })
+            .select('name brandId')
+            .lean()
+
+        const names = new Set<string>()
+        variants.forEach((v: any) => {
+            // Add variant name words (e.g., "Creta SX" -> "creta", "sx")
+            const nameWords = v.name.toLowerCase().split(/\s+/)
+            nameWords.forEach((word: string) => {
+                if (word.length > 2) names.add(word)
+            })
+            // Add brand if available
+            if (v.brandId) {
+                names.add(v.brandId.toLowerCase())
+            }
+        })
+
+        cachedCarNames = Array.from(names)
+        cacheTimestamp = Date.now()
+        console.log(`📊 Cached ${cachedCarNames.length} car names from database`)
+        return cachedCarNames
+    } catch (error) {
+        console.error('Failed to fetch car names:', error)
+        // Fallback to common car names if DB fails
+        return [
+            'creta', 'seltos', 'nexon', 'punch', 'brezza', 'venue', 'sonet',
+            'swift', 'baleno', 'i20', 'altroz', 'tiago', 'kwid',
+            'city', 'verna', 'ciaz', 'amaze', 'dzire',
+            'xuv700', 'hector', 'harrier', 'safari', 'compass', 'fortuner',
+            'innova', 'ertiga', 'xl6', 'carens', 'alcazar',
+            'scorpio', 'thar', 'jimny', 'grand vitara', 'hyryder'
+        ]
+    }
+}
+
+/**
+ * Extract car names from user query for RAG (now dynamic!)
+ */
+async function extractCarNamesFromQuery(query: string): Promise<string[]> {
     const lowerQuery = query.toLowerCase()
-    const carKeywords = [
-        'creta', 'seltos', 'nexon', 'punch', 'brezza', 'venue', 'sonet',
-        'swift', 'baleno', 'i20', 'altroz', 'tiago', 'kwid',
-        'city', 'verna', 'ciaz', 'amaze', 'dzire',
-        'xuv700', 'hector', 'harrier', 'safari', 'compass', 'fortuner',
-        'innova', 'ertiga', 'xl6', 'carens', 'alcazar',
-        'scorpio', 'thar', 'jimny', 'grand vitara', 'hyryder'
-    ]
+    const carKeywords = await getActiveCarNames()
 
     const found: string[] = []
     carKeywords.forEach(car => {
@@ -140,7 +184,7 @@ You: "Both are excellent compact SUVs at ₹10.87L. Creta wins on resale value a
 
         // RAG: Extract car names and fetch real data from database
         let ragContext = ''
-        const carNames = extractCarNamesFromQuery(message)
+        const carNames = await extractCarNamesFromQuery(message)
 
         if (carNames.length > 0) {
             console.log(`🔍 RAG: Detected cars: ${carNames.join(', ')}`)
