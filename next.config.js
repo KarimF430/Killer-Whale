@@ -81,7 +81,7 @@ const nextConfig = {
       "default-src 'self'",
       // Allow unsafe-eval only in development for Next/Webpack dev tooling
       // Added unpkg.com and lottie hosts for Killer Whale loading animation
-      `script-src 'self' 'unsafe-inline'${unsafeEval} https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net`,
+      `script-src 'self' 'unsafe-inline'${unsafeEval} 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: http: blob:",
       "font-src 'self' data:",
