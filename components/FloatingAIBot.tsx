@@ -24,13 +24,7 @@ export function FloatingAIBot({ type, id, name }: FloatingAIBotProps) {
     const [quirkyBit, setQuirkyBit] = useState<QuirkyBit | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
-    const [mounted, setMounted] = useState(false)
     const router = useRouter()
-
-    // Ensure client-side rendering for Lottie web component
-    useEffect(() => {
-        setMounted(true)
-    }, [])
 
     // Fetch quirky bit on mount
     useEffect(() => {
@@ -65,7 +59,7 @@ export function FloatingAIBot({ type, id, name }: FloatingAIBotProps) {
     }
 
     // Don't render if loading, error, no data, or explicitly closed
-    if (loading || error || !quirkyBit || !mounted) return null
+    if (loading || error || !quirkyBit) return null
 
     return (
         <div className="floating-ai-bot">
@@ -98,12 +92,9 @@ export function FloatingAIBot({ type, id, name }: FloatingAIBotProps) {
                     onClick={() => setIsExpanded(!isExpanded)}
                 >
                     <div className="bot-avatar">
-                        <dotlottie-wc
-                            src="https://lottie.host/8754cad2-50d7-4203-9090-3284e174f02b/5Hnji66uaY.lottie"
-                            style={{ width: '200px', height: '200px' }}
-                            autoplay
-                            loop
-                        />
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
                     </div>
                     <div className="notification-badge">
                         <span>1</span>
