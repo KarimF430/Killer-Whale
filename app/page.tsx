@@ -16,6 +16,7 @@ import VideoAd from '@/components/ads/VideoAd'
 import PageSection from '@/components/common/PageSection'
 import Card from '@/components/common/Card'
 import { staticPageSEO } from '@/lib/seo'
+import OceanBackground from '@/components/home/OceanBackground'
 
 export const metadata: Metadata = staticPageSEO.home
 export const revalidate = 3600 // Revalidate every hour
@@ -239,8 +240,9 @@ export default async function HomePage() {
   const { popularCars, allCars, newLaunchedCars, brands, comparisons, news, upcomingCars } = await getHomeData()
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main>
+    <div className="min-h-screen bg-white relative">
+      <OceanBackground />
+      <main className="relative z-[2]">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
           <Ad3DCarousel className="my-3 sm:my-4" />
         </div>

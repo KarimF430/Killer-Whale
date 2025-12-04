@@ -16,9 +16,9 @@ export default function PageSection({
   maxWidth = '7xl'
 }: PageSectionProps) {
   const bgClasses = {
-    white: 'bg-white',
-    gray: 'bg-gray-50',
-    blue: 'bg-blue-50'
+    white: 'bg-transparent',
+    gray: 'bg-gray-50/80',
+    blue: 'bg-blue-50/80'
   }
 
   const maxWidthClasses = {
