@@ -24,7 +24,13 @@ export function FloatingAIBot({ type, id, name }: FloatingAIBotProps) {
     const [quirkyBit, setQuirkyBit] = useState<QuirkyBit | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const router = useRouter()
+
+    // Ensure client-side rendering for Lottie web component
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // Fetch quirky bit on mount
     useEffect(() => {
@@ -59,7 +65,7 @@ export function FloatingAIBot({ type, id, name }: FloatingAIBotProps) {
     }
 
     // Don't render if loading, error, no data, or explicitly closed
-    if (loading || error || !quirkyBit) return null
+    if (loading || error || !quirkyBit || !mounted) return null
 
     return (
         <div className="floating-ai-bot">
