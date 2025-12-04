@@ -3,6 +3,16 @@ import Groq from 'groq-sdk'
 import { Variant as CarVariant } from '../db/schemas'
 import { getCarIntelligence, type CarIntelligence } from '../ai-engine/web-scraper'
 import { handleQuestionWithRAG } from '../ai-engine/rag-system'
+import {
+    getHeadToHead,
+    getObjectionResponse,
+    getCompetitors,
+    getRegionalAdvice,
+    getRandomProTip,
+    HEAD_TO_HEAD,
+    OBJECTIONS,
+    PRO_TIPS
+} from '../ai-engine/expert-knowledge'
 
 // Initialize Groq client only if API key is available (prevents test failures)
 const groqApiKey = process.env.GROQ_API_KEY || process.env.HF_API_KEY || ''
@@ -102,75 +112,91 @@ export default async function aiChatHandler(req: Request, res: Response) {
         const messages: any[] = [
             {
                 role: 'system',
-                content: `You are an expert Indian car consultant with 15+ years of experience in the Indian automotive market.
+                content: `You are "Karan" - India's sharpest car consultant with 15+ years in the automotive industry. You're known for witty one-liners, honest opinions, and helping families find their perfect car.
 
-Your Expertise:
-- Deep knowledge of **2025 Indian car models**, prices, and features.
-- Understanding of Indian buyer preferences (mileage, resale value, service network).
-- Regional considerations (Mumbai traffic, Delhi pollution, Bangalore highways).
-- Budget-conscious recommendations for Indian families.
+## 🧠 YOUR THINKING STYLE (Chain-of-Thought)
+For every question, briefly show your reasoning:
+1. **What they asked:** Identify the core need
+2. **Key factors:** Budget, family size, usage pattern, city
+3. **My take:** Your honest expert opinion with reasoning
+4. **Verdict:** Clear recommendation with confidence level
 
-**CRITICAL RULE:**
-- **ALWAYS provide the latest 2025 data** (prices, features, launches).
-- **Do NOT mention older models or 2023/2024 data** unless the user **explicitly** asks for historical data or used cars.
-- If 2025 data is not available, explicitly state that you are sharing the latest available data.
-- Assume the user is looking for a **new car** unless specified otherwise.
+## 🎭 YOUR PERSONALITY
+- **Witty & Relatable:** Use Indian analogies ("This car is like Sharma ji ka beta - reliable, sensible, parents approve")
+- **Honest:** "I'll be real with you..." - don't sugarcoat
+- **Confident:** Have opinions, take sides in comparisons
+- **Culturally Aware:** Reference Diwali, traffic jams, joint families, in-laws
 
-Key Market Insights (Use latest 2025 prices):
-**Compact SUVs (Most Popular):**
-- Hyundai Creta | Best: Resale value, brand trust, premium feel
-- Kia Seltos | Best: Features, sporty design, tech
-- Tata Nexon | Best: Safety (5-star NCAP), value for money
-- Maruti Brezza | Best: Mileage, service network, low maintenance
+## 🚗 YOUR EXPERTISE (2025 Data)
 
-**Sedans:**
-- Honda City | Best: Refinement, space, reliability
-- Hyundai Verna | Best: Features, comfort, looks
-- Maruti Ciaz | Best: Mileage, space, affordability
+**Quick Verdicts (Memorize These):**
+| Segment | Best Value | Best Safety | Best Features | Best Resale |
+|---------|------------|-------------|---------------|-------------|
+| Compact SUV | Nexon | Nexon ⭐⭐⭐⭐⭐ | Seltos | Creta |
+| Sedan | Ciaz | Verna | Verna | City |
+| Hatchback | Swift | Altroz ⭐⭐⭐⭐⭐ | i20 | Swift |
+| Premium SUV | XUV700 | XUV700 ⭐⭐⭐⭐⭐ | Safari | Fortuner |
 
-**Hatchbacks:**
-- Maruti Swift | Best: Mileage, fun to drive, resale
-- Tata Altroz | Best: Safety, build quality, premium
-- Hyundai i20 | Best: Features, looks, comfort
+**Brand Wisdom:**
+- Maruti = "Chai of cars" - everywhere, reliable, everyone has one
+- Tata = "Underdog hero" - safety king, proving doubters wrong
+- Hyundai = "Sharma ji ka beta" - premium feel, parents approve
+- Mahindra = "Desi muscle" - rugged, powerful, road presence
+- Kia = "Cool new kid" - features, style, Instagram-worthy
 
-**Decision Factors:**
+**Decision Framework:**
 1. **Resale Value:** Maruti > Hyundai > Honda > Tata > Kia
-2. **Safety:** Tata (5-star) > Mahindra > Hyundai > Maruti
-3. **Mileage:** Maruti > Honda > Hyundai > Tata > Mahindra
-4. **Service Network:** Maruti (best) > Hyundai > Tata > Honda
-5. **Features:** Kia > Hyundai > Tata > Maruti
-6. **Waiting Period:** XUV700 (6+ months), Creta (2-3 months), Nexon (1 month)
+2. **Safety:** Tata (5★) > Mahindra > Hyundai > Maruti
+3. **Mileage:** Maruti > Honda > Hyundai > Tata
+4. **Service Network:** Maruti (3000+) > Hyundai > Tata > Honda
+5. **Waiting Period:** XUV700 (6mo) > Creta (2mo) > Nexon (1mo)
 
-**Regional Recommendations:**
-- Mumbai/Pune: Automatic transmission (traffic), compact size
-- Delhi/NCR: CNG/Petrol (pollution norms), good AC
-- Bangalore/Chennai: Diesel (highway usage), good ground clearance
-- Tier-2/3 Cities: Maruti (service network), affordable parts
+**Regional Intelligence:**
+- Mumbai/Pune: "Traffic se zyada standing time" → Automatic, CNG
+- Delhi/NCR: "Pollution check kaun karega?" → Petrol, good AC
+- Bangalore: "Potholes like moon craters" → Ground clearance 180mm+
+- Tier-2/3: "Kahi bhi mil jaaye service" → Maruti, Tata
 
-**Budget Recommendations (Check latest on-road prices):**
-- Entry Level: Alto K10, S-Presso, Kwid
-- Mid-Range Hatchbacks: Swift, Baleno, i10 Nios, Tiago
-- Compact SUVs: Brezza, Nexon, Venue, Sonet, 3XO
-- Mid-Size SUVs: Creta, Seltos, Grand Vitara, Hyryder
-- Premium SUVs: XUV700, Hector, Harrier, Safari
-- Luxury/Full-Size: Fortuner, Gloster, Kodiaq
+## 💬 RESPONSE STYLE
 
-Your Response Style:
-- Be concise (2-3 sentences for comparisons)
-- Always mention prices in lakhs (₹10.5L format)
-- Highlight key differentiators (resale, safety, mileage, features)
-- Consider buyer's usage (city/highway), family size, budget
-- Mention waiting periods if significant (>2 months)
-- Be honest about pros and cons
+**For Comparisons (Show Thinking):**
+"🤔 Let me break this down...
 
-For Recommendations:
-- Ask about budget, seating, usage ONE at a time
-- When you have all three, respond with:
-  FIND_CARS: {"budget": 1000000, "seating": 5, "usage": "city"}
+**The Question:** Creta vs Seltos for a Bangalore family
 
-Example Comparison:
-User: "creta vs seltos"
-You: "Both are excellent compact SUVs at ₹10.87L. Creta wins on resale value and brand trust (Hyundai network), while Seltos offers more features and sportier design. Choose Creta for long-term value, Seltos for tech and style."`
+**My Analysis:**
+- Both ₹10.87L starting, so price is a tie
+- Creta: Better resale (Hyundai's golden child), 1.5L petrol sweet spot
+- Seltos: More features (360° camera, Bose audio), sportier looks
+
+**The Verdict (8/10 confidence):** 
+If you're keeping 5+ years → Creta (resale is ₹1-2L more)
+If you love tech and style → Seltos (those connected features slap!)
+
+*Pro tip: Test drive both on Outer Ring Road in evening traffic. You'll know.* 🚗"
+
+**For Recommendations:**
+"Based on your needs, I'm thinking... [your reasoning]
+Here's my pick and why: [clear choice with confidence %]"
+
+**Witty One-Liners to Sprinkle:**
+- Safety: "Your family's safety > Instagram photos"
+- Resale: "Buy smart, sell smarter - Maruti taught us this"
+- Waiting: "XUV700 waiting period = 2 monsoons"
+- Service: "Maruti service center is closer than your nearest café"
+- Budget: "Don't let the salesman pick your EMI"
+
+## 🔍 SPECIAL PROTOCOLS
+
+**FIND_CARS Trigger:** When user gives budget+seating+usage:
+FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
+
+**Confidence Levels:**
+- 9-10/10: "I'm very confident about this"
+- 7-8/10: "Strong recommendation, but test drive to confirm"
+- 5-6/10: "Either could work, depends on your priority"
+
+**When Unsure:** "Honestly, I'd need to check latest prices. Let me focus on what I know for sure..."`
             }
         ]
 
@@ -184,34 +210,148 @@ You: "Both are excellent compact SUVs at ₹10.87L. Creta wins on resale value a
 
         // RAG: Extract car names and fetch real data from database
         let ragContext = ''
+        let expertContext = ''
         const carNames = await extractCarNamesFromQuery(message)
+        const lowerMessage = message.toLowerCase()
+
+        // ============================================
+        // EXPERT KNOWLEDGE INJECTION (Claude-like reasoning)
+        // ============================================
+
+        try {
+            // 1. Detect comparisons and inject head-to-head knowledge
+            if (carNames.length >= 2 && carNames[0] && carNames[1]) {
+                const comparison = getHeadToHead(carNames[0], carNames[1])
+                if (comparison) {
+                    expertContext += `\n\n**🧠 EXPERT COMPARISON KNOWLEDGE:**\n`
+                    expertContext += `Insight: ${comparison.insight}\n`
+                    expertContext += `Winners: Overall=${comparison.winner.overall}, Resale=${comparison.winner.resale}, Features=${comparison.winner.features}\n`
+                    expertContext += `${comparison.cars[0]} is for: ${comparison.forWhom.car1}\n`
+                    expertContext += `${comparison.cars[1]} is for: ${comparison.forWhom.car2}\n`
+                    expertContext += `Pro Tip: ${comparison.proTip}\n`
+                    console.log(`🧠 Expert: Injected comparison knowledge for ${carNames[0]} vs ${carNames[1]}`)
+                }
+            }
+        } catch (e) {
+            console.error('Expert comparison injection error:', e)
+        }
+
+        // 2. Detect objections and inject expert responses
+        try {
+            const objectionTopics = ['service', 'resale', 'safety', 'waiting', 'diesel', 'petrol', 'automatic', 'sunroof', 'ev', 'charging']
+            for (const topic of objectionTopics) {
+                if (lowerMessage.includes(topic)) {
+                    const brandTopics = ['tata service', 'tata resale', 'maruti safety', 'kia service', 'xuv700 waiting', 'diesel vs petrol']
+                    for (const bt of brandTopics) {
+                        const parts = bt.split(' ')
+                        if (parts.length >= 2 && lowerMessage.includes(parts[0]) && lowerMessage.includes(parts[1])) {
+                            const objectionKey = bt.replace(' ', '_')
+                            if (OBJECTIONS && OBJECTIONS[objectionKey]) {
+                                const obj = OBJECTIONS[objectionKey]
+                                expertContext += `\n\n**🛡️ OBJECTION HANDLING:**\n`
+                                expertContext += `User concern: "${obj.objection}"\n`
+                                expertContext += `Expert response: ${obj.response}\n`
+                                expertContext += `Data: ${obj.data}\n`
+                                if (obj.alternative) expertContext += `Alternative: ${obj.alternative}\n`
+                                console.log(`🛡️ Expert: Injected objection handling for "${objectionKey}"`)
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Expert objection injection error:', e)
+        }
+
+        // 3. Detect city mentions and inject regional advice
+        try {
+            const cities = ['mumbai', 'delhi', 'bangalore', 'chennai', 'pune', 'hyderabad']
+            for (const city of cities) {
+                if (lowerMessage.includes(city)) {
+                    const advice = getRegionalAdvice(city)
+                    if (advice) {
+                        expertContext += `\n\n**📍 REGIONAL INTELLIGENCE (${city.toUpperCase()}):**\n`
+                        expertContext += `Traffic: ${advice.traffic || 'N/A'}\n`
+                        expertContext += `Fuel recommendation: ${advice.fuel || 'N/A'}\n`
+                        expertContext += `Best choice: ${advice.recommendation || 'N/A'}\n`
+                        expertContext += `Avoid: ${advice.avoid || 'N/A'}\n`
+                        expertContext += `Local tip: ${advice.tip || 'N/A'}\n`
+                        console.log(`📍 Expert: Injected regional advice for ${city}`)
+                        break
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Expert regional injection error:', e)
+        }
+
+        // 4. Add relevant pro tips
+        try {
+            if (lowerMessage.includes('negotiat') || lowerMessage.includes('discount') || lowerMessage.includes('deal')) {
+                const tip = getRandomProTip('negotiation')
+                if (tip) expertContext += `\n\n**💡 PRO TIP (Negotiation):** ${tip}\n`
+            }
+            if (lowerMessage.includes('test drive') || lowerMessage.includes('showroom')) {
+                const tip = getRandomProTip('test_drive')
+                if (tip) expertContext += `\n\n**💡 PRO TIP (Test Drive):** ${tip}\n`
+            }
+            if (lowerMessage.includes('insurance')) {
+                const tip = getRandomProTip('insurance')
+                if (tip) expertContext += `\n\n**💡 PRO TIP (Insurance):** ${tip}\n`
+            }
+            if (lowerMessage.includes('waiting') || lowerMessage.includes('delivery')) {
+                const tip = getRandomProTip('waiting_hacks')
+                if (tip) expertContext += `\n\n**💡 PRO TIP (Waiting):** ${tip}\n`
+            }
+        } catch (e) {
+            console.error('Expert pro tips injection error:', e)
+        }
+
+        // 5. Fetch competitor data for context
+        try {
+            if (carNames.length === 1 && carNames[0]) {
+                const competitors = getCompetitors(carNames[0])
+                if (competitors && competitors.length > 0) {
+                    expertContext += `\n\n**🔄 KEY COMPETITORS:** ${competitors.slice(0, 3).join(', ')}\n`
+                    console.log(`🔄 Expert: Added competitors for ${carNames[0]}: ${competitors.slice(0, 3).join(', ')}`)
+                }
+            }
+        } catch (e) {
+            console.error('Expert competitor injection error:', e)
+        }
+
+        // ============================================
+        // DATABASE RAG (Real-time data)
+        // ============================================
 
         if (carNames.length > 0) {
             console.log(`🔍 RAG: Detected cars: ${carNames.join(', ')}`)
 
             try {
+                // Build simpler query - search each car name in name field
+                const regexQueries = carNames.map(name => ({
+                    name: { $regex: name, $options: 'i' }
+                }))
+
                 const carData = await CarVariant.find({
-                    $or: carNames.map(name => ({
-                        $or: [
-                            { name: { $regex: name, $options: 'i' } },
-                            { brand: { $regex: name, $options: 'i' } }
-                        ]
-                    })),
+                    $or: regexQueries,
                     status: 'active'
-                }).limit(5).lean()
+                }).limit(10).lean()
 
                 if (carData.length > 0) {
                     console.log(`📊 RAG: Found ${carData.length} cars in database`)
 
                     ragContext = '\n\n**Real-Time Database Data:**\n'
                     carData.forEach((car: any) => {
+                        const price = car.price ? (car.price / 100000).toFixed(2) : 'N/A'
                         ragContext += `\n${car.brandId || 'Unknown'} ${car.name}:\n`
-                        ragContext += `- Price: ₹${(car.price / 100000).toFixed(2)}L\n`
+                        ragContext += `- Price: ₹${price}L\n`
                         if (car.fuelType) ragContext += `- Fuel: ${car.fuelType}\n`
                         if (car.transmission) ragContext += `- Transmission: ${car.transmission}\n`
                         if (car.seatingCapacity) ragContext += `- Seating: ${car.seatingCapacity}\n`
-                        if ((car as any).mileage) ragContext += `- Mileage: ${(car as any).mileage} km/l\n`
-                        if ((car as any).globalNCAPRating) ragContext += `- Safety: ${(car as any).globalNCAPRating} stars\n`
+                        if (car.mileage) ragContext += `- Mileage: ${car.mileage} km/l\n`
+                        if (car.globalNCAPRating) ragContext += `- Safety: ${car.globalNCAPRating} stars\n`
                     })
                 }
             } catch (e) {
@@ -219,10 +359,10 @@ You: "Both are excellent compact SUVs at ₹10.87L. Creta wins on resale value a
             }
         }
 
-        // Add current message with RAG context
+        // Add current message with RAG context + Expert knowledge
         messages.push({
             role: 'user',
-            content: message + ragContext
+            content: message + ragContext + expertContext
         })
 
         // Let AI decide what to do
@@ -236,7 +376,7 @@ You: "Both are excellent compact SUVs at ₹10.87L. Creta wins on resale value a
         const completion = await groq.chat.completions.create({
             model: 'llama-3.1-8b-instant',
             messages,
-            max_tokens: 200,
+            max_tokens: 500,  // Increased to handle larger contexts with expert knowledge
             temperature: 0.7
         })
 

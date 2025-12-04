@@ -319,23 +319,38 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
         }
 
         const prompt = `
-        Based ONLY on the provided car data below, write ONE quirky, interesting fact for Indian car buyers.
+        You're a witty Indian car expert writing ONE memorable, punchy fact that'll make someone smile.
         
         DATA:
         ${dataSummary || context}
 
-        INSTRUCTIONS:
-        1. PRIORITIZE LATEST NEWS *only* if it explicitly mentions ${entityName}.
-        2. If the news is about a different car (e.g. news about Creta when viewing i20), IGNORE IT and use the DB data.
-        3. If no relevant news, use the DB data (Mileage, Price, Features).
-        4. If data mentions "Real World Mileage", highlight it.
-        5. Keep it under 150 characters.
-        6. Tone: Helpful, expert, slightly witty.
-        7. Format: Just the text, no quotes.
+        STYLE GUIDE:
+        🎯 Be MEMORABLE - Use analogies, humor, surprise facts
+        🇮🇳 Be INDIAN - Reference chai, Diwali, traffic jams, Sharma ji, cricket
+        ⚡ Be PUNCHY - Under 120 characters, no fluff
+        😄 Be WITTY - Make them smile or go "oh interesting!"
 
-        Example Output:
-        "Breaking: The new facelift was just spotted testing with ADAS Level 2!"
-        "The i20 Asta(O) gives you 20 kmpl on highways, perfect for weekend getaways!"
+        EXAMPLES OF GOOD QUIRKS:
+        - "XUV700 ADAS can see better than your watchman at night 👀"
+        - "Nexon's safety rating > your helmet + seatbelt + prayers combined"  
+        - "Swift's resale value = almost like buying gold, but more fun"
+        - "Creta waiting period: enough time to plan 2 Diwalis 🪔"
+        - "This car drinks less than your scooter. Yes, really!"
+        - "Boot space bigger than your Diwali shopping list"
+        - "Mother-in-law approved safety rating ✅"
+
+        BAD (Don't do this):
+        - "This car has good mileage" (boring!)
+        - "The price is competitive" (corporate speak)
+        - "It's a reliable vehicle" (yawn)
+
+        SPECIAL RULES:
+        1. If there's NEWS about ${entityName}, lead with that
+        2. If no relevant news, pick the MOST SURPRISING stat from DB
+        3. Never start with "Did you know" - just state it
+        4. One emoji max, use sparingly
+
+        Write ONE quirky fact now (no quotes):
         `
 
         const response = await groq.chat.completions.create({
@@ -343,12 +358,12 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are an expert car analyst. You write short, punchy facts based strictly on provided data.'
+                    content: 'You are a witty Indian car journalist known for viral one-liners. You write facts that make people share and remember. Keep it under 120 chars.'
                 },
                 { role: 'user', content: prompt }
             ],
-            max_tokens: 100,
-            temperature: 0.7
+            max_tokens: 80,
+            temperature: 0.85  // Higher for more creative/witty outputs
         })
 
         const text = response.choices[0]?.message?.content?.trim() ||
