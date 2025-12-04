@@ -100,7 +100,7 @@ export function FloatingAIBot({ type, id, name }: FloatingAIBotProps) {
                     <div className="bot-avatar">
                         <dotlottie-wc
                             src="https://lottie.host/8754cad2-50d7-4203-9090-3284e174f02b/5Hnji66uaY.lottie"
-                            style={{ width: '160px', height: '160px' }}
+                            style={{ width: '200px', height: '200px' }}
                             autoplay
                             loop
                         />
