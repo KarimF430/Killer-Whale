@@ -737,13 +737,10 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
     }
   ]
 
+
   // Helper function to calculate on-road price using the exact same logic as CarsByBudget
   const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
-    // Get selected city from localStorage (same as useOnRoadPrice hook)
-    const selectedCity = typeof window !== 'undefined'
-      ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
-      : 'Mumbai, Maharashtra'
-
+    // Use selectedCity state (already hydration-safe from useEffect at line 294)
     const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
 
     // Use the exact same calculation function as CarsByBudget
