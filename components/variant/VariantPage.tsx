@@ -895,8 +895,25 @@ export default function VariantPage({
                 onClick={() => {
                   const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                   const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
-                  const variantSlug = displayVariantName?.toLowerCase().replace(/\s+/g, '-')
-                  router.push(`/${brandSlug}-cars/${modelSlug}/price-in/mumbai?variant=${variantSlug}`)
+
+                  // Get selected city from localStorage
+                  const selectedCityValue = typeof window !== 'undefined'
+                    ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
+                    : 'Mumbai, Maharashtra'
+                  const citySlug = selectedCityValue.split(',')[0].toLowerCase().replace(/\s+/g, '-')
+
+                  // Use same normalization as price breakup page for consistent matching
+                  const variantSlug = displayVariantName
+                    ?.toLowerCase()
+                    .replace(/\s*\([^)]*\)/g, '-')  // Replace " (O)" with "-"
+                    .replace(/[()]/g, '')            // Remove remaining parentheses
+                    .replace(/\s+/g, '-')            // Spaces to hyphens
+                    .replace(/[^a-z0-9-]/g, '')      // Remove special chars
+                    .replace(/-+/g, '-')             // Multiple hyphens to single
+                    .replace(/^-|-$/g, '')           // Remove leading/trailing
+
+                  // Navigate directly to price-in route with variant parameter
+                  router.push(`/${brandSlug}-cars/${modelSlug}/price-in/${citySlug}?variant=${variantSlug}`)
                 }}
                 className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
@@ -2542,6 +2559,7 @@ export default function VariantPage({
                       onClick={() => {
                         const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                         const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
+                        // Keep original format for variant page URLs
                         const variantSlug = variantItem.name.toLowerCase().replace(/\s+/g, '-')
                         router.push(`/${brandSlug}-cars/${modelSlug}/${variantSlug}`)
                       }}
@@ -2549,8 +2567,25 @@ export default function VariantPage({
                         e.stopPropagation()
                         const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                         const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
-                        const varSlug = variant.name?.toLowerCase().replace(/\s+/g, '-')
-                        router.push(`/${brandSlug}-cars/${modelSlug}/price-in/mumbai?variant=${varSlug}`)
+
+                        // Get selected city from localStorage
+                        const selectedCityValue = typeof window !== 'undefined'
+                          ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
+                          : 'Mumbai, Maharashtra'
+                        const citySlug = selectedCityValue.split(',')[0].toLowerCase().replace(/\s+/g, '-')
+
+                        // Use same normalization as price breakup page for consistent matching
+                        const varSlug = variantItem.name
+                          ?.toLowerCase()
+                          .replace(/\s*\([^)]*\)/g, '-')  // Replace " (O)" with "-"
+                          .replace(/[()]/g, '')            // Remove remaining parentheses
+                          .replace(/\s+/g, '-')            // Spaces to hyphens
+                          .replace(/[^a-z0-9-]/g, '')      // Remove special chars
+                          .replace(/-+/g, '-')             // Multiple hyphens to single
+                          .replace(/^-|-$/g, '')           // Remove leading/trailing
+
+                        // Navigate directly to price-in route with variant parameter
+                        router.push(`/${brandSlug}-cars/${modelSlug}/price-in/${citySlug}?variant=${varSlug}`)
                       }}
                       onCompare={(e) => e.stopPropagation()}
                     />
@@ -2570,7 +2605,7 @@ export default function VariantPage({
                     onClick={() => {
                       const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                       const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
-                      router.push(`/${brandSlug}-cars/${modelSlug}/variants`)
+                      router.push(`/ ${brandSlug} -cars / ${modelSlug}/variants`)
                     }}
                   >
                     View All {transformedVariants.length} Variants
@@ -3188,9 +3223,9 @@ export default function VariantPage({
             </div>
           </div>
         </PageSection>
-      </div>
+      </div >
 
       <Footer />
-    </div>
+    </div >
   )
 }

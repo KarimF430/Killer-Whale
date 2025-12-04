@@ -31,6 +31,12 @@ export default async function VariantDetailPage({ params }: PageProps) {
   const modelSlug = resolvedParams.model
   const variantSlug = resolvedParams.variant
 
+  // Redirect if this is actually a price page (starts with "price-in")
+  if (variantSlug.startsWith('price-in')) {
+    const { redirect } = await import('next/navigation')
+    redirect(`/${resolvedParams['brand-cars']}/${modelSlug}/${variantSlug}`)
+  }
+
   // Convert slugs to display names
   const brandName = brandSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
   const modelName = modelSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')

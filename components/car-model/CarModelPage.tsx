@@ -1149,7 +1149,15 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 onClick={() => {
                   const brandSlug = model.brand.toLowerCase().replace(/\s+/g, '-')
                   const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-')
-                  router.push(`/${brandSlug}-cars/${modelSlug}/price-in/mumbai`)
+
+                  // Get selected city from localStorage
+                  const selectedCityValue = typeof window !== 'undefined'
+                    ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
+                    : 'Mumbai, Maharashtra'
+                  const citySlug = selectedCityValue.split(',')[0].toLowerCase().replace(/\s+/g, '-')
+
+                  // Navigate directly to price-in route (no variant = will show base variant)
+                  router.push(`/${brandSlug}-cars/${modelSlug}/price-in/${citySlug}`)
                 }}
                 className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >

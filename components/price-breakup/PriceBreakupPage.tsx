@@ -37,9 +37,20 @@ interface PriceBreakupPageProps {
   brandSlug?: string
   modelSlug?: string
   citySlug?: string
+  // SSR initial data
+  initialBrand?: any
+  initialModel?: any
+  initialVariants?: any[]
 }
 
-export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: PriceBreakupPageProps = {}) {
+export default function PriceBreakupPage({
+  brandSlug,
+  modelSlug,
+  citySlug,
+  initialBrand,
+  initialModel,
+  initialVariants = []
+}: PriceBreakupPageProps = {}) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [showVariantDropdown, setShowVariantDropdown] = useState(false)
@@ -168,10 +179,10 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
     }
   }, [citySlug])
 
-  // Variants state
-  const [activeFilter, setActiveFilter] = useState('All')
-  const [modelVariants, setModelVariants] = useState<any[]>([])
-  const [loadingVariants, setLoadingVariants] = useState(true)
+  // Variants state - Use multi-select filters like VariantPage
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(['All'])
+  const [modelVariants, setModelVariants] = useState<any[]>(initialVariants)
+  const [loadingVariants, setLoadingVariants] = useState(initialVariants.length === 0)
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
 
   // Popular cars state
@@ -258,41 +269,76 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
           // Set default variant: use URL param if provided, otherwise lowest price variant
           if (variantParam) {
-            // Normalize function to remove special characters and convert to lowercase
+            // Enhanced normalize function to handle all edge cases
+            // MUST match the normalization in VariantPage.tsx exactly
             const normalizeForMatch = (str: string) =>
-              str.toLowerCase()
-                .replace(/[()]/g, '') // Remove parentheses
+              str
+                .toLowerCase()
+                .replace(/\s*\(([^)]*)\)/g, '-$1-') // Extract content from parentheses: "S (O)" -> "s-o-"
+                .replace(/[()]/g, '')  // Remove any remaining parentheses
                 .replace(/\s+/g, '-')  // Replace spaces with hyphens
-                .replace(/[^a-z0-9-]/g, '') // Remove other special chars
+                .replace(/[^a-z0-9-]/g, '') // Remove all non-alphanumeric except hyphens
+                .replace(/-+/g, '-')   // Replace multiple consecutive hyphens with single hyphen
+                .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
 
             const normalizedParam = normalizeForMatch(variantParam)
+
+            console.log('🔍 Variant matching - Input:', {
+              variantParam,
+              normalizedParam
+            })
 
             // Try to find match by comparing normalized versions
             const matchedVariant = transformedVariants.find((v: any) => {
               const normalizedVariantName = normalizeForMatch(v.name)
-              return normalizedVariantName === normalizedParam
+              const isMatch = normalizedVariantName === normalizedParam
+
+              if (isMatch) {
+                console.log('✅ MATCH FOUND:', {
+                  original: v.name,
+                  normalized: normalizedVariantName,
+                  urlParam: normalizedParam
+                })
+              }
+
+              return isMatch
             })
 
-            console.log('🔍 Variant matching:', {
+            console.log('🔍 Variant matching - Results:', {
               variantParam,
               normalizedParam,
               matchedVariant: matchedVariant?.name,
               allVariants: transformedVariants.map((v: any) => ({
                 name: v.name,
-                normalized: normalizeForMatch(v.name)
+                normalized: normalizeForMatch(v.name),
+                matches: normalizeForMatch(v.name) === normalizedParam
               }))
             })
 
             if (matchedVariant) {
               setSelectedVariantName(matchedVariant.name)
-              console.log('✅ Matched variant from URL:', matchedVariant.name)
+              console.log('✅ Successfully matched variant from URL:', matchedVariant.name)
             } else {
-              // Fallback to lowest price variant if no match found
-              const lowestPriceVariant = transformedVariants.reduce((lowest: any, current: any) => {
-                return (current.price < lowest.price) ? current : lowest
-              }, transformedVariants[0])
-              setSelectedVariantName(lowestPriceVariant?.name || '')
-              console.warn('⚠️ No variant match found, using lowest price:', lowestPriceVariant?.name)
+              // Fallback: Try partial matching if exact match fails
+              const partialMatch = transformedVariants.find((v: any) => {
+                const normalizedName = normalizeForMatch(v.name)
+                return normalizedName.includes(normalizedParam) || normalizedParam.includes(normalizedName)
+              })
+
+              if (partialMatch) {
+                setSelectedVariantName(partialMatch.name)
+                console.log('✅ Matched variant using partial match:', partialMatch.name)
+              } else {
+                // Final fallback to lowest price variant if no match found
+                const lowestPriceVariant = transformedVariants.reduce((lowest: any, current: any) => {
+                  return (current.price < lowest.price) ? current : lowest
+                }, transformedVariants[0])
+                setSelectedVariantName(lowestPriceVariant?.name || '')
+                console.warn('⚠️ No variant match found, using lowest price:', lowestPriceVariant?.name, {
+                  searchedFor: normalizedParam,
+                  availableVariants: transformedVariants.map((v: any) => normalizeForMatch(v.name))
+                })
+              }
             }
           } else {
             // Find lowest price variant
@@ -396,7 +442,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
         })
 
         // Sort by popularRank
-        const sortedCars = processedCars.sort((a, b) => {
+        const sortedCars = processedCars.sort((a: any, b: any) => {
           const rankA = a.popularRank || 999
           const rankB = b.popularRank || 999
           return rankA - rankB
@@ -567,27 +613,46 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
   const availableFilters = getDynamicFilters()
 
-  // Filter variants based on active filter
+  // Filter variants based on selected filters (multi-select like VariantPage)
   const getFilteredVariants = () => {
-    switch (activeFilter) {
-      case 'All':
-        return allVariants
-      case 'Diesel':
-        return allVariants.filter(variant => variant.fuel === 'Diesel')
-      case 'Petrol':
-        return allVariants.filter(variant => variant.fuel === 'Petrol')
-      case 'CNG':
-        return allVariants.filter(variant => variant.fuel === 'CNG')
-      case 'Automatic':
-        return allVariants.filter(variant =>
-          variant.transmission && isAutomaticTransmission(variant.transmission)
-        )
-      default:
-        return allVariants
+    if (selectedFilters.includes('All')) {
+      return allVariants
     }
+
+    return allVariants.filter(variant => {
+      // Check if variant matches any of the selected filters
+      const matchesFuel = selectedFilters.some(filter =>
+        ['Petrol', 'Diesel', 'CNG', 'Electric'].includes(filter) && variant.fuel === filter
+      )
+      const matchesTransmission = selectedFilters.includes('Automatic') &&
+        variant.transmission && isAutomaticTransmission(variant.transmission)
+
+      return matchesFuel || matchesTransmission
+    })
   }
 
   const filteredVariants = getFilteredVariants()
+
+  // Handle filter toggle (multi-select) - Exact copy from VariantPage
+  const handleFilterToggle = (filter: string) => {
+    if (filter === 'All') {
+      setSelectedFilters(['All'])
+    } else {
+      setSelectedFilters(prev => {
+        // Remove 'All' if selecting a specific filter
+        const withoutAll = prev.filter(f => f !== 'All')
+
+        // Toggle the clicked filter
+        if (withoutAll.includes(filter)) {
+          const newFilters = withoutAll.filter(f => f !== filter)
+          // If no filters left, select 'All'
+          return newFilters.length === 0 ? ['All'] : newFilters
+        } else {
+          return [...withoutAll, filter]
+        }
+      })
+    }
+  }
 
   const handleVariantClick = (variant: any) => {
     const brandSlug = brandName?.toLowerCase().replace(/\s+/g, '-')
@@ -763,8 +828,23 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
               {modelName} Price in {selectedCity.split(',')[0]}
             </h1>
             <p className="text-gray-600 text-base">
-              The on road price of the {modelName} in {selectedCity.split(',')[0]} ranges from Rs. 8.44 Lakh to Rs. 17.06 Lakh.
-              The ex-showroom price is between Rs. 7.32 Lakh and Rs. 14.15 Lakh.
+              {loadingVariants ? (
+                'Loading price information...'
+              ) : modelVariants.length > 0 ? (
+                (() => {
+                  const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
+                  const lowestExPrice = Math.min(...modelVariants.map(v => v.price)) / 100000
+                  const highestExPrice = Math.max(...modelVariants.map(v => v.price)) / 100000
+                  const lowestOnRoadBreakup = calculateOnRoadPrice(Math.min(...modelVariants.map(v => v.price)), state, 'Petrol')
+                  const highestOnRoadBreakup = calculateOnRoadPrice(Math.max(...modelVariants.map(v => v.price)), state, 'Petrol')
+                  const lowestOnRoadPrice = lowestOnRoadBreakup.totalOnRoadPrice / 100000
+                  const highestOnRoadPrice = highestOnRoadBreakup.totalOnRoadPrice / 100000
+
+                  return `The on road price of the ${modelName} in ${selectedCity.split(',')[0]} ranges from Rs. ${formatPrice(lowestOnRoadPrice)} to Rs. ${formatPrice(highestOnRoadPrice)}. The ex-showroom price is between Rs. ${formatPrice(lowestExPrice)} and Rs. ${formatPrice(highestExPrice)}.`
+                })()
+              ) : (
+                `Price information for ${modelName} in ${selectedCity.split(',')[0]}.`
+              )}
               <button className="text-red-600 ml-1 font-medium">...more</button>
             </p>
           </div>
@@ -836,7 +916,7 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
                   onClick={() => setShowVariantDropdown(!showVariantDropdown)}
                   className="w-full bg-white border-2 border-blue-500 rounded-lg px-4 py-3 text-left flex items-center justify-between hover:border-blue-600 transition-colors"
                 >
-                  <span className="text-gray-900 font-medium">{selectedVariantName || 'Loading...'}</span>
+                  <span className="text-gray-900 font-medium">Choose Variant</span>
                   <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showVariantDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
@@ -1003,9 +1083,9 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
       {/* Section 3: More Variants */}
       <PageSection background="white" maxWidth="7xl">
-        <div id="variants" className="py-8 space-y-8">
-          <h2 className="text-2xl font-bold text-gray-900">
-            More {modelName} Variants price in {selectedCity.split(',')[0]}
+        <div id="variants" className="space-y-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
+            More {brandName} {modelName} Variants
           </h2>
 
           {/* Filter Options - Dynamic based on available variants */}
@@ -1013,8 +1093,8 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
             {availableFilters.map((filter) => (
               <button
                 key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`px-4 py-2 rounded-lg transition-colors ${activeFilter === filter
+                onClick={() => handleFilterToggle(filter)}
+                className={`px-4 py-2 rounded-lg transition-colors ${selectedFilters.includes(filter)
                   ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
@@ -1079,98 +1159,110 @@ export default function PriceBreakupPage({ brandSlug, modelSlug, citySlug }: Pri
 
       {/* Section 4: AD Banner, Similar Cars & Popular Cars */}
       <PageSection background="white" maxWidth="7xl">
-        <div id="similar-cars" className="py-8 space-y-12">
+        <div id="similar-cars" className="space-y-12">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
 
-          {/* Similar Cars Section */}
-          <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-gray-900">Similar Cars to {brandName} {modelName}</h2>
+          {/* Similar Cars Section - Exact copy from VariantPage */}
+          <div className="space-y-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
+              Similar Cars To {modelName}
+            </h2>
 
-            {/* Cars Horizontal Scroll */}
+            {/* Cars Horizontal Scroll - Exact copy from VariantPage */}
             <div className="relative">
               {loadingSimilarCars ? (
-                <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
-                  {[1, 2, 3, 4].map((i) => (
+                <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
+                  {[1, 2, 3].map((i) => (
                     <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
                       <div className="h-48 bg-gray-200 animate-pulse"></div>
                       <div className="p-5 space-y-3">
                         <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                         <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
-                        <div className="space-y-2">
-                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : similarCars.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
-                  <p>No similar cars found.</p>
+                  <p>No similar cars found</p>
                 </div>
               ) : (
                 <div
-                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  {similarCars.map((car) => (
-                    <CarCard
-                      key={car.id}
-                      car={car}
-                      onClick={() => {
-                        const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                        const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                        router.push(`/${brandSlug}-cars/${modelSlug}`)
-                      }}
-                    />
-                  ))}
+                  {similarCars.map((car: any) => {
+                    // Transform the data to match CarCard interface
+                    const transformedCar = {
+                      id: car.id,
+                      name: car.name,
+                      brand: car.brand || car.brandName,
+                      brandName: car.brandName,
+                      image: car.image || '/placeholder-car.png',
+                      startingPrice: car.startingPrice,
+                      lowestPriceFuelType: car.fuelTypes?.[0] || 'Petrol',
+                      fuelTypes: car.fuelTypes || ['Petrol'],
+                      transmissions: car.transmissionTypes || car.transmissions || ['Manual'],
+                      seating: car.seating || 5,
+                      launchDate: car.launchDate || 'Recently Launched',
+                      slug: car.slug || `${car.brandName?.toLowerCase().replace(/\s+/g, '-')}-${car.name?.toLowerCase().replace(/\s+/g, '-')}`,
+                      isNew: car.isNew || false,
+                      isPopular: car.isPopular || false
+                    }
+
+                    return (
+                      <CarCard
+                        key={car.id}
+                        car={transformedCar}
+                        onClick={() => {
+                          const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                          const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                          window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                        }}
+                      />
+                    )
+                  })}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Popular Cars Section */}
-          <div id="popular-cars" className="space-y-8">
-            <h2 className="text-2xl font-bold text-gray-900">Popular Cars</h2>
+          {/* Popular Cars Section - Exact styling from VariantPage */}
+          <div id="popular-cars" className="space-y-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Popular Cars</h2>
 
-            {/* Cars Horizontal Scroll */}
+            {/* Cars Horizontal Scroll - Exact copy from VariantPage */}
             <div className="relative">
               {loadingPopularCars ? (
-                <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
-                  {[1, 2, 3, 4].map((i) => (
+                <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
+                  {[1, 2, 3].map((i) => (
                     <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
                       <div className="h-48 bg-gray-200 animate-pulse"></div>
                       <div className="p-5 space-y-3">
                         <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
                         <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
-                        <div className="space-y-2">
-                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                          <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : popularCars.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
-                  <p>No popular cars found.</p>
+                  <p>No popular cars found</p>
                 </div>
               ) : (
                 <div
-                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  {popularCars.map((car) => (
+                  {popularCars.map((car: any) => (
                     <CarCard
                       key={car.id}
                       car={car}
                       onClick={() => {
                         const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
                         const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                        router.push(`/${brandSlug}-cars/${modelSlug}`)
+                        window.location.href = `/${brandSlug}-cars/${modelSlug}`
                       }}
                     />
                   ))}
