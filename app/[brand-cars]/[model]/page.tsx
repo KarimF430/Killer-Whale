@@ -65,6 +65,12 @@ async function getUpcomingCarData(brandSlug: string, modelSlug: string) {
     const brandName = brandSlug.replace('-cars', '')
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
+    // Guard against invalid routes - reject literal bracket params
+    if (brandSlug.includes('[') || brandSlug.includes(']') ||
+      modelSlug.includes('[') || modelSlug.includes(']')) {
+      return null
+    }
+
     if (brandSlug.startsWith('.well-known') || brandSlug === 'well-known') {
       throw new Error('Ignore well-known probe')
     }
@@ -243,10 +249,19 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     const brandName = brandSlug.replace('-cars', '')
 
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+
+    // Guard against invalid routes - reject literal bracket params like [brand-cars] or [model]
+    if (brandSlug.includes('[') || brandSlug.includes(']') ||
+      modelSlug.includes('[') || modelSlug.includes(']')) {
+      console.log('Invalid route params detected (literal brackets), returning null')
+      return null
+    }
+
     // Guard against /.well-known devtools requests being treated as dynamic routes
     if (brandSlug.startsWith('.well-known') || brandSlug === 'well-known') {
       throw new Error('Ignore well-known probe')
     }
+
 
 
     // OPTIMIZATION: Parallel data fetching where possible
