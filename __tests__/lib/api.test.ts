@@ -129,27 +129,36 @@ describe('API Client', () => {
 
     describe('Error Handling', () => {
         it('should handle network errors gracefully', async () => {
-            (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+            // Mock all retry attempts to fail with network error
+            (global.fetch as jest.Mock)
+                .mockRejectedValueOnce(new Error('Network error'))
+                .mockRejectedValueOnce(new Error('Network error'))
+                .mockRejectedValueOnce(new Error('Network error'));
 
             const result = await api.getBrands();
 
             expect(result.success).toBe(false);
             expect(result.error).toBeDefined();
-        });
+        }, 15000);
 
         it('should handle HTTP errors', async () => {
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
+            // Mock all retry attempts to return 404
+            const errorResponse = {
                 ok: false,
                 status: 404,
                 statusText: 'Not Found',
                 text: async () => 'Resource not found',
-            });
+            };
+            (global.fetch as jest.Mock)
+                .mockResolvedValueOnce(errorResponse)
+                .mockResolvedValueOnce(errorResponse)
+                .mockResolvedValueOnce(errorResponse);
 
             const result = await api.getBrandBySlug('non-existent');
 
             expect(result.success).toBe(false);
             expect(result.error).toBeDefined();
-        });
+        }, 15000);
 
         it('should retry on failure', async () => {
             // First call fails, second succeeds
