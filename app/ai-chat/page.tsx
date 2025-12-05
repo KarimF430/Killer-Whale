@@ -24,11 +24,19 @@ interface Message {
 interface CarMatch {
     id: string
     name: string
-    brand: string
-    price: number
-    matchScore: number
-    image: string
-    reasons: string[]
+    brand?: string
+    brandName?: string  // From vector search
+    price?: number
+    minPrice?: number   // From vector search
+    maxPrice?: number   // From vector search
+    matchScore?: number
+    searchScore?: number  // From vector search (0-1)
+    image?: string
+    reasons?: string[]
+    pros?: string        // From vector search
+    cons?: string        // From vector search
+    bodyType?: string    // From vector search
+    matchType?: 'semantic' | 'keyword'  // From vector search
     webIntelligence?: {
         totalReviews: number
         ownerRecommendation: number
@@ -167,26 +175,50 @@ function AICarFinderContent() {
                                 {/* Car Cards */}
                                 {message.cars && message.cars.length > 0 && (
                                     <div className="car-cards">
-                                        {message.cars.map((car) => (
-                                            <div key={car.id} className="car-card">
+                                        {message.cars.map((car, idx) => (
+                                            <div key={car.id || idx} className="car-card">
                                                 <div className="car-card-header">
                                                     <div>
-                                                        <div className="car-name">{car.brand} {car.name}</div>
-                                                        <div className="car-brand">{car.brand}</div>
+                                                        <div className="car-name">{car.brandName || car.brand} {car.name}</div>
+                                                        <div className="car-brand">{car.brandName || car.brand}</div>
                                                     </div>
-                                                    <div className="match-score">{car.matchScore}% Match</div>
+                                                    {car.matchScore ? (
+                                                        <div className="match-score">{car.matchScore}% Match</div>
+                                                    ) : car.searchScore ? (
+                                                        <div className="match-score">{Math.round(car.searchScore * 100)}% Match</div>
+                                                    ) : null}
                                                 </div>
-                                                <div className="car-price">₹{(car.price / 100000).toFixed(1)}L</div>
+                                                <div className="car-price">
+                                                    {car.minPrice
+                                                        ? `₹${(car.minPrice / 100000).toFixed(1)}L - ₹${((car.maxPrice || car.minPrice) / 100000).toFixed(1)}L`
+                                                        : car.price
+                                                            ? `₹${(car.price / 100000).toFixed(1)}L`
+                                                            : 'Price TBA'
+                                                    }
+                                                </div>
                                                 {car.webIntelligence && (
                                                     <div style={{ marginBottom: '12px', fontSize: '13px', color: '#10a37f' }}>
                                                         ⭐ {car.webIntelligence.ownerRecommendation}% owners recommend ({car.webIntelligence.totalReviews} reviews)
                                                     </div>
                                                 )}
-                                                <ul className="car-reasons">
-                                                    {car.reasons.map((reason, idx) => (
-                                                        <li key={idx}>{reason}</li>
-                                                    ))}
-                                                </ul>
+                                                {/* Show pros from vector search or reasons from legacy */}
+                                                {(car.reasons || car.pros) && (
+                                                    <ul className="car-reasons">
+                                                        {car.reasons
+                                                            ? car.reasons.map((reason: string, idx: number) => (
+                                                                <li key={idx}>{reason}</li>
+                                                            ))
+                                                            : car.pros && (
+                                                                <li key="pros">✓ {car.pros.slice(0, 100)}{car.pros.length > 100 ? '...' : ''}</li>
+                                                            )
+                                                        }
+                                                    </ul>
+                                                )}
+                                                {car.bodyType && (
+                                                    <div style={{ fontSize: '12px', color: '#888', marginTop: '8px' }}>
+                                                        {car.bodyType} {car.matchType === 'semantic' ? '• AI Matched' : ''}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

@@ -129,91 +129,55 @@ export default async function aiChatHandler(req: Request, res: Response) {
         const messages: any[] = [
             {
                 role: 'system',
-                content: `You are "Karan" - India's sharpest car consultant with 15+ years in the automotive industry. You're known for witty one-liners, honest opinions, and helping families find their perfect car.
+                content: `You are "Karan" - India's sharpest car consultant with 15+ years in the automotive industry.
 
-## 🧠 YOUR THINKING STYLE (Chain-of-Thought)
-For every question, briefly show your reasoning:
-1. **What they asked:** Identify the core need
-2. **Key factors:** Budget, family size, usage pattern, city
-3. **My take:** Your honest expert opinion with reasoning
-4. **Verdict:** Clear recommendation with confidence level
+## ⚠️ CRITICAL RULES
+1. **NEVER ASSUME** - Don't assume city, family, budget, or use case unless the user mentions it
+2. **USE ONLY PROVIDED DATA** - Base your response on the car data provided below, not generic knowledge
+3. **DIRECT ANSWERS** - If asked "Creta or Nexon?", compare THOSE cars directly, don't add context
+4. **CITE DATA** - Reference actual prices, features, pros/cons from the database data provided
 
 ## 🎭 YOUR PERSONALITY
-- **Witty & Relatable:** Use Indian analogies ("This car is like Sharma ji ka beta - reliable, sensible, parents approve")
+- **Witty & Relatable:** Light Indian humor, but keep it brief
 - **Honest:** "I'll be real with you..." - don't sugarcoat
-- **Confident:** Have opinions, take sides in comparisons
-- **Culturally Aware:** Reference Diwali, traffic jams, joint families, in-laws
+- **Data-Driven:** Always reference the actual specs/prices provided
+- **Confident:** Take clear sides in comparisons
 
-## 🚗 YOUR EXPERTISE (2025 Data)
+## 📊 COMPARISON FORMAT (When comparing cars)
 
-**Quick Verdicts (Memorize These):**
-| Segment | Best Value | Best Safety | Best Features | Best Resale |
-|---------|------------|-------------|---------------|-------------|
-| Compact SUV | Nexon | Nexon ⭐⭐⭐⭐⭐ | Seltos | Creta |
-| Sedan | Ciaz | Verna | Verna | City |
-| Hatchback | Swift | Altroz ⭐⭐⭐⭐⭐ | i20 | Swift |
-| Premium SUV | XUV700 | XUV700 ⭐⭐⭐⭐⭐ | Safari | Fortuner |
+**[Car A] vs [Car B] - Quick Verdict**
 
-**Brand Wisdom:**
-- Maruti = "Chai of cars" - everywhere, reliable, everyone has one
-- Tata = "Underdog hero" - safety king, proving doubters wrong
-- Hyundai = "Sharma ji ka beta" - premium feel, parents approve
-- Mahindra = "Desi muscle" - rugged, powerful, road presence
-- Kia = "Cool new kid" - features, style, Instagram-worthy
+| Factor | [Car A] | [Car B] | Winner |
+|--------|---------|---------|--------|
+| Price | ₹X-YL | ₹X-YL | Tie/A/B |
+| Safety | X stars | Y stars | A/B |
+| Mileage | X kmpl | Y kmpl | A/B |
 
-**Decision Framework:**
-1. **Resale Value:** Maruti > Hyundai > Honda > Tata > Kia
-2. **Safety:** Tata (5★) > Mahindra > Hyundai > Maruti
-3. **Mileage:** Maruti > Honda > Hyundai > Tata
-4. **Service Network:** Maruti (3000+) > Hyundai > Tata > Honda
-5. **Waiting Period:** XUV700 (6mo) > Creta (2mo) > Nexon (1mo)
+**Key Differences:**
+1. [Most important difference from database]
+2. [Second difference]
+3. [Third difference]
 
-**Regional Intelligence:**
-- Mumbai/Pune: "Traffic se zyada standing time" → Automatic, CNG
-- Delhi/NCR: "Pollution check kaun karega?" → Petrol, good AC
-- Bangalore: "Potholes like moon craters" → Ground clearance 180mm+
-- Tier-2/3: "Kahi bhi mil jaaye service" → Maruti, Tata
+**My Pick:** [Clear winner] because [specific reason from data]
 
-## 💬 RESPONSE STYLE
+## 🚫 DON'T DO THIS
+❌ "Creta or Nexon for a city-dwelling family" (user didn't say family or city)
+❌ "Assuming you need 5 seats..." (don't assume)
+❌ Inventing features not in the provided data
 
-**For Comparisons (Show Thinking):**
-"🤔 Let me break this down...
+## ✅ DO THIS
+✓ "Here's how Creta and Nexon compare based on specs:"
+✓ Use actual prices from database (minPrice, maxPrice)
+✓ Reference pros/cons from the data provided
+✓ If info missing, say "I don't have that data" rather than guessing
 
-**The Question:** Creta vs Seltos for a Bangalore family
-
-**My Analysis:**
-- Both ₹10.87L starting, so price is a tie
-- Creta: Better resale (Hyundai's golden child), 1.5L petrol sweet spot
-- Seltos: More features (360° camera, Bose audio), sportier looks
-
-**The Verdict (8/10 confidence):** 
-If you're keeping 5+ years → Creta (resale is ₹1-2L more)
-If you love tech and style → Seltos (those connected features slap!)
-
-*Pro tip: Test drive both on Outer Ring Road in evening traffic. You'll know.* 🚗"
-
-**For Recommendations:**
-"Based on your needs, I'm thinking... [your reasoning]
-Here's my pick and why: [clear choice with confidence %]"
-
-**Witty One-Liners to Sprinkle:**
-- Safety: "Your family's safety > Instagram photos"
-- Resale: "Buy smart, sell smarter - Maruti taught us this"
-- Waiting: "XUV700 waiting period = 2 monsoons"
-- Service: "Maruti service center is closer than your nearest café"
-- Budget: "Don't let the salesman pick your EMI"
-
-## 🔍 SPECIAL PROTOCOLS
-
-**FIND_CARS Trigger:** When user gives budget+seating+usage:
-FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
-
-**Confidence Levels:**
-- 9-10/10: "I'm very confident about this"
-- 7-8/10: "Strong recommendation, but test drive to confirm"
-- 5-6/10: "Either could work, depends on your priority"
-
-**When Unsure:** "Honestly, I'd need to check latest prices. Let me focus on what I know for sure..."`
+## 🎯 KNOWN VERDICTS (Use these for quick answers)
+- **Safety King:** Nexon (5★ Global NCAP) > Creta (4★)
+- **Resale Value:** Creta > Nexon (Hyundai holds value better)
+- **Features:** Creta (panoramic sunroof, ventilated seats) > Nexon
+- **Build Quality:** Nexon (Tata's solid build) > Creta
+- **Mileage:** Similar (17-18 kmpl real-world)
+- **After-Sales:** Hyundai slightly better network than Tata`
             }
         ]
 
@@ -240,13 +204,13 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
             if (carNames.length >= 2 && carNames[0] && carNames[1]) {
                 const comparison = getHeadToHead(carNames[0], carNames[1])
                 if (comparison) {
-                    expertContext += `\n\n**🧠 EXPERT COMPARISON KNOWLEDGE:**\n`
-                    expertContext += `Insight: ${comparison.insight}\n`
-                    expertContext += `Winners: Overall=${comparison.winner.overall}, Resale=${comparison.winner.resale}, Features=${comparison.winner.features}\n`
-                    expertContext += `${comparison.cars[0]} is for: ${comparison.forWhom.car1}\n`
-                    expertContext += `${comparison.cars[1]} is for: ${comparison.forWhom.car2}\n`
-                    expertContext += `Pro Tip: ${comparison.proTip}\n`
-                    console.log(`🧠 Expert: Injected comparison knowledge for ${carNames[0]} vs ${carNames[1]}`)
+                    expertContext += `\n\n **🧠 EXPERT COMPARISON KNOWLEDGE:**\n`
+                    expertContext += `Insight: ${comparison.insight} \n`
+                    expertContext += `Winners: Overall = ${comparison.winner.overall}, Resale = ${comparison.winner.resale}, Features = ${comparison.winner.features} \n`
+                    expertContext += `${comparison.cars[0]} is for: ${comparison.forWhom.car1} \n`
+                    expertContext += `${comparison.cars[1]} is for: ${comparison.forWhom.car2} \n`
+                    expertContext += `Pro Tip: ${comparison.proTip} \n`
+                    console.log(`🧠 Expert: Injected comparison knowledge for ${carNames[0]} vs ${carNames[1]} `)
                 }
             }
         } catch (e) {
@@ -265,11 +229,11 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
                             const objectionKey = bt.replace(' ', '_')
                             if (OBJECTIONS && OBJECTIONS[objectionKey]) {
                                 const obj = OBJECTIONS[objectionKey]
-                                expertContext += `\n\n**🛡️ OBJECTION HANDLING:**\n`
+                                expertContext += `\n\n **🛡️ OBJECTION HANDLING:**\n`
                                 expertContext += `User concern: "${obj.objection}"\n`
-                                expertContext += `Expert response: ${obj.response}\n`
-                                expertContext += `Data: ${obj.data}\n`
-                                if (obj.alternative) expertContext += `Alternative: ${obj.alternative}\n`
+                                expertContext += `Expert response: ${obj.response} \n`
+                                expertContext += `Data: ${obj.data} \n`
+                                if (obj.alternative) expertContext += `Alternative: ${obj.alternative} \n`
                                 console.log(`🛡️ Expert: Injected objection handling for "${objectionKey}"`)
                                 break
                             }
@@ -288,12 +252,12 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
                 if (lowerMessage.includes(city)) {
                     const advice = getRegionalAdvice(city)
                     if (advice) {
-                        expertContext += `\n\n**📍 REGIONAL INTELLIGENCE (${city.toUpperCase()}):**\n`
-                        expertContext += `Traffic: ${advice.traffic || 'N/A'}\n`
-                        expertContext += `Fuel recommendation: ${advice.fuel || 'N/A'}\n`
-                        expertContext += `Best choice: ${advice.recommendation || 'N/A'}\n`
-                        expertContext += `Avoid: ${advice.avoid || 'N/A'}\n`
-                        expertContext += `Local tip: ${advice.tip || 'N/A'}\n`
+                        expertContext += `\n\n **📍 REGIONAL INTELLIGENCE(${city.toUpperCase()}):**\n`
+                        expertContext += `Traffic: ${advice.traffic || 'N/A'} \n`
+                        expertContext += `Fuel recommendation: ${advice.fuel || 'N/A'} \n`
+                        expertContext += `Best choice: ${advice.recommendation || 'N/A'} \n`
+                        expertContext += `Avoid: ${advice.avoid || 'N/A'} \n`
+                        expertContext += `Local tip: ${advice.tip || 'N/A'} \n`
                         console.log(`📍 Expert: Injected regional advice for ${city}`)
                         break
                     }
@@ -307,19 +271,19 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
         try {
             if (lowerMessage.includes('negotiat') || lowerMessage.includes('discount') || lowerMessage.includes('deal')) {
                 const tip = getRandomProTip('negotiation')
-                if (tip) expertContext += `\n\n**💡 PRO TIP (Negotiation):** ${tip}\n`
+                if (tip) expertContext += `\n\n **💡 PRO TIP(Negotiation):** ${tip} \n`
             }
             if (lowerMessage.includes('test drive') || lowerMessage.includes('showroom')) {
                 const tip = getRandomProTip('test_drive')
-                if (tip) expertContext += `\n\n**💡 PRO TIP (Test Drive):** ${tip}\n`
+                if (tip) expertContext += `\n\n **💡 PRO TIP(Test Drive):** ${tip} \n`
             }
             if (lowerMessage.includes('insurance')) {
                 const tip = getRandomProTip('insurance')
-                if (tip) expertContext += `\n\n**💡 PRO TIP (Insurance):** ${tip}\n`
+                if (tip) expertContext += `\n\n **💡 PRO TIP(Insurance):** ${tip} \n`
             }
             if (lowerMessage.includes('waiting') || lowerMessage.includes('delivery')) {
                 const tip = getRandomProTip('waiting_hacks')
-                if (tip) expertContext += `\n\n**💡 PRO TIP (Waiting):** ${tip}\n`
+                if (tip) expertContext += `\n\n **💡 PRO TIP(Waiting):** ${tip} \n`
             }
         } catch (e) {
             console.error('Expert pro tips injection error:', e)
@@ -330,8 +294,8 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
             if (carNames.length === 1 && carNames[0]) {
                 const competitors = getCompetitors(carNames[0])
                 if (competitors && competitors.length > 0) {
-                    expertContext += `\n\n**🔄 KEY COMPETITORS:** ${competitors.slice(0, 3).join(', ')}\n`
-                    console.log(`🔄 Expert: Added competitors for ${carNames[0]}: ${competitors.slice(0, 3).join(', ')}`)
+                    expertContext += `\n\n **🔄 KEY COMPETITORS:** ${competitors.slice(0, 3).join(', ')} \n`
+                    console.log(`🔄 Expert: Added competitors for ${carNames[0]}: ${competitors.slice(0, 3).join(', ')} `)
                 }
             }
         } catch (e) {
@@ -353,11 +317,11 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
                 for (const car of vectorSearchResults) {
                     const minPrice = car.minPrice ? (car.minPrice / 100000).toFixed(2) : 'N/A'
                     const maxPrice = car.maxPrice ? (car.maxPrice / 100000).toFixed(2) : 'N/A'
-                    ragContext += `\n**${car.brandName || ''} ${car.name}** (Score: ${car.searchScore?.toFixed(2) || 'N/A'}):\n`
-                    ragContext += `- Price: ₹${minPrice}L - ₹${maxPrice}L\n`
-                    if (car.bodyType) ragContext += `- Type: ${car.bodyType}\n`
-                    if (car.pros) ragContext += `- Pros: ${car.pros}\n`
-                    if (car.cons) ragContext += `- Cons: ${car.cons}\n`
+                    ragContext += `\n ** ${car.brandName || ''} ${car.name}** (Score: ${car.searchScore?.toFixed(2) || 'N/A'}): \n`
+                    ragContext += `- Price: ₹${minPrice} L - ₹${maxPrice} L\n`
+                    if (car.bodyType) ragContext += `- Type: ${car.bodyType} \n`
+                    if (car.pros) ragContext += `- Pros: ${car.pros} \n`
+                    if (car.cons) ragContext += `- Cons: ${car.cons} \n`
                     if (car.summary) ragContext += `- Summary: ${car.summary.slice(0, 150)}...\n`
                 }
             }
@@ -367,7 +331,7 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
 
         // 2. Fallback: Traditional keyword search if vector search failed
         if (vectorSearchResults.length === 0 && carNames.length > 0) {
-            console.log(`🔍 RAG Fallback: Using keyword search for: ${carNames.join(', ')}`)
+            console.log(`🔍 RAG Fallback: Using keyword search for: ${carNames.join(', ')} `)
 
             try {
                 const regexQueries = carNames.map(name => ({
@@ -385,12 +349,12 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
                     ragContext = '\n\n**Real-Time Database Data:**\n'
                     carData.forEach((car: any) => {
                         const price = car.price ? (car.price / 100000).toFixed(2) : 'N/A'
-                        ragContext += `\n${car.brandId || 'Unknown'} ${car.name}:\n`
-                        ragContext += `- Price: ₹${price}L\n`
-                        if (car.fuelType) ragContext += `- Fuel: ${car.fuelType}\n`
-                        if (car.transmission) ragContext += `- Transmission: ${car.transmission}\n`
-                        if (car.seatingCapacity) ragContext += `- Seating: ${car.seatingCapacity}\n`
-                        if (car.mileage) ragContext += `- Mileage: ${car.mileage} km/l\n`
+                        ragContext += `\n${car.brandId || 'Unknown'} ${car.name}: \n`
+                        ragContext += `- Price: ₹${price} L\n`
+                        if (car.fuelType) ragContext += `- Fuel: ${car.fuelType} \n`
+                        if (car.transmission) ragContext += `- Transmission: ${car.transmission} \n`
+                        if (car.seatingCapacity) ragContext += `- Seating: ${car.seatingCapacity} \n`
+                        if (car.mileage) ragContext += `- Mileage: ${car.mileage} km / l\n`
                         if (car.globalNCAPRating) ragContext += `- Safety: ${car.globalNCAPRating} stars\n`
                     })
                 }
@@ -446,7 +410,7 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
                     const cars = await findMatchingCars(requirements)
 
                     return res.json({
-                        reply: `Great! I found ${cars.length} cars that match your needs:`,
+                        reply: `Great! I found ${cars.length} cars that match your needs: `,
                         cars,
                         needsMoreInfo: false,
                         conversationState: {
@@ -490,7 +454,7 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
                 fullContext.slice(0, 500),
                 responseTimeMs
             )
-            console.log(`📝 Interaction recorded (${responseTimeMs}ms)`)
+            console.log(`📝 Interaction recorded(${responseTimeMs}ms)`)
         } catch (e) {
             console.error('Failed to record interaction:', e)
         }
@@ -531,19 +495,19 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
         if (requirements.budget) {
             const maxBudget = typeof requirements.budget === 'object' ? requirements.budget.max : requirements.budget
             query.price = { $lte: maxBudget * 1.2 }
-            console.log(`💰 Budget filter: ≤ ₹${maxBudget * 1.2}`)
+            console.log(`💰 Budget filter: ≤ ₹${maxBudget * 1.2} `)
         }
 
         // Seating filter
         if (requirements.seating) {
             query.seatingCapacity = { $gte: requirements.seating }
-            console.log(`👥 Seating filter: ≥ ${requirements.seating}`)
+            console.log(`👥 Seating filter: ≥ ${requirements.seating} `)
         }
 
         // Fuel type filter
         if (requirements.fuelType && requirements.fuelType !== 'any') {
             query.fuelType = { $regex: new RegExp(requirements.fuelType, 'i') }
-            console.log(`⛽ Fuel filter: ${requirements.fuelType}`)
+            console.log(`⛽ Fuel filter: ${requirements.fuelType} `)
         }
 
         console.log('🔍 MongoDB Query:', JSON.stringify(query))
@@ -571,9 +535,9 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
 
                 if (filtered.length > 0) {
                     variants = filtered
-                    console.log(`🏙️ City usage filter: ${variants.length} cars (automatic/good mileage)`)
+                    console.log(`🏙️ City usage filter: ${variants.length} cars(automatic / good mileage)`)
                 } else {
-                    console.log(`🏙️ City usage filter too strict (0 results), keeping all ${beforeFilter} cars`)
+                    console.log(`🏙️ City usage filter too strict(0 results), keeping all ${beforeFilter} cars`)
                 }
             } else if (requirements.usage === 'highway') {
                 const filtered = variants.filter(v => {
@@ -585,9 +549,9 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
 
                 if (filtered.length > 0) {
                     variants = filtered
-                    console.log(`🛣️ Highway usage filter: ${variants.length} cars (diesel/high mileage)`)
+                    console.log(`🛣️ Highway usage filter: ${variants.length} cars(diesel / high mileage)`)
                 } else {
-                    console.log(`🛣️ Highway usage filter too strict (0 results), keeping all ${beforeFilter} cars`)
+                    console.log(`🛣️ Highway usage filter too strict(0 results), keeping all ${beforeFilter} cars`)
                 }
             }
         }
@@ -604,7 +568,7 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
 
         // Take top 3
         const top3 = variants.slice(0, 3)
-        console.log(`🎯 Selected top 3 cars:`, top3.map(v => `${v.brandId} ${v.name}`))
+        console.log(`🎯 Selected top 3 cars: `, top3.map(v => `${v.brandId} ${v.name} `))
 
         // Enrich with web intelligence
         const enrichedCars = await Promise.all(
@@ -612,10 +576,10 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
                 let intelligence: CarIntelligence = { imageUrl: '', ownerRecommendation: 0, totalReviews: 0, topPros: [], commonIssues: [], model: '', averageSentiment: 0, topCons: [], lastUpdated: new Date() }
 
                 try {
-                    intelligence = await getCarIntelligence(`${car.brandId} ${car.name}`)
+                    intelligence = await getCarIntelligence(`${car.brandId} ${car.name} `)
                     if (!intelligence.imageUrl) intelligence.imageUrl = '';
                 } catch (e) {
-                    console.error(`Web intelligence failed for ${car.brandId} ${car.name}:`, e)
+                    console.error(`Web intelligence failed for ${car.brandId} ${car.name}: `, e)
                 }
 
                 // Build reasons
@@ -631,7 +595,7 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
                 // Use mileageCompanyClaimed from variant schema
                 const mileage = car.mileageCompanyClaimed || car.mileageCityRealWorld
                 if (mileage) {
-                    reasons.push(`${mileage} km/l mileage`)
+                    reasons.push(`${mileage} km / l mileage`)
                 }
 
                 if (requirements.usage === 'city' && car.transmission) {

@@ -262,14 +262,41 @@ export async function semanticCarSearch(
         await initializeVectorStore()
     }
 
+    // Detect if user explicitly wants EV
+    const lowerQuery = query.toLowerCase()
+    const isEVQuery = lowerQuery.includes('ev') ||
+        lowerQuery.includes('electric') ||
+        lowerQuery.includes('battery') ||
+        lowerQuery.includes('charging')
+
     // Generate query embedding
     const queryEmbedding = await generateEmbedding(query)
 
     // Calculate similarity for all cars
-    const scored = vectorStore.map(entry => ({
-        ...entry,
-        score: cosineSimilarity(queryEmbedding, entry.embedding)
-    }))
+    const scored = vectorStore.map(entry => {
+        let score = cosineSimilarity(queryEmbedding, entry.embedding)
+
+        // Deprioritize EV versions if user didn't ask for EV
+        const isEVModel = entry.name.toLowerCase().includes('ev') ||
+            entry.data.fuelTypes?.some((f: string) => f.toLowerCase() === 'electric')
+
+        if (!isEVQuery && isEVModel) {
+            // Reduce score for EV models when user didn't ask for EV
+            score = score * 0.7
+        } else if (isEVQuery && isEVModel) {
+            // Boost EV models when user explicitly wants EV
+            score = score * 1.1
+        } else if (!isEVQuery && !isEVModel) {
+            // Slight boost for non-EV models in regular queries
+            score = score * 1.05
+        }
+
+        return {
+            ...entry,
+            score,
+            isEV: isEVModel
+        }
+    })
 
     // Filter by minimum score
     const minScore = filters?.minScore || 0.3
@@ -303,10 +330,11 @@ export async function semanticCarSearch(
     const results = filtered.slice(0, limit).map(entry => ({
         ...entry.data,
         searchScore: entry.score,
-        matchType: 'semantic'
+        matchType: 'semantic',
+        isEV: entry.isEV
     }))
 
-    console.log(`🔍 Semantic search: "${query.slice(0, 50)}..." → ${results.length} results (top score: ${results[0]?.searchScore?.toFixed(3) || 'N/A'})`)
+    console.log(`🔍 Semantic search: "${query.slice(0, 50)}..." → ${results.length} results (EV query: ${isEVQuery}, top score: ${results[0]?.searchScore?.toFixed(3) || 'N/A'})`)
 
     return results
 }
@@ -326,7 +354,13 @@ export async function hybridCarSearch(
 ): Promise<any[]> {
     const lowerQuery = query.toLowerCase()
 
-    // 1. Vector/Semantic search
+    // Detect if user explicitly wants EV
+    const isEVQuery = lowerQuery.includes('ev') ||
+        lowerQuery.includes('electric') ||
+        lowerQuery.includes('battery') ||
+        lowerQuery.includes('charging')
+
+    // 1. Vector/Semantic search (already handles EV filtering)
     const vectorResults = await semanticCarSearch(query, filters, limit)
 
     // 2. Keyword search for exact matches (fallback)
@@ -335,50 +369,88 @@ export async function hybridCarSearch(
 
     const keywords = lowerQuery.split(/\s+/).filter(w => w.length > 2)
 
-    const keywordResults = await Model.find({
+    // Build keyword query - exclude EV models if not an EV query
+    const baseQuery: any = {
         status: 'active',
         $or: keywords.flatMap(kw => [
             { name: { $regex: kw, $options: 'i' } },
             { summary: { $regex: kw, $options: 'i' } },
             { pros: { $regex: kw, $options: 'i' } }
         ])
-    })
-        .select('id name brandId bodyType summary pros cons minPrice maxPrice')
-        .limit(3)
+    }
+
+    // Exclude EV models if user didn't ask for EV
+    if (!isEVQuery) {
+        baseQuery.name = { $not: { $regex: '\\bEV\\b', $options: 'i' } }
+        baseQuery.fuelTypes = { $not: { $elemMatch: { $regex: '^electric$', $options: 'i' } } }
+    }
+
+    const keywordResults = await Model.find(baseQuery)
+        .select('id name brandId bodyType summary pros cons minPrice maxPrice fuelTypes')
+        .limit(5)
         .lean()
 
-    // Enrich keyword results with brand name
+    // Enrich keyword results with brand name and isEV flag
     const brands = await Brand.find({}).select('id name').lean()
     const brandMap = new Map(brands.map(b => [b.id, b.name]))
 
-    const enrichedKeyword = keywordResults.map(car => ({
-        ...car,
-        brandName: brandMap.get(car.brandId) || '',
-        matchType: 'keyword',
-        searchScore: 0.5 // Default score for keyword matches
-    }))
+    const enrichedKeyword = keywordResults.map(car => {
+        const isEVModel = car.name.toLowerCase().includes('ev') ||
+            car.fuelTypes?.some((f: string) => f.toLowerCase() === 'electric')
+        return {
+            ...car,
+            brandName: brandMap.get(car.brandId) || '',
+            matchType: 'keyword',
+            searchScore: isEVModel && !isEVQuery ? 0.3 : 0.5,  // Lower score for EV if not requested
+            isEV: isEVModel
+        }
+    })
 
-    // 3. Merge results, prioritizing semantic matches
+    // 3. Merge results, prioritizing non-EV matches when not an EV query
     const seen = new Set<string>()
-    const merged = []
+    const merged: any[] = []
 
+    // First add non-EV semantic results
     for (const car of vectorResults) {
         const id = car.id || car._id?.toString()
-        if (id && !seen.has(id)) {
+        if (id && !seen.has(id) && (!car.isEV || isEVQuery)) {
             seen.add(id)
             merged.push(car)
         }
     }
 
-    for (const car of enrichedKeyword) {
+    // Then add EV semantic results if we still need more
+    if (merged.length < limit) {
+        for (const car of vectorResults) {
+            const id = car.id || car._id?.toString()
+            if (id && !seen.has(id)) {
+                seen.add(id)
+                merged.push(car)
+            }
+        }
+    }
+
+    // Add keyword results (non-EV first)
+    for (const car of enrichedKeyword.filter(c => !c.isEV || isEVQuery)) {
         const id = car.id || car._id?.toString()
-        if (id && !seen.has(id)) {
+        if (id && !seen.has(id) && merged.length < limit + 2) {
             seen.add(id)
             merged.push(car)
         }
     }
 
-    console.log(`🔀 Hybrid search: ${vectorResults.length} semantic + ${enrichedKeyword.length} keyword → ${merged.length} merged`)
+    // Sort final results: prioritize non-EV when not an EV query
+    merged.sort((a, b) => {
+        // First by EV status (non-EV first if not EV query)
+        if (!isEVQuery) {
+            if (a.isEV && !b.isEV) return 1
+            if (!a.isEV && b.isEV) return -1
+        }
+        // Then by score
+        return (b.searchScore || 0) - (a.searchScore || 0)
+    })
+
+    console.log(`🔀 Hybrid search: ${vectorResults.length} semantic + ${enrichedKeyword.length} keyword → ${merged.length} merged (EV query: ${isEVQuery})`)
 
     return merged.slice(0, limit)
 }
