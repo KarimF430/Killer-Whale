@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 
@@ -30,14 +30,22 @@ interface PopularComparisonsProps {
 
 export default function PopularComparisons({ initialComparisons = [] }: PopularComparisonsProps) {
   const [comparisons] = useState<ComparisonData[]>(initialComparisons)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
-  // Helper function to calculate on-road price
-  const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
-    const selectedCity = typeof window !== 'undefined'
-      ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
-      : 'Mumbai, Maharashtra'
+  // Only run on-road price calculation after client-side hydration
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
+  // Helper function to calculate on-road price - only call after mount
+  const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
+    if (!mounted) {
+      // During SSR/initial hydration, return ex-showroom price to match server
+      return exShowroomPrice
+    }
+
+    const selectedCity = localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
     const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
     const breakup = calculateOnRoadPrice(exShowroomPrice, state, fuelType)
     return breakup.totalOnRoadPrice
@@ -52,6 +60,7 @@ export default function PopularComparisons({ initialComparisons = [] }: PopularC
   if (comparisons.length === 0) {
     return null // Don't show section if no comparisons
   }
+
 
   return (
     <div>
@@ -89,6 +98,8 @@ export default function PopularComparisons({ initialComparisons = [] }: PopularC
                         src={comparison.model1.heroImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"}
                         alt={`${comparison.model1.brand} ${comparison.model1.name}`}
                         className="w-full h-20 object-contain"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           if (e.currentTarget.src !== "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E") {
                             e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
@@ -102,7 +113,7 @@ export default function PopularComparisons({ initialComparisons = [] }: PopularC
                       <div className="text-red-600 font-bold text-sm">
                         ₹ {(model1OnRoad / 100000).toFixed(2)} Lakh
                       </div>
-                      <div className="text-xs text-gray-500">On-Road Price</div>
+                      <div className="text-xs text-gray-500">{mounted ? 'On-Road Price' : 'Ex-Showroom'}</div>
                     </div>
                   </div>
 
@@ -120,6 +131,8 @@ export default function PopularComparisons({ initialComparisons = [] }: PopularC
                         src={comparison.model2.heroImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"}
                         alt={`${comparison.model2.brand} ${comparison.model2.name}`}
                         className="w-full h-20 object-contain"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           if (e.currentTarget.src !== "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E") {
                             e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
@@ -133,7 +146,7 @@ export default function PopularComparisons({ initialComparisons = [] }: PopularC
                       <div className="text-red-600 font-bold text-sm">
                         ₹ {(model2OnRoad / 100000).toFixed(2)} Lakh
                       </div>
-                      <div className="text-xs text-gray-500">On-Road Price</div>
+                      <div className="text-xs text-gray-500">{mounted ? 'On-Road Price' : 'Ex-Showroom'}</div>
                     </div>
                   </div>
                 </div>

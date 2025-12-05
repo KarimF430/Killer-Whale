@@ -130,6 +130,8 @@ export default function LatestCarNews({ initialNews = [] }: { initialNews?: News
                     src={getFirstImage(article)}
                     alt={article.title}
                     className="w-full h-full object-cover bg-gray-100"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <div className="h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">

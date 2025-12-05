@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import CarCard from './CarCard'
 
@@ -55,8 +55,6 @@ const formatFuelType = (fuel: string): string => {
 
 export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[] }) {
   const [selectedBudget, setSelectedBudget] = useState('under-8')
-  const [carsByBudget, setCarsByBudget] = useState<Record<string, Car[]>>({})
-  const [loading, setLoading] = useState(false)
 
   const budgetRanges = [
     { id: 'under-8', label: 'Under ₹8 Lakh', max: 800000 },
@@ -66,17 +64,17 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
     { id: 'above-50', label: 'Above ₹50 Lakh', max: Infinity }
   ]
 
-  useEffect(() => {
-    if (initialCars.length > 0) {
-      // ✅ FIXED: Use proper price RANGES, not cumulative filters
-      const organized: Record<string, Car[]> = {
-        'under-8': initialCars.filter(car => car.startingPrice > 0 && car.startingPrice <= 800000),
-        'under-15': initialCars.filter(car => car.startingPrice > 800000 && car.startingPrice <= 1500000),
-        'under-25': initialCars.filter(car => car.startingPrice > 1500000 && car.startingPrice <= 2500000),
-        'under-50': initialCars.filter(car => car.startingPrice > 2500000 && car.startingPrice <= 5000000),
-        'above-50': initialCars.filter(car => car.startingPrice > 5000000)
-      }
-      setCarsByBudget(organized)
+  // ✅ OPTIMIZED: Use useMemo to process cars immediately on first render
+  // This eliminates the useEffect delay that caused empty first render
+  const carsByBudget = useMemo(() => {
+    if (initialCars.length === 0) return {}
+
+    return {
+      'under-8': initialCars.filter(car => car.startingPrice > 0 && car.startingPrice <= 800000),
+      'under-15': initialCars.filter(car => car.startingPrice > 800000 && car.startingPrice <= 1500000),
+      'under-25': initialCars.filter(car => car.startingPrice > 1500000 && car.startingPrice <= 2500000),
+      'under-50': initialCars.filter(car => car.startingPrice > 2500000 && car.startingPrice <= 5000000),
+      'above-50': initialCars.filter(car => car.startingPrice > 5000000)
     }
   }, [initialCars])
 
@@ -115,24 +113,7 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
 
       {/* Cars Horizontal Scroll */}
       <div className="relative">
-        {loading ? (
-          <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="h-48 bg-gray-200 animate-pulse"></div>
-                <div className="p-5 space-y-3">
-                  <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-                  <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : currentCars.length === 0 ? (
+        {currentCars.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>No cars found in this budget range.</p>
           </div>

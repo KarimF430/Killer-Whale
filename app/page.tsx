@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import Footer from '@/components/Footer'
 import AdBanner from '@/components/home/AdBanner'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
@@ -10,13 +11,23 @@ import UpcomingCars from '@/components/home/UpcomingCars'
 import FavouriteCars from '@/components/home/FavouriteCars'
 import NewLaunchedCars from '@/components/home/NewLaunchedCars'
 import LatestCarNews from '@/components/home/LatestCarNews'
-import YouTubeVideoPlayer from '@/components/home/YouTubeVideoPlayer'
 import PopularComparisons from '@/components/home/PopularComparisons'
-import VideoAd from '@/components/ads/VideoAd'
 import PageSection from '@/components/common/PageSection'
 import Card from '@/components/common/Card'
 import { staticPageSEO } from '@/lib/seo'
-import OceanBackground from '@/components/home/OceanBackground'
+
+// Lazy load heavy components that are below the fold
+const YouTubeVideoPlayer = dynamic(() => import('@/components/home/YouTubeVideoPlayer'), {
+  loading: () => <div className="h-80 bg-gray-100 rounded-lg animate-pulse" />
+})
+const VideoAd = dynamic(() => import('@/components/ads/VideoAd'), {
+  loading: () => <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+// Lazy load OceanBackground - 12 Lottie animations, loads after main content
+const OceanBackground = dynamic(() => import('@/components/home/OceanBackground'), {
+  loading: () => null // No placeholder, just load after hydration
+})
 
 export const metadata: Metadata = staticPageSEO.home
 export const revalidate = 3600 // Revalidate every hour
