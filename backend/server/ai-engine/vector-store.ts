@@ -340,12 +340,145 @@ export async function semanticCarSearch(
 }
 
 // ============================================
+// EXACT NAME SEARCH (Priority Matching)
+// ============================================
+
+import { findBestCarMatches, CAR_ALIASES, resolveCarAlias } from './fuzzy-match'
+
+// Common car names for extraction
+const KNOWN_CAR_NAMES = [
+    // Popular Models
+    'swift', 'creta', 'nexon', 'seltos', 'venue', 'brezza', 'baleno', 'i20', 'i10',
+    'sonet', 'carens', 'innova', 'fortuner', 'city', 'elevate', 'amaze',
+    'thar', 'scorpio', 'xuv700', 'xuv400', 'xuv300', 'bolero', 'harrier', 'safari',
+    'punch', 'tiago', 'tigor', 'altroz', 'curvv', 'fronx', 'jimny', 'invicto', 'hycross',
+    'grand vitara', 'ertiga', 'xl6', 'dzire', 's-presso', 'wagonr', 'alto', 'eeco',
+    'verna', 'exter', 'aura', 'alcazar',
+    // Brand names
+    'tata', 'maruti', 'hyundai', 'kia', 'mahindra', 'honda', 'toyota', 'mg', 'skoda', 'volkswagen'
+]
+
+/**
+ * Extract car names mentioned in the query
+ * Uses fuzzy matching to handle typos
+ */
+function extractCarNamesFromQuery(query: string): string[] {
+    const lowerQuery = query.toLowerCase()
+    const extracted: string[] = []
+
+    // 1. Check for exact car name mentions
+    for (const carName of KNOWN_CAR_NAMES) {
+        if (lowerQuery.includes(carName)) {
+            extracted.push(carName)
+        }
+    }
+
+    // 2. Check aliases (typos, shortcuts)
+    for (const [alias, resolved] of Object.entries(CAR_ALIASES)) {
+        if (lowerQuery.includes(alias) && !extracted.includes(resolved)) {
+            extracted.push(resolved)
+        }
+    }
+
+    // 3. Fuzzy match remaining words
+    if (extracted.length === 0) {
+        const fuzzyMatches = findBestCarMatches(query, KNOWN_CAR_NAMES, 2)
+        for (const match of fuzzyMatches) {
+            if (match.similarity >= 0.7) {
+                extracted.push(match.car)
+            }
+        }
+    }
+
+    return [...new Set(extracted)]
+}
+
+/**
+ * Search for exact car name matches in database
+ * Returns cars with high confidence score (0.9-1.0)
+ */
+export async function exactNameSearch(
+    query: string,
+    limit = 5
+): Promise<any[]> {
+    const { Model, Brand } = await import('../db/schemas')
+
+    // Extract car names from query
+    const carNames = extractCarNamesFromQuery(query)
+
+    if (carNames.length === 0) {
+        return []
+    }
+
+    console.log(`🎯 Exact search: found car names [${carNames.join(', ')}] in query`)
+
+    // Build regex patterns for each car name
+    const namePatterns = carNames.map(name => ({
+        name: { $regex: new RegExp(`^${name}$|^${name}\\s|\\s${name}$|\\s${name}\\s`, 'i') }
+    }))
+
+    // Also search by brand name
+    const brandPatterns = carNames.map(name => ({
+        brandId: { $regex: name, $options: 'i' }
+    }))
+
+    const results = await Model.find({
+        status: 'active',
+        $or: [...namePatterns]
+    })
+        .select('id name brandId bodyType summary pros cons minPrice maxPrice fuelTypes')
+        .limit(limit)
+        .lean()
+
+    // Get brand names
+    const brands = await Brand.find({}).select('id name').lean()
+    const brandMap = new Map(brands.map(b => [b.id, b.name]))
+
+    // Score based on match quality
+    const scored = results.map(car => {
+        const carNameLower = car.name.toLowerCase()
+        let score = 0.85 // Base score for regex match
+
+        // Boost if car name is exact match
+        for (const searchName of carNames) {
+            if (carNameLower === searchName) {
+                score = 1.0
+                break
+            } else if (carNameLower.startsWith(searchName) || carNameLower.endsWith(searchName)) {
+                score = 0.95
+            } else if (carNameLower.includes(searchName)) {
+                score = Math.max(score, 0.9)
+            }
+        }
+
+        // Check for EV variants
+        const isEV = carNameLower.includes('ev') ||
+            car.fuelTypes?.some((f: string) => f.toLowerCase() === 'electric')
+
+        return {
+            ...car,
+            brandName: brandMap.get(car.brandId) || '',
+            searchScore: score,
+            matchType: 'exact',
+            isEV
+        }
+    })
+
+    // Sort by score descending
+    scored.sort((a, b) => b.searchScore - a.searchScore)
+
+    console.log(`🎯 Exact search: ${scored.length} matches found`)
+
+    return scored.slice(0, limit)
+}
+
+// ============================================
 // HYBRID SEARCH (Vector + Keyword)
 // ============================================
 
 /**
- * Hybrid search combining vector + keyword matching
- * Best of both worlds: semantic understanding + exact matches
+ * Hybrid search combining exact name + vector + keyword matching
+ * Priority: Exact name > Semantic > Keyword
  */
 export async function hybridCarSearch(
     query: string,
@@ -360,11 +493,16 @@ export async function hybridCarSearch(
         lowerQuery.includes('battery') ||
         lowerQuery.includes('charging')
 
-    // 1. Vector/Semantic search (already handles EV filtering)
+    // 1. EXACT NAME SEARCH (highest priority)
+    const exactResults = await exactNameSearch(query, limit)
+
+    // If we got exact matches, prioritize them
+    const hasExactMatches = exactResults.length > 0 && exactResults.some(r => r.searchScore >= 0.9)
+
+    // 2. Vector/Semantic search (already handles EV filtering)
     const vectorResults = await semanticCarSearch(query, filters, limit)
 
-    // 2. Keyword search for exact matches (fallback)
-    // Dynamic import to prevent startup crash when MongoDB isn't connected
+    // 3. Keyword search for fallback
     const { Model, Brand } = await import('../db/schemas')
 
     const keywords = lowerQuery.split(/\s+/).filter(w => w.length > 2)
@@ -410,7 +548,16 @@ export async function hybridCarSearch(
     const seen = new Set<string>()
     const merged: any[] = []
 
-    // First add non-EV semantic results
+    // PRIORITY 1: Add exact name matches first (highest priority)
+    for (const car of exactResults) {
+        const id = car.id || car._id?.toString()
+        if (id && !seen.has(id) && (!car.isEV || isEVQuery)) {
+            seen.add(id)
+            merged.push(car)
+        }
+    }
+
+    // PRIORITY 2: Add non-EV semantic results
     for (const car of vectorResults) {
         const id = car.id || car._id?.toString()
         if (id && !seen.has(id) && (!car.isEV || isEVQuery)) {
@@ -419,7 +566,7 @@ export async function hybridCarSearch(
         }
     }
 
-    // Then add EV semantic results if we still need more
+    // PRIORITY 3: Add EV semantic results if still need more
     if (merged.length < limit) {
         for (const car of vectorResults) {
             const id = car.id || car._id?.toString()
@@ -430,7 +577,7 @@ export async function hybridCarSearch(
         }
     }
 
-    // Add keyword results (non-EV first)
+    // PRIORITY 4: Add keyword results (non-EV first)
     for (const car of enrichedKeyword.filter(c => !c.isEV || isEVQuery)) {
         const id = car.id || car._id?.toString()
         if (id && !seen.has(id) && merged.length < limit + 2) {
@@ -439,18 +586,24 @@ export async function hybridCarSearch(
         }
     }
 
-    // Sort final results: prioritize non-EV when not an EV query
+    // Sort final results: prioritize exact matches > non-EV > by score
     merged.sort((a, b) => {
-        // First by EV status (non-EV first if not EV query)
+        // First by match type (exact > semantic > keyword)
+        const matchPriority: Record<string, number> = { exact: 3, semantic: 2, keyword: 1 }
+        const aPriority = matchPriority[a.matchType] || 0
+        const bPriority = matchPriority[b.matchType] || 0
+        if (aPriority !== bPriority) return bPriority - aPriority
+
+        // Then by EV status (non-EV first if not EV query)
         if (!isEVQuery) {
             if (a.isEV && !b.isEV) return 1
             if (!a.isEV && b.isEV) return -1
         }
-        // Then by score
+        // Finally by score
         return (b.searchScore || 0) - (a.searchScore || 0)
     })
 
-    console.log(`🔀 Hybrid search: ${vectorResults.length} semantic + ${enrichedKeyword.length} keyword → ${merged.length} merged (EV query: ${isEVQuery})`)
+    console.log(`🔀 Hybrid search: ${exactResults.length} exact + ${vectorResults.length} semantic + ${enrichedKeyword.length} keyword → ${merged.length} merged (EV: ${isEVQuery})`)
 
     return merged.slice(0, limit)
 }
