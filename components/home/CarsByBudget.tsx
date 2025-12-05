@@ -61,7 +61,6 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
     { id: 'under-15', label: 'Under ₹15 Lakh', max: 1500000 },
     { id: 'under-25', label: 'Under ₹25 Lakh', max: 2500000 },
     { id: 'under-50', label: 'Under ₹50 Lakh', max: 5000000 },
-    { id: 'above-50', label: 'Above ₹50 Lakh', max: Infinity }
   ]
 
   // ✅ OPTIMIZED: Use useMemo to process cars immediately on first render
@@ -74,7 +73,6 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
       'under-15': initialCars.filter(car => car.startingPrice > 800000 && car.startingPrice <= 1500000),
       'under-25': initialCars.filter(car => car.startingPrice > 1500000 && car.startingPrice <= 2500000),
       'under-50': initialCars.filter(car => car.startingPrice > 2500000 && car.startingPrice <= 5000000),
-      'above-50': initialCars.filter(car => car.startingPrice > 5000000)
     }
   }, [initialCars])
 
