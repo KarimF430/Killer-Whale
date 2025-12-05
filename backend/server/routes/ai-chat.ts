@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import Groq from 'groq-sdk'
-import { Variant as CarVariant } from '../db/schemas'
+import { Variant as CarVariant, Model } from '../db/schemas'
 import { getCarIntelligence, type CarIntelligence } from '../ai-engine/web-scraper'
 import { handleQuestionWithRAG } from '../ai-engine/rag-system'
 import {
@@ -13,6 +13,16 @@ import {
     OBJECTIONS,
     PRO_TIPS
 } from '../ai-engine/expert-knowledge'
+// Vector search and self-learning imports
+import { hybridCarSearch, initializeVectorStore, getVectorStoreStats } from '../ai-engine/vector-store'
+import {
+    recordInteraction,
+    recordFeedback,
+    recordCarClick,
+    getLearnedContext,
+    classifyQuery,
+    getLearningMetrics
+} from '../ai-engine/self-learning'
 
 // Initialize Groq client only if API key is available (prevents test failures)
 const groqApiKey = process.env.GROQ_API_KEY || process.env.HF_API_KEY || ''
@@ -103,10 +113,17 @@ export default async function aiChatHandler(req: Request, res: Response) {
         return res.status(405).json({ error: 'Method not allowed' })
     }
 
+    const startTime = Date.now()
+
     try {
-        const { message, sessionId, conversationHistory = [] } = req.body
+        const { message, sessionId = 'web-' + Date.now(), conversationHistory = [] } = req.body
 
         console.log('🔍 User:', message)
+
+        // Initialize vector store on first request (cached after that)
+        await initializeVectorStore().catch(err => {
+            console.warn('⚠️ Vector store init failed, using fallback:', err.message)
+        })
 
         // Build conversation for Groq
         const messages: any[] = [
@@ -322,14 +339,37 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
         }
 
         // ============================================
-        // DATABASE RAG (Real-time data)
+        // ENHANCED RAG: Vector + Keyword Hybrid Search
         // ============================================
 
-        if (carNames.length > 0) {
-            console.log(`🔍 RAG: Detected cars: ${carNames.join(', ')}`)
+        // 1. Semantic search using embeddings (finds intent, not just keywords)
+        let vectorSearchResults: any[] = []
+        try {
+            vectorSearchResults = await hybridCarSearch(message, {}, 5)
+            if (vectorSearchResults.length > 0) {
+                console.log(`🧠 Vector search: Found ${vectorSearchResults.length} semantic matches`)
+
+                ragContext = '\n\n**🔍 Cars Found (AI-Matched to Your Query):**\n'
+                for (const car of vectorSearchResults) {
+                    const minPrice = car.minPrice ? (car.minPrice / 100000).toFixed(2) : 'N/A'
+                    const maxPrice = car.maxPrice ? (car.maxPrice / 100000).toFixed(2) : 'N/A'
+                    ragContext += `\n**${car.brandName || ''} ${car.name}** (Score: ${car.searchScore?.toFixed(2) || 'N/A'}):\n`
+                    ragContext += `- Price: ₹${minPrice}L - ₹${maxPrice}L\n`
+                    if (car.bodyType) ragContext += `- Type: ${car.bodyType}\n`
+                    if (car.pros) ragContext += `- Pros: ${car.pros}\n`
+                    if (car.cons) ragContext += `- Cons: ${car.cons}\n`
+                    if (car.summary) ragContext += `- Summary: ${car.summary.slice(0, 150)}...\n`
+                }
+            }
+        } catch (e) {
+            console.error('Vector search error:', e)
+        }
+
+        // 2. Fallback: Traditional keyword search if vector search failed
+        if (vectorSearchResults.length === 0 && carNames.length > 0) {
+            console.log(`🔍 RAG Fallback: Using keyword search for: ${carNames.join(', ')}`)
 
             try {
-                // Build simpler query - search each car name in name field
                 const regexQueries = carNames.map(name => ({
                     name: { $regex: name, $options: 'i' }
                 }))
@@ -340,7 +380,7 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
                 }).limit(10).lean()
 
                 if (carData.length > 0) {
-                    console.log(`📊 RAG: Found ${carData.length} cars in database`)
+                    console.log(`📊 Keyword RAG: Found ${carData.length} cars`)
 
                     ragContext = '\n\n**Real-Time Database Data:**\n'
                     carData.forEach((car: any) => {
@@ -359,10 +399,22 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
             }
         }
 
-        // Add current message with RAG context + Expert knowledge
+        // 3. Get learned context from past successful responses
+        let learnedContext = ''
+        try {
+            learnedContext = await getLearnedContext(message)
+            if (learnedContext) {
+                console.log(`📚 Using learned context from past successes`)
+            }
+        } catch (e) {
+            console.error('Learned context error:', e)
+        }
+
+        // Add current message with RAG context + Expert knowledge + Learned context
+        const fullContext = ragContext + expertContext + learnedContext
         messages.push({
             role: 'user',
-            content: message + ragContext + expertContext
+            content: message + fullContext
         })
 
         // Let AI decide what to do
@@ -421,9 +473,33 @@ FIND_CARS: {"budget": 1500000, "seating": 5, "usage": "city"}
             aiResponse.toLowerCase().includes('seating') ||
             aiResponse.toLowerCase().includes('how many')
 
+        // Record interaction for self-learning
+        const responseTimeMs = Date.now() - startTime
+        const carsRecommended = vectorSearchResults.slice(0, 3).map((car: any) => ({
+            modelId: car.id || car._id?.toString() || '',
+            modelName: car.name || '',
+            brandName: car.brandName || ''
+        }))
+
+        try {
+            await recordInteraction(
+                sessionId,
+                message,
+                aiResponse,
+                carsRecommended,
+                fullContext.slice(0, 500),
+                responseTimeMs
+            )
+            console.log(`📝 Interaction recorded (${responseTimeMs}ms)`)
+        } catch (e) {
+            console.error('Failed to record interaction:', e)
+        }
+
         res.json({
             reply: aiResponse,
             needsMoreInfo,
+            cars: vectorSearchResults.slice(0, 3), // Return top matched cars
+            sessionId, // Return for feedback tracking
             conversationState: {
                 stage: needsMoreInfo ? 'gathering_requirements' : 'greeting',
                 collectedInfo: {},

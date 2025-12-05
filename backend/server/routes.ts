@@ -44,6 +44,7 @@ import adminAnalyticsRoutes from "./routes/admin-analytics";
 import aiChatHandler from "./routes/ai-chat";
 import quirkyBitRoutes from "./routes/quirky-bit";
 import createYouTubeRoutes from "./routes/youtube";
+import aiFeedbackRoutes from "./routes/ai-feedback";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -2144,7 +2145,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           transmissions: transmissions,
           seating: 5,
           launchDate: model.launchDate || new Date().toISOString(),
-          slug: model.id,
+          // Use model's database slug if available, otherwise generate from name
+          slug: model.slug || model.name.toLowerCase().replace(/\s+/g, '-'),
           isNew: model.isNew || false,
           isPopular: model.isPopular || false,
           popularRank: model.popularRank || null,
@@ -2604,6 +2606,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
   // Quirky Bits endpoint (for floating AI bot)
   app.use('/api/quirky-bit', publicLimiter, quirkyBitRoutes);
+
+  // AI Feedback & Learning Analytics endpoint
+  app.use('/api/ai-feedback', publicLimiter, aiFeedbackRoutes);
 
   // YouTube endpoint
   app.use('/api/youtube', publicLimiter, createYouTubeRoutes(storage));
