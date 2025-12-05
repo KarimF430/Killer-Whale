@@ -14,39 +14,6 @@ interface ModelPageProps {
 // Enable ISR with 1-hour revalidation (matches home page pattern)
 export const revalidate = 3600
 
-// Force dynamic rendering to fix navigation issues on Vercel
-// Static generation was causing stale/invalid pages to be cached
-export const dynamic = 'force-dynamic'
-
-// Pre-render top 50 popular car pages at build time for instant loading (CarWale-style SSG)
-export async function generateStaticParams() {
-  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
-  try {
-    const [brandsRes, modelsRes] = await Promise.all([
-      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 86400 } }),
-      fetch(`${backendUrl}/api/cars/popular?limit=50`, { next: { revalidate: 86400 } })
-    ])
-
-    if (!brandsRes.ok || !modelsRes.ok) return []
-
-    const brands = await brandsRes.json()
-    const models = await modelsRes.json()
-
-    const brandMap = brands.reduce((acc: any, b: any) => ({
-      ...acc,
-      [b.id]: b.name.toLowerCase().replace(/\s+/g, '-')
-    }), {})
-
-    return (Array.isArray(models) ? models : []).map((model: any) => ({
-      'brand-cars': `${brandMap[model.brandId] || 'unknown'}-cars`,
-      'model': model.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown'
-    })).filter((p: any) => p['brand-cars'] !== 'unknown-cars' && p.model !== 'unknown')
-  } catch (e) {
-    console.log('generateStaticParams fallback - will use on-demand rendering')
-    return [] // Fallback to on-demand ISR
-  }
-}
-
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
   const resolvedParams = await params
