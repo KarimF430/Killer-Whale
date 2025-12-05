@@ -14,6 +14,10 @@ interface ModelPageProps {
 // Enable ISR with 1-hour revalidation (matches home page pattern)
 export const revalidate = 3600
 
+// Force dynamic rendering to fix navigation issues on Vercel
+// Static generation was causing stale/invalid pages to be cached
+export const dynamic = 'force-dynamic'
+
 // Pre-render top 50 popular car pages at build time for instant loading (CarWale-style SSG)
 export async function generateStaticParams() {
   const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
