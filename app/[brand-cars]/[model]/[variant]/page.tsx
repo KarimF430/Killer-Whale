@@ -11,6 +11,9 @@ interface PageProps {
   }>
 }
 
+// Enable ISR with 1-hour revalidation for caching
+export const revalidate = 3600
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const resolvedParams = await params
   const brandSlug = resolvedParams['brand-cars'].replace('-cars', '')
