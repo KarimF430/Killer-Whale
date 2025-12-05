@@ -15,6 +15,29 @@ const groq = groqApiKey ? new Groq({ apiKey: groqApiKey }) : null
 const cache = new Map<string, { data: any; timestamp: number }>()
 const CACHE_TTL = 3600000 // 1 hour
 
+// Hour-based themes for variety (rotates every hour)
+const QUIRKY_THEMES = [
+    { theme: 'SAFETY', angle: 'safety rating, crash protection, family security' },
+    { theme: 'MILEAGE', angle: 'fuel efficiency, petrol savings, long drives' },
+    { theme: 'TECH', angle: 'features, infotainment, connected tech, ADAS' },
+    { theme: 'VALUE', angle: 'price vs competition, resale value, EMI' },
+    { theme: 'INDIAN_LIFE', angle: 'Diwali trips, traffic jams, potholes, monsoon' },
+    { theme: 'STYLE', angle: 'looks, road presence, Instagram-worthy, alloys' },
+    { theme: 'FAMILY', angle: 'boot space, rear seat comfort, AC cooling' },
+    { theme: 'COMPARISON', angle: 'vs competitors, why this over rivals' },
+    { theme: 'OWNERSHIP', angle: 'service cost, spare parts, insurance' },
+    { theme: 'POWER', angle: 'acceleration, turbo, driving pleasure' },
+    { theme: 'BRAND', angle: 'brand reputation, heritage, trust' },
+    { theme: 'TRENDING', angle: 'latest updates, new launch, waiting period' },
+]
+
+// Get current hour's theme (rotates every hour)
+function getCurrentTheme(): string {
+    const hour = new Date().getHours()
+    const theme = QUIRKY_THEMES[hour % QUIRKY_THEMES.length]
+    return `Focus on: ${theme.theme} - ${theme.angle}`
+}
+
 // Helper to fetch real-time news with relevance filtering
 async function fetchRealTimeNews(query: string) {
     try {
@@ -69,8 +92,9 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Invalid type. Must be brand, model, variant, price, or comparison' })
     }
 
-    // Check cache
-    const cacheKey = `${type}-${id}`
+    // Check cache - includes hour to ensure fresh content every hour
+    const currentHour = new Date().getHours()
+    const cacheKey = `${type}-${id}-hour${currentHour}`
     const cached = cache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
         console.log(`✅ Cache hit for ${cacheKey}`)
@@ -319,38 +343,40 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
         }
 
         const prompt = `
-        You're a witty Indian car expert writing ONE memorable, punchy fact that'll make someone smile.
+        You're a professional car expert writing ONE insightful, memorable fact with subtle humor.
+        
+        🎯 THIS HOUR'S FOCUS: ${getCurrentTheme()}
+        (Write about THIS specific angle - make it unique!)
         
         DATA:
         ${dataSummary || context}
 
         STYLE GUIDE:
-        🎯 Be MEMORABLE - Use analogies, humor, surprise facts
-        🇮🇳 Be INDIAN - Reference chai, Diwali, traffic jams, Sharma ji, cricket
-        ⚡ Be PUNCHY - Under 120 characters, no fluff
-        😄 Be WITTY - Make them smile or go "oh interesting!"
+        ✅ Be PROFESSIONAL - Sound like an expert, not a stand-up comedian
+        ✅ Be INSIGHTFUL - Share a genuinely useful or surprising fact
+        ✅ Be SUBTLE - Humor through clever wordplay, not cultural clichés
+        ⚡ Be CONCISE - Under 100 characters, no fluff
 
-        EXAMPLES OF GOOD QUIRKS:
-        - "XUV700 ADAS can see better than your watchman at night 👀"
-        - "Nexon's safety rating > your helmet + seatbelt + prayers combined"  
-        - "Swift's resale value = almost like buying gold, but more fun"
-        - "Creta waiting period: enough time to plan 2 Diwalis 🪔"
-        - "This car drinks less than your scooter. Yes, really!"
-        - "Boot space bigger than your Diwali shopping list"
-        - "Mother-in-law approved safety rating ✅"
+        EXAMPLES OF GOOD FACTS:
+        - "XUV700's ADAS detects obstacles faster than you can say 'brake'"
+        - "Nexon scored 5 stars in crash tests. Your peace of mind? Priceless."
+        - "Swift holds its value like fine wine - just depreciates slower"
+        - "This engine drinks less fuel than a hybrid in traffic"
+        - "Boot space: 450L. Weekend trips? Sorted."
+        - "0-100 in 9.5s. Coffee's still hot when you reach the office."
 
-        BAD (Don't do this):
-        - "This car has good mileage" (boring!)
-        - "The price is competitive" (corporate speak)
-        - "It's a reliable vehicle" (yawn)
+        DON'T DO THIS:
+        ❌ "Diwali trips", "chai", "Sharma ji", "mother-in-law" (too informal)
+        ❌ "This car has good mileage" (boring, not specific)
+        ❌ Multiple emojis or exclamation marks!!!
 
-        SPECIAL RULES:
-        1. If there's NEWS about ${entityName}, lead with that
-        2. If no relevant news, pick the MOST SURPRISING stat from DB
-        3. Never start with "Did you know" - just state it
-        4. One emoji max, use sparingly
+        RULES:
+        1. Focus on the THEME above
+        2. Use actual data from the specs provided
+        3. One emoji max (optional)
+        4. Be clever, not corny
 
-        Write ONE quirky fact now (no quotes):
+        Write ONE professional-yet-witty fact now (no quotes):
         `
 
         const response = await groq.chat.completions.create({
@@ -358,12 +384,12 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are a witty Indian car journalist known for viral one-liners. You write facts that make people share and remember. Keep it under 120 chars.'
+                    content: 'You are a professional automotive analyst who writes concise, insightful car facts with subtle wit. Keep responses under 100 characters. Be informative yet engaging.'
                 },
                 { role: 'user', content: prompt }
             ],
             max_tokens: 80,
-            temperature: 0.85  // Higher for more creative/witty outputs
+            temperature: 0.7  // Balanced for professional yet engaging outputs
         })
 
         const text = response.choices[0]?.message?.content?.trim() ||
