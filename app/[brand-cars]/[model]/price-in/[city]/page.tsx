@@ -6,6 +6,47 @@ import { FloatingAIBot } from '@/components/FloatingAIBot'
 // Enable ISR with 1-hour revalidation
 export const revalidate = 3600
 
+// Pre-render popular car price pages at build time for instant loading
+export async function generateStaticParams() {
+  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+  const majorCities = ['mumbai', 'delhi', 'bangalore', 'chennai', 'hyderabad']
+
+  try {
+    const [brandsRes, popularRes] = await Promise.all([
+      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 86400 } }),
+      fetch(`${backendUrl}/api/cars/popular?limit=20`, { next: { revalidate: 86400 } })
+    ])
+
+    if (!brandsRes.ok || !popularRes.ok) return []
+
+    const brands = await brandsRes.json()
+    const popularModels = await popularRes.json()
+
+    const brandMap = brands.reduce((acc: any, b: any) => ({
+      ...acc,
+      [b.id]: b.name.toLowerCase().replace(/\s+/g, '-')
+    }), {})
+
+    // Generate params for top 20 models × 5 cities = 100 pages
+    const params: { 'brand-cars': string; model: string; city: string }[] = []
+
+      ; (Array.isArray(popularModels) ? popularModels : []).slice(0, 20).forEach((model: any) => {
+        majorCities.forEach(city => {
+          params.push({
+            'brand-cars': `${brandMap[model.brandId] || 'unknown'}-cars`,
+            'model': model.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
+            'city': city
+          })
+        })
+      })
+
+    return params.filter(p => p['brand-cars'] !== 'unknown-cars' && p.model !== 'unknown')
+  } catch (e) {
+    console.log('generateStaticParams fallback for price pages')
+    return []
+  }
+}
+
 interface PriceInCityPageProps {
   params: Promise<{
     'brand-cars': string

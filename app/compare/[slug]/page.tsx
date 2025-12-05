@@ -9,6 +9,33 @@ interface PageProps {
 // Enable ISR with 1-hour revalidation
 export const revalidate = 3600
 
+// Pre-render popular comparison pages at build time for instant loading
+export async function generateStaticParams() {
+  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+
+  try {
+    // Fetch popular comparisons from backend
+    const response = await fetch(`${backendUrl}/api/popular-comparisons`, {
+      next: { revalidate: 86400 }
+    })
+
+    if (!response.ok) return []
+
+    const comparisons = await response.json()
+
+    // Generate slugs for top 20 popular comparisons
+    return (Array.isArray(comparisons) ? comparisons : [])
+      .slice(0, 20)
+      .map((comp: any) => ({
+        slug: comp.slug || `${comp.car1Slug}-vs-${comp.car2Slug}`
+      }))
+      .filter((p: any) => p.slug && p.slug !== 'undefined-vs-undefined')
+  } catch (e) {
+    console.log('generateStaticParams fallback for comparison pages')
+    return []
+  }
+}
+
 // Generate dynamic metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params

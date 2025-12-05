@@ -14,6 +14,35 @@ interface ModelPageProps {
 // Enable ISR with 1-hour revalidation (matches home page pattern)
 export const revalidate = 3600
 
+// Pre-render top 50 popular car pages at build time for instant loading (CarWale-style SSG)
+export async function generateStaticParams() {
+  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+  try {
+    const [brandsRes, modelsRes] = await Promise.all([
+      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 86400 } }),
+      fetch(`${backendUrl}/api/cars/popular?limit=50`, { next: { revalidate: 86400 } })
+    ])
+
+    if (!brandsRes.ok || !modelsRes.ok) return []
+
+    const brands = await brandsRes.json()
+    const models = await modelsRes.json()
+
+    const brandMap = brands.reduce((acc: any, b: any) => ({
+      ...acc,
+      [b.id]: b.name.toLowerCase().replace(/\s+/g, '-')
+    }), {})
+
+    return (Array.isArray(models) ? models : []).map((model: any) => ({
+      'brand-cars': `${brandMap[model.brandId] || 'unknown'}-cars`,
+      'model': model.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown'
+    })).filter((p: any) => p['brand-cars'] !== 'unknown-cars' && p.model !== 'unknown')
+  } catch (e) {
+    console.log('generateStaticParams fallback - will use on-demand rendering')
+    return [] // Fallback to on-demand ISR
+  }
+}
+
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
   const resolvedParams = await params
@@ -42,10 +71,17 @@ async function getUpcomingCarData(brandSlug: string, modelSlug: string) {
 
     console.log('🔍 Trying to fetch as upcoming car...')
 
-    // Fetch brands to get brandId
-    const brandsResponse = await fetch(`${backendUrl}/api/brands`, { cache: 'no-store' })
+    // OPTIMIZED: Parallel fetch of brands and upcoming cars
+    const [brandsResponse, upcomingCarsResponse] = await Promise.all([
+      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/upcoming-cars`, { next: { revalidate: 3600 } })
+    ])
+
     if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
+    if (!upcomingCarsResponse.ok) throw new Error('Failed to fetch upcoming cars')
+
     const brands = await brandsResponse.json()
+    const upcomingCars = await upcomingCarsResponse.json()
 
     const brandData = brands.find((brand: any) => {
       const slug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
@@ -54,11 +90,7 @@ async function getUpcomingCarData(brandSlug: string, modelSlug: string) {
 
     if (!brandData) throw new Error('Brand not found')
 
-    // Fetch upcoming cars for this brand
-    const upcomingCarsResponse = await fetch(`${backendUrl}/api/upcoming-cars`, { cache: 'no-store' })
-    if (!upcomingCarsResponse.ok) throw new Error('Failed to fetch upcoming cars')
-
-    const upcomingCars = await upcomingCarsResponse.json()
+    // upcomingCars already fetched in parallel above
     const upcomingCarData = upcomingCars.find((car: any) => {
       const carSlug = car.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       return carSlug === modelSlug && car.brandId === brandData.id
@@ -106,7 +138,7 @@ async function getUpcomingCarData(brandSlug: string, modelSlug: string) {
     }
 
     // Fetch actual variants for this upcoming car
-    const variantsResponse = await fetch(`${backendUrl}/api/variants?modelId=${upcomingCarData.id}`, { cache: 'no-store' });
+    const variantsResponse = await fetch(`${backendUrl}/api/variants?modelId=${upcomingCarData.id}`, { next: { revalidate: 3600 } });
     let variants = [];
 
     if (variantsResponse.ok) {
@@ -221,8 +253,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     console.log('🚀 Starting optimized parallel data fetch...')
     const startTime = Date.now()
 
-    // Step 1: Fetch brands (required first to get brandId)
-    const brandsResponse = await fetch(`${backendUrl}/api/brands`, { cache: 'no-store' })
+    // Step 1: Fetch brands (required first to get brandId) - ISR cached
+    const brandsResponse = await fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } })
     if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
 
     const brands = await brandsResponse.json()
@@ -235,8 +267,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
 
     if (!brandData) throw new Error('Brand not found')
 
-    // Step 2: Fetch models for this brand to get modelId
-    const modelsResponse = await fetch(`${backendUrl}/api/frontend/brands/${brandData.id}/models`, { cache: 'no-store' })
+    // Step 2: Fetch models for this brand to get modelId - ISR cached
+    const modelsResponse = await fetch(`${backendUrl}/api/frontend/brands/${brandData.id}/models`, { next: { revalidate: 3600 } })
     if (!modelsResponse.ok) throw new Error('Failed to fetch models')
 
     const modelsData = await modelsResponse.json()

@@ -11,6 +11,54 @@ interface PageProps {
   }>
 }
 
+// Enable ISR with 1-hour revalidation
+export const revalidate = 3600
+
+// Pre-render popular variant pages at build time for instant loading
+export async function generateStaticParams() {
+  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+  try {
+    const [brandsRes, popularRes] = await Promise.all([
+      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 86400 } }),
+      fetch(`${backendUrl}/api/cars/popular?limit=20`, { next: { revalidate: 86400 } })
+    ])
+
+    if (!brandsRes.ok || !popularRes.ok) return []
+
+    const brands = await brandsRes.json()
+    const popularModels = await popularRes.json()
+
+    const brandMap = brands.reduce((acc: any, b: any) => ({
+      ...acc,
+      [b.id]: b.name.toLowerCase().replace(/\s+/g, '-')
+    }), {})
+
+    // Fetch variants for popular models
+    const variantPromises = (Array.isArray(popularModels) ? popularModels : [])
+      .slice(0, 10) // Top 10 popular models
+      .map(async (model: any) => {
+        try {
+          const varRes = await fetch(`${backendUrl}/api/variants?modelId=${model.id}&limit=3`)
+          if (!varRes.ok) return []
+          const variants = await varRes.json()
+          return variants.map((v: any) => ({
+            'brand-cars': `${brandMap[model.brandId] || 'unknown'}-cars`,
+            'model': model.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
+            'variant': v.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown'
+          }))
+        } catch { return [] }
+      })
+
+    const results = await Promise.all(variantPromises)
+    return results.flat().filter((p: any) =>
+      p['brand-cars'] !== 'unknown-cars' && p.model !== 'unknown' && p.variant !== 'unknown'
+    )
+  } catch (e) {
+    console.log('generateStaticParams fallback for variant pages')
+    return []
+  }
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const resolvedParams = await params
   const brandSlug = resolvedParams['brand-cars'].replace('-cars', '')
@@ -42,46 +90,30 @@ export default async function VariantDetailPage({ params }: PageProps) {
   const modelName = modelSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
   const variantName = variantSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 
-  console.log('VariantDetailPage: Brand slug:', brandSlug)
-  console.log('VariantDetailPage: Model slug:', modelSlug)
-  console.log('VariantDetailPage: Variant slug:', variantSlug)
-  console.log('VariantDetailPage: Parsed params:', { brandName, modelName, variantName })
-
   // Fetch real data from backend
   try {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
-    // Fetch brands to get brand ID
+    // OPTIMIZED: Fetch brands first (required for other calls)
     const brandsRes = await fetch(`${backendUrl}/api/brands`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
+      next: { revalidate: 3600 }
     })
     const brands = await brandsRes.json()
 
-    console.log('✅ Fetched brands:', brands.length)
-    console.log('🔍 Looking for brandSlug:', brandSlug)
-
-    // Normalize slug for matching (same logic as model page)
     const normalizeBrandSlug = (name: string) =>
       name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-
-    console.log('📋 All brands and their normalized slugs:')
-    brands.forEach((b: any) => {
-      console.log(`  - ${b.name} => ${normalizeBrandSlug(b.name)}`)
-    })
 
     const brand = brands.find((b: any) =>
       normalizeBrandSlug(b.name) === brandSlug
     )
 
-    console.log('🎯 Found brand:', brand ? brand.name : 'NOT FOUND')
-
     if (!brand) {
       throw new Error('Brand not found')
     }
 
-    // Fetch models for this brand
+    // OPTIMIZED: Parallel fetch of models and prepare for variants
     const modelsRes = await fetch(`${backendUrl}/api/models?brandId=${brand.id}`, {
-      next: { revalidate: 1800 } // Cache for 30 minutes
+      next: { revalidate: 3600 }
     })
     const models = await modelsRes.json()
     const model = models.find((m: any) =>
@@ -92,10 +124,16 @@ export default async function VariantDetailPage({ params }: PageProps) {
       throw new Error('Model not found')
     }
 
-    // Fetch variants for this model
-    const variantsRes = await fetch(`${backendUrl}/api/variants?modelId=${model.id}`, {
-      next: { revalidate: 1800 } // Cache for 30 minutes
-    })
+    // OPTIMIZED: Parallel fetch of variants and similar cars
+    const [variantsRes, similarModelsRes] = await Promise.all([
+      fetch(`${backendUrl}/api/variants?modelId=${model.id}`, {
+        next: { revalidate: 3600 }
+      }),
+      fetch(`${backendUrl}/api/models-with-pricing?bodyType=${model.bodyType || 'Hatchback'}&limit=6`, {
+        next: { revalidate: 3600 }
+      }).catch(() => ({ json: () => [] }))
+    ])
+
     const variants = await variantsRes.json()
 
     // Find the specific variant
@@ -122,13 +160,12 @@ export default async function VariantDetailPage({ params }: PageProps) {
     const variantPrices = variants.map((v: any) => v.price).filter((p: number) => p > 0)
     const modelStartingPrice = variantPrices.length > 0 ? Math.min(...variantPrices) : 0
 
-    // Fetch similar cars (same as model page)
-    const similarModelsRes = await fetch(
-      `${backendUrl}/api/models-with-pricing?bodyType=${model.bodyType || 'Hatchback'}`,
-      { next: { revalidate: 3600 } }
-    ).then(res => res.json()).catch(() => [])
-
-    const similarModelsData = similarModelsRes?.data || similarModelsRes || []
+    // Use parallel-fetched similar cars data
+    let similarModelsData: any[] = []
+    try {
+      const jsonResult = 'json' in similarModelsRes ? await similarModelsRes.json() : []
+      similarModelsData = jsonResult?.data || jsonResult || []
+    } catch { similarModelsData = [] }
 
     // Process similar cars (same logic as model page)
     const brandMap = brands.reduce((acc: any, brand: any) => {

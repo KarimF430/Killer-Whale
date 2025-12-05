@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { Star, Heart, Share2, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowRight, Calendar, Fuel, Users, Settings, IndianRupee, MapPin, Phone, MessageCircle, Zap, Shield, Award, TrendingUp, Clock, CheckCircle, AlertCircle, Info, X, Plus, Minus, Eye, ExternalLink, Play, ThumbsUp, ThumbsDown, Wrench, DollarSign, User, Car } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 import { renderTextWithCarLinks, useCarModelsData } from '@/lib/faq-hyperlinks'
 import PageSection from '../common/PageSection'
@@ -15,8 +16,15 @@ import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import CarCard from '../home/CarCard'
 import { useViewTracker } from '@/lib/use-view-tracker'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
-import ModelYouTube from './ModelYouTube'
-import ModelFAQ from './ModelFAQ'
+// Lazy-load heavy components for faster initial page load (CarWale-style optimization)
+const ModelYouTube = dynamic(() => import('./ModelYouTube'), {
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />,
+  ssr: false
+})
+const ModelFAQ = dynamic(() => import('./ModelFAQ'), {
+  loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />,
+  ssr: false
+})
 import { triggerCarInteraction, initializeAudioContext } from '@/utils/carInteraction'
 import { KillerWhaleSpinner } from '../common/KillerWhaleLoader'
 
