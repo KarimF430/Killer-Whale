@@ -11,7 +11,8 @@
  * - Auto-caching for performance
  */
 
-import { Model, Variant, Brand } from '../db/schemas'
+// NOTE: Mongoose models are imported dynamically to prevent startup crashes
+// when MongoDB isn't connected yet
 
 // ============================================
 // CONFIGURATION
@@ -160,6 +161,9 @@ export async function initializeVectorStore(): Promise<void> {
     const startTime = Date.now()
 
     try {
+        // Dynamic import to prevent startup crash when MongoDB isn't connected
+        const { Model, Brand } = await import('../db/schemas')
+
         // Fetch all active models with their brands
         const models = await Model.find({ status: 'active' })
             .select('id name brandId bodyType summary pros cons description fuelTypes engineSummaries mileageData faqs minPrice maxPrice')
@@ -326,6 +330,9 @@ export async function hybridCarSearch(
     const vectorResults = await semanticCarSearch(query, filters, limit)
 
     // 2. Keyword search for exact matches (fallback)
+    // Dynamic import to prevent startup crash when MongoDB isn't connected
+    const { Model, Brand } = await import('../db/schemas')
+
     const keywords = lowerQuery.split(/\s+/).filter(w => w.length > 2)
 
     const keywordResults = await Model.find({
