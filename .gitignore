@@ -2,10 +2,6 @@
 node_modules/
 /.pnp
 .pnp.js
-
-# Mobile App (ignore until development complete)
-mobile-app/
-
 # Testing
 /coverage
 
