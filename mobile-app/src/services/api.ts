@@ -22,6 +22,15 @@ export const api = {
     try { const r = await fetch(`${BASE_URL}/api/upcoming-cars`); const d = await r.json(); return Array.isArray(d) ? d : []; }
     catch (e) { console.error('Error upcoming:', e); return []; }
   },
+  getUpcomingCarsByBrand: async (brandId: string): Promise<UpcomingCar[]> => {
+    try {
+      const r = await fetch(`${BASE_URL}/api/upcoming-cars`);
+      const d = await r.json();
+      const all = Array.isArray(d) ? d : [];
+      return all.filter((car: any) => car.brandId === brandId);
+    }
+    catch (e) { console.error('Error upcoming by brand:', e); return []; }
+  },
   getPopularComparisons: async (): Promise<any[]> => {
     try { const r = await fetch(`${BASE_URL}/api/popular-comparisons`); const d = await r.json(); return Array.isArray(d) ? d : []; }
     catch (e) { console.error('Error comparisons:', e); return []; }
@@ -31,16 +40,33 @@ export const api = {
     catch (e) { console.error('Error news:', e); return []; }
   },
   getYouTubeVideos: async (): Promise<{ featuredVideo: YouTubeVideo | null; relatedVideos: YouTubeVideo[] }> => {
-    try { 
-      const r = await fetch(`${BASE_URL}/api/youtube/videos`); 
-      const d = await r.json(); 
-      return { featuredVideo: d.featuredVideo || null, relatedVideos: d.relatedVideos || [] }; 
+    try {
+      const r = await fetch(`${BASE_URL}/api/youtube/videos`);
+      const d = await r.json();
+      return { featuredVideo: d.featuredVideo || null, relatedVideos: d.relatedVideos || [] };
     }
     catch (e) { console.error('Error youtube:', e); return { featuredVideo: null, relatedVideos: [] }; }
+  },
+  getYouTubeVideosByBrand: async (brandName: string): Promise<{ featuredVideo: YouTubeVideo | null; relatedVideos: YouTubeVideo[] }> => {
+    try {
+      const r = await fetch(`${BASE_URL}/api/youtube/videos?search=${encodeURIComponent(brandName)}`);
+      const d = await r.json();
+      return { featuredVideo: d.featuredVideo || null, relatedVideos: d.relatedVideos || [] };
+    }
+    catch (e) { console.error('Error youtube by brand:', e); return { featuredVideo: null, relatedVideos: [] }; }
   },
   search: async (query: string): Promise<any> => {
     try { const r = await fetch(`${BASE_URL}/api/search?q=${encodeURIComponent(query)}`); return r.json(); }
     catch (e) { console.error('Error search:', e); return []; }
+  },
+  getModelsByBrand: async (brandId: string): Promise<Model[]> => {
+    try {
+      const r = await fetch(`${BASE_URL}/api/models-with-pricing?brandId=${encodeURIComponent(brandId)}&limit=100`);
+      const d = await r.json();
+      const m = d.data || d || [];
+      return Array.isArray(m) ? m : [];
+    }
+    catch (e) { console.error('Error models by brand:', e); return []; }
   },
 };
 

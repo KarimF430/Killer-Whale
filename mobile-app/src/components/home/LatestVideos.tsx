@@ -23,16 +23,17 @@ export interface VideoData {
 interface LatestVideosProps {
   featuredVideo: VideoData | null;
   relatedVideos: VideoData[];
+  title?: string; // Optional custom title, defaults to 'Latest Videos'
 }
 
-export default function LatestVideos({ featuredVideo, relatedVideos }: LatestVideosProps) {
+export default function LatestVideos({ featuredVideo, relatedVideos, title = 'Latest Videos' }: LatestVideosProps) {
   if (!featuredVideo) return null;
 
   const playVideo = async (videoId: string) => {
     // Try YouTube app first, fallback to browser
     const youtubeAppUrl = `youtube://www.youtube.com/watch?v=${videoId}`;
     const webUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    
+
     try {
       const canOpenApp = await Linking.canOpenURL(youtubeAppUrl);
       if (canOpenApp) {
@@ -49,7 +50,7 @@ export default function LatestVideos({ featuredVideo, relatedVideos }: LatestVid
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Latest Videos</Text>
+        <Text style={styles.sectionTitle}>{title}</Text>
         <TouchableOpacity style={styles.visitChannel} onPress={() => Linking.openURL('https://www.youtube.com/@motoroctane')}>
           <Text style={styles.visitText}>Visit Channel</Text>
           <Feather name="external-link" size={14} color="#DC2626" />
