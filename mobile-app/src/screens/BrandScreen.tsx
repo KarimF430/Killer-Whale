@@ -12,7 +12,8 @@ import Header from '../components/common/Header';
 import Ad3DCarousel from '../components/ads/Ad3DCarousel';
 import UpcomingCarCard, { UpcomingCarData } from '../components/home/UpcomingCarCard';
 import LatestVideos, { VideoData } from '../components/home/LatestVideos';
-import api, { Brand } from '../services/api';
+import Footer from '../components/common/Footer';
+import api, { Brand, BrandDetails } from '../services/api';
 
 interface BrandScreenProps {
   route: { params: { brandSlug: string } };
@@ -99,6 +100,8 @@ export default function BrandScreen({ route, navigation }: BrandScreenProps) {
   const [showAllBrands, setShowAllBrands] = useState(false);
   const [featuredVideo, setFeaturedVideo] = useState<VideoData | null>(null);
   const [relatedVideos, setRelatedVideos] = useState<VideoData[]>([]);
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [faqs, setFaqs] = useState<{ question: string; answer: string }[]>([]);
 
   const fetchBrandData = async () => {
     try {
@@ -109,6 +112,14 @@ export default function BrandScreen({ route, navigation }: BrandScreenProps) {
 
       const brandId = brand?.id || '';
       const brandName = brand?.name || formatBrandName(brandSlug);
+
+      // Fetch brand details including FAQs
+      if (brandId) {
+        const brandDetails = await api.getBrandById(brandId);
+        if (brandDetails?.faqs && brandDetails.faqs.length > 0) {
+          setFaqs(brandDetails.faqs);
+        }
+      }
 
       // Fetch models using brandId
       let modelsData: any[] = [];
@@ -427,8 +438,123 @@ export default function BrandScreen({ route, navigation }: BrandScreenProps) {
           />
         )}
 
-        {/* Placeholder for next sections */}
-        <View style={{ height: 100 }} />
+        {/* Section 6: Ad Carousel + Brand FAQ */}
+        <Ad3DCarousel autoRotate rotateInterval={4000} />
+
+        <View style={styles.faqSection}>
+          <Text style={styles.faqTitle}>{brandInfo?.name} FAQ</Text>
+          <Text style={styles.faqSubtitle}>{faqs.length} questions about {brandInfo?.name} cars</Text>
+
+          {faqs.map((faq, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.faqItem}
+              onPress={() => setOpenFAQ(openFAQ === index ? null : index)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.faqQuestion}>
+                <Text style={styles.faqQuestionText}>{faq.question}</Text>
+                <Feather name={openFAQ === index ? 'chevron-up' : 'chevron-down'} size={20} color="#6B7280" />
+              </View>
+              {openFAQ === index && (
+                <View style={styles.faqAnswer}>
+                  <View style={styles.faqDivider} />
+                  <Text style={styles.faqAnswerText}>{faq.answer}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Section 7: Owner Reviews */}
+        <View style={styles.reviewsSection}>
+          <Text style={styles.reviewsTitle}>{brandInfo?.name} Owner Reviews</Text>
+
+          {/* Rating Summary Card */}
+          <View style={styles.ratingCard}>
+            <View style={styles.ratingHeader}>
+              <View style={styles.starsRow}>
+                {[1, 2, 3, 4, 5].map(i => <Feather key={i} name="star" size={20} color={i <= 4 ? '#F59E0B' : '#D1D5DB'} style={i <= 4 ? { color: '#F59E0B' } : {}} />)}
+              </View>
+              <Text style={styles.ratingNumber}>4.2</Text>
+              <Text style={styles.ratingCount}>(1,543 reviews)</Text>
+            </View>
+
+            <Text style={styles.breakdownTitle}>Rating Breakdown</Text>
+            {[{ star: 5, count: 856 }, { star: 4, count: 324 }, { star: 3, count: 189 }, { star: 2, count: 26 }, { star: 1, count: 13 }].map(item => (
+              <View key={item.star} style={styles.breakdownRow}>
+                <Text style={styles.breakdownStar}>{item.star}★</Text>
+                <View style={styles.breakdownBarBg}>
+                  <View style={[styles.breakdownBarFill, { width: `${(item.count / 856) * 100}%` }]} />
+                </View>
+                <Text style={styles.breakdownCount}>{item.count}</Text>
+              </View>
+            ))}
+
+            {/* Filter & Sort */}
+            <View style={styles.filterRow}>
+              <View>
+                <Text style={styles.filterLabel}>Filter by rating:</Text>
+                <View style={styles.filterDropdown}>
+                  <Text style={styles.filterText}>All Ratings</Text>
+                  <Feather name="chevron-down" size={16} color="#6B7280" />
+                </View>
+              </View>
+              <View>
+                <Text style={styles.filterLabel}>Sort by:</Text>
+                <View style={styles.filterDropdown}>
+                  <Text style={styles.filterText}>Most Recent</Text>
+                  <Feather name="chevron-down" size={16} color="#6B7280" />
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* Review Cards */}
+          {[
+            { id: 1, name: 'Rajesh Kumar', date: '15/01/2024', rating: 5, title: 'Excellent car with great mileage', text: 'I have been using this car for 6 months now. The mileage is excellent in city conditions. Build quality is good and maintenance cost is reasonable.', likes: 24, dislikes: 2, verified: true },
+            { id: 2, name: 'Priya Sharma', date: '12/01/2024', rating: 4, title: 'Good family car', text: 'Perfect for family use. Spacious interior and comfortable seats. Only issue is the road noise at high speeds.', likes: 18, dislikes: 1, verified: true },
+          ].map(review => (
+            <View key={review.id} style={styles.reviewCard}>
+              <View style={styles.reviewHeader}>
+                <View style={styles.reviewAvatar}><Text style={styles.reviewAvatarText}>{review.name[0]}</Text></View>
+                <View style={styles.reviewInfo}>
+                  <View style={styles.reviewNameRow}>
+                    <Text style={styles.reviewName}>{review.name}</Text>
+                    {review.verified && <View style={styles.verifiedBadge}><Feather name="check" size={10} color="#FFFFFF" /></View>}
+                  </View>
+                  <Text style={styles.reviewDate}>{review.date}</Text>
+                </View>
+              </View>
+              <View style={styles.reviewStarsRow}>
+                {[1, 2, 3, 4, 5].map(i => <Feather key={i} name="star" size={14} color={i <= review.rating ? '#F59E0B' : '#D1D5DB'} />)}
+              </View>
+              <Text style={styles.reviewTitle}>{review.title}</Text>
+              <Text style={styles.reviewText}>{review.text}</Text>
+              <View style={styles.reviewActions}>
+                <View style={styles.reviewAction}><Feather name="thumbs-up" size={14} color="#6B7280" /><Text style={styles.reviewActionText}>{review.likes}</Text></View>
+                <View style={styles.reviewAction}><Feather name="message-circle" size={14} color="#6B7280" /><Text style={styles.reviewActionText}>{review.dislikes}</Text></View>
+              </View>
+            </View>
+          ))}
+
+          {/* Read More Link */}
+          <TouchableOpacity style={styles.readMoreButton} activeOpacity={0.7}>
+            <Text style={styles.readMoreText}>Read More</Text>
+          </TouchableOpacity>
+
+          {/* Write a Review CTA */}
+          <View style={styles.writeReviewCard}>
+            <Text style={styles.writeReviewTitle}>Own a {brandInfo?.name?.toLowerCase()} car? Share your experience!</Text>
+            <Text style={styles.writeReviewSubtitle}>Help other buyers make informed decisions by sharing your honest review</Text>
+            <TouchableOpacity style={styles.writeReviewButton} activeOpacity={0.9}>
+              <Text style={styles.writeReviewButtonText}>Write a Review</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Footer */}
+        <Footer onNavigate={(screen: string) => navigation.navigate(screen as never)} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -532,4 +658,56 @@ const styles = StyleSheet.create({
   // Section 5: Videos
   videosSection: { backgroundColor: '#FFFFFF' },
   videosHeader: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 8 },
+
+  // Section 6: FAQ
+  faqSection: { paddingVertical: 24, paddingHorizontal: 16, backgroundColor: '#FFFFFF' },
+  faqTitle: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 6 },
+  faqSubtitle: { fontSize: 14, color: '#6B7280', marginBottom: 20 },
+  faqItem: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, marginBottom: 12, overflow: 'hidden' },
+  faqQuestion: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 16, minHeight: 56 },
+  faqQuestionText: { fontSize: 15, fontWeight: '500', color: '#111827', flex: 1, marginRight: 12 },
+  faqAnswer: { paddingHorizontal: 16, paddingBottom: 16 },
+  faqDivider: { height: 1, backgroundColor: '#F3F4F6', marginBottom: 12 },
+  faqAnswerText: { fontSize: 14, color: '#6B7280', lineHeight: 22 },
+
+  // Section 7: Owner Reviews
+  reviewsSection: { paddingVertical: 24, paddingHorizontal: 16, backgroundColor: '#FFFFFF' },
+  reviewsTitle: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 20 },
+  ratingCard: { backgroundColor: '#F9FAFB', borderRadius: 12, padding: 20, marginBottom: 16 },
+  ratingHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  starsRow: { flexDirection: 'row', marginRight: 8 },
+  ratingNumber: { fontSize: 32, fontWeight: '700', color: '#111827', marginRight: 8 },
+  ratingCount: { fontSize: 14, color: '#6B7280' },
+  breakdownTitle: { fontSize: 16, fontWeight: '600', color: '#111827', marginBottom: 12 },
+  breakdownRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  breakdownStar: { fontSize: 14, color: '#6B7280', width: 30 },
+  breakdownBarBg: { flex: 1, height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, marginHorizontal: 8 },
+  breakdownBarFill: { height: 8, backgroundColor: '#F59E0B', borderRadius: 4 },
+  breakdownCount: { fontSize: 14, color: '#6B7280', width: 40, textAlign: 'right' },
+  filterRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
+  filterLabel: { fontSize: 12, color: '#6B7280', marginBottom: 6 },
+  filterDropdown: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 },
+  filterText: { fontSize: 14, color: '#111827', marginRight: 8 },
+  reviewCard: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 16, marginBottom: 12 },
+  reviewHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  reviewAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#DC2626', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  reviewAvatarText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+  reviewInfo: { flex: 1 },
+  reviewNameRow: { flexDirection: 'row', alignItems: 'center' },
+  reviewName: { fontSize: 15, fontWeight: '600', color: '#111827', marginRight: 6 },
+  verifiedBadge: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#10B981', alignItems: 'center', justifyContent: 'center' },
+  reviewDate: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  reviewStarsRow: { flexDirection: 'row', marginBottom: 8 },
+  reviewTitle: { fontSize: 15, fontWeight: '600', color: '#111827', marginBottom: 6 },
+  reviewText: { fontSize: 14, color: '#4B5563', lineHeight: 22, marginBottom: 12 },
+  reviewActions: { flexDirection: 'row' },
+  reviewAction: { flexDirection: 'row', alignItems: 'center', marginRight: 16 },
+  reviewActionText: { fontSize: 13, color: '#6B7280', marginLeft: 4 },
+  readMoreButton: { alignItems: 'center', paddingVertical: 16 },
+  readMoreText: { fontSize: 15, fontWeight: '600', color: '#DC2626' },
+  writeReviewCard: { backgroundColor: '#FEF2F2', borderRadius: 12, padding: 24, alignItems: 'center', marginTop: 16 },
+  writeReviewTitle: { fontSize: 18, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 8 },
+  writeReviewSubtitle: { fontSize: 14, color: '#6B7280', textAlign: 'center', lineHeight: 22, marginBottom: 16 },
+  writeReviewButton: { backgroundColor: '#DC2626', paddingHorizontal: 32, paddingVertical: 14, borderRadius: 8 },
+  writeReviewButtonText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
 });

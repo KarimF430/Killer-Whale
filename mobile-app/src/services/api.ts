@@ -5,6 +5,7 @@
 const BASE_URL = 'http://192.168.1.10:5001';
 
 export interface Brand { id: string; name: string; logo?: string; slug: string; }
+export interface BrandDetails extends Brand { summary?: string; faqs?: { question: string; answer: string }[]; }
 export interface Model { id: string; name: string; brandId: string; heroImage: string; lowestPrice: number; fuelTypes: string[]; transmissions: string[]; seating: number; isNew: boolean; isPopular: boolean; launchDate?: string; }
 export interface UpcomingCar { id: string; name: string; brandId: string; brandName: string; image: string; expectedPriceMin: number; expectedPriceMax: number; fuelTypes: string[]; expectedLaunchDate: string; isNew: boolean; isPopular: boolean; }
 export interface YouTubeVideo { id: string; title: string; thumbnail: string; duration: string; views: string; likes: string; publishedAt: string; channelName: string; }
@@ -13,6 +14,10 @@ export const api = {
   getBrands: async (): Promise<Brand[]> => {
     try { const r = await fetch(`${BASE_URL}/api/brands`); const d = await r.json(); return Array.isArray(d) ? d : []; }
     catch (e) { console.error('Error brands:', e); return []; }
+  },
+  getBrandById: async (brandId: string): Promise<BrandDetails | null> => {
+    try { const r = await fetch(`${BASE_URL}/api/brands/${brandId}`); const d = await r.json(); return d; }
+    catch (e) { console.error('Error brand:', e); return null; }
   },
   getModelsWithPricing: async (limit = 100): Promise<Model[]> => {
     try { const r = await fetch(`${BASE_URL}/api/models-with-pricing?limit=${limit}`); const d = await r.json(); const m = d.data || d || []; return Array.isArray(m) ? m : []; }
