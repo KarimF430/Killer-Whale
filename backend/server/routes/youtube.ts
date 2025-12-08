@@ -206,23 +206,23 @@ export default function createYouTubeRoutes(storage: IStorage): Router {
 
             // Check if cache is still valid (within 24 hours)
             const cacheAge = Date.now() - cache.timestamp;
-            if (cacheAge >= CACHE_DURATION) {
-                const hoursOld = Math.floor(cacheAge / 1000 / 60 / 60);
-                console.log(`⏰ YouTube cache expired (${hoursOld} hours old) - waiting for next scheduled fetch`);
-                return res.status(503).json({
-                    error: 'Cache expired',
-                    message: 'Fresh content will be available at the next scheduled update'
-                });
-            }
-
-            // Cache is valid, return it
+            const isExpired = cacheAge >= CACHE_DURATION;
             const minutesOld = Math.floor(cacheAge / 1000 / 60);
-            console.log(`✅ Serving YouTube videos from persistent cache (age: ${minutesOld} minutes)`);
+            const hoursOld = Math.floor(cacheAge / 1000 / 60 / 60);
+
+            // IMPORTANT: Always return cached videos, even if expired
+            // Videos will display until new ones replace them at next scheduled fetch
+            if (isExpired) {
+                console.log(`⏰ YouTube cache is stale (${hoursOld} hours old) - serving anyway until next refresh`);
+            } else {
+                console.log(`✅ Serving fresh YouTube videos from cache (age: ${minutesOld} minutes)`);
+            }
 
             return res.json({
                 ...cache.data,
                 cached: true,
-                cacheAge: minutesOld
+                cacheAge: minutesOld,
+                isStale: isExpired
             });
 
         } catch (error) {
