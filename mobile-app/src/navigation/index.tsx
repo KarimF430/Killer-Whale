@@ -13,6 +13,7 @@ import { colors } from '../theme';
 // Import screens
 import HomeScreen from '../screens/HomeScreen';
 import BrandScreen from '../screens/BrandScreen';
+import ModelScreen from '../screens/ModelScreen';
 
 // Placeholder screens (will be built out)
 const PlaceholderScreen = ({ route }: any) => (
@@ -55,7 +56,7 @@ function HomeStackNavigator() {
         >
             <HomeStack.Screen name="HomeMain" component={HomeScreen} />
             <HomeStack.Screen name="Brand" component={BrandScreen} />
-            <HomeStack.Screen name="Model" component={PlaceholderScreen} />
+            <HomeStack.Screen name="Model" component={ModelScreen} />
             <HomeStack.Screen name="Variant" component={PlaceholderScreen} />
         </HomeStack.Navigator>
     );

@@ -115,7 +115,7 @@ export default function UpcomingCarCard({ car, onPress }: UpcomingCarCardProps) 
             <Text style={styles.price}>₹ {(displayPrice / 100000).toFixed(2)} Lakh</Text>
             <Text style={styles.priceOnwards}>Onwards</Text>
           </View>
-          <Text style={styles.priceLabel}>On-Road Price</Text>
+          <Text style={styles.priceLabel}>Ex-Showroom</Text>
         </View>
 
         {/* Specs - Calendar and Fuel */}

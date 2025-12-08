@@ -365,7 +365,7 @@ export default function BrandScreen({ route, navigation }: BrandScreenProps) {
                     <Text style={styles.priceLakh}>Lakh</Text>
                     <Text style={styles.onwards}>Onwards</Text>
                   </View>
-                  <Text style={styles.priceLabel}>On-Road Price</Text>
+                  <Text style={styles.priceLabel}>Ex-Showroom</Text>
                 </View>
               </TouchableOpacity>
             ))

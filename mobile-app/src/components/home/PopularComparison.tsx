@@ -41,7 +41,7 @@ const ComparisonCard = ({ comparison, onPress }: { comparison: ComparisonData; o
         <Text style={styles.brandName}>{comparison.model1.brand}</Text>
         <Text style={styles.modelName} numberOfLines={1}>{comparison.model1.name}</Text>
         <Text style={styles.price}>₹ {(comparison.model1.startingPrice / 100000).toFixed(2)} Lakh</Text>
-        <Text style={styles.priceLabel}>On-Road Price</Text>
+        <Text style={styles.priceLabel}>Ex-Showroom</Text>
       </View>
 
       {/* VS Badge */}
@@ -58,7 +58,7 @@ const ComparisonCard = ({ comparison, onPress }: { comparison: ComparisonData; o
         <Text style={styles.brandName}>{comparison.model2.brand}</Text>
         <Text style={styles.modelName} numberOfLines={1}>{comparison.model2.name}</Text>
         <Text style={styles.price}>₹ {(comparison.model2.startingPrice / 100000).toFixed(2)} Lakh</Text>
-        <Text style={styles.priceLabel}>On-Road Price</Text>
+        <Text style={styles.priceLabel}>Ex-Showroom</Text>
       </View>
     </View>
 
@@ -77,7 +77,7 @@ export default function PopularComparison({ comparisons, onComparePress, onCusto
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Popular Comparison</Text>
-      
+
       <FlatList
         data={comparisons}
         keyExtractor={(item) => item.id}
@@ -112,8 +112,10 @@ const styles = StyleSheet.create({
   price: { fontSize: 14, fontWeight: '700', color: '#DC2626' },
   priceLabel: { fontSize: 12, color: '#6B7280' },
   vsBadgeContainer: { width: 32, alignItems: 'center', justifyContent: 'center', marginTop: 30 },
-  vsBadge: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 3, elevation: 3 },
+  vsBadge: {
+    width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 3, elevation: 3
+  },
   vsText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
   compareButton: { paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
   compareButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
