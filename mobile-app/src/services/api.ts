@@ -52,6 +52,7 @@ export interface ModelDetails {
   mileageData?: { engineName: string; companyClaimed: string; cityRealWorld: string; highwayRealWorld: string }[];
   bodyType?: string;
   subBodyType?: string;
+  faqs?: { question: string; answer: string }[];
 }
 export interface Variant {
   id: string;
@@ -93,8 +94,13 @@ export const api = {
     try { const r = await fetch(`${BASE_URL}/api/popular-comparisons`); const d = await r.json(); return Array.isArray(d) ? d : []; }
     catch (e) { console.error('Error comparisons:', e); return []; }
   },
-  getNews: async (limit = 6): Promise<any[]> => {
-    try { const r = await fetch(`${BASE_URL}/api/news?limit=${limit}`); const d = await r.json(); return d.articles || []; }
+  getNews: async (limit = 6, tag?: string): Promise<any[]> => {
+    try {
+      const tagParam = tag ? `&tag=${encodeURIComponent(tag)}` : '';
+      const r = await fetch(`${BASE_URL}/api/news?limit=${limit}${tagParam}`);
+      const d = await r.json();
+      return d.articles || [];
+    }
     catch (e) { console.error('Error news:', e); return []; }
   },
   getYouTubeVideos: async (): Promise<{ featuredVideo: YouTubeVideo | null; relatedVideos: YouTubeVideo[] }> => {

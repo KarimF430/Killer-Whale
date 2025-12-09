@@ -21,6 +21,7 @@ import {
     Share,
     FlatList,
     Modal,
+    TextInput,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +29,7 @@ import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import Ad3DCarousel from '../components/ads/Ad3DCarousel';
 import CarCard, { CarCardData } from '../components/home/CarCard';
+import LatestVideos, { VideoData } from '../components/home/LatestVideos';
 import api from '../services/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -169,6 +171,14 @@ export default function ModelScreen({ route, navigation }: ModelScreenProps) {
     // Section 13 state - Model News
     const [modelNews, setModelNews] = useState<{ id: string; title: string; excerpt: string; slug: string; featuredImage?: string; publishDate: string; views: number; likes: number; authorName?: string }[]>([]);
 
+    // Section 14 state - Model Videos (same as BrandScreen)
+    const [featuredVideo, setFeaturedVideo] = useState<VideoData | null>(null);
+    const [relatedVideos, setRelatedVideos] = useState<VideoData[]>([]);
+
+    // Section 15 state - Model FAQ (same as BrandScreen)
+    const [faqs, setFaqs] = useState<{ question: string; answer: string }[]>([]);
+    const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+
     const imageScrollRef = useRef<FlatList>(null);
     const sectionScrollRef = useRef<ScrollView>(null);
 
@@ -294,15 +304,11 @@ export default function ModelScreen({ route, navigation }: ModelScreenProps) {
                 console.error('Error fetching similar cars:', e);
             }
 
-            // Fetch model news (filter by model name in title)
+            // Fetch model news using tag parameter (like web: /api/news?tag=modelName)
             try {
-                const newsData = await api.getNews(20);
-                const modelName = model.name.toLowerCase();
-                const filteredNews = (Array.isArray(newsData) ? newsData : [])
-                    .filter((n: any) =>
-                        n.title?.toLowerCase().includes(modelName) ||
-                        n.excerpt?.toLowerCase().includes(modelName)
-                    )
+                const newsData = await api.getNews(10, model.name); // Pass model name as tag
+
+                const mappedNews = (Array.isArray(newsData) ? newsData : [])
                     .slice(0, 6)
                     .map((n: any) => ({
                         id: n.id,
@@ -315,9 +321,25 @@ export default function ModelScreen({ route, navigation }: ModelScreenProps) {
                         likes: n.likes || 0,
                         authorName: 'Haji Karim',
                     }));
-                setModelNews(filteredNews);
+                setModelNews(mappedNews);
             } catch (e) {
                 console.error('Error fetching model news:', e);
+            }
+
+            // Fetch model videos using model name (same as BrandScreen)
+            try {
+                const videoData = await api.getYouTubeVideosByBrand(`${modelData.brandName || ''} ${model.name}`);
+                if (videoData.featuredVideo) {
+                    setFeaturedVideo(videoData.featuredVideo as VideoData);
+                    setRelatedVideos((videoData.relatedVideos || []).slice(0, 3) as VideoData[]);
+                }
+            } catch (e) {
+                console.error('Error fetching model videos:', e);
+            }
+
+            // Extract FAQs from model details
+            if (modelDetails?.faqs && modelDetails.faqs.length > 0) {
+                setFaqs(modelDetails.faqs);
             }
         } catch (error) {
             console.error('Error fetching model data:', error);
@@ -1371,6 +1393,188 @@ export default function ModelScreen({ route, navigation }: ModelScreenProps) {
                         </View>
                     </View>
                 )}
+
+                {/* Section 14: Model Videos (using same LatestVideos component as BrandScreen) */}
+                {featuredVideo && (
+                    <LatestVideos
+                        title={`${modelData.brandName} ${modelData.name} Videos`}
+                        featuredVideo={featuredVideo}
+                        relatedVideos={relatedVideos}
+                    />
+                )}
+
+                {/* Section 15: Model FAQ (same design as BrandScreen) */}
+                {faqs.length > 0 && (
+                    <View style={styles.faqSection}>
+                        <Text style={styles.faqTitle}>{modelData.brandName} {modelData.name} FAQ</Text>
+                        <Text style={styles.faqSubtitle}>{faqs.length} questions about {modelData.brandName} {modelData.name}</Text>
+
+                        {faqs.map((faq, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.faqItem}
+                                onPress={() => setOpenFAQ(openFAQ === index ? null : index)}
+                                activeOpacity={0.8}
+                            >
+                                <View style={styles.faqQuestion}>
+                                    <Text style={styles.faqQuestionText}>{faq.question}</Text>
+                                    <Feather name={openFAQ === index ? 'chevron-up' : 'chevron-down'} size={20} color="#6B7280" />
+                                </View>
+                                {openFAQ === index && (
+                                    <View style={styles.faqAnswer}>
+                                        <View style={styles.faqDivider} />
+                                        <Text style={styles.faqAnswerText}>{faq.answer}</Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                )}
+
+                {/* Section 16: Model Owner Reviews (same design as BrandScreen) */}
+                <View style={styles.reviewsSection}>
+                    <Text style={styles.reviewsTitle}>{modelData.brandName} {modelData.name} Owner Reviews</Text>
+
+                    {/* Rating Summary Card */}
+                    <View style={styles.ratingCard}>
+                        <View style={styles.ratingHeader}>
+                            <View style={styles.starsRow}>
+                                {[1, 2, 3, 4, 5].map(i => <Feather key={i} name="star" size={20} color={i <= 4 ? '#F59E0B' : '#D1D5DB'} />)}
+                            </View>
+                            <Text style={styles.ownerRatingNumber}>4.2</Text>
+                            <Text style={styles.ownerRatingCount}>(1,543 reviews)</Text>
+                        </View>
+
+                        <Text style={styles.breakdownTitle}>Rating Breakdown</Text>
+                        {[{ star: 5, count: 856 }, { star: 4, count: 324 }, { star: 3, count: 189 }, { star: 2, count: 26 }, { star: 1, count: 13 }].map(item => (
+                            <View key={item.star} style={styles.breakdownRow}>
+                                <Text style={styles.breakdownStar}>{item.star}★</Text>
+                                <View style={styles.breakdownBarBg}>
+                                    <View style={[styles.breakdownBarFill, { width: `${(item.count / 856) * 100}%` }]} />
+                                </View>
+                                <Text style={styles.breakdownCount}>{item.count}</Text>
+                            </View>
+                        ))}
+
+                        {/* Filter & Sort */}
+                        <View style={styles.filterRow}>
+                            <View>
+                                <Text style={styles.filterLabel}>Filter by rating:</Text>
+                                <View style={styles.filterDropdown}>
+                                    <Text style={styles.filterText}>All Ratings</Text>
+                                    <Feather name="chevron-down" size={16} color="#6B7280" />
+                                </View>
+                            </View>
+                            <View>
+                                <Text style={styles.filterLabel}>Sort by:</Text>
+                                <View style={styles.filterDropdown}>
+                                    <Text style={styles.filterText}>Most Recent</Text>
+                                    <Feather name="chevron-down" size={16} color="#6B7280" />
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Review Cards */}
+                    {[
+                        { id: 1, name: 'Rajesh Kumar', date: '15/01/2024', rating: 5, title: 'Excellent car with great mileage', text: 'I have been using this car for 6 months now. The mileage is excellent in city conditions. Build quality is good and maintenance cost is reasonable.', likes: 24, dislikes: 2, verified: true },
+                        { id: 2, name: 'Priya Sharma', date: '12/01/2024', rating: 4, title: 'Good family car', text: 'Perfect for family use. Spacious interior and comfortable seats. Only issue is the road noise at high speeds.', likes: 18, dislikes: 1, verified: true },
+                    ].map(review => (
+                        <View key={review.id} style={styles.reviewCard}>
+                            <View style={styles.reviewHeader}>
+                                <View style={styles.reviewAvatar}><Text style={styles.reviewAvatarText}>{review.name[0]}</Text></View>
+                                <View style={styles.reviewInfo}>
+                                    <View style={styles.reviewNameRow}>
+                                        <Text style={styles.reviewName}>{review.name}</Text>
+                                        {review.verified && <View style={styles.verifiedBadge}><Feather name="check" size={10} color="#FFFFFF" /></View>}
+                                    </View>
+                                    <Text style={styles.reviewDate}>{review.date}</Text>
+                                </View>
+                            </View>
+                            <View style={styles.reviewStarsRow}>
+                                {[1, 2, 3, 4, 5].map(i => <Feather key={i} name="star" size={14} color={i <= review.rating ? '#F59E0B' : '#D1D5DB'} />)}
+                            </View>
+                            <Text style={styles.reviewTitle}>{review.title}</Text>
+                            <Text style={styles.reviewText}>{review.text}</Text>
+                            <View style={styles.reviewActions}>
+                                <View style={styles.reviewAction}><Feather name="thumbs-up" size={14} color="#6B7280" /><Text style={styles.reviewActionText}>{review.likes}</Text></View>
+                                <View style={styles.reviewAction}><Feather name="thumbs-down" size={14} color="#6B7280" /><Text style={styles.reviewActionText}>{review.dislikes}</Text></View>
+                            </View>
+                        </View>
+                    ))}
+
+                    {/* Read More Link */}
+                    <TouchableOpacity style={styles.readMoreButton} activeOpacity={0.7}>
+                        <Text style={styles.readMoreText}>Read More</Text>
+                    </TouchableOpacity>
+
+                    {/* Write a Review CTA */}
+                    <View style={styles.writeReviewCard}>
+                        <Text style={styles.writeReviewTitle}>Own a {modelData.brandName?.toLowerCase()} {modelData.name?.toLowerCase()}? Share your experience!</Text>
+                        <Text style={styles.writeReviewSubtitle}>Help other buyers make informed decisions by sharing your honest review</Text>
+                        <TouchableOpacity style={styles.writeReviewButton} activeOpacity={0.9}>
+                            <Text style={styles.writeReviewButtonText}>Write a Review</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Section 17: Share Your Feedback (same as web) */}
+                <Ad3DCarousel autoRotate rotateInterval={4000} />
+
+                <View style={styles.feedbackSection}>
+                    <Text style={styles.feedbackTitle}>Share Your Feedback</Text>
+                    <Text style={styles.feedbackSubtitle}>Help us improve by sharing your thoughts about this page</Text>
+
+                    <View style={styles.feedbackCard}>
+                        {/* Feedback Textarea */}
+                        <View style={styles.feedbackInputGroup}>
+                            <Text style={styles.feedbackLabel}>Your Feedback</Text>
+                            <TextInput
+                                style={styles.feedbackTextarea}
+                                placeholder="Tell us what you think about this car page..."
+                                placeholderTextColor="#9CA3AF"
+                                multiline
+                                numberOfLines={4}
+                                textAlignVertical="top"
+                            />
+                        </View>
+
+                        {/* Name Input */}
+                        <View style={styles.feedbackInputGroup}>
+                            <Text style={styles.feedbackLabel}>Your Name</Text>
+                            <TextInput
+                                style={styles.feedbackInput}
+                                placeholder="Enter your name"
+                                placeholderTextColor="#9CA3AF"
+                            />
+                        </View>
+
+                        {/* Email Input */}
+                        <View style={styles.feedbackInputGroup}>
+                            <Text style={styles.feedbackLabel}>Email Address</Text>
+                            <TextInput
+                                style={styles.feedbackInput}
+                                placeholder="Enter your email"
+                                placeholderTextColor="#9CA3AF"
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
+                        </View>
+
+                        {/* Submit Button */}
+                        <TouchableOpacity activeOpacity={0.9}>
+                            <LinearGradient
+                                colors={['#DC2626', '#EA580C']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.feedbackSubmitButton}
+                            >
+                                <Feather name="check-circle" size={20} color="#FFFFFF" />
+                                <Text style={styles.feedbackSubmitText}>Submit Feedback</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
                 {/* Footer */}
                 <Footer onNavigate={(screen: string) => navigation.navigate(screen as never)} />
@@ -2496,6 +2700,428 @@ const styles = StyleSheet.create({
         color: '#DC2626',
         fontSize: 14,
         fontWeight: '600',
+    },
+
+    // Section 13: Model News (exact copy from LatestCarNews)
+    modelNewsSection: {
+        paddingVertical: 24,
+        paddingHorizontal: 16,
+        backgroundColor: '#FFFFFF',
+    },
+    modelNewsHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    modelNewsTitle: {
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#111827',
+    },
+    modelNewsViewAll: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    modelNewsViewAllText: {
+        fontSize: 14,
+        color: '#DC2626',
+        fontWeight: '500',
+        marginRight: 4,
+    },
+    modelNewsScrollContainer: {
+        // paddingHorizontal handled by parent
+    },
+    newsCard: {
+        width: 260,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        overflow: 'hidden',
+        marginRight: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    newsCardImageContainer: {
+        height: 140,
+        position: 'relative',
+    },
+    newsCardImage: {
+        width: '100%',
+        height: '100%',
+    },
+    newsCardBadge: {
+        position: 'absolute',
+        top: 12,
+        left: 12,
+        backgroundColor: '#3B82F6',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 9999,
+    },
+    newsCardBadgeText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '500',
+    },
+    newsCardContent: {
+        padding: 12,
+    },
+    newsCardTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: 6,
+        lineHeight: 20,
+    },
+    newsCardExcerpt: {
+        fontSize: 12,
+        color: '#6B7280',
+        marginBottom: 8,
+        lineHeight: 18,
+    },
+    newsCardMetaRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    newsCardAuthor: {
+        fontSize: 11,
+        color: '#6B7280',
+        fontWeight: '500',
+    },
+    newsCardMetaDot: {
+        fontSize: 11,
+        color: '#6B7280',
+        marginHorizontal: 6,
+    },
+    newsCardDate: {
+        fontSize: 11,
+        color: '#6B7280',
+        marginLeft: 4,
+    },
+    newsCardStatsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    newsCardStatItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    newsCardStatText: {
+        fontSize: 11,
+        color: '#6B7280',
+        marginLeft: 4,
+    },
+
+    // Section 14: Model Videos
+    modelVideosSection: {
+        paddingVertical: 24,
+        paddingHorizontal: 16,
+        backgroundColor: '#FFFFFF',
+    },
+    modelVideosHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    modelVideosTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#111827',
+    },
+    modelVideosVisitChannel: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    modelVideosVisitText: {
+        fontSize: 14,
+        color: '#DC2626',
+        fontWeight: '500',
+        marginRight: 4,
+    },
+    featuredVideoCard: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        overflow: 'hidden',
+        marginBottom: 16,
+    },
+    featuredVideoImageContainer: {
+        height: 200,
+        position: 'relative',
+    },
+    featuredVideoImage: {
+        width: '100%',
+        height: '100%',
+    },
+    featuredPlayButton: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    featuredPlayIcon: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    featuredVideoInfo: {
+        padding: 16,
+    },
+    featuredVideoTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: 8,
+        lineHeight: 22,
+    },
+    featuredVideoMeta: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    featuredChannelName: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#DC2626',
+    },
+    featuredPublishDate: {
+        fontSize: 13,
+        color: '#6B7280',
+    },
+    featuredVideoStats: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    featuredStatItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    featuredStatText: {
+        fontSize: 13,
+        color: '#6B7280',
+        marginLeft: 6,
+    },
+    moreVideosSection: {
+        marginTop: 8,
+    },
+    moreVideosTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#111827',
+        marginBottom: 12,
+    },
+    moreVideoCard: {
+        flexDirection: 'row',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        overflow: 'hidden',
+        marginBottom: 12,
+    },
+    moreVideoImageContainer: {
+        width: 140,
+        height: 90,
+        position: 'relative',
+    },
+    moreVideoImage: {
+        width: '100%',
+        height: '100%',
+    },
+    videoDurationBadge: {
+        position: 'absolute',
+        bottom: 6,
+        right: 6,
+        backgroundColor: 'rgba(0,0,0,0.75)',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    videoDurationText: {
+        color: '#FFFFFF',
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    moreVideoInfo: {
+        flex: 1,
+        padding: 10,
+        justifyContent: 'center',
+    },
+    moreVideoTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#111827',
+        marginBottom: 4,
+        lineHeight: 18,
+    },
+    moreVideoChannel: {
+        fontSize: 12,
+        color: '#DC2626',
+        fontWeight: '500',
+        marginBottom: 4,
+    },
+    moreVideoStats: {
+        fontSize: 11,
+        color: '#6B7280',
+    },
+    subscribeCTA: {
+        marginTop: 16,
+        backgroundColor: '#FEF2F2',
+        borderRadius: 12,
+        padding: 16,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#FECACA',
+    },
+    subscribeCTATitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: 4,
+    },
+    subscribeCTAText: {
+        fontSize: 13,
+        color: '#6B7280',
+        textAlign: 'center',
+    },
+
+    // Section 15: Model FAQ (same as BrandScreen)
+    faqSection: { paddingVertical: 24, paddingHorizontal: 16, backgroundColor: '#F9FAFB' },
+    faqTitle: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 6 },
+    faqSubtitle: { fontSize: 14, color: '#6B7280', marginBottom: 20 },
+    faqItem: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, marginBottom: 12, overflow: 'hidden' },
+    faqQuestion: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 16, minHeight: 56 },
+    faqQuestionText: { fontSize: 15, fontWeight: '500', color: '#111827', flex: 1, marginRight: 12 },
+    faqAnswer: { paddingHorizontal: 16, paddingBottom: 16 },
+    faqDivider: { height: 1, backgroundColor: '#F3F4F6', marginBottom: 12 },
+    faqAnswerText: { fontSize: 14, color: '#6B7280', lineHeight: 22 },
+
+    // Section 16: Owner Reviews (same as BrandScreen)
+    reviewsSection: { paddingVertical: 24, paddingHorizontal: 16, backgroundColor: '#FFFFFF' },
+    reviewsTitle: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 20 },
+    ratingCard: { backgroundColor: '#F9FAFB', borderRadius: 12, padding: 20, marginBottom: 16 },
+    ratingHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+    starsRow: { flexDirection: 'row', marginRight: 8 },
+    ownerRatingNumber: { fontSize: 32, fontWeight: '700', color: '#111827', marginRight: 8 },
+    ownerRatingCount: { fontSize: 14, color: '#6B7280' },
+    breakdownTitle: { fontSize: 16, fontWeight: '600', color: '#111827', marginBottom: 12 },
+    breakdownRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+    breakdownStar: { fontSize: 14, color: '#6B7280', width: 30 },
+    breakdownBarBg: { flex: 1, height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, marginHorizontal: 8 },
+    breakdownBarFill: { height: 8, backgroundColor: '#F59E0B', borderRadius: 4 },
+    breakdownCount: { fontSize: 14, color: '#6B7280', width: 40, textAlign: 'right' },
+    filterRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
+    filterLabel: { fontSize: 12, color: '#6B7280', marginBottom: 6 },
+    filterDropdown: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 },
+    filterText: { fontSize: 14, color: '#111827', marginRight: 8 },
+    reviewCard: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 16, marginBottom: 12 },
+    reviewHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+    reviewAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#DC2626', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+    reviewAvatarText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+    reviewInfo: { flex: 1 },
+    reviewNameRow: { flexDirection: 'row', alignItems: 'center' },
+    reviewName: { fontSize: 15, fontWeight: '600', color: '#111827', marginRight: 6 },
+    verifiedBadge: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#10B981', alignItems: 'center', justifyContent: 'center' },
+    reviewDate: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+    reviewStarsRow: { flexDirection: 'row', marginBottom: 8 },
+    reviewTitle: { fontSize: 15, fontWeight: '600', color: '#111827', marginBottom: 6 },
+    reviewText: { fontSize: 14, color: '#4B5563', lineHeight: 22, marginBottom: 12 },
+    reviewActions: { flexDirection: 'row' },
+    reviewAction: { flexDirection: 'row', alignItems: 'center', marginRight: 16 },
+    reviewActionText: { fontSize: 13, color: '#6B7280', marginLeft: 4 },
+    readMoreButton: { alignItems: 'center', paddingVertical: 16 },
+    readMoreText: { fontSize: 15, fontWeight: '600', color: '#DC2626' },
+    writeReviewCard: { backgroundColor: '#FEF2F2', borderRadius: 12, padding: 24, alignItems: 'center', marginTop: 16 },
+    writeReviewTitle: { fontSize: 18, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 8 },
+    writeReviewSubtitle: { fontSize: 14, color: '#6B7280', textAlign: 'center', lineHeight: 22, marginBottom: 16 },
+    writeReviewButton: { backgroundColor: '#DC2626', paddingHorizontal: 32, paddingVertical: 14, borderRadius: 8 },
+    writeReviewButtonText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
+
+    // Section 17: Share Your Feedback
+    feedbackSection: {
+        paddingVertical: 24,
+        paddingHorizontal: 16,
+        backgroundColor: '#FFFFFF',
+    },
+    feedbackTitle: {
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#111827',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    feedbackSubtitle: {
+        fontSize: 14,
+        color: '#6B7280',
+        textAlign: 'center',
+        marginBottom: 24,
+    },
+    feedbackCard: {
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: 12,
+        padding: 20,
+    },
+    feedbackInputGroup: {
+        marginBottom: 20,
+    },
+    feedbackLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#374151',
+        marginBottom: 8,
+    },
+    feedbackTextarea: {
+        borderWidth: 1,
+        borderColor: '#D1D5DB',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        fontSize: 14,
+        color: '#111827',
+        minHeight: 100,
+        backgroundColor: '#FFFFFF',
+    },
+    feedbackInput: {
+        borderWidth: 1,
+        borderColor: '#D1D5DB',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        fontSize: 14,
+        color: '#111827',
+        backgroundColor: '#FFFFFF',
+    },
+    feedbackSubmitButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 8,
+    },
+    feedbackSubmitText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#FFFFFF',
+        marginLeft: 8,
     },
 
     // Modal
