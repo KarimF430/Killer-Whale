@@ -7,6 +7,7 @@ import HeroSection from '@/components/home/HeroSection'
 import CarsByBudget from '@/components/home/CarsByBudget'
 import TopCarsByBodyType from '@/components/home/TopCarsByBodyType'
 import PopularCars from '@/components/home/PopularCars'
+import DecemberOffersSection from '@/components/home/DecemberOffersSection'
 import BrandSection from '@/components/home/BrandSection'
 import UpcomingCars from '@/components/home/UpcomingCars'
 import FavouriteCars from '@/components/home/FavouriteCars'
@@ -276,6 +277,10 @@ export default async function HomePage() {
         </PageSection>
 
         <PageSection background="gray">
+          <DecemberOffersSection initialCars={allCars} initialBrands={brands} />
+        </PageSection>
+
+        <PageSection background="white">
           <BrandSection initialBrands={brands} />
         </PageSection>
 
