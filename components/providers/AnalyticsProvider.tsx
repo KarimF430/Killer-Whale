@@ -5,18 +5,14 @@
  * Initializes analytics and tracks route changes
  */
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import analytics from '@/lib/analytics';
 
-export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+// Inner component that uses searchParams
+function AnalyticsLogic() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-
-    // Initialize analytics on mount
-    useEffect(() => {
-        analytics.init();
-    }, []);
 
     // Track page views on route change
     useEffect(() => {
@@ -29,5 +25,21 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
         }
     }, [pathname, searchParams]);
 
-    return <>{children}</>;
+    return null;
+}
+
+export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+    // Initialize analytics on mount (doesn't depend on params)
+    useEffect(() => {
+        analytics.init();
+    }, []);
+
+    return (
+        <>
+            <Suspense fallback={null}>
+                <AnalyticsLogic />
+            </Suspense>
+            {children}
+        </>
+    );
 }
