@@ -54,7 +54,6 @@ const Ad3DCarousel = dynamic(() => import('@/components/ads/Ad3DCarousel'), {
 })
 
 const AIChatbotPopup = dynamic(() => import('@/components/ads/AIChatbotPopup'), {
-  ssr: false,
   loading: () => null
 })
 
@@ -128,10 +127,10 @@ async function getHomeData() {
   console.log('🔍 Fetching home data from:', backendUrl)
 
   try {
-    // Fetch all data in parallel (6 requests) - Reduced limit from 100 to 50 for faster loading
+    // Fetch all data in parallel (6 requests) - Limit set to 80 for balanced performance and coverage
     const [popularRes, modelsRes, brandsRes, comparisonsRes, newsRes, upcomingCarsRes] = await Promise.all([
       fetch(`${backendUrl}/api/cars/popular`, { next: { revalidate: 3600 } }),
-      fetch(`${backendUrl}/api/models-with-pricing?limit=50`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/models-with-pricing?limit=80`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/popular-comparisons`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/news?limit=6`, { next: { revalidate: 3600 } }),
