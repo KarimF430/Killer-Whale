@@ -93,16 +93,23 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
     <div>
       <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Cars by Budget</h2>
 
-      {/* Budget Filter Buttons */}
-      <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
+      {/* Budget Filter Buttons - Compact like Top 10 Cars */}
+      <div
+        className="flex gap-2 overflow-x-auto scrollbar-hide mb-5 pb-1"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
         {budgetRanges.map((budget) => (
           <button
             key={budget.id}
             onClick={() => setSelectedBudget(budget.id)}
-            className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${selectedBudget === budget.id
-              ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+            className={`
+              flex-shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-medium 
+              transition-all duration-200 whitespace-nowrap
+              ${selectedBudget === budget.id
+                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
+              }
+            `}
           >
             {budget.label}
           </button>

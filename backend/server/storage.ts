@@ -303,6 +303,7 @@ export class PersistentStorage implements IStorage {
       isNew: model.isNew || null,
       popularRank: model.popularRank || null,
       newRank: model.newRank || null,
+      topRank: model.topRank || null,
       bodyType: model.bodyType || null,
       subBodyType: model.subBodyType || null,
       launchDate: model.launchDate || null,

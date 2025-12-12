@@ -21,6 +21,7 @@ export const models = pgTable("models", {
   isNew: boolean("is_new").default(false),
   popularRank: integer("popular_rank"),
   newRank: integer("new_rank"),
+  topRank: integer("top_rank"), // Ranking for Top Cars section (1-10)
   bodyType: text("body_type"),
   subBodyType: text("sub_body_type"),
   launchDate: text("launch_date"),

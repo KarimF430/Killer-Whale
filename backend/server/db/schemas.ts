@@ -32,6 +32,7 @@ const modelSchema = new mongoose.Schema({
   isNew: { type: Boolean, default: false },
   popularRank: { type: Number, default: null },
   newRank: { type: Number, default: null },
+  topRank: { type: Number, default: null }, // Ranking for Top Cars section (1-10)
 
   // Basic Info
   bodyType: { type: String, default: null },

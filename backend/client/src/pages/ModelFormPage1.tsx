@@ -15,7 +15,7 @@ export default function ModelFormPage1() {
   const { formData, updateFormData, resetFormData, saveProgress, isEditMode: contextIsEditMode, setEditMode } = useModelForm();
   const isEditMode = !!params.id;
   const editingModelId = params.id;
-  
+
   const { data: brands = [], isLoading: brandsLoading } = useQuery<Brand[]>({
     queryKey: ['/api/brands'],
   });
@@ -33,6 +33,7 @@ export default function ModelFormPage1() {
     isNew: false,
     popularRank: null as number | null,
     newRank: null as number | null,
+    topRank: null as number | null,
     bodyType: '',
     subBodyType: '',
     launchDate: '',
@@ -67,6 +68,7 @@ export default function ModelFormPage1() {
         isNew: existingModel.isNew || false,
         popularRank: existingModel.popularRank,
         newRank: existingModel.newRank,
+        topRank: (existingModel as any).topRank || null,
         bodyType: existingModel.bodyType || '',
         subBodyType: existingModel.subBodyType || '',
         launchDate: existingModel.launchDate || '',
@@ -94,6 +96,7 @@ export default function ModelFormPage1() {
         isNew: false,
         popularRank: null,
         newRank: null,
+        topRank: null,
         bodyType: '',
         subBodyType: '',
         launchDate: '',
@@ -120,7 +123,7 @@ export default function ModelFormPage1() {
   };
 
   const [generatedModelId, setGeneratedModelId] = useState('');
-  
+
   useEffect(() => {
     const selectedBrand = brands.find(b => b.id === localData.brandId);
     if (selectedBrand && localData.name) {
@@ -131,18 +134,18 @@ export default function ModelFormPage1() {
 
   const handleNext = async () => {
     console.log('Page 1 - Saving data:', localData);
-    
+
     // Validate required fields
     if (!localData.brandId || !localData.name) {
       alert('Please fill in all required fields (Brand and Model Name).');
       return;
     }
-    
+
     try {
       // Save progress to backend
       const modelId = await saveProgress(localData);
       console.log('Model saved with ID:', modelId);
-      
+
       // Navigate to next page
       if (isEditMode || modelId) {
         setLocation(`/models/${modelId}/edit/page2`);
@@ -171,7 +174,7 @@ export default function ModelFormPage1() {
           <h1 className="text-2xl font-semibold">{isEditMode ? 'Edit Model' : 'Add New Model'}</h1>
           <div className="flex items-center gap-2">
             <Label className="text-sm font-normal">Model Id</Label>
-            <Input 
+            <Input
               value={isEditMode ? editingModelId : generatedModelId}
               disabled
               className="w-32 font-mono text-sm bg-muted"
@@ -181,14 +184,14 @@ export default function ModelFormPage1() {
         </div>
 
         <div className="flex gap-4">
-          <Button 
+          <Button
             type="button"
             variant="default"
             data-testid="button-activate-model"
           >
             activate Model
           </Button>
-          <Button 
+          <Button
             type="button"
             variant="outline"
             data-testid="button-deactivate-model"
@@ -200,7 +203,7 @@ export default function ModelFormPage1() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label>Select Brand</Label>
-            <select 
+            <select
               className="w-full px-3 py-2 border rounded-md"
               value={localData.brandId}
               onChange={(e) => setLocalData({ ...localData, brandId: e.target.value })}
@@ -242,8 +245,8 @@ export default function ModelFormPage1() {
         {localData.isPopular && (
           <div className="space-y-2">
             <Label>Popular Model Ranking (1-20)</Label>
-            <select 
-              className="w-full md:w-48 px-3 py-2 border rounded-md" 
+            <select
+              className="w-full md:w-48 px-3 py-2 border rounded-md"
               value={localData.popularRank || ''}
               onChange={(e) => setLocalData({ ...localData, popularRank: e.target.value ? parseInt(e.target.value) : null })}
               data-testid="select-popular-rank"
@@ -259,8 +262,8 @@ export default function ModelFormPage1() {
         {localData.isNew && (
           <div className="space-y-2">
             <Label>New Model Ranking (1-20)</Label>
-            <select 
-              className="w-full md:w-48 px-3 py-2 border rounded-md" 
+            <select
+              className="w-full md:w-48 px-3 py-2 border rounded-md"
               value={localData.newRank || ''}
               onChange={(e) => setLocalData({ ...localData, newRank: e.target.value ? parseInt(e.target.value) : null })}
               data-testid="select-new-rank"
@@ -273,11 +276,27 @@ export default function ModelFormPage1() {
           </div>
         )}
 
+        <div className="space-y-2">
+          <Label>Top Cars Ranking (1-10)</Label>
+          <p className="text-xs text-gray-500">Assign a rank to display in "Top 10 Cars" section on homepage</p>
+          <select
+            className="w-full md:w-48 px-3 py-2 border rounded-md"
+            value={localData.topRank || ''}
+            onChange={(e) => setLocalData({ ...localData, topRank: e.target.value ? parseInt(e.target.value) : null })}
+            data-testid="select-top-rank"
+          >
+            <option value="">Not Ranked</option>
+            {Array.from({ length: 10 }, (_, i) => (
+              <option key={i + 1} value={i + 1}>{i + 1}</option>
+            ))}
+          </select>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label>Body Type</Label>
-            <select 
-              className="w-full px-3 py-2 border rounded-md" 
+            <select
+              className="w-full px-3 py-2 border rounded-md"
               value={localData.bodyType}
               onChange={(e) => setLocalData({ ...localData, bodyType: e.target.value })}
               data-testid="select-body-type"
@@ -295,8 +314,8 @@ export default function ModelFormPage1() {
 
           <div className="space-y-2">
             <Label>Sub-body Type</Label>
-            <select 
-              className="w-full px-3 py-2 border rounded-md" 
+            <select
+              className="w-full px-3 py-2 border rounded-md"
               value={localData.subBodyType}
               onChange={(e) => setLocalData({ ...localData, subBodyType: e.target.value })}
               data-testid="select-subbody-type"
@@ -325,22 +344,22 @@ export default function ModelFormPage1() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
             <Label>Model Name</Label>
-            <Input 
-              placeholder="Text field" 
+            <Input
+              placeholder="Text field"
               value={localData.name}
               onChange={(e) => setLocalData({ ...localData, name: e.target.value })}
-              data-testid="input-model-name" 
+              data-testid="input-model-name"
             />
           </div>
 
           <div className="space-y-2">
             <Label>Launched time line</Label>
-            <Input 
-              type="month" 
-              placeholder="Calendar popup" 
+            <Input
+              type="month"
+              placeholder="Calendar popup"
               value={localData.launchDate}
               onChange={(e) => setLocalData({ ...localData, launchDate: e.target.value })}
-              data-testid="input-launch-date" 
+              data-testid="input-launch-date"
             />
           </div>
 
@@ -349,10 +368,10 @@ export default function ModelFormPage1() {
             <label className="flex items-center justify-center h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-gray-50">
               <Upload className="w-4 h-4 mr-2" />
               <span className="text-sm">{localData.brochureFile ? localData.brochureFile.name : 'Upload PDF'}</span>
-              <input 
-                type="file" 
-                className="hidden" 
-                accept=".pdf" 
+              <input
+                type="file"
+                className="hidden"
+                accept=".pdf"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -367,7 +386,7 @@ export default function ModelFormPage1() {
                     setLocalData({ ...localData, brochureFile: file });
                   }
                 }}
-                data-testid="input-brochure" 
+                data-testid="input-brochure"
               />
             </label>
             {localData.brochureFile && (

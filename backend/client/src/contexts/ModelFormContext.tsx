@@ -23,6 +23,7 @@ const initialFormData: Partial<InsertModel> = {
   isNew: false,
   popularRank: null,
   newRank: null,
+  topRank: null,
   bodyType: null,
   subBodyType: null,
   launchDate: null,
@@ -71,14 +72,14 @@ export function ModelFormProvider({ children }: { children: ReactNode }) {
   // Progressive save mutation
   const saveMutation = useMutation({
     mutationFn: async (data: Partial<InsertModel>) => {
-      const url = isEditMode && currentModelId 
-        ? `/api/models/${currentModelId}` 
+      const url = isEditMode && currentModelId
+        ? `/api/models/${currentModelId}`
         : '/api/models';
-      
+
       const method = isEditMode && currentModelId ? 'PUT' : 'POST';
-      
+
       console.log(`🔄 Model Form: ${method} ${url}`, data);
-      
+
       return await apiRequest(method, url, data);
     },
     onSuccess: (result) => {
@@ -87,10 +88,10 @@ export function ModelFormProvider({ children }: { children: ReactNode }) {
         setCurrentModelId(result.id);
         setIsEditModeState(true);
       }
-      
+
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/models'] });
-      
+
       toast({
         title: "Progress Saved",
         description: `Model ${isEditMode ? 'updated' : 'created'} successfully.`,
@@ -109,19 +110,19 @@ export function ModelFormProvider({ children }: { children: ReactNode }) {
   const saveProgress = async (data: Partial<InsertModel>): Promise<string> => {
     // Update local form data
     updateFormData(data);
-    
+
     // Save to backend
     const result = await saveMutation.mutateAsync(data);
-    
+
     // Return the model ID (either existing or newly created)
     return currentModelId || result.id;
   };
 
   return (
-    <ModelFormContext.Provider value={{ 
-      formData, 
-      updateFormData, 
-      resetFormData, 
+    <ModelFormContext.Provider value={{
+      formData,
+      updateFormData,
+      resetFormData,
       saveProgress,
       isEditMode,
       setEditMode,

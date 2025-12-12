@@ -5,6 +5,7 @@ import AdBanner from '@/components/home/AdBanner'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 import HeroSection from '@/components/home/HeroSection'
 import CarsByBudget from '@/components/home/CarsByBudget'
+import TopCarsByBodyType from '@/components/home/TopCarsByBodyType'
 import PopularCars from '@/components/home/PopularCars'
 import BrandSection from '@/components/home/BrandSection'
 import UpcomingCars from '@/components/home/UpcomingCars'
@@ -46,6 +47,8 @@ interface Car {
   isPopular: boolean
   popularRank: number | null
   newRank: number | null
+  bodyType?: string
+  topRank?: number | null
 }
 
 const formatLaunchDate = (date: string): string => {
@@ -165,7 +168,9 @@ async function getHomeData() {
         isNew: model.isNew || false,
         isPopular: model.isPopular || false,
         popularRank: model.popularRank ?? null,
-        newRank: model.newRank ?? null
+        newRank: model.newRank ?? null,
+        bodyType: model.bodyType || undefined,
+        topRank: model.topRank ?? null
       }
     }) : []
 
@@ -256,6 +261,10 @@ export default async function HomePage() {
 
         <PageSection background="gray">
           <CarsByBudget initialCars={allCars} />
+        </PageSection>
+
+        <PageSection background="white">
+          <TopCarsByBodyType initialCars={allCars} />
         </PageSection>
 
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">

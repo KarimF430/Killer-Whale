@@ -39,6 +39,7 @@ function mapModel(doc: any): Model {
     isNew: doc.isNew || false,
     popularRank: doc.popularRank || null,
     newRank: doc.newRank || null,
+    topRank: doc.topRank || null,
     bodyType: doc.bodyType || null,
     subBodyType: doc.subBodyType || null,
     launchDate: doc.launchDate || null,
