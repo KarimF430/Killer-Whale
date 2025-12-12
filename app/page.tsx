@@ -1,29 +1,65 @@
 import { Metadata } from 'next'
 import dynamic from 'next/dynamic'
-import Footer from '@/components/Footer'
-import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
-import TataSierraAdBanner from '@/components/ads/TataSierraAdBanner'
 import HeroSection from '@/components/home/HeroSection'
 import CarsByBudget from '@/components/home/CarsByBudget'
 import TopCarsByBodyType from '@/components/home/TopCarsByBodyType'
-import PopularCars from '@/components/home/PopularCars'
-import DecemberOffersSection from '@/components/home/DecemberOffersSection'
-import BrandSection from '@/components/home/BrandSection'
-import UpcomingCars from '@/components/home/UpcomingCars'
-import FavouriteCars from '@/components/home/FavouriteCars'
-import NewLaunchedCars from '@/components/home/NewLaunchedCars'
-import LatestCarNews from '@/components/home/LatestCarNews'
-import PopularComparisons from '@/components/home/PopularComparisons'
+import TataSierraAdBanner from '@/components/ads/TataSierraAdBanner'
 import PageSection from '@/components/common/PageSection'
 import Card from '@/components/common/Card'
 import { staticPageSEO } from '@/lib/seo'
 
-// Lazy load heavy components that are below the fold
+// Lazy load below-fold components for better performance
+const PopularCars = dynamic(() => import('@/components/home/PopularCars'), {
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const DecemberOffersSection = dynamic(() => import('@/components/home/DecemberOffersSection'), {
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const BrandSection = dynamic(() => import('@/components/home/BrandSection'), {
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const UpcomingCars = dynamic(() => import('@/components/home/UpcomingCars'), {
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const FavouriteCars = dynamic(() => import('@/components/home/FavouriteCars'), {
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const NewLaunchedCars = dynamic(() => import('@/components/home/NewLaunchedCars'), {
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const LatestCarNews = dynamic(() => import('@/components/home/LatestCarNews'), {
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const PopularComparisons = dynamic(() => import('@/components/home/PopularComparisons'), {
+  loading: () => <div className="h-80 bg-gray-100 rounded-lg animate-pulse" />
+})
+
 const YouTubeVideoPlayer = dynamic(() => import('@/components/home/YouTubeVideoPlayer'), {
   loading: () => <div className="h-80 bg-gray-100 rounded-lg animate-pulse" />
 })
+
 const VideoAd = dynamic(() => import('@/components/ads/VideoAd'), {
   loading: () => <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const Ad3DCarousel = dynamic(() => import('@/components/ads/Ad3DCarousel'), {
+  loading: () => <div className="h-48 bg-gray-100 rounded-lg animate-pulse" />
+})
+
+const AIChatbotPopup = dynamic(() => import('@/components/ads/AIChatbotPopup'), {
+  ssr: false,
+  loading: () => null
+})
+
+const Footer = dynamic(() => import('@/components/Footer'), {
+  loading: () => <div className="h-96 bg-gray-900 animate-pulse" />
 })
 
 
@@ -92,10 +128,10 @@ async function getHomeData() {
   console.log('🔍 Fetching home data from:', backendUrl)
 
   try {
-    // Fetch all data in parallel (6 requests)
+    // Fetch all data in parallel (6 requests) - Reduced limit from 100 to 50 for faster loading
     const [popularRes, modelsRes, brandsRes, comparisonsRes, newsRes, upcomingCarsRes] = await Promise.all([
       fetch(`${backendUrl}/api/cars/popular`, { next: { revalidate: 3600 } }),
-      fetch(`${backendUrl}/api/models-with-pricing?limit=100`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/models-with-pricing?limit=50`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/popular-comparisons`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/news?limit=6`, { next: { revalidate: 3600 } }),
@@ -316,6 +352,9 @@ export default async function HomePage() {
       </main >
 
       <Footer />
+
+      {/* AI Chatbot Popup Ad */}
+      <AIChatbotPopup />
     </div >
   )
 }

@@ -52,6 +52,7 @@ export default function TataSierraAdBanner() {
                                 alt="Tata Sierra"
                                 fill
                                 className="object-contain drop-shadow-2xl"
+                                sizes="(max-width: 640px) 400px, 500px"
                                 priority
                             />
                         </div>
