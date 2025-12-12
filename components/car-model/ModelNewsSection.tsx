@@ -75,18 +75,20 @@ export default function ModelNewsSection({ carName, newsArticles }: ModelNewsSec
         </div>
 
         {/* News Container */}
-        <div className="relative">
-          {/* Navigation Arrows */}
+        <div className="relative group">
+          {/* Navigation Arrows - Hover to reveal */}
           <button
             onClick={() => scroll('left')}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
+            className="hidden md:flex absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -ml-5"
+            aria-label="Scroll left"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
 
           <button
             onClick={() => scroll('right')}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center"
+            className="hidden md:flex absolute right-0 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -mr-5"
+            aria-label="Scroll right"
           >
             <ChevronRight className="w-5 h-5 text-gray-600" />
           </button>

@@ -105,7 +105,7 @@ export default async function BrandNews({ brandSlug, brandName }: BrandNewsProps
       <div className="relative">
         <div
           id="brand-news-scroll"
-          className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
+          className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {articles.map((article) => (

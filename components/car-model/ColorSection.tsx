@@ -122,41 +122,68 @@ export default function ColorSection({ carName, colors }: ColorSectionProps) {
               key={index}
               onClick={() => goToColor(index)}
               className={`w-3 h-3 rounded-full transition-all duration-200 ${index === currentColorIndex
-                  ? 'bg-red-500 scale-125'
-                  : index === currentColorIndex - 1 ||
-                    (currentColorIndex === 0 && index === colors.length - 1)
+                ? 'bg-red-500 scale-125'
+                : index === currentColorIndex - 1 ||
+                  (currentColorIndex === 0 && index === colors.length - 1)
+                  ? 'bg-red-400'
+                  : index === currentColorIndex + 1 ||
+                    (currentColorIndex === colors.length - 1 && index === 0)
                     ? 'bg-red-400'
-                    : index === currentColorIndex + 1 ||
-                      (currentColorIndex === colors.length - 1 && index === 0)
-                      ? 'bg-red-400'
-                      : 'bg-gray-300 hover:bg-gray-400'
+                    : 'bg-gray-300 hover:bg-gray-400'
                 }`}
             />
           ))}
         </div>
 
         {/* Color Thumbnails */}
-        <div className="flex justify-center mt-8 space-x-4 overflow-x-auto pb-4">
-          {colors.map((color, index) => (
-            <button
-              key={color.id}
-              onClick={() => goToColor(index)}
-              className={`flex-shrink-0 p-3 rounded-lg border-2 transition-all duration-200 ${index === currentColorIndex
+        <div className="relative group">
+          {/* Left Scroll Arrow */}
+          <button
+            onClick={() => {
+              const container = document.getElementById('color-thumbnails-scroll')
+              container?.scrollBy({ left: -200, behavior: 'smooth' })
+            }}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+            aria-label="Scroll left"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={() => {
+              const container = document.getElementById('color-thumbnails-scroll')
+              container?.scrollBy({ left: 200, behavior: 'smooth' })
+            }}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+            aria-label="Scroll right"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          <div id="color-thumbnails-scroll" className="flex justify-center mt-8 space-x-4 overflow-x-auto pb-4 scroll-smooth">
+            {colors.map((color, index) => (
+              <button
+                key={color.id}
+                onClick={() => goToColor(index)}
+                className={`flex-shrink-0 p-3 rounded-lg border-2 transition-all duration-200 ${index === currentColorIndex
                   ? 'border-red-500 bg-red-50 shadow-lg'
                   : 'border-gray-200 hover:border-gray-300 bg-white'
-                }`}
-            >
-              <div className="flex flex-col items-center space-y-2">
-                <div
-                  className="w-8 h-8 rounded-full border-2 border-gray-300 shadow-sm"
-                  style={{ backgroundColor: color.hexCode }}
-                />
-                <span className="text-xs font-normal text-gray-700 text-center">
-                  {color.name}
-                </span>
-              </div>
-            </button>
-          ))}
+                  }`}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div
+                    className="w-8 h-8 rounded-full border-2 border-gray-300 shadow-sm"
+                    style={{ backgroundColor: color.hexCode }}
+                  />
+                  <span className="text-xs font-normal text-gray-700 text-center">
+                    {color.name}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </section>

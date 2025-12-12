@@ -30,18 +30,32 @@ export default function SimilarCarsSection({ carName, similarCars }: SimilarCars
         </h2>
 
         {/* Horizontal Scroll Container */}
-        <div className="relative">
+        <div className="relative group">
           {/* Navigation Arrows */}
-          <button className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center justify-center group">
-            <ChevronLeft className="w-4 h-4 text-gray-600 group-hover:text-gray-800" />
+          <button
+            onClick={() => {
+              const container = document.getElementById('similar-cars-section-scroll')
+              container?.scrollBy({ left: -300, behavior: 'smooth' })
+            }}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -ml-5"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <button className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center justify-center group">
-            <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-800" />
+          <button
+            onClick={() => {
+              const container = document.getElementById('similar-cars-section-scroll')
+              container?.scrollBy({ left: 300, behavior: 'smooth' })
+            }}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -mr-5"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-5 h-5" />
           </button>
 
           {/* Horizontal Scrollable Cars */}
-          <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
+          <div id="similar-cars-section-scroll" className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
             {similarCars.map((car) => (
               <div
                 key={car.id}
