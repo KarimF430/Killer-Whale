@@ -4,6 +4,7 @@ import './globals.css'
 import Header from '@/components/Header'
 import { FavouritesProvider } from '@/lib/favourites-context'
 import { AuthProvider } from '@/lib/auth-context'
+import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -75,6 +76,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   const GA_ID = process.env.NEXT_PUBLIC_GA_ID
+  const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID
 
   return (
     <html lang="en">
@@ -86,6 +88,7 @@ export default function RootLayout({
         {/* Preconnect to external domains for faster loading */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://www.clarity.ms" />
         {process.env.NEXT_PUBLIC_API_URL && (
           <link rel="preconnect" href={new URL(process.env.NEXT_PUBLIC_API_URL).origin} />
         )}
@@ -125,6 +128,21 @@ export default function RootLayout({
           </>
         )}
 
+        {/* Microsoft Clarity */}
+        {CLARITY_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "${CLARITY_ID}");
+              `,
+            }}
+          />
+        )}
+
         {/* Schema.org structured data */}
         <script
           type="application/ld+json"
@@ -145,12 +163,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen bg-gray-50`}>
-        <AuthProvider>
-          <FavouritesProvider>
-            <Header />
-            {children}
-          </FavouritesProvider>
-        </AuthProvider>
+        <AnalyticsProvider>
+          <AuthProvider>
+            <FavouritesProvider>
+              <Header />
+              {children}
+            </FavouritesProvider>
+          </AuthProvider>
+        </AnalyticsProvider>
       </body>
     </html>
   )
