@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 import dynamic from 'next/dynamic'
 import Footer from '@/components/Footer'
-import AdBanner from '@/components/home/AdBanner'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
+import TataSierraAdBanner from '@/components/ads/TataSierraAdBanner'
 import HeroSection from '@/components/home/HeroSection'
 import CarsByBudget from '@/components/home/CarsByBudget'
 import TopCarsByBodyType from '@/components/home/TopCarsByBodyType'
@@ -268,7 +268,7 @@ export default async function HomePage() {
         </PageSection>
 
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
-          <Ad3DCarousel className="my-3 sm:my-4" />
+          <TataSierraAdBanner />
         </div>
 
         <PageSection background="white">
@@ -308,9 +308,9 @@ export default async function HomePage() {
         <PageSection background="white">
           <YouTubeVideoPlayer />
         </PageSection>
-      </main>
+      </main >
 
       <Footer />
-    </div>
+    </div >
   )
 }
