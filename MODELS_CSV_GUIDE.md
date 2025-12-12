@@ -4,7 +4,7 @@
 
 **File:** `models_import_template.csv`
 
-This template contains all fields needed to import car models into the MotorOctane platform.
+This template contains all fields needed to import car models into the gadizone platform.
 
 ## 📊 Field Descriptions
 

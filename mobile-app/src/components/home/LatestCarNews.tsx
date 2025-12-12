@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Latest Car News Section
+ * gadizone Mobile App - Latest Car News Section
  * Shows news articles with image, badge, title, author, date, stats
  */
 

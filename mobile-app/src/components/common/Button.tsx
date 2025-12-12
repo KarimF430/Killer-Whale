@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Button Component
+ * gadizone Mobile App - Button Component
  * Primary and Secondary buttons with gradient styling
  */
 

@@ -118,8 +118,8 @@ done
    - No CORS headers for unauthorized origin
 
 **Whitelisted Origins:**
-- ✅ `https://motoroctane.com`
-- ✅ `https://www.motoroctane.com`
+- ✅ `https://gadizone.com`
+- ✅ `https://www.gadizone.com`
 - ✅ `http://localhost:3000`
 - ✅ `http://localhost:5001`
 - ✅ `http://192.168.1.23:3000`
@@ -250,7 +250,7 @@ curl -X DELETE http://localhost:5001/api/brands/brand-test \
 1. **Environment Variables:**
    ```env
    # Add to .env
-   FRONTEND_URL=https://motoroctane.com
+   FRONTEND_URL=https://gadizone.com
    NODE_ENV=production
    ```
 

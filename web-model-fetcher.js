@@ -490,7 +490,7 @@ async function importModelsToDatabase(token) {
 
 // Main execution
 async function main() {
-  console.log('🚀 Web Model Data Fetcher for MotorOctane\n');
+  console.log('🚀 Web Model Data Fetcher for gadizone\n');
   console.log('📊 Will fetch complete model data with ALL backend fields:\n');
   console.log('🔧 Basic: Name, Body Type, Seating, Fuel Types, Transmissions');
   console.log('📝 Content: Description, Pros/Cons, SEO Headers, Summaries');

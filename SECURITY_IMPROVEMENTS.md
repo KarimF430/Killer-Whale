@@ -277,13 +277,13 @@ fetch('/api/brands', {
 # Terminal 1
 curl -X POST http://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@motoroctane.com","password":"Admin@123"}' \
+  -d '{"email":"admin@gadizone.com","password":"Admin@123"}' \
   -c cookies1.txt
 
 # Terminal 2 (same user)
 curl -X POST http://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@motoroctane.com","password":"Admin@123"}' \
+  -d '{"email":"admin@gadizone.com","password":"Admin@123"}' \
   -c cookies2.txt
 
 # Terminal 1 token should now be invalid

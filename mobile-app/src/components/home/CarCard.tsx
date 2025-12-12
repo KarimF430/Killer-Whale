@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Car Card (PIXEL-PERFECT match to web)
+ * gadizone Mobile App - Car Card (PIXEL-PERFECT match to web)
  * Uses EXACT same icons as web: Fuel (gas pump), Gauge (speedometer)
  */
 

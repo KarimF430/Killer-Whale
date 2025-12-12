@@ -1,8 +1,8 @@
-# MotorOctane Mobile App - Development Documentation
+# gadizone Mobile App - Development Documentation
 
 ## 📱 Overview
 
-This React Native (Expo) mobile app is an **exact pixel-perfect replica** of the MotorOctane Next.js web frontend. It connects to the same Express.js backend API enabling seamless cross-platform experience.
+This React Native (Expo) mobile app is an **exact pixel-perfect replica** of the gadizone Next.js web frontend. It connects to the same Express.js backend API enabling seamless cross-platform experience.
 
 ---
 
@@ -58,7 +58,7 @@ from-red-600 (#DC2626) → to-orange-500 (#EA580C)
 |---------|-------------------|----------------------|
 | Height | `h-16` (64px) | `height: 64` |
 | Background | `bg-white shadow-sm` | `backgroundColor: '#FFFFFF'` + shadow |
-| Logo | `motoroctane-logo.png` + text | Same image + text |
+| Logo | `gadizone-logo.png` + text | Same image + text |
 | Search Icon | `lucide-react Search` | `Feather.search` |
 | Location Icon | `lucide-react MapPin` | `Feather.map-pin` |
 | Menu Icon | `lucide-react Menu` | `Feather.menu` |

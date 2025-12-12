@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const budgetInfo = budgetRanges[budget] || budgetRanges['under-8']
 
     return {
-        title: `${budgetInfo.label} Cars in India - Prices, Specs & Reviews | MotorOctane`,
+        title: `${budgetInfo.label} Cars in India - Prices, Specs & Reviews | gadizone`,
         description: `Find the best cars ${budgetInfo.label.toLowerCase()} in India. Compare prices, specifications, features, and expert reviews. ${budgetInfo.description}`,
         keywords: `cars ${budgetInfo.label.toLowerCase()}, budget cars, car prices India, ${budget} cars`,
         openGraph: {

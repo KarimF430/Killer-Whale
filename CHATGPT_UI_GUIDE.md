@@ -6,7 +6,7 @@
 
 **Features:**
 - ✅ Dark theme (#212121 background)
-- ✅ MotorOctane orange/red gradient (#ff6b35 to #f7931e)
+- ✅ gadizone orange/red gradient (#ff6b35 to #f7931e)
 - ✅ ChatGPT-style message bubbles
 - ✅ Smooth animations
 - ✅ Message actions (copy, edit, like/dislike)
@@ -36,7 +36,7 @@ The new structure should be:
   <div className="chat-header">
     <div className="chat-title">
       <Menu size={20} />
-      MotorOctane AI
+      gadizone AI
     </div>
     <button className="new-chat-btn">
       <Plus size={16} />
@@ -117,7 +117,7 @@ The new structure should be:
 - Borders: `#4d4d4f` (Medium gray)
 - Text: `#ececec` (Light gray)
 
-### **MotorOctane Brand:**
+### **gadizone Brand:**
 - Primary: `#ff6b35` (Orange)
 - Secondary: `#f7931e` (Yellow-orange)
 - Gradient: `linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)`

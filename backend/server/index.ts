@@ -109,8 +109,8 @@ app.use(helmet({
 
 // SECURE CORS configuration - MUST come before security middleware
 const allowedOrigins = [
-  'https://motoroctane.com',
-  'https://www.motoroctane.com',
+  'https://gadizone.com',
+  'https://www.gadizone.com',
   'https://killer-whale101.vercel.app',
   'https://killer-whale.onrender.com',
   'http://localhost:3000',
@@ -249,7 +249,7 @@ if (redisClient) {
 
 // Session Middleware with enhanced cross-domain support
 const sessionConfig: any = {
-  secret: process.env.SESSION_SECRET || "motoroctane_secret_key_2024",
+  secret: process.env.SESSION_SECRET || "gadizone_secret_key_2024",
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -319,7 +319,7 @@ if (!isProd) {
 
     // Initialize MongoDB storage
     const storage = new MongoDBStorage();
-    const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/motoroctane";
+    const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/gadizone";
 
     try {
       await storage.connect(mongoUri);

@@ -39,7 +39,7 @@ npm run migrate
 **Expected Output:**
 ```
 🚀 Starting MongoDB migration...
-📡 Connecting to MongoDB: mongodb://localhost:27017/motoroctane
+📡 Connecting to MongoDB: mongodb://localhost:27017/gadizone
 ✅ Connected to MongoDB
 
 📦 Found X brands
@@ -92,14 +92,14 @@ serving on port 5001
 2. Choose "Connect your application"
 3. Copy the connection string:
    ```
-   mongodb+srv://username:<password>@cluster.mongodb.net/motoroctane
+   mongodb+srv://username:<password>@cluster.mongodb.net/gadizone
    ```
 4. Replace `<password>` with your actual password
 
 #### **Step 3: Update .env File**
 ```bash
 # Edit backend/.env
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/motoroctane
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/gadizone
 ```
 
 #### **Step 4: Whitelist Your IP**
@@ -192,7 +192,7 @@ brew install --cask mongodb-compass
 # Open and connect to:
 mongodb://localhost:27017
 
-# Browse database: motoroctane
+# Browse database: gadizone
 # Check collections: brands, models, variants, etc.
 ```
 
@@ -202,7 +202,7 @@ mongodb://localhost:27017
 mongosh
 
 # Use database
-use motoroctane
+use gadizone
 
 # Count documents
 db.brands.countDocuments()

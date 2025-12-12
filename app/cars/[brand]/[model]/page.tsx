@@ -29,11 +29,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const structuredData = generateCarStructuredData(carData)
 
   return {
-    title: `${fullName} Price, Mileage, Reviews, Specifications | MotorOctane`,
+    title: `${fullName} Price, Mileage, Reviews, Specifications | gadizone`,
     description: `Explore ${fullName} price, mileage, reviews, specifications, variants, colors and more. Get on-road price, EMI calculator, expert reviews and user ratings for ${fullName}.`,
     keywords: `${fullName}, ${brand}, ${model}, price, mileage, review, specifications, variants, colors, on-road price, EMI calculator`,
     openGraph: {
-      title: `${fullName} - Complete Car Details | MotorOctane`,
+      title: `${fullName} - Complete Car Details | gadizone`,
       description: `Discover ${fullName} price, features, specifications, mileage, and expert reviews. Compare variants and get best deals.`,
       images: [carData.image],
       url: canonicalUrl,

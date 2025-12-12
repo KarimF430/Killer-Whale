@@ -222,10 +222,10 @@ Scale:  Unlimited
 2. **MongoDB Backups:**
    ```bash
    # Export database
-   mongodump --db motoroctane --out backup/
+   mongodump --db gadizone --out backup/
    
    # Restore database
-   mongorestore --db motoroctane backup/motoroctane/
+   mongorestore --db gadizone backup/gadizone/
    ```
 
 3. **MongoDB Atlas (Cloud):**
@@ -310,7 +310,7 @@ npm run migrate
 
 # Verify data in MongoDB
 mongosh
-use motoroctane
+use gadizone
 db.brands.countDocuments()
 ```
 
@@ -354,10 +354,10 @@ db.brands.countDocuments()
 ### **Current `.env` File:**
 ```bash
 # MongoDB Connection
-MONGODB_URI=mongodb://localhost:27017/motoroctane
+MONGODB_URI=mongodb://localhost:27017/gadizone
 
 # JWT Secret
-JWT_SECRET=motoroctane-super-secret-key-change-in-production
+JWT_SECRET=gadizone-super-secret-key-change-in-production
 
 # Server Configuration
 NODE_ENV=development
@@ -366,7 +366,7 @@ PORT=5001
 
 ### **For MongoDB Atlas:**
 ```bash
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/motoroctane
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/gadizone
 ```
 
 ---
@@ -382,15 +382,15 @@ If you need to go back to JSON files:
 ### **Option 2: Export from MongoDB**
 ```bash
 # Export to JSON
-mongoexport --db motoroctane --collection brands --out brands.json
-mongoexport --db motoroctane --collection models --out models.json
-mongoexport --db motoroctane --collection variants --out variants.json
+mongoexport --db gadizone --collection brands --out brands.json
+mongoexport --db gadizone --collection models --out models.json
+mongoexport --db gadizone --collection variants --out variants.json
 ```
 
 ### **Option 3: Restore from Backup**
 ```bash
 # Restore from mongodump backup
-mongorestore --db motoroctane backup/motoroctane/
+mongorestore --db gadizone backup/gadizone/
 ```
 
 ---
@@ -461,7 +461,7 @@ db.brands.find({ status: 'active' }).explain('executionStats')
 ### **4. Regular Backups**
 ```bash
 # Add to cron job
-mongodump --db motoroctane --out /backups/$(date +%Y%m%d)
+mongodump --db gadizone --out /backups/$(date +%Y%m%d)
 ```
 
 ---

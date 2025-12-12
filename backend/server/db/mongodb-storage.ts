@@ -945,7 +945,7 @@ export class MongoDBStorage implements IStorage {
         return null;
       }
 
-      const cacheKey = 'youtube:cache:motoroctane';
+      const cacheKey = 'youtube:cache:gadizone';
       const cachedData = await redis.get(cacheKey);
 
       if (!cachedData) {
@@ -974,7 +974,7 @@ export class MongoDBStorage implements IStorage {
         return;
       }
 
-      const cacheKey = 'youtube:cache:motoroctane';
+      const cacheKey = 'youtube:cache:gadizone';
       const cacheData = { data, timestamp };
       const TTL = 48 * 60 * 60; // 48 hours in seconds (allows overlap for safety)
 

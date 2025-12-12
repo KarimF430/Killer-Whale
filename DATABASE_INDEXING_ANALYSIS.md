@@ -216,17 +216,17 @@ To verify index usage in production:
 
 ```bash
 # 1. Check all indexes
-mongo motoroctane --eval "db.models.getIndexes()"
-mongo motoroctane --eval "db.variants.getIndexes()"
+mongo gadizone --eval "db.models.getIndexes()"
+mongo gadizone --eval "db.variants.getIndexes()"
 
 # 2. Explain query performance
-mongo motoroctane --eval "db.models.find({brandId: 'test', status: 'active'}).explain('executionStats')"
+mongo gadizone --eval "db.models.find({brandId: 'test', status: 'active'}).explain('executionStats')"
 
 # 3. Check index usage stats
-mongo motoroctane --eval "db.models.aggregate([{ \$indexStats: {} }])"
+mongo gadizone --eval "db.models.aggregate([{ \$indexStats: {} }])"
 
 # 4. Find unused indexes
-mongo motoroctane --eval "db.models.aggregate([
+mongo gadizone --eval "db.models.aggregate([
   { \$indexStats: {} },
   { \$match: { 'accesses.ops': { \$lt: 100 } } }
 ])"

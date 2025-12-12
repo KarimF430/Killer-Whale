@@ -132,7 +132,7 @@ throw new Error('Test Sentry Alert');
 ## Quick Reference
 
 **Sentry Dashboard:** https://sentry.io  
-**Your Project:** motoroctane  
+**Your Project:** gadizone  
 **Alerts Page:** https://sentry.io/alerts/
 
 **Need Help?** See full guide: `SENTRY_ALERTS_GUIDE.md`

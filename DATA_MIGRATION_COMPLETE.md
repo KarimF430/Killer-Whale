@@ -290,7 +290,7 @@ GET /api/variants/HOELSV00001
 
 ## 🎉 **Summary:**
 
-Your MotorOctane app now has:
+Your gadizone app now has:
 - ✅ Complete MongoDB Atlas integration
 - ✅ All 178 variant fields migrated
 - ✅ Zero data loss

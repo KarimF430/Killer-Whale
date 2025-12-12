@@ -129,7 +129,7 @@ export default function YouTubeVideoPlayer() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Latest Videos</h2>
         <a
-          href="https://www.youtube.com/@motoroctane"
+          href="https://www.youtube.com/@gadizone"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center text-red-600 hover:text-red-700 font-medium"
@@ -269,12 +269,12 @@ export default function YouTubeVideoPlayer() {
 
           {/* Subscribe Button */}
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-            <h4 className="font-bold text-gray-900 mb-2">Subscribe to MotorOctane</h4>
+            <h4 className="font-bold text-gray-900 mb-2">Subscribe to gadizone</h4>
             <p className="text-sm text-gray-600 mb-3">
               Get the latest car reviews, comparisons, and buying guides
             </p>
             <a
-              href="https://www.youtube.com/@motoroctane?sub_confirmation=1"
+              href="https://www.youtube.com/@gadizone?sub_confirmation=1"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"

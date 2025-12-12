@@ -1,5 +1,5 @@
 You have already built the Home Page and Brand Page.
-Now, develop the following new pages for the MotorOctane Web project:
+Now, develop the following new pages for the gadizone Web project:
 
 Product Page (detailed requirements given below)
 

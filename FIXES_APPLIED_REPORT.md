@@ -124,8 +124,8 @@ res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
 
 // AFTER (Secure)
 const allowedOrigins = [
-  'https://motoroctane.com',
-  'https://www.motoroctane.com',
+  'https://gadizone.com',
+  'https://www.gadizone.com',
   'http://localhost:3000',
   'http://192.168.1.23:3000'
 ];
@@ -136,8 +136,8 @@ if (origin && allowedOrigins.includes(origin)) {
 ```
 
 **Whitelisted Origins:**
-- ✅ `https://motoroctane.com` (Production)
-- ✅ `https://www.motoroctane.com` (Production with www)
+- ✅ `https://gadizone.com` (Production)
+- ✅ `https://www.gadizone.com` (Production with www)
 - ✅ `http://localhost:3000` (Development)
 - ✅ `http://localhost:5001` (Development backend)
 - ✅ `http://192.168.1.23:3000` (Mobile testing)

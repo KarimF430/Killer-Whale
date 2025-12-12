@@ -154,11 +154,11 @@ npx pm2 list
 ```json
 {
   "@type": "WebSite",
-  "name": "MotorOctane",
-  "url": "https://motoroctane.com",
+  "name": "gadizone",
+  "url": "https://gadizone.com",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://motoroctane.com/search?q={search_term_string}"
+    "target": "https://gadizone.com/search?q={search_term_string}"
   }
 }
 ```
@@ -222,7 +222,7 @@ import Breadcrumbs from '@/components/common/Breadcrumbs'
 - ✅ Static pages
 - ✅ News articles
 
-**Access:** https://motoroctane.com/sitemap.xml
+**Access:** https://gadizone.com/sitemap.xml
 
 ---
 
@@ -328,9 +328,9 @@ SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
 
 ### **3. Google Search Console**
 1. Go to https://search.google.com/search-console
-2. Add property: motoroctane.com
+2. Add property: gadizone.com
 3. Verify ownership
-4. Submit sitemap: https://motoroctane.com/sitemap.xml
+4. Submit sitemap: https://gadizone.com/sitemap.xml
 
 ### **4. Test Everything**
 ```bash

@@ -1,7 +1,7 @@
 # Brands and Models Analysis Report
 
 ## Overview
-This document provides a comprehensive analysis of the 36 brands and 3 models currently in the MotorOctane database.
+This document provides a comprehensive analysis of the 36 brands and 3 models currently in the gadizone database.
 
 ---
 

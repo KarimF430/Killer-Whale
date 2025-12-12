@@ -6,7 +6,7 @@ import CarGrid from '@/components/cars/CarGrid'
 import SortOptions from '@/components/cars/SortOptions'
 
 export const metadata: Metadata = {
-  title: 'New Cars in India 2024 - Latest Prices, Specifications & Reviews | MotorOctane',
+  title: 'New Cars in India 2024 - Latest Prices, Specifications & Reviews | gadizone',
   description: 'Browse new cars in India with latest prices, specifications, and expert reviews. Filter by brand, price, fuel type, and more. Find your perfect car today.',
   keywords: 'new cars India, car prices 2024, car specifications, car reviews, buy new car',
 }

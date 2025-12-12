@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Color System
+ * gadizone Mobile App - Color System
  * EXACT match of web globals.css and Tailwind defaults
  * 
  * Primary gradient: from-red-600 (#DC2626) to-orange-500 (#EA580C)

@@ -975,7 +975,7 @@ export default function PriceBreakupPage({
                   <button
                     onClick={() => {
                       const shareData = {
-                        title: `${brandName} ${modelName} Price - MotorOctane`,
+                        title: `${brandName} ${modelName} Price - gadizone`,
                         text: `Check out the on-road price of ${brandName} ${modelName} in ${selectedCity}`,
                         url: window.location.href
                       };

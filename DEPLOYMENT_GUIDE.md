@@ -35,7 +35,7 @@
 2. Connect your GitHub repository: `KarimF430/Orca101`
 3. Configure:
    ```
-   Name: motoroctane-backend
+   Name: gadizone-backend
    Region: Singapore (or closest to you)
    Branch: main
    Root Directory: backend
@@ -69,7 +69,7 @@ SENTRY_DSN=your_sentry_dsn
 #### **1.4 Deploy**
 - Click **"Create Web Service"**
 - Wait for deployment (5-10 minutes)
-- Note your backend URL: `https://motoroctane-backend.onrender.com`
+- Note your backend URL: `https://gadizone-backend.onrender.com`
 
 ---
 
@@ -95,7 +95,7 @@ SENTRY_DSN=your_sentry_dsn
 Click **"Environment Variables"** and add:
 ```bash
 # Backend API
-NEXT_PUBLIC_API_URL=https://motoroctane-backend.onrender.com
+NEXT_PUBLIC_API_URL=https://gadizone-backend.onrender.com
 
 # Google Analytics (Optional)
 NEXT_PUBLIC_GA_ID=your_ga_tracking_id
@@ -116,21 +116,21 @@ SENTRY_AUTH_TOKEN=your_sentry_auth_token
 
 #### **On Vercel (Frontend):**
 1. Go to **Settings** → **Domains**
-2. Add your domain: `motoroctane.com`
+2. Add your domain: `gadizone.com`
 3. Update DNS records as shown
 
 #### **On Render (Backend):**
 1. Go to **Settings** → **Custom Domains**
-2. Add subdomain: `api.motoroctane.com`
+2. Add subdomain: `api.gadizone.com`
 3. Update DNS records
 
 #### **Update Environment Variables:**
 ```bash
 # Vercel
-NEXT_PUBLIC_API_URL=https://api.motoroctane.com
+NEXT_PUBLIC_API_URL=https://api.gadizone.com
 
 # Render
-CORS_ORIGIN=https://motoroctane.com
+CORS_ORIGIN=https://gadizone.com
 ```
 
 ---
@@ -233,7 +233,7 @@ REDIS_URL=your_redis_url
 2. Choose **"Connect your application"**
 3. Copy connection string:
    ```
-   mongodb+srv://username:password@cluster.mongodb.net/motoroctane?retryWrites=true&w=majority
+   mongodb+srv://username:password@cluster.mongodb.net/gadizone?retryWrites=true&w=majority
    ```
 4. Replace `<password>` with your actual password
 
@@ -244,7 +244,7 @@ REDIS_URL=your_redis_url
 ### **Required Variables:**
 ```bash
 # Database
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/motoroctane
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/gadizone
 
 # Authentication
 JWT_SECRET=your_super_secret_key_min_32_characters
@@ -401,7 +401,7 @@ curl https://your-backend-url.com/api/brands
 
 ## 🎉 **DEPLOYMENT COMPLETE!**
 
-Your MotorOctane platform is now live and ready to serve users!
+Your gadizone platform is now live and ready to serve users!
 
 ### **Next Steps:**
 1. ✅ Test all features thoroughly

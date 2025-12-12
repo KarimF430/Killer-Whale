@@ -13,12 +13,12 @@
 2. **Sign up** for free
 3. **Create cluster** (M0 Free tier)
 4. **Create user:**
-   - Username: `motoroctane`
+   - Username: `gadizone`
    - Password: (generate strong password)
 5. **Whitelist IP:** 0.0.0.0/0 (allow all)
 6. **Get connection string:**
    ```
-   mongodb+srv://motoroctane:YOUR_PASSWORD@cluster.mongodb.net/motoroctane
+   mongodb+srv://gadizone:YOUR_PASSWORD@cluster.mongodb.net/gadizone
    ```
 
 ---
@@ -31,7 +31,7 @@
 4. **Connect:** `KarimF430/Orca101`
 5. **Configure:**
    ```
-   Name: motoroctane-api
+   Name: gadizone-api
    Root Directory: backend
    Build: npm install && npm run build
    Start: npm start
@@ -43,7 +43,7 @@
    NODE_ENV=production
    ```
 7. **Create Service** → Wait for deploy
-8. **Copy URL:** `https://motoroctane-api.onrender.com`
+8. **Copy URL:** `https://gadizone-api.onrender.com`
 
 ---
 
@@ -61,7 +61,7 @@
    ```
 6. **Environment Variables:**
    ```bash
-   NEXT_PUBLIC_API_URL=https://motoroctane-api.onrender.com
+   NEXT_PUBLIC_API_URL=https://gadizone-api.onrender.com
    ```
 7. **Deploy** → Wait 3-5 minutes
 8. **Your site is LIVE!** 🎉
@@ -73,7 +73,7 @@
 ### **Test Backend:**
 ```bash
 # Open in browser
-https://motoroctane-api.onrender.com/api/health
+https://gadizone-api.onrender.com/api/health
 
 # Should return: {"status":"ok"}
 ```
@@ -118,21 +118,21 @@ https://your-project.vercel.app
 
 #### **On Vercel:**
 1. **Settings** → **Domains**
-2. Add: `motoroctane.com`
+2. Add: `gadizone.com`
 3. Update DNS as shown
 
 #### **On Render:**
 1. **Settings** → **Custom Domains**
-2. Add: `api.motoroctane.com`
+2. Add: `api.gadizone.com`
 3. Update DNS
 
 #### **Update Environment:**
 ```bash
 # Vercel
-NEXT_PUBLIC_API_URL=https://api.motoroctane.com
+NEXT_PUBLIC_API_URL=https://api.gadizone.com
 
 # Render
-CORS_ORIGIN=https://motoroctane.com
+CORS_ORIGIN=https://gadizone.com
 ```
 
 ---
@@ -194,11 +194,11 @@ Total: $36/month
 
 ## 🎉 **YOU'RE LIVE!**
 
-**Your MotorOctane platform is now accessible worldwide!**
+**Your gadizone platform is now accessible worldwide!**
 
 ### **Share Your URLs:**
 - **Frontend:** `https://your-project.vercel.app`
-- **Backend:** `https://motoroctane-api.onrender.com`
+- **Backend:** `https://gadizone-api.onrender.com`
 - **Admin:** `https://your-project.vercel.app/admin`
 
 ### **Next Steps:**

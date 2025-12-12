@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/motoroctane';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/gadizone';
 
 async function checkArticles() {
     try {

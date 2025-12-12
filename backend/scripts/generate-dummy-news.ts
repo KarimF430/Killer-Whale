@@ -18,7 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/motoroctane';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/gadizone';
 
 async function generateDummyNews() {
     try {
@@ -27,13 +27,13 @@ async function generateDummyNews() {
         console.log('✅ Connected to MongoDB');
 
         // 1. Get or Create Default Author
-        let author = await NewsAuthor.findOne({ email: 'ai-generator@motoroctane.com' });
+        let author = await NewsAuthor.findOne({ email: 'ai-generator@gadizone.com' });
         if (!author) {
             console.log('👤 Creating default AI Author...');
             author = await NewsAuthor.create({
                 id: uuidv4(),
                 name: 'AI Generator',
-                email: 'ai-generator@motoroctane.com',
+                email: 'ai-generator@gadizone.com',
                 password: 'hashed_dummy_password', // In real app this should be hashed
                 role: 'editor',
                 bio: 'Automated news generator',

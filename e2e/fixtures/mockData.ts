@@ -93,7 +93,7 @@ export const mockVariants = [
 
 export const mockUser = {
     id: 'user-test-1',
-    email: 'test@motoroctane.com',
+    email: 'test@gadizone.com',
     name: 'Test User',
     googleId: 'google-test-123'
 };

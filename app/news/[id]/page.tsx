@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     if (!res.ok) {
       return {
-        title: 'Article Not Found | MotorOctane',
+        title: 'Article Not Found | gadizone',
         description: 'The requested article could not be found.'
       }
     }
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const article = await res.json()
 
     return {
-      title: `${article.title} | MotorOctane News`,
+      title: `${article.title} | gadizone News`,
       description: article.excerpt || article.title,
       keywords: article.tags?.join(', ') || 'car news, automotive news, latest cars',
       openGraph: {
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description: article.excerpt || article.title,
         type: 'article',
         publishedTime: article.publishDate,
-        authors: [article.authorId || 'MotorOctane'],
+        authors: [article.authorId || 'gadizone'],
         images: article.featuredImage ? [{
           url: article.featuredImage.startsWith('http')
             ? article.featuredImage
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   } catch (error) {
     console.error('Error generating metadata:', error)
     return {
-      title: 'Car News | MotorOctane',
+      title: 'Car News | gadizone',
       description: 'Latest automotive news and updates'
     }
   }

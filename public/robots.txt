@@ -1,4 +1,4 @@
-# Robots.txt for MotorOctane
+# Robots.txt for gadizone
 # Allow all search engines to crawl the site
 
 User-agent: *
@@ -15,7 +15,7 @@ Allow: /api/sitemap
 Crawl-delay: 1
 
 # Sitemap location
-Sitemap: https://motoroctane.com/sitemap.xml
+Sitemap: https://gadizone.com/sitemap.xml
 
 # Specific rules for major search engines
 User-agent: Googlebot

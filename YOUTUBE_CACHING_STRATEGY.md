@@ -84,7 +84,7 @@ To change cache duration, modify this constant. Recommended values:
 1. Update `.env.local`:
    ```
    YOUTUBE_API_KEY=your_api_key_here
-   YOUTUBE_CHANNEL_ID=@motoroctane
+   YOUTUBE_CHANNEL_ID=@gadizone
    ```
 
 2. Restart dev server:

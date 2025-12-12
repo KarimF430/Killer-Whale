@@ -1,4 +1,4 @@
-# MotorOctane Mobile App
+# gadizone Mobile App
 
 React Native (Expo) mobile app for iOS and Android - exact copy of the web frontend.
 

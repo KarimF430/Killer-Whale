@@ -11,7 +11,7 @@ The code is now **hybrid**:
 
 ## 🚀 To Test:
 1.  **Refresh your browser.**
-2.  **Check Home Page:** You should see **real latest videos** from MotorOctane.
+2.  **Check Home Page:** You should see **real latest videos** from gadizone.
 3.  **Check Console:** You should see `🔑 YouTube API Key exists: true`.
 
 ---

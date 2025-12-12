@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const [brandName = 'Renault', modelName = 'Kwid', variantName = 'LXI'] = slug.split('-')
   
   return {
-    title: `${brandName} ${modelName} ${variantName} - Price, Specs & Features | MotorOctane`,
+    title: `${brandName} ${modelName} ${variantName} - Price, Specs & Features | gadizone`,
     description: `Get detailed information about ${brandName} ${modelName} ${variantName} variant including price, specifications, features, and expert reviews.`,
     keywords: `${brandName} ${modelName} ${variantName}, variant price, car specifications, features, reviews`,
   }

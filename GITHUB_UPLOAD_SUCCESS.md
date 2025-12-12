@@ -295,7 +295,7 @@ npm run dev
 
 ## 🎉 **YOU'RE READY TO DEPLOY!**
 
-### **Your MotorOctane platform is:**
+### **Your gadizone platform is:**
 - ✅ **Uploaded to GitHub**
 - ✅ **Production-ready**
 - ✅ **Fully documented**

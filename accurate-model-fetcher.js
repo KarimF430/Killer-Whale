@@ -474,7 +474,7 @@ async function importAccurateModels(token) {
 
 // Main execution
 async function main() {
-  console.log('🎯 Accurate Model Data Fetcher for MotorOctane\n');
+  console.log('🎯 Accurate Model Data Fetcher for gadizone\n');
   console.log('📊 Features:');
   console.log('   • Complete model lists for all 36 brands');
   console.log('   • Accurate specifications and engine data');

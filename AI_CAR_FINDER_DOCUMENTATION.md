@@ -796,7 +796,7 @@ Response:
 
 For questions or issues:
 - Create GitHub issue
-- Email: support@motoroctane.com
+- Email: support@gadizone.com
 - Documentation: /docs/ai-chat
 
 ---

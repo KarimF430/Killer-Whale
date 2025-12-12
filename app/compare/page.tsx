@@ -5,7 +5,7 @@ import CompareSelectionClient from './CompareSelectionClient'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Compare Cars - Side by Side Comparison | MotorOctane',
+  title: 'Compare Cars - Side by Side Comparison | gadizone',
   description: 'Compare cars side by side. Select two cars to compare specifications, prices, features, and more.',
   keywords: 'car comparison, compare cars, side by side comparison, car specs comparison',
 }

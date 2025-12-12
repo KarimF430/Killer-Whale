@@ -35,7 +35,7 @@ async function main() {
 
         const storage = new MongoDBStorage();
 
-        // Realistic data for MotorOctane
+        // Realistic data for gadizone
         const mockData = {
             featuredVideo: {
                 id: "VideoID_1",
@@ -45,7 +45,7 @@ async function main() {
                 views: "250K",
                 likes: "15K",
                 publishedAt: "1 day ago",
-                channelName: "MotorOctane"
+                channelName: "gadizone"
             },
             relatedVideos: [
                 {
@@ -56,7 +56,7 @@ async function main() {
                     views: "180K",
                     likes: "12K",
                     publishedAt: "3 days ago",
-                    channelName: "MotorOctane"
+                    channelName: "gadizone"
                 },
                 {
                     id: "VideoID_3",
@@ -66,7 +66,7 @@ async function main() {
                     views: "320K",
                     likes: "20K",
                     publishedAt: "1 week ago",
-                    channelName: "MotorOctane"
+                    channelName: "gadizone"
                 },
                 {
                     id: "VideoID_4",
@@ -76,7 +76,7 @@ async function main() {
                     views: "150K",
                     likes: "8K",
                     publishedAt: "2 weeks ago",
-                    channelName: "MotorOctane"
+                    channelName: "gadizone"
                 }
             ]
         };

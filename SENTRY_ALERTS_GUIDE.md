@@ -9,7 +9,7 @@ This guide helps you configure Sentry alerts to get notified when errors occur i
 ## 1. Access Alert Settings
 
 1. Login to [Sentry.io](https://sentry.io)
-2. Select your project (motoroctane)
+2. Select your project (gadizone)
 3. Click **Alerts** in the left sidebar
 4. Click **Create Alert**
 
@@ -315,7 +315,7 @@ Alert 1: Critical Production Errors
   If:
     - level equals error OR fatal
     - environment equals production
-  Then: Email to team@motoroctane.com
+  Then: Email to team@gadizone.com
   Frequency: Every time
 
 Alert 2: High Error Rate
@@ -333,7 +333,7 @@ Alert 3: New Issues
   If:
     - environment equals production
     - status is unresolved
-  Then: Email to team@motoroctane.com
+  Then: Email to team@gadizone.com
   Frequency: Every time
 ```
 

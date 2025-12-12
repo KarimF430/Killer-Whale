@@ -26,7 +26,7 @@ The YouTube video section on the home page now fetches real videos from your You
 - Copy your Channel ID
 
 **Option 2: Use Channel Handle**
-- You can also use your channel handle (e.g., `@motoroctane`)
+- You can also use your channel handle (e.g., `@gadizone`)
 - The component will automatically convert it to a channel ID
 
 ### 3. Add Environment Variables
@@ -41,7 +41,7 @@ NEXT_PUBLIC_YOUTUBE_CHANNEL_ID=your_channel_id_or_@handle
 **Example:**
 ```env
 NEXT_PUBLIC_YOUTUBE_API_KEY=AIzaSyDxxxxxxxxxxxxxxxxxxxxxxxxxxx
-NEXT_PUBLIC_YOUTUBE_CHANNEL_ID=@motoroctane
+NEXT_PUBLIC_YOUTUBE_CHANNEL_ID=@gadizone
 ```
 
 Or with actual channel ID:
@@ -144,7 +144,7 @@ The component transforms YouTube API data into this format:
   views: "2.5M",
   likes: "45K",
   publishedAt: "2 days ago",
-  channelName: "MotorOctane"
+  channelName: "gadizone"
 }
 ```
 

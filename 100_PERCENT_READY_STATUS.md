@@ -176,7 +176,7 @@ npx pm2 status
 
 ## 🎉 **CONGRATULATIONS!**
 
-**Your MotorOctane platform is ready for 1M+ users!**
+**Your gadizone platform is ready for 1M+ users!**
 
 Just run:
 ```bash

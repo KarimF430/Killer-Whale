@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - HeroSection (EXACT match to web)
+ * gadizone Mobile App - HeroSection (EXACT match to web)
  * Red-orange gradient bg, white search card, AI Search button, shimmer icon
  */
 

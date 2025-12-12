@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Home Screen (COMPLETE)
+ * gadizone Mobile App - Home Screen (COMPLETE)
  */
 
 import React, { useEffect, useState } from 'react';

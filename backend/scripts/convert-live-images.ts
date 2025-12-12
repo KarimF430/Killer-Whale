@@ -35,7 +35,7 @@ class LiveImageConverter {
   private liveImages: LiveImage[] = [];
 
   constructor() {
-    this.mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/motoroctane';
+    this.mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/gadizone';
     this.uploadsDir = path.join(__dirname, '../../uploads');
   }
 

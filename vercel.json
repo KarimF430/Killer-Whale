@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "motoroctane",
+  "name": "gadizone",
   "env": {
     "NODE_ENV": "production"
   },

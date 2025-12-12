@@ -69,7 +69,7 @@ Or test manually:
 # Get auth token
 TOKEN=$(curl -s -X POST http://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@motoroctane.com","password":"Admin@123"}' | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+  -d '{"email":"admin@gadizone.com","password":"Admin@123"}' | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
 
 # Create Honda brand
 curl -X POST http://localhost:5001/api/brands \

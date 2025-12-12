@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Footer
+ * gadizone Mobile App - Footer
  * Dark themed footer with logo, links, brands, and contact info
  */
 
@@ -13,10 +13,10 @@ interface FooterProps {
 
 export default function Footer({ onNavigate }: FooterProps) {
   const socialLinks = [
-    { icon: 'facebook' as const, url: 'https://facebook.com/motoroctane' },
-    { icon: 'twitter' as const, url: 'https://twitter.com/motoroctane' },
-    { icon: 'instagram' as const, url: 'https://instagram.com/motoroctane' },
-    { icon: 'youtube' as const, url: 'https://youtube.com/@motoroctane' },
+    { icon: 'facebook' as const, url: 'https://facebook.com/gadizone' },
+    { icon: 'twitter' as const, url: 'https://twitter.com/gadizone' },
+    { icon: 'instagram' as const, url: 'https://instagram.com/gadizone' },
+    { icon: 'youtube' as const, url: 'https://youtube.com/@gadizone' },
   ];
 
   const quickLinks = ['New Cars', 'Compare Cars', 'Car Brands', 'EMI Calculator', 'Car News'];
@@ -27,8 +27,8 @@ export default function Footer({ onNavigate }: FooterProps) {
       {/* Logo & Description */}
       <View style={styles.logoSection}>
         <View style={styles.logoRow}>
-          <Image source={require('../../../assets/motoroctane-logo.png')} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.brandName}>MotorOctane</Text>
+          <Image source={require('../../../assets/gadizone-logo.png')} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.brandName}>gadizone</Text>
         </View>
         <Text style={styles.description}>
           Your trusted partner for finding the perfect new car in India. Compare prices, specifications, reviews, and get the best deals from authorized dealers.
@@ -69,7 +69,7 @@ export default function Footer({ onNavigate }: FooterProps) {
         <Text style={styles.sectionTitle}>Contact Us</Text>
         <View style={styles.contactItem}>
           <Feather name="mail" size={16} color="#9CA3AF" />
-          <Text style={styles.contactText}>info@motoroctane.com</Text>
+          <Text style={styles.contactText}>info@gadizone.com</Text>
         </View>
         <View style={styles.contactItem}>
           <Feather name="phone" size={16} color="#9CA3AF" />
@@ -77,13 +77,13 @@ export default function Footer({ onNavigate }: FooterProps) {
         </View>
         <View style={styles.contactItem}>
           <Feather name="map-pin" size={16} color="#9CA3AF" />
-          <Text style={styles.contactText}>MotorOctane Technologies Pvt. Ltd.{'\n'}Cyber City, Gurgaon, Haryana 122002</Text>
+          <Text style={styles.contactText}>gadizone Technologies Pvt. Ltd.{'\n'}Cyber City, Gurgaon, Haryana 122002</Text>
         </View>
       </View>
 
       {/* Copyright */}
       <View style={styles.copyright}>
-        <Text style={styles.copyrightText}>© 2024 MotorOctane. All rights reserved.</Text>
+        <Text style={styles.copyrightText}>© 2024 gadizone. All rights reserved.</Text>
       </View>
     </View>
   );

@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Badge Component
+ * gadizone Mobile App - Badge Component
  * NEW and POPULAR badges
  */
 

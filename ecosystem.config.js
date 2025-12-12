@@ -12,7 +12,7 @@ module.exports = {
   apps: [
     {
       // Frontend Next.js Application
-      name: 'motoroctane-frontend',
+      name: 'gadizone-frontend',
       script: 'npm',
       args: 'start',
       cwd: './',
@@ -42,7 +42,7 @@ module.exports = {
     
     {
       // Backend Express Application
-      name: 'motoroctane-backend',
+      name: 'gadizone-backend',
       script: './backend/dist/index.js',
       cwd: './',
       instances: 4, // Start 4 instances
@@ -91,8 +91,8 @@ module.exports = {
       user: 'deploy',
       host: 'your-server.com',
       ref: 'origin/main',
-      repo: 'git@github.com:your-username/motoroctane.git',
-      path: '/var/www/motoroctane',
+      repo: 'git@github.com:your-username/gadizone.git',
+      path: '/var/www/gadizone',
       'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env production',
       'pre-deploy-local': 'echo "Deploying to production server"',
       env: {
@@ -109,20 +109,20 @@ module.exports = {
  * pm2 start ecosystem.config.js
  * 
  * Start specific app:
- * pm2 start ecosystem.config.js --only motoroctane-backend
+ * pm2 start ecosystem.config.js --only gadizone-backend
  * 
  * Reload with zero downtime:
  * pm2 reload ecosystem.config.js
  * 
  * Scale backend to 8 instances:
- * pm2 scale motoroctane-backend 8
+ * pm2 scale gadizone-backend 8
  * 
  * Monitor all apps:
  * pm2 monit
  * 
  * View logs:
  * pm2 logs
- * pm2 logs motoroctane-backend
+ * pm2 logs gadizone-backend
  * 
  * Stop all:
  * pm2 stop all

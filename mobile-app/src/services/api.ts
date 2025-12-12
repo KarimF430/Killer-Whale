@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - API Service
+ * gadizone Mobile App - API Service
  */
 
 const BASE_URL = 'http://192.168.1.26:5001';

@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Header (EXACT match to web)
+ * gadizone Mobile App - Header (EXACT match to web)
  * h-16 (64px) height, logo 40x40, text 2xl, Search/MapPin/Menu icons
  */
 
@@ -27,8 +27,8 @@ export default function Header({ onSearchPress, navigation }: HeaderProps) {
       <View style={styles.container}>
         {/* Logo */}
         <TouchableOpacity style={styles.logoContainer} onPress={() => navigation?.navigate('Home')} activeOpacity={0.8}>
-          <Image source={require('../../../assets/motoroctane-logo.png')} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.brandName}>MotorOctane</Text>
+          <Image source={require('../../../assets/gadizone-logo.png')} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.brandName}>gadizone</Text>
         </TouchableOpacity>
 
         {/* Right Icons */}

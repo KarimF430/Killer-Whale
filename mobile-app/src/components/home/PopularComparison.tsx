@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Popular Comparison Section
+ * gadizone Mobile App - Popular Comparison Section
  * Shows car comparisons with VS badge between two cars
  */
 

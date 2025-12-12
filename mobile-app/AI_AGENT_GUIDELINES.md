@@ -1,8 +1,8 @@
-# MotorOctane Mobile App - AI Agent Development Guidelines
+# gadizone Mobile App - AI Agent Development Guidelines
 
 ## 🤖 Purpose
 
-This document provides guidelines for AI agents (Claude, GPT, etc.) to maintain consistency when developing the MotorOctane React Native mobile app. **Follow these rules exactly** to ensure pixel-perfect replication of the web frontend.
+This document provides guidelines for AI agents (Claude, GPT, etc.) to maintain consistency when developing the gadizone React Native mobile app. **Follow these rules exactly** to ensure pixel-perfect replication of the web frontend.
 
 ---
 
@@ -164,7 +164,7 @@ cat /Applications/WEBSITE-23092025-101/components/home/[ComponentName].tsx
 ### Step 3: Create RN Component
 ```typescript
 /**
- * MotorOctane Mobile App - [Component Name]
+ * gadizone Mobile App - [Component Name]
  * EXACT replica of web components/[path]/[ComponentName].tsx
  * 
  * Web specs:
@@ -211,7 +211,7 @@ Before marking any section complete:
 
 ```typescript
 /**
- * MotorOctane Mobile App - [Component Name]
+ * gadizone Mobile App - [Component Name]
  * EXACT replica of web [web file path]
  * 
  * Web specs:

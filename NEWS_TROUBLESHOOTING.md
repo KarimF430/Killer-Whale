@@ -14,7 +14,7 @@ npx ts-node scripts/create-news-admin.ts
 ```
 
 This will create:
-- **Email:** `admin@motoroctane.com`
+- **Email:** `admin@gadizone.com`
 - **Password:** `admin123`
 
 ---
@@ -23,7 +23,7 @@ This will create:
 
 1. Navigate to: `http://localhost:5001/login`
 2. Enter credentials:
-   - Email: `admin@motoroctane.com`
+   - Email: `admin@gadizone.com`
    - Password: `admin123`
 3. Click Login
 
@@ -59,7 +59,7 @@ Test the endpoints manually:
 # Get auth token first (login)
 curl -X POST http://localhost:5001/api/admin/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@motoroctane.com","password":"admin123"}'
+  -d '{"email":"admin@gadizone.com","password":"admin123"}'
 
 # Copy the token from response
 
@@ -272,7 +272,7 @@ npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 1. **Login:**
    ```
    POST http://localhost:5001/api/admin/login
-   Body: {"email":"admin@motoroctane.com","password":"admin123"}
+   Body: {"email":"admin@gadizone.com","password":"admin123"}
    ```
 
 2. **Get Articles:**

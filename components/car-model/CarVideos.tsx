@@ -39,7 +39,7 @@ export default function CarVideos({ carData }: CarVideosProps) {
       thumbnail: '/api/placeholder/320/180',
       duration: '15:20',
       views: '950K',
-      channel: 'MotorOctane',
+      channel: 'gadizone',
       type: 'Comparison'
     },
     {

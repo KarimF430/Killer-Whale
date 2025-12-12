@@ -61,7 +61,7 @@ export default function CompareSelectionClient({ initialCars, initialBrands }: C
                             Add cars of your choice
                         </h1>
                         <p className="text-base text-gray-600 leading-relaxed">
-                            Motoroctane brings you comparison of Hyundai Venue, Kia Sonet and Maruti Suzuki Baleno...
+                            gadizone brings you comparison of Hyundai Venue, Kia Sonet and Maruti Suzuki Baleno...
                             <span className="text-blue-600 cursor-pointer hover:underline">more</span>
                         </p>
                     </div>

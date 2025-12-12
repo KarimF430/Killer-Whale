@@ -8,21 +8,21 @@ services:
   # MongoDB Database
   mongodb:
     image: mongo:7.0
-    container_name: motoroctane-mongodb
+    container_name: gadizone-mongodb
     restart: unless-stopped
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: motoroctane_dev_password
-      MONGO_INITDB_DATABASE: motoroctane
+      MONGO_INITDB_ROOT_PASSWORD: gadizone_dev_password
+      MONGO_INITDB_DATABASE: gadizone
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
     networks:
-      - motoroctane-network
+      - gadizone-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/motoroctane --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/gadizone --quiet
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,7 +30,7 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: motoroctane-redis
+    container_name: gadizone-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -38,7 +38,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - motoroctane-network
+      - gadizone-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -50,14 +50,14 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: motoroctane-backend
+    container_name: gadizone-backend
     restart: unless-stopped
     ports:
       - "5001:5001"
     environment:
       NODE_ENV: development
       PORT: 5001
-      MONGODB_URI: mongodb://admin:motoroctane_dev_password@mongodb:27017/motoroctane?authSource=admin
+      MONGODB_URI: mongodb://admin:gadizone_dev_password@mongodb:27017/gadizone?authSource=admin
       REDIS_URL: redis://redis:6379
       JWT_SECRET: dev-jwt-secret-change-in-production
       SESSION_SECRET: dev-session-secret-change-in-production
@@ -75,7 +75,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - motoroctane-network
+      - gadizone-network
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5001/health"]
       interval: 30s
@@ -87,7 +87,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: motoroctane-frontend
+    container_name: gadizone-frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -103,7 +103,7 @@ services:
     depends_on:
       - backend
     networks:
-      - motoroctane-network
+      - gadizone-network
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
       interval: 30s
@@ -111,7 +111,7 @@ services:
       retries: 3
 
 networks:
-  motoroctane-network:
+  gadizone-network:
     driver: bridge
 
 volumes:

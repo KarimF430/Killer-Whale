@@ -139,7 +139,7 @@ const redis = new Redis.Cluster([
 
 **Current:**
 ```typescript
-mongoose.connect('mongodb://localhost:27017/motoroctane');
+mongoose.connect('mongodb://localhost:27017/gadizone');
 ```
 
 **Problems:**
@@ -151,7 +151,7 @@ mongoose.connect('mongodb://localhost:27017/motoroctane');
 **For 1M Users Need:**
 ```typescript
 // MongoDB Replica Set
-mongoose.connect('mongodb://mongo1,mongo2,mongo3/motoroctane?replicaSet=rs0', {
+mongoose.connect('mongodb://mongo1,mongo2,mongo3/gadizone?replicaSet=rs0', {
   readPreference: 'secondaryPreferred'
 });
 ```
@@ -330,9 +330,9 @@ export const revalidate = 3600; // Revalidate every hour
 module.exports = {
   images: {
     loader: 'cloudinary', // or 'cloudflare'
-    domains: ['cdn.motoroctane.com'],
+    domains: ['cdn.gadizone.com'],
   },
-  assetPrefix: 'https://cdn.motoroctane.com',
+  assetPrefix: 'https://cdn.gadizone.com',
 };
 ```
 
@@ -505,7 +505,7 @@ server {
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: motoroctane-api
+  name: gadizone-api
 spec:
   minReplicas: 3
   maxReplicas: 50

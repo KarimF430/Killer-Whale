@@ -3,7 +3,7 @@ import Footer from '@/components/Footer'
 import NewsListing from '@/components/news/NewsListing'
 
 export const metadata: Metadata = {
-  title: 'Car News, Reviews & Expert Insights | MotorOctane',
+  title: 'Car News, Reviews & Expert Insights | gadizone',
   description: 'Stay updated with the latest car news, expert reviews, buying guides, and automotive insights. Get comprehensive coverage of new car launches, industry trends, and expert opinions.',
   keywords: 'car news, car reviews, automotive news, car buying guide, new car launches, car industry news, expert car reviews, automobile news',
   openGraph: {

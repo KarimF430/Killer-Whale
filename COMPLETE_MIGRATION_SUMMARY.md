@@ -275,7 +275,7 @@ curl http://localhost:5001/api/brands
 **Engine Data:** ✅ **SHOWING**  
 **All Specs:** ✅ **SHOWING**  
 
-**Your MotorOctane app is now fully operational with MongoDB Atlas!** 🚀
+**Your gadizone app is now fully operational with MongoDB Atlas!** 🚀
 
 ---
 

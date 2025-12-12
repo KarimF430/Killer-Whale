@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Brand Section
+ * gadizone Mobile App - Brand Section
  * EXACT replica of web components/home/BrandSection.tsx
  * 
  * Web specs:

@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - YouTube Video Player (Sierra Ad)
+ * gadizone Mobile App - YouTube Video Player (Sierra Ad)
  * Opens YouTube app/browser for reliable playback (embed blocked by YouTube policy)
  */
 

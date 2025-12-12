@@ -58,7 +58,7 @@ MongoServerError: Authentication failed
 **Solutions:**
 ```bash
 # Correct format:
-mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/motoroctane
+mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/gadizone
 
 # Common mistakes:
 # - Special characters in password (need URL encoding)
@@ -70,7 +70,7 @@ mongodb+srv://USERNAME:PASSWORD@cluster.mongodb.net/motoroctane
 ```javascript
 // URL encode password if it has special characters
 const password = encodeURIComponent('P@ssw0rd!');
-const uri = `mongodb+srv://user:${password}@cluster.mongodb.net/motoroctane`;
+const uri = `mongodb+srv://user:${password}@cluster.mongodb.net/gadizone`;
 ```
 
 ---
@@ -79,7 +79,7 @@ const uri = `mongodb+srv://user:${password}@cluster.mongodb.net/motoroctane`;
 
 #### **Error:**
 ```
-MongoServerError: E11000 duplicate key error collection: motoroctane.brands index: id_1 dup key: { id: "brand-123" }
+MongoServerError: E11000 duplicate key error collection: gadizone.brands index: id_1 dup key: { id: "brand-123" }
 ```
 
 **Cause:** Trying to insert document with duplicate unique field
@@ -416,7 +416,7 @@ mongoose.connection.on('connected', () => {
 ### **5. Use Environment Variables**
 ```typescript
 // ❌ Never hardcode
-mongoose.connect('mongodb://localhost:27017/motoroctane');
+mongoose.connect('mongodb://localhost:27017/gadizone');
 
 // ✅ Use environment variables
 mongoose.connect(process.env.MONGODB_URI!);

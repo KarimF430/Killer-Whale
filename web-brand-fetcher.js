@@ -321,7 +321,7 @@ async function importBrandsToDatabase(token) {
 
 // Main execution
 async function main() {
-  console.log('🚀 Web Brand Data Fetcher for MotorOctane\n');
+  console.log('🚀 Web Brand Data Fetcher for gadizone\n');
   console.log('📊 Will fetch real data for 36 car brands:\n');
   
   carBrands.forEach((brand, index) => {

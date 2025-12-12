@@ -1,4 +1,4 @@
-# 🚀 K6 Load Testing Guide - MotorOctane
+# 🚀 K6 Load Testing Guide - gadizone
 
 ## 📊 Test Overview
 

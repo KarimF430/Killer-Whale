@@ -45,7 +45,7 @@ try {
 // Email templates with branded design
 const emailTemplates = {
     verification: (name: string, verificationUrl: string) => ({
-        subject: '🚗 Verify Your MotorOctane Account',
+        subject: '🚗 Verify Your gadizone Account',
         html: `
       <!DOCTYPE html>
       <html>
@@ -61,7 +61,7 @@ const emailTemplates = {
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%); padding: 40px; text-align: center;">
-                    <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Welcome to MotorOctane!</h1>
+                    <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Welcome to gadizone!</h1>
                   </td>
                 </tr>
                 <!-- Body -->
@@ -88,7 +88,7 @@ const emailTemplates = {
                       <strong>Note:</strong> This verification link will expire in 24 hours.
                     </p>
                     <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin: 16px 0 0 0;">
-                      If you didn't create an account with MotorOctane, you can safely ignore this email.
+                      If you didn't create an account with gadizone, you can safely ignore this email.
                     </p>
                   </td>
                 </tr>
@@ -96,7 +96,7 @@ const emailTemplates = {
                 <tr>
                   <td style="background: #f9fafb; padding: 24px 30px; border-top: 1px solid #e5e7eb;">
                     <p style="color: #6b7280; font-size: 12px; line-height: 1.5; margin: 0; text-align: center;">
-                      © ${new Date().getFullYear()} MotorOctane. All rights reserved.<br>
+                      © ${new Date().getFullYear()} gadizone. All rights reserved.<br>
                       Your trusted source for car comparisons and insights.
                     </p>
                   </td>
@@ -111,7 +111,7 @@ const emailTemplates = {
     }),
 
     welcome: (name: string) => ({
-        subject: '🎉 Welcome to MotorOctane - Your Account is Active!',
+        subject: '🎉 Welcome to gadizone - Your Account is Active!',
         html: `
       <!DOCTYPE html>
       <html>
@@ -163,7 +163,7 @@ const emailTemplates = {
                   <td style="background: #f9fafb; padding: 24px 30px; border-top: 1px solid #e5e7eb;">
                     <p style="color: #6b7280; font-size: 12px; line-height: 1.5; margin: 0; text-align: center;">
                       Happy car hunting!<br>
-                      The MotorOctane Team
+                      The gadizone Team
                     </p>
                   </td>
                 </tr>
@@ -177,7 +177,7 @@ const emailTemplates = {
     }),
 
     passwordReset: (name: string, resetUrl: string) => ({
-        subject: '🔐 Reset Your MotorOctane Password',
+        subject: '🔐 Reset Your gadizone Password',
         html: `
       <!DOCTYPE html>
       <html>
@@ -225,7 +225,7 @@ const emailTemplates = {
                 <tr>
                   <td style="background: #f9fafb; padding: 24px 30px; border-top: 1px solid #e5e7eb;">
                     <p style="color: #6b7280; font-size: 12px; line-height: 1.5; margin: 0; text-align: center;">
-                      © ${new Date().getFullYear()} MotorOctane. All rights reserved.
+                      © ${new Date().getFullYear()} gadizone. All rights reserved.
                     </p>
                   </td>
                 </tr>
@@ -260,10 +260,10 @@ export const sendEmail = async (
     try {
         const emailContent = emailTemplates[template](data.name, data.url || '');
 
-        const from = process.env.GMAIL_USER || process.env.SMTP_USER || 'noreply@motoroctane.com';
+        const from = process.env.GMAIL_USER || process.env.SMTP_USER || 'noreply@gadizone.com';
 
         await transporter.sendMail({
-            from: `"MotorOctane" <${from}>`,
+            from: `"gadizone" <${from}>`,
             to,
             subject: emailContent.subject,
             html: emailContent.html,

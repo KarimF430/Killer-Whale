@@ -17,7 +17,7 @@
 
 **Exposed Credentials:**
 ```
-Username: motoroctane_user21
+Username: gadizone_user21
 Password: U2kcCNN7h5Y56Je6
 Cluster: cluster0.hok00oq.mongodb.net
 ```
@@ -124,7 +124,7 @@ The `.env` file is in `.gitignore` BUT it was committed to Git at some point. Gi
 
 ### 5. **Weak JWT/Session Secrets in Examples**
 **Files:**
-- `backend/.env.example`: `JWT_SECRET=motoroctane-super-secret-key-change-in-production`
+- `backend/.env.example`: `JWT_SECRET=gadizone-super-secret-key-change-in-production`
 - Multiple documentation files with weak examples
 
 **Risk:** If developers copy these to production, easy to crack
@@ -236,7 +236,7 @@ git push origin --force --all
 
 ```typescript
 // ❌ BEFORE (INSECURE)
-const PROD_URI = 'mongodb+srv://motoroctane_user21:U2kcCNN7h5Y56Je6@cluster0...';
+const PROD_URI = 'mongodb+srv://gadizone_user21:U2kcCNN7h5Y56Je6@cluster0...';
 
 // ✅ AFTER (SECURE)
 const PROD_URI = process.env.MONGODB_URI || (() => {

@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - UpcomingCarCard Component
+ * gadizone Mobile App - UpcomingCarCard Component
  * EXACT replica of web components/home/UpcomingCarCard.tsx
  * 
  * Key differences from regular CarCard:

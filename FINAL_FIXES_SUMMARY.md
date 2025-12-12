@@ -96,7 +96,7 @@ res.header('Access-Control-Allow-Origin', '*');
 
 // After: Whitelisted
 const allowedOrigins = [
-  'https://motoroctane.com',
+  'https://gadizone.com',
   'http://localhost:3000'
 ];
 if (allowedOrigins.includes(origin)) {

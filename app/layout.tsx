@@ -16,13 +16,13 @@ export const viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://motoroctane.com'),
-  title: 'MotorOctane - New Cars in India | Latest Prices, Reviews & Comparisons',
+  metadataBase: new URL('https://gadizone.com'),
+  title: 'gadizone - New Cars in India | Latest Prices, Reviews & Comparisons',
   description: 'Discover new cars in India with AI-powered search. Compare latest prices, detailed specifications, expert reviews, and get the best deals from authorized dealers across India.',
   keywords: 'new cars India, car prices 2024, car specifications, car reviews, car comparison, EMI calculator, car deals, Maruti Suzuki, Hyundai, Tata, Mahindra',
-  authors: [{ name: 'MotorOctane' }],
-  creator: 'MotorOctane',
-  publisher: 'MotorOctane',
+  authors: [{ name: 'gadizone' }],
+  creator: 'gadizone',
+  publisher: 'gadizone',
   formatDetection: {
     email: false,
     address: false,
@@ -42,27 +42,27 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://motoroctane.com',
-    siteName: 'MotorOctane',
-    title: 'MotorOctane - New Cars in India | Latest Prices & Reviews',
+    url: 'https://gadizone.com',
+    siteName: 'gadizone',
+    title: 'gadizone - New Cars in India | Latest Prices & Reviews',
     description: 'Discover new cars in India with AI-powered search. Compare latest prices, detailed specifications, and expert reviews from authorized dealers.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'MotorOctane - New Cars in India',
+        alt: 'gadizone - New Cars in India',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MotorOctane - New Cars in India | Latest Prices & Reviews',
+    title: 'gadizone - New Cars in India | Latest Prices & Reviews',
     description: 'Discover new cars in India with AI-powered search. Compare latest prices, detailed specifications, and expert reviews.',
     images: ['/og-image.jpg'],
   },
   alternates: {
-    canonical: 'https://motoroctane.com',
+    canonical: 'https://gadizone.com',
   },
   verification: {
     google: 'your-google-verification-code',
@@ -131,12 +131,12 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              "name": "MotorOctane",
-              "url": "https://motoroctane.com",
+              "name": "gadizone",
+              "url": "https://gadizone.com",
               "description": "New cars in India - Latest prices, reviews & comparisons",
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://motoroctane.com/search?q={search_term_string}",
+                "target": "https://gadizone.com/search?q={search_term_string}",
                 "query-input": "required name=search_term_string"
               }
             })

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "motoroctane-full",
+  "name": "gadizone-full",
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",

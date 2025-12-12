@@ -39,7 +39,7 @@ npm install --save-dev @types/jsonwebtoken @types/bcryptjs @types/cookie-parser
    - `updateAdminUserLogin(id)` - Update last login
    - File persistence in `data/admin-users.json`
    - **Default admin created automatically:**
-     - Email: `admin@motoroctane.com`
+     - Email: `admin@gadizone.com`
      - Password: `Admin@123`
 
 ---
@@ -107,7 +107,7 @@ Update `backend/client/src/App.tsx`:
 ## 🎯 **Default Admin Credentials:**
 
 ```
-Email:    admin@motoroctane.com
+Email:    admin@gadizone.com
 Password: Admin@123
 ```
 

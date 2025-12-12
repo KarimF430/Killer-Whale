@@ -111,7 +111,7 @@ const articleData = {
   tags: ["launch", "electric"],
   linkedCars: ["model-id-1"],
   featuredImage: "/uploads/featured.jpg",
-  seoTitle: "New Car Launch | MotorOctane",
+  seoTitle: "New Car Launch | gadizone",
   seoDescription: "Complete details...",
   seoKeywords: ["car", "launch", "2025"],
   status: "published",
@@ -267,10 +267,10 @@ const articleSchema = {
   },
   "publisher": {
     "@type": "Organization",
-    "name": "MotorOctane",
+    "name": "gadizone",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://motoroctane.com/logo.png"
+      "url": "https://gadizone.com/logo.png"
     }
   }
 }
@@ -317,7 +317,7 @@ const ArticleRenderer = dynamic(() => import('@/components/news/ArticleRenderer'
 
 #### **Share Buttons:**
 ```typescript
-const shareUrl = `https://motoroctane.com/news/${article.slug}`
+const shareUrl = `https://gadizone.com/news/${article.slug}`
 const shareText = article.title
 
 // Twitter
@@ -399,7 +399,7 @@ export default async function sitemap() {
   const articles = await fetch('/api/news').then(res => res.json())
   
   return articles.map(article => ({
-    url: `https://motoroctane.com/news/${article.slug}`,
+    url: `https://gadizone.com/news/${article.slug}`,
     lastModified: article.updatedAt,
     changeFrequency: 'daily',
     priority: article.isFeatured ? 1.0 : 0.8,
@@ -419,12 +419,12 @@ export async function GET() {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
     <rss version="2.0">
       <channel>
-        <title>MotorOctane News</title>
-        <link>https://motoroctane.com/news</link>
+        <title>gadizone News</title>
+        <link>https://gadizone.com/news</link>
         ${articles.map(article => `
           <item>
             <title>${article.title}</title>
-            <link>https://motoroctane.com/news/${article.slug}</link>
+            <link>https://gadizone.com/news/${article.slug}</link>
             <description>${article.excerpt}</description>
             <pubDate>${new Date(article.publishDate).toUTCString()}</pubDate>
           </item>

@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Favourite Cars Section
+ * gadizone Mobile App - Favourite Cars Section
  * EXACT replica of web components/home/FavouriteCars.tsx
  * 
  * Features:

@@ -229,7 +229,7 @@ open http://localhost:3000
 
 ## 🎉 **CONGRATULATIONS!**
 
-### **Your MotorOctane Platform is:**
+### **Your gadizone Platform is:**
 
 ✅ **100% Production Ready**  
 ✅ **100% Secure**  

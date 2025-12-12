@@ -13,7 +13,7 @@ POST /api/admin/login
 Content-Type: application/json
 
 {
-  "email": "admin@motoroctane.com",
+  "email": "admin@gadizone.com",
   "password": "password123"
 }
 
@@ -23,7 +23,7 @@ Response:
   "user": {
     "id": "uuid",
     "name": "Admin User",
-    "email": "admin@motoroctane.com",
+    "email": "admin@gadizone.com",
     "role": "admin",
     "profileImage": "/path/to/image.jpg"
   }
@@ -39,7 +39,7 @@ Response:
 {
   "id": "uuid",
   "name": "Admin User",
-  "email": "admin@motoroctane.com",
+  "email": "admin@gadizone.com",
   "role": "admin",
   "bio": "...",
   "profileImage": "...",
@@ -504,7 +504,7 @@ async function createAdmin() {
   
   await newsStorage.createAuthor({
     name: 'Admin User',
-    email: 'admin@motoroctane.com',
+    email: 'admin@gadizone.com',
     password: hashedPassword,
     role: 'admin',
     bio: 'System Administrator',
@@ -528,7 +528,7 @@ npm start
 ```bash
 curl -X POST http://localhost:5001/api/admin/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@motoroctane.com","password":"admin123"}'
+  -d '{"email":"admin@gadizone.com","password":"admin123"}'
 ```
 
 ---

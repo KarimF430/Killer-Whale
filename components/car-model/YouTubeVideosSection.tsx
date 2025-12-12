@@ -132,7 +132,7 @@ export default function YouTubeVideosSection({ carName, videos }: YouTubeVideosS
 
         {/* Subscribe Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Subscribe to MotorOctane</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Subscribe to gadizone</h3>
           <p className="text-gray-600 text-sm mb-4">
             Get the latest car reviews, comparisons, and buying guides
           </p>

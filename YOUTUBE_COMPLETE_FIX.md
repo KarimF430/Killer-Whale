@@ -85,7 +85,7 @@ Update `.env.local`:
 ```env
 # Remove NEXT_PUBLIC_ prefix for security
 YOUTUBE_API_KEY=your_api_key_here
-YOUTUBE_CHANNEL_ID=@motoroctane
+YOUTUBE_CHANNEL_ID=@gadizone
 ```
 
 ### Restart Required
@@ -107,7 +107,7 @@ Should show:
   "hasApiKey": true,
   "apiKeyLength": 39,
   "apiKeyPrefix": "AIzaSy...",
-  "channelId": "@motoroctane",
+  "channelId": "@gadizone",
   "env": {
     "NODE_ENV": "development",
     "hasNextPublicKey": false  // Should be false!

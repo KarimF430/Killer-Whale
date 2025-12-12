@@ -11,7 +11,7 @@ This migration changes **ONLY** the database backend. Everything else remains **
 ### **Database Storage:**
 ```
 Before: JSON Files (backend/data/*.json)
-After:  MongoDB (motoroctane database)
+After:  MongoDB (gadizone database)
 ```
 
 **That's it!** Nothing else changed.

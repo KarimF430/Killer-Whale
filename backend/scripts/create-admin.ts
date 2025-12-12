@@ -24,7 +24,7 @@ async function main() {
   const password = parseArg('--password', 'StrongPass@123');
   const name = parseArg('--name', 'Admin');
   const role = parseArg('--role', 'super_admin');
-  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/motoroctane';
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/gadizone';
 
   if (!email || !password) {
     console.error('Usage: tsx scripts/create-admin.ts --email <email> --password <password> [--name <name>] [--role <role>]');

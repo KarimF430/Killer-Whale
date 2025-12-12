@@ -12,11 +12,11 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   const brandName = brand.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())
   
   return {
-    title: `${brandName} Cars - New Models, Prices & Reviews | MotorOctane`,
+    title: `${brandName} Cars - New Models, Prices & Reviews | gadizone`,
     description: `Explore all ${brandName} car models with detailed specifications, prices, reviews, and comparisons. Find the perfect ${brandName} car for your needs.`,
     keywords: `${brandName} cars, ${brandName} models, ${brandName} prices, new ${brandName} cars, ${brandName} reviews`,
     openGraph: {
-      title: `${brandName} Cars - New Models, Prices & Reviews | MotorOctane`,
+      title: `${brandName} Cars - New Models, Prices & Reviews | gadizone`,
       description: `Explore all ${brandName} car models with detailed specifications, prices, reviews, and comparisons.`,
       type: 'website',
     },

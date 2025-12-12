@@ -12,7 +12,7 @@ npx ts-node scripts/create-news-admin.ts
 **Output:**
 ```
 ✅ Admin user created successfully!
-Email: admin@motoroctane.com
+Email: admin@gadizone.com
 Password: admin123
 ```
 
@@ -42,7 +42,7 @@ serving on port 5001
 Open browser: `http://localhost:5001`
 
 **Login:**
-- Email: `admin@motoroctane.com`
+- Email: `admin@gadizone.com`
 - Password: `admin123`
 
 ---
@@ -110,7 +110,7 @@ The system creates these categories automatically:
 ## **🔑 Default Credentials:**
 
 **Admin Login:**
-- Email: `admin@motoroctane.com`
+- Email: `admin@gadizone.com`
 - Password: `admin123`
 
 ⚠️ **Change password after first login!**

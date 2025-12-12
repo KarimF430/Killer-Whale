@@ -215,7 +215,7 @@ const cacheConfig = {
 1. **Horizontal Sharding**:
    ```typescript
    // Shard by brandId for even distribution
-   sh.shardCollection("motoroctane.variants", { "brandId": 1 })
+   sh.shardCollection("gadizone.variants", { "brandId": 1 })
    ```
 
 2. **Read Replicas**:

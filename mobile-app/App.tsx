@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Main Entry Point
+ * gadizone Mobile App - Main Entry Point
  */
 
 import React from 'react';

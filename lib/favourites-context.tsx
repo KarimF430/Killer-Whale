@@ -30,7 +30,7 @@ interface FavouritesContextType {
 
 const FavouritesContext = createContext<FavouritesContextType | undefined>(undefined)
 
-const STORAGE_KEY = 'motoroctane_favourites'
+const STORAGE_KEY = 'gadizone_favourites'
 
 // Helper function to normalize fuel types
 const normalizeFuelType = (fuel: string): string => {

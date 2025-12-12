@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     if (!response.ok) {
       return {
-        title: 'Compare Cars | MotorOctane',
+        title: 'Compare Cars | gadizone',
         description: 'Compare car specifications, prices, and features side by side.'
       }
     }
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const title = modelNames.join(' vs ')
 
     return {
-      title: `${title} Comparison - Specs, Price & Features | MotorOctane`,
+      title: `${title} Comparison - Specs, Price & Features | gadizone`,
       description: `Compare ${title}. Detailed side-by-side comparison of specifications, prices, features, and expert reviews.`,
       keywords: `${title} comparison, ${modelNames.join(', ')}, car comparison`,
       openGraph: {
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   } catch (error) {
     console.error('Error generating metadata:', error)
     return {
-      title: 'Compare Cars | MotorOctane',
+      title: 'Compare Cars | gadizone',
       description: 'Compare car specifications, prices, and features side by side.'
     }
   }
@@ -88,7 +88,7 @@ async function getComparisonData(slug: string) {
 
     // Generate SEO text
     const modelNames = comparisonItems.map((item: any) => `${item.model.brandName} ${item.model.name}`)
-    const seoText = `Motoroctane brings you comparison of ${modelNames.join(', ')}...`
+    const seoText = `gadizone brings you comparison of ${modelNames.join(', ')}...`
 
     return {
       comparisonItems,

@@ -8,7 +8,7 @@
 ## 🚀 **What's Working Now**
 
 ### 1. **ChatGPT-Style UI** ✅
-- Dark theme with MotorOctane branding
+- Dark theme with gadizone branding
 - Clean interface below main header
 - No quick reply buttons (free-form)
 - Fully responsive

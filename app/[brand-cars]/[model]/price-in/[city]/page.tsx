@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: PriceInCityPageProps): Promis
   const modelName = toDisplayName(modelSlug)
   const cityName = cityMap[citySlug.toLowerCase()]?.split(',')[0] || toDisplayName(citySlug)
 
-  const title = `${brandName} ${modelName} Price in ${cityName} - On-Road Price, EMI, Variants | MotorOctane`
+  const title = `${brandName} ${modelName} Price in ${cityName} - On-Road Price, EMI, Variants | gadizone`
   const description = `Get ${brandName} ${modelName} on-road price in ${cityName}. Check detailed price breakup including ex-showroom price, RTO, insurance, and calculate EMI. Compare variants and get the best deals.`
 
   return {

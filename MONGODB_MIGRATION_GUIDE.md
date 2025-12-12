@@ -44,7 +44,7 @@ brew install mongodb-community
 brew services start mongodb-community
 
 # Connection string:
-mongodb://localhost:27017/motoroctane
+mongodb://localhost:27017/gadizone
 ```
 
 #### **Option B: MongoDB Atlas (Cloud - FREE)**
@@ -53,7 +53,7 @@ mongodb://localhost:27017/motoroctane
 2. Create free account
 3. Create free cluster (M0)
 4. Get connection string:
-   mongodb+srv://username:password@cluster.mongodb.net/motoroctane
+   mongodb+srv://username:password@cluster.mongodb.net/gadizone
 ```
 
 **Recommended:** MongoDB Atlas (easier, free, no local setup)
@@ -65,9 +65,9 @@ mongodb://localhost:27017/motoroctane
 Create `.env` file:
 ```bash
 # backend/.env
-MONGODB_URI=mongodb://localhost:27017/motoroctane
+MONGODB_URI=mongodb://localhost:27017/gadizone
 # OR for Atlas:
-# MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/motoroctane
+# MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/gadizone
 
 JWT_SECRET=your-secret-key-change-in-production
 NODE_ENV=development
@@ -396,7 +396,7 @@ const app = express();
 (async () => {
   // Initialize MongoDB storage
   const storage = new MongoDBStorage();
-  await storage.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/motoroctane');
+  await storage.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/gadizone');
   
   // Register routes (same as before)
   registerRoutes(app, storage);
@@ -420,7 +420,7 @@ import { Brand, Model, Variant, AdminUser, PopularComparison } from './server/db
 async function migrate() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/motoroctane');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/gadizone');
     console.log('✅ Connected to MongoDB');
 
     // Read JSON files

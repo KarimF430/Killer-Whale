@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Spacing System
+ * gadizone Mobile App - Spacing System
  * Consistent spacing across the app
  */
 

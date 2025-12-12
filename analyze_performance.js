@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔍 Performance Analysis for MotorOctane Pages\n');
+console.log('🔍 Performance Analysis for gadizone Pages\n');
 console.log('='.repeat(80));
 
 // Page analysis results

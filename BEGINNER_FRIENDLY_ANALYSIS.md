@@ -1,4 +1,4 @@
-# 🚀 MotorOctane - Complete Analysis for Beginners
+# 🚀 gadizone - Complete Analysis for Beginners
 
 **Date:** November 11, 2025  
 **Your Questions Answered Simply**

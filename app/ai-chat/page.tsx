@@ -2,7 +2,7 @@
 
 /**
  * AI Car Finder - ChatGPT-Style Interface
- * Modern dark theme with MotorOctane branding
+ * Modern dark theme with gadizone branding
  */
 
 import { useState, useEffect, useRef, Suspense } from 'react'
@@ -296,7 +296,7 @@ function AICarFinderContent() {
                     </div>
                 </div>
                 <div className="helper-text">
-                    MotorOctane AI can make mistakes. Check important info.
+                    gadizone AI can make mistakes. Check important info.
                 </div>
             </div>
         </div>

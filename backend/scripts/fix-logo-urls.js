@@ -136,7 +136,7 @@ async function main() {
   
   try {
     // Connect to MongoDB
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/motoroctane';
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/gadizone';
     await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
     

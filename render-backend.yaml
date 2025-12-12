@@ -1,7 +1,7 @@
 # Render Configuration for Backend Only
 services:
   - type: web
-    name: motoroctane-backend
+    name: gadizone-backend
     env: node
     plan: starter
     region: singapore
@@ -23,15 +23,15 @@ services:
       - key: REDIS_URL
         sync: false
       - key: FRONTEND_URL
-        value: https://motoroctane-frontend.vercel.app
+        value: https://gadizone-frontend.vercel.app
     healthCheckPath: /api/monitoring/health
     
   # Optional: Redis for caching
   - type: redis
-    name: motoroctane-redis
+    name: gadizone-redis
     plan: starter
     
 databases:
   # Optional: If using Render's PostgreSQL instead of MongoDB
-  - name: motoroctane-db
+  - name: gadizone-db
     plan: starter

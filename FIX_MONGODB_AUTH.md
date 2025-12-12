@@ -19,7 +19,7 @@ This means your MongoDB Atlas credentials are incorrect or the user hasn't been 
 2. Click **"Add New Database User"** button
 3. Fill in the details:
    - **Authentication Method:** Password
-   - **Username:** `motoroctane_user` (or any name you prefer)
+   - **Username:** `gadizone_user` (or any name you prefer)
    - **Password:** Click "Autogenerate Secure Password" or create your own
    - **IMPORTANT:** Copy the password immediately!
    - **Database User Privileges:** Select "Read and write to any database"
@@ -52,16 +52,16 @@ Replace the connection string in `/Applications/WEBSITE-23092025-101/backend/.en
 
 ```bash
 # MongoDB Connection
-MONGODB_URI=mongodb+srv://motoroctane_user:YOUR_ACTUAL_PASSWORD@cluster0.hok00oq.mongodb.net/motoroctane?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://gadizone_user:YOUR_ACTUAL_PASSWORD@cluster0.hok00oq.mongodb.net/gadizone?retryWrites=true&w=majority
 ```
 
 **Replace:**
-- `motoroctane_user` with your actual username
+- `gadizone_user` with your actual username
 - `YOUR_ACTUAL_PASSWORD` with your actual password (no angle brackets!)
 
 **Example:**
 ```bash
-MONGODB_URI=mongodb+srv://myuser:MySecurePass123@cluster0.hok00oq.mongodb.net/motoroctane?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://myuser:MySecurePass123@cluster0.hok00oq.mongodb.net/gadizone?retryWrites=true&w=majority
 ```
 
 ---
@@ -117,11 +117,11 @@ mongodb+srv://USERNAME:PASSWORD@CLUSTER.mongodb.net/DATABASE?retryWrites=true&w=
 ```
 
 **Your cluster:** `cluster0.hok00oq.mongodb.net`
-**Database name:** `motoroctane`
+**Database name:** `gadizone`
 
 Full example:
 ```
-mongodb+srv://motoroctane_user:SecurePass123@cluster0.hok00oq.mongodb.net/motoroctane?retryWrites=true&w=majority
+mongodb+srv://gadizone_user:SecurePass123@cluster0.hok00oq.mongodb.net/gadizone?retryWrites=true&w=majority
 ```
 
 ---
@@ -153,7 +153,7 @@ mongodb+srv://motoroctane_user:SecurePass123@cluster0.hok00oq.mongodb.net/motoro
 - [ ] Updated .env with correct username
 - [ ] Updated .env with correct password (no brackets!)
 - [ ] URL-encoded special characters in password
-- [ ] Added database name: `motoroctane`
+- [ ] Added database name: `gadizone`
 - [ ] Saved .env file
 
 ---
@@ -181,10 +181,10 @@ To avoid encoding issues, create a new user with a simple password:
 
 1. Go to Database Access
 2. Create new user
-3. Use simple password (only letters and numbers): `MotorOctane2024`
+3. Use simple password (only letters and numbers): `gadizone2024`
 4. Update .env:
    ```
-   MONGODB_URI=mongodb+srv://motoroctane_user:MotorOctane2024@cluster0.hok00oq.mongodb.net/motoroctane?retryWrites=true&w=majority
+   MONGODB_URI=mongodb+srv://gadizone_user:gadizone2024@cluster0.hok00oq.mongodb.net/gadizone?retryWrites=true&w=majority
    ```
 
 ---

@@ -1,6 +1,6 @@
 # Google Maps API Integration Setup
 
-This document explains how to set up Google Maps API for location services in the MotorOctane website.
+This document explains how to set up Google Maps API for location services in the gadizone website.
 
 ## Features
 

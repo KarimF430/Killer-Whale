@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Ad 3D Carousel
+ * gadizone Mobile App - Ad 3D Carousel
  * EXACT replica of web components/ads/Ad3DCarousel.tsx
  * 
  * Design specs from web:

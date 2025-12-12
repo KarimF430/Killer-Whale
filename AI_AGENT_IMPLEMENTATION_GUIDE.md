@@ -1,6 +1,6 @@
 # 🤖 AI AGENT IMPLEMENTATION GUIDE
 
-**Complete setup guide for AI agents working on MotorOctane platform**
+**Complete setup guide for AI agents working on gadizone platform**
 
 ---
 

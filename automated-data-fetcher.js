@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Automated Real Data Fetcher for MotorOctane
+ * Automated Real Data Fetcher for gadizone
  * Fetches complete live data for all backend fields
  * Includes: FAQs, Summaries, Specifications, Engine Data, Mileage, etc.
  */
@@ -324,7 +324,7 @@ async function importCompleteDataset(token) {
 
 // Main execution
 async function main() {
-  console.log('🚀 Automated Complete Data Fetcher for MotorOctane\n');
+  console.log('🚀 Automated Complete Data Fetcher for gadizone\n');
   console.log('📊 Will populate ALL backend fields with real data:\n');
   console.log('🏢 BRANDS: Name, Summary, FAQs, Status');
   console.log('🚗 MODELS: All fields including:');

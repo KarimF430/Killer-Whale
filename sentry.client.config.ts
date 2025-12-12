@@ -80,7 +80,7 @@ Sentry.init({
   
   // Allowed URLs for error tracking
   allowUrls: [
-    /https?:\/\/(www\.)?motoroctane\.com/,
+    /https?:\/\/(www\.)?gadizone\.com/,
     /https?:\/\/localhost:\d+/,
   ],
 });

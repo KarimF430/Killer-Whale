@@ -103,7 +103,7 @@ If you prefer not to install MongoDB locally, use MongoDB Atlas (free):
 - Go to "Database Access"
 - Click "Add New Database User"
 - Choose "Password" authentication
-- Username: `motoroctane`
+- Username: `gadizone`
 - Password: (generate strong password)
 - User Privileges: "Read and write to any database"
 - Click "Add User"
@@ -120,14 +120,14 @@ If you prefer not to install MongoDB locally, use MongoDB Atlas (free):
 - Choose "Connect your application"
 - Copy the connection string:
   ```
-  mongodb+srv://motoroctane:<password>@cluster.mongodb.net/motoroctane
+  mongodb+srv://gadizone:<password>@cluster.mongodb.net/gadizone
   ```
 - Replace `<password>` with your actual password
 
 ### **6. Update .env File:**
 ```bash
 # Edit: /Applications/WEBSITE-23092025-101/backend/.env
-MONGODB_URI=mongodb+srv://motoroctane:YOUR_PASSWORD@cluster.mongodb.net/motoroctane
+MONGODB_URI=mongodb+srv://gadizone:YOUR_PASSWORD@cluster.mongodb.net/gadizone
 ```
 
 ### **7. Run Migration:**

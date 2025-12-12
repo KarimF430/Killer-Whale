@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Cars by Budget Section
+ * gadizone Mobile App - Cars by Budget Section
  * EXACT replica of web components/home/CarsByBudget.tsx
  * 
  * Web specs from screenshot:

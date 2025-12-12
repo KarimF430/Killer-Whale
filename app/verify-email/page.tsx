@@ -90,7 +90,7 @@ function VerifyEmailContent() {
                         </div>
                         <h1 className="text-3xl font-bold text-green-600 mb-3">Email Verified!</h1>
                         <p className="text-gray-600 text-lg mb-6">
-                            Your email has been successfully verified. Welcome to MotorOctane!
+                            Your email has been successfully verified. Welcome to gadizone!
                         </p>
                         <p className="text-sm text-gray-500 mb-6">Redirecting to home page...</p>
                         <div className="animate-pulse flex justify-center">

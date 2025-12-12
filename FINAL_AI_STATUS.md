@@ -4,7 +4,7 @@
 
 ### 1. **UI Design** - PERFECT! ✅
 - ChatGPT-style dark theme (#212121)
-- MotorOctane orange branding (#ff6b35)
+- gadizone orange branding (#ff6b35)
 - Beautiful message bubbles
 - Quick reply buttons
 - Smooth animations

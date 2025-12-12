@@ -7,11 +7,11 @@ async function createNewsAdmin() {
     await newsStorage.initialize()
     
     // Check if admin already exists
-    const existingAdmin = await newsStorage.getAuthorByEmail('admin@motoroctane.com')
+    const existingAdmin = await newsStorage.getAuthorByEmail('admin@gadizone.com')
     
     if (existingAdmin) {
       console.log('✅ Admin user already exists!')
-      console.log('Email: admin@motoroctane.com')
+      console.log('Email: admin@gadizone.com')
       return
     }
     
@@ -21,7 +21,7 @@ async function createNewsAdmin() {
     // Create admin user
     const admin = await newsStorage.createAuthor({
       name: 'Admin User',
-      email: 'admin@motoroctane.com',
+      email: 'admin@gadizone.com',
       password: hashedPassword,
       role: 'admin',
       bio: 'System Administrator',
@@ -31,7 +31,7 @@ async function createNewsAdmin() {
     })
     
     console.log('✅ Admin user created successfully!')
-    console.log('Email: admin@motoroctane.com')
+    console.log('Email: admin@gadizone.com')
     console.log('Password: admin123')
     console.log('\n🔐 Please change the password after first login!')
     

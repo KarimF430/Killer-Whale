@@ -107,7 +107,7 @@ export const validateCarUrl = (brandSlug: string, modelSlug: string, expectedCar
 /**
  * Generate canonical URL for SEO
  */
-export const generateCanonicalUrl = (car: CarUrlData, baseUrl: string = 'https://motoroctane.com'): string => {
+export const generateCanonicalUrl = (car: CarUrlData, baseUrl: string = 'https://gadizone.com'): string => {
   const modelUrl = generateCarModelUrl(car)
   return `${baseUrl}${modelUrl}`
 }

@@ -15,17 +15,17 @@ export function generateSEO({
   ogImage = '/og-image.jpg',
   canonical
 }: SEOConfig): Metadata {
-  const siteName = 'MotorOctane'
+  const siteName = 'gadizone'
   const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://motoroctane.com'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://gadizone.com'
   
   return {
     title: fullTitle,
     description,
-    keywords: keywords || `${title}, car prices, car reviews, car specifications, MotorOctane`,
-    authors: [{ name: 'MotorOctane' }],
-    creator: 'MotorOctane',
-    publisher: 'MotorOctane',
+    keywords: keywords || `${title}, car prices, car reviews, car specifications, gadizone`,
+    authors: [{ name: 'gadizone' }],
+    creator: 'gadizone',
+    publisher: 'gadizone',
     formatDetection: {
       email: false,
       address: false,
@@ -56,7 +56,7 @@ export function generateSEO({
       title: fullTitle,
       description,
       images: [ogImage],
-      creator: '@motoroctane',
+      creator: '@gadizone',
     },
     robots: {
       index: true,

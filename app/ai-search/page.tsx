@@ -59,7 +59,7 @@ function AISearchContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold text-blue-600">
-              MotorOctane
+              gadizone
             </Link>
             <div className="flex-1 max-w-2xl mx-8">
               <div className="relative">

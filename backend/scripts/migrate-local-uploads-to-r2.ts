@@ -56,7 +56,7 @@ async function main() {
     forcePathStyle: true,
   })
 
-  const mongoUri = getEnv('MONGODB_URI', 'mongodb://localhost:27017/motoroctane')
+  const mongoUri = getEnv('MONGODB_URI', 'mongodb://localhost:27017/gadizone')
   await mongoose.connect(mongoUri)
 
   let migrated = 0, missing = 0

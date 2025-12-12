@@ -105,7 +105,7 @@ export default function HeroSection({ carData }: HeroSectionProps) {
               onClick={() => {
                 const shareData = {
                   title: `${carData.fullName} - Check it out!`,
-                  text: `Check out the ${carData.fullName} on MotorOctane!`,
+                  text: `Check out the ${carData.fullName} on gadizone!`,
                   url: window.location.href
                 };
 

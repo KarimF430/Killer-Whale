@@ -24,10 +24,6 @@ const VideoAd = dynamic(() => import('@/components/ads/VideoAd'), {
   loading: () => <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
 })
 
-// Lazy load OceanBackground - 12 Lottie animations, loads after main content
-const OceanBackground = dynamic(() => import('@/components/home/OceanBackground'), {
-  loading: () => null // No placeholder, just load after hydration
-})
 
 export const metadata: Metadata = staticPageSEO.home
 export const revalidate = 3600 // Revalidate every hour
@@ -252,7 +248,6 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-white relative">
-      <OceanBackground />
       <main className="relative z-[2]">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
           <Ad3DCarousel className="my-3 sm:my-4" />

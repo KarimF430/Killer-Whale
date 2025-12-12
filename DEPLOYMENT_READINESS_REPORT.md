@@ -140,7 +140,7 @@ JWT_SECRET=generate-32-char-secret
 git init
 git add .
 git commit -m "Initial commit"
-git remote add origin https://github.com/username/motoroctane.git
+git remote add origin https://github.com/username/gadizone.git
 git push -u origin main
 ```
 
@@ -256,7 +256,7 @@ vercel --prod
 
 ## 🎉 **CONCLUSION**
 
-**Your MotorOctane platform is 95% ready for deployment!**
+**Your gadizone platform is 95% ready for deployment!**
 
 **Next Steps:**
 1. Fix the admin page issue

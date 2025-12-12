@@ -70,7 +70,7 @@ function getBrandFallbackData(brand: string) {
         views: '2.5M',
         likes: '45K',
         publishedAt: '2 days ago',
-        channelName: 'MotorOctane'
+        channelName: 'gadizone'
       },
       related: [
         {
@@ -81,7 +81,7 @@ function getBrandFallbackData(brand: string) {
           views: '1.2M',
           likes: '28K',
           publishedAt: '1 week ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder2',
@@ -91,7 +91,7 @@ function getBrandFallbackData(brand: string) {
           views: '890K',
           likes: '19K',
           publishedAt: '3 days ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder3',
@@ -101,7 +101,7 @@ function getBrandFallbackData(brand: string) {
           views: '1.8M',
           likes: '35K',
           publishedAt: '5 days ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         }
       ]
     },
@@ -114,7 +114,7 @@ function getBrandFallbackData(brand: string) {
         views: '3.1M',
         likes: '52K',
         publishedAt: '1 day ago',
-        channelName: 'MotorOctane'
+        channelName: 'gadizone'
       },
       related: [
         {
@@ -125,7 +125,7 @@ function getBrandFallbackData(brand: string) {
           views: '1.8M',
           likes: '35K',
           publishedAt: '4 days ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder2',
@@ -135,7 +135,7 @@ function getBrandFallbackData(brand: string) {
           views: '2.2M',
           likes: '41K',
           publishedAt: '1 week ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder3',
@@ -145,7 +145,7 @@ function getBrandFallbackData(brand: string) {
           views: '1.5M',
           likes: '29K',
           publishedAt: '2 weeks ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         }
       ]
     },
@@ -158,7 +158,7 @@ function getBrandFallbackData(brand: string) {
         views: '2.8M',
         likes: '48K',
         publishedAt: '3 days ago',
-        channelName: 'MotorOctane'
+        channelName: 'gadizone'
       },
       related: [
         {
@@ -169,7 +169,7 @@ function getBrandFallbackData(brand: string) {
           views: '1.6M',
           likes: '32K',
           publishedAt: '1 week ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder2',
@@ -179,7 +179,7 @@ function getBrandFallbackData(brand: string) {
           views: '3.5M',
           likes: '67K',
           publishedAt: '5 days ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder3',
@@ -189,7 +189,7 @@ function getBrandFallbackData(brand: string) {
           views: '1.9M',
           likes: '38K',
           publishedAt: '2 weeks ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         }
       ]
     },
@@ -202,7 +202,7 @@ function getBrandFallbackData(brand: string) {
         views: '4.2M',
         likes: '78K',
         publishedAt: '1 day ago',
-        channelName: 'MotorOctane'
+        channelName: 'gadizone'
       },
       related: [
         {
@@ -213,7 +213,7 @@ function getBrandFallbackData(brand: string) {
           views: '2.1M',
           likes: '42K',
           publishedAt: '6 days ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder2',
@@ -223,7 +223,7 @@ function getBrandFallbackData(brand: string) {
           views: '2.8M',
           likes: '55K',
           publishedAt: '3 days ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder3',
@@ -233,7 +233,7 @@ function getBrandFallbackData(brand: string) {
           views: '1.7M',
           likes: '34K',
           publishedAt: '1 week ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         }
       ]
     },
@@ -246,7 +246,7 @@ function getBrandFallbackData(brand: string) {
         views: '3.3M',
         likes: '61K',
         publishedAt: '2 days ago',
-        channelName: 'MotorOctane'
+        channelName: 'gadizone'
       },
       related: [
         {
@@ -257,7 +257,7 @@ function getBrandFallbackData(brand: string) {
           views: '1.9M',
           likes: '37K',
           publishedAt: '1 week ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder2',
@@ -267,7 +267,7 @@ function getBrandFallbackData(brand: string) {
           views: '2.4M',
           likes: '46K',
           publishedAt: '4 days ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         },
         {
           id: 'placeholder3',
@@ -277,7 +277,7 @@ function getBrandFallbackData(brand: string) {
           views: '2.0M',
           likes: '39K',
           publishedAt: '10 days ago',
-          channelName: 'MotorOctane'
+          channelName: 'gadizone'
         }
       ]
     }
@@ -292,7 +292,7 @@ function getBrandFallbackData(brand: string) {
       views: '2.5M',
       likes: '45K',
       publishedAt: '2 days ago',
-      channelName: 'MotorOctane'
+      channelName: 'gadizone'
     },
     related: [
       {
@@ -303,7 +303,7 @@ function getBrandFallbackData(brand: string) {
         views: '1.2M',
         likes: '28K',
         publishedAt: '1 week ago',
-        channelName: 'MotorOctane'
+        channelName: 'gadizone'
       },
       {
         id: 'placeholder2',
@@ -313,7 +313,7 @@ function getBrandFallbackData(brand: string) {
         views: '890K',
         likes: '19K',
         publishedAt: '3 days ago',
-        channelName: 'MotorOctane'
+        channelName: 'gadizone'
       },
       {
         id: 'placeholder3',
@@ -323,7 +323,7 @@ function getBrandFallbackData(brand: string) {
         views: '1.8M',
         likes: '35K',
         publishedAt: '5 days ago',
-        channelName: 'MotorOctane'
+        channelName: 'gadizone'
       }
     ]
   }
@@ -429,7 +429,7 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{brandName.charAt(0).toUpperCase() + brandName.slice(1)} Videos</h2>
           <a
-            href="https://www.youtube.com/@motoroctane"
+            href="https://www.youtube.com/@gadizone"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center text-red-600 hover:text-red-700 font-medium"
@@ -569,12 +569,12 @@ export default function BrandYouTube({ brandName }: BrandYouTubeProps) {
 
             {/* Subscribe Button */}
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-              <h4 className="font-bold text-gray-900 mb-2">Subscribe to MotorOctane</h4>
+              <h4 className="font-bold text-gray-900 mb-2">Subscribe to gadizone</h4>
               <p className="text-sm text-gray-600 mb-3">
                 Get the latest car reviews, comparisons, and buying guides
               </p>
               <a
-                href="https://www.youtube.com/@motoroctane?sub_confirmation=1"
+                href="https://www.youtube.com/@gadizone?sub_confirmation=1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"

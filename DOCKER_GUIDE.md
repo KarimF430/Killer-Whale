@@ -86,14 +86,14 @@ docker-compose down
 docker-compose down -v
 
 # Access container shell
-docker exec -it motoroctane-backend sh
-docker exec -it motoroctane-frontend sh
+docker exec -it gadizone-backend sh
+docker exec -it gadizone-frontend sh
 
 # Access MongoDB shell
-docker exec -it motoroctane-mongodb mongosh -u admin -p motoroctane_dev_password
+docker exec -it gadizone-mongodb mongosh -u admin -p gadizone_dev_password
 
 # Access Redis CLI
-docker exec -it motoroctane-redis redis-cli
+docker exec -it gadizone-redis redis-cli
 ```
 
 ### Production
@@ -134,12 +134,12 @@ cp .env.example .env.production
 
 **Development (default):**
 - Username: `admin`
-- Password: `motoroctane_dev_password`
-- Database: `motoroctane`
+- Password: `gadizone_dev_password`
+- Database: `gadizone`
 
 **Connection String:**
 ```
-mongodb://admin:motoroctane_dev_password@localhost:27017/motoroctane?authSource=admin
+mongodb://admin:gadizone_dev_password@localhost:27017/gadizone?authSource=admin
 ```
 
 ---
@@ -193,7 +193,7 @@ docker-compose restart mongodb
 docker system prune -a --volumes
 
 # Remove specific volumes
-docker volume rm motoroctane_mongodb_data
+docker volume rm gadizone_mongodb_data
 ```
 
 ---
@@ -275,7 +275,7 @@ Edit `docker-compose.prod.yml` and add:
 
 ```yaml
 environment:
-  MONGODB_URI: mongodb+srv://user:pass@cluster.mongodb.net/motoroctane
+  MONGODB_URI: mongodb+srv://user:pass@cluster.mongodb.net/gadizone
   REDIS_URL: redis://username:password@redis-host:6379
 ```
 

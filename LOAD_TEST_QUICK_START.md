@@ -1,7 +1,7 @@
 # ⚡ K6 Load Test - Quick Start
 
 ## 🎯 Goal
-Test MotorOctane with **500k daily users** (~20 users/second)
+Test gadizone with **500k daily users** (~20 users/second)
 
 ---
 

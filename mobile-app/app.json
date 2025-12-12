@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MotorOctane",
-    "slug": "motoroctane",
+    "name": "gadizone",
+    "slug": "gadizone",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,14 +14,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.motoroctane.app"
+      "bundleIdentifier": "com.gadizone.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#DC2626"
       },
-      "package": "com.motoroctane.app"
+      "package": "com.gadizone.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"

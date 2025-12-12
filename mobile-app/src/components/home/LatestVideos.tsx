@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Latest Videos Section
+ * gadizone Mobile App - Latest Videos Section
  * Opens YouTube app/browser for reliable playback (embed blocked by YouTube policy)
  */
 
@@ -51,7 +51,7 @@ export default function LatestVideos({ featuredVideo, relatedVideos, title = 'La
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.sectionTitle}>{title}</Text>
-        <TouchableOpacity style={styles.visitChannel} onPress={() => Linking.openURL('https://www.youtube.com/@motoroctane')}>
+        <TouchableOpacity style={styles.visitChannel} onPress={() => Linking.openURL('https://www.youtube.com/@gadizone')}>
           <Text style={styles.visitText}>Visit Channel</Text>
           <Feather name="external-link" size={14} color="#DC2626" />
         </TouchableOpacity>
@@ -104,9 +104,9 @@ export default function LatestVideos({ featuredVideo, relatedVideos, title = 'La
 
       {/* Subscribe Section */}
       <View style={styles.subscribeContainer}>
-        <Text style={styles.subscribeTitle}>Subscribe to MotorOctane</Text>
+        <Text style={styles.subscribeTitle}>Subscribe to gadizone</Text>
         <Text style={styles.subscribeSubtext}>Get the latest car reviews, comparisons, and buying guides</Text>
-        <TouchableOpacity style={styles.subscribeButton} onPress={() => Linking.openURL('https://www.youtube.com/@motoroctane?sub_confirmation=1')} activeOpacity={0.9}>
+        <TouchableOpacity style={styles.subscribeButton} onPress={() => Linking.openURL('https://www.youtube.com/@gadizone?sub_confirmation=1')} activeOpacity={0.9}>
           <Text style={styles.subscribeButtonText}>Subscribe Now</Text>
           <Feather name="external-link" size={14} color="#FFFFFF" />
         </TouchableOpacity>

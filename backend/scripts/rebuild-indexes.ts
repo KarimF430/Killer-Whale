@@ -11,7 +11,7 @@ import { Brand, Model, Variant, AdminUser, PopularComparison } from '../server/d
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/motoroctane';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/gadizone';
 
 async function rebuildIndexes() {
   try {

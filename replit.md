@@ -1,7 +1,7 @@
-# MotorOctane - Car Marketplace Website
+# gadizone - Car Marketplace Website
 
 ## Overview
-MotorOctane is a comprehensive car marketplace website built with Next.js 14, TypeScript, and Tailwind CSS. The platform allows users to explore new cars in India, compare prices, read reviews, and access various automotive tools like EMI calculators.
+gadizone is a comprehensive car marketplace website built with Next.js 14, TypeScript, and Tailwind CSS. The platform allows users to explore new cars in India, compare prices, read reviews, and access various automotive tools like EMI calculators.
 
 ## Project Architecture
 - **Frontend**: Next.js 14 with App Router

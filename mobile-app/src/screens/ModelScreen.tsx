@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Model Screen
+ * gadizone Mobile App - Model Screen
  * Section 1: Sticky Tab Bar + Car Image Carousel + Model Header + Rating + Description + Price + CTA
  * Section 2: Variant Dropdown + City Dropdown + EMI Calculator + Ad Carousel
  * PIXEL-PERFECT match with web frontend CarModelPage.tsx
@@ -361,7 +361,7 @@ export default function ModelScreen({ route, navigation }: ModelScreenProps) {
     const handleShare = async () => {
         try {
             await Share.share({
-                message: `Check out the ${modelData?.brandName} ${modelData?.name} on MotorOctane!`,
+                message: `Check out the ${modelData?.brandName} ${modelData?.name} on gadizone!`,
                 title: `${modelData?.brandName} ${modelData?.name}`,
             });
         } catch (error) {

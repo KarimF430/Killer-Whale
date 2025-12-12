@@ -21,8 +21,8 @@
 # Getting your Sentry DSN:
 # 1. Create account at https://sentry.io
 # 2. Create two projects:
-#    - "motoroctane-backend" (Node.js / Express)
-#    - "motoroctane-frontend" (Next.js)
+#    - "gadizone-backend" (Node.js / Express)
+#    - "gadizone-frontend" (Next.js)
 # 3. Copy the DSN from each project's settings
 # 4. Add to respective .env files
 #
@@ -60,7 +60,7 @@
 # ?readPreference=secondaryPreferred&maxPoolSize=100
 #
 # Example:
-# MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/motoroctane?readPreference=secondaryPreferred&maxPoolSize=100
+# MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/gadizone?readPreference=secondaryPreferred&maxPoolSize=100
 #
 # ==========================
 # 5. VERIFICATION

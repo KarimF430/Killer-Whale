@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Card Component
+ * gadizone Mobile App - Card Component
  * Reusable card wrapper with shadow
  */
 

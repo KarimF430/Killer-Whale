@@ -177,7 +177,7 @@ open http://localhost:3000
 2. Install Certbot:
    ```bash
    sudo apt install certbot
-   sudo certbot --nginx -d motoroctane.com
+   sudo certbot --nginx -d gadizone.com
    ```
 
 ---
@@ -276,7 +276,7 @@ pm2 monit
 pm2 logs --err
 
 # 5. Database performance
-mongo motoroctane --eval "db.models.explain('executionStats').find({brandId: 'test'})"
+mongo gadizone --eval "db.models.explain('executionStats').find({brandId: 'test'})"
 ```
 
 ---
@@ -294,7 +294,7 @@ mongo motoroctane --eval "db.models.explain('executionStats').find({brandId: 'te
 
 ## 🎉 **CONGRATULATIONS!**
 
-Your MotorOctane platform is now:
+Your gadizone platform is now:
 - ✅ Optimized for 1M+ daily users
 - ✅ Protected against common attacks
 - ✅ Monitored for errors and performance

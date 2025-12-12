@@ -1,6 +1,5 @@
 import Link from 'next/link'
-
-import { Car, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -9,31 +8,24 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <img
-                src="/motoroctane-logo.png"
-                alt="MotorOctane - Aapka Auto Expert"
-                width={40}
-                height={40}
-                className="h-10 w-auto group-hover:scale-105 transition-transform duration-300"
-              />
-              <span className="text-xl font-bold group-hover:text-orange-300 transition-colors">MotorOctane</span>
+            <Link href="/" className="inline-block group">
+              <span className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent group-hover:from-red-400 group-hover:to-orange-300 transition-all">gadizone</span>
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed">
               Your trusted partner for finding the perfect new car in India. Compare prices,
               specifications, reviews, and get the best deals from authorized dealers.
             </p>
             <div className="flex space-x-4">
-              <a href="https://facebook.com/motoroctane" className="text-gray-400 hover:text-red-400 transition-colors" aria-label="Follow us on Facebook">
+              <a href="https://facebook.com/gadizone" className="text-gray-400 hover:text-red-400 transition-colors" aria-label="Follow us on Facebook">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="https://twitter.com/motoroctane" className="text-gray-400 hover:text-orange-400 transition-colors" aria-label="Follow us on Twitter">
+              <a href="https://twitter.com/gadizone" className="text-gray-400 hover:text-orange-400 transition-colors" aria-label="Follow us on Twitter">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="https://instagram.com/motoroctane" className="text-gray-400 hover:text-red-400 transition-colors" aria-label="Follow us on Instagram">
+              <a href="https://instagram.com/gadizone" className="text-gray-400 hover:text-red-400 transition-colors" aria-label="Follow us on Instagram">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="https://youtube.com/motoroctane" className="text-gray-400 hover:text-orange-400 transition-colors" aria-label="Subscribe to our YouTube channel">
+              <a href="https://youtube.com/gadizone" className="text-gray-400 hover:text-orange-400 transition-colors" aria-label="Subscribe to our YouTube channel">
                 <Youtube className="h-5 w-5" />
               </a>
             </div>
@@ -109,8 +101,8 @@ export default function Footer() {
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-red-400" />
-                <a href="mailto:info@motoroctane.com" className="text-gray-300 hover:text-red-400 transition-colors">
-                  info@motoroctane.com
+                <a href="mailto:info@gadizone.com" className="text-gray-300 hover:text-red-400 transition-colors">
+                  info@gadizone.com
                 </a>
               </div>
               <div className="flex items-center space-x-3">
@@ -122,7 +114,7 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="h-4 w-4 text-red-400 mt-0.5" />
                 <span className="text-gray-300">
-                  MotorOctane Technologies Pvt. Ltd.<br />
+                  gadizone Technologies Pvt. Ltd.<br />
                   Cyber City, Gurgaon, Haryana 122002
                 </span>
               </div>
@@ -134,7 +126,7 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              © 2024 MotorOctane. All rights reserved.
+              © 2024 gadizone. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
               <Link href="/privacy-policy" className="text-gray-400 hover:text-red-400 transition-colors">

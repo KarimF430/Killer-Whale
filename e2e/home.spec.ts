@@ -11,7 +11,7 @@ test.describe('Home Page', () => {
     });
 
     test('should load with correct title', async ({ page }) => {
-        await expect(page).toHaveTitle(/MotorOctane/);
+        await expect(page).toHaveTitle(/gadizone/);
     });
 
     test('should display header navigation', async ({ page }) => {
@@ -69,7 +69,7 @@ test.describe('Home Page', () => {
         await page.setViewportSize({ width: 375, height: 667 });
 
         // Check that page is still functional
-        await expect(page).toHaveTitle(/MotorOctane/);
+        await expect(page).toHaveTitle(/gadizone/);
 
         // Check mobile navigation
         const header = page.locator('header');

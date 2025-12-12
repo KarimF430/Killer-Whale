@@ -23,7 +23,7 @@ const execAsync = promisify(exec);
 
 // Configuration
 const config = {
-  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/motoroctane',
+  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/gadizone',
   backupDir: process.env.BACKUP_DIR || './backups',
   maxBackups: parseInt(process.env.MAX_BACKUPS || '7'), // Keep 7 days of backups
   s3Bucket: process.env.S3_BACKUP_BUCKET, // Optional S3 bucket for cloud backup
@@ -56,7 +56,7 @@ function parseMongoUri(uri: string) {
 // Create backup
 async function createBackup() {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const backupName = `motoroctane-backup-${timestamp}`;
+  const backupName = `gadizone-backup-${timestamp}`;
   const backupPath = path.join(config.backupDir, backupName);
   
   try {
@@ -155,7 +155,7 @@ async function cleanOldBackups() {
     console.log('🧹 Cleaning old backups...');
     
     const files = fs.readdirSync(config.backupDir)
-      .filter(file => file.startsWith('motoroctane-backup-'))
+      .filter(file => file.startsWith('gadizone-backup-'))
       .map(file => ({
         name: file,
         path: path.join(config.backupDir, file),
@@ -231,7 +231,7 @@ export async function restoreBackup(backupFile: string) {
 export async function listBackups() {
   try {
     const files = fs.readdirSync(config.backupDir)
-      .filter(file => file.startsWith('motoroctane-backup-'))
+      .filter(file => file.startsWith('gadizone-backup-'))
       .map(file => {
         const stats = fs.statSync(path.join(config.backupDir, file));
         return {

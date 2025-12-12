@@ -26,8 +26,8 @@ try {
 } catch { }
 const baseImageHosts = [
   'images.unsplash.com',
-  'motoroctane.com',
-  'www.motoroctane.com',
+  'gadizone.com',
+  'www.gadizone.com',
   r2Host,
   backendHost,
   ...extraImageHosts,

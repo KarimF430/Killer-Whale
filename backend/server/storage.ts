@@ -159,7 +159,7 @@ export class PersistentStorage implements IStorage {
   private async createDefaultAdmin(): Promise<void> {
     try {
       const defaultAdmin: InsertAdminUser = {
-        email: 'admin@motoroctane.com',
+        email: 'admin@gadizone.com',
         password: await hashPassword('Admin@123'),
         name: 'Admin',
         role: 'super_admin',
@@ -167,7 +167,7 @@ export class PersistentStorage implements IStorage {
       };
 
       await this.createAdminUser(defaultAdmin);
-      console.log('✅ Default admin user created: admin@motoroctane.com / Admin@123');
+      console.log('✅ Default admin user created: admin@gadizone.com / Admin@123');
     } catch (error) {
       console.error('Error creating default admin:', error);
     }

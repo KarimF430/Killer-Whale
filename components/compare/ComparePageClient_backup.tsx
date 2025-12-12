@@ -74,7 +74,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
 
   const generateSeoText = (modelNames: string[]) => {
     if (modelNames.length === 0) return ''
-    return `Motoroctane brings you comparison of ${modelNames.join(', ')}...`
+    return `gadizone brings you comparison of ${modelNames.join(', ')}...`
   }
 
   const fetchComparisonData = async () => {
@@ -123,7 +123,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
       // Generate SEO text
       const modelNames = items.map(item => `${item.model.brandName} ${item.model.name}`)
       if (modelNames.length > 0) {
-        setSeoText(`Motoroctane brings you comparison of ${modelNames.join(', ')}...`)
+        setSeoText(`gadizone brings you comparison of ${modelNames.join(', ')}...`)
       }
 
       setDataLoaded(true)
@@ -218,7 +218,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
       try {
         await navigator.share({
           title: `${comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}`,
-          text: 'Compare these cars on MotorOctane',
+          text: 'Compare these cars on gadizone',
           url: window.location.href
         })
       } catch (err) {

@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Upcoming Cars Section
+ * gadizone Mobile App - Upcoming Cars Section
  * EXACT replica of web components/home/UpcomingCars.tsx
  */
 

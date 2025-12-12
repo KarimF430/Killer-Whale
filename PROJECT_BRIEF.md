@@ -1,10 +1,10 @@
-# MotorOctane - Project Brief
+# gadizone - Project Brief
 
 **Production-Ready Car Discovery Platform for India**
 
 ## Overview
 
-MotorOctane is an enterprise-grade car discovery platform optimized for the Indian market, featuring AI-powered search, real-time pricing, comprehensive car comparisons, and advanced analytics. Built to handle 1M+ daily users with 95%+ mobile traffic.
+gadizone is an enterprise-grade car discovery platform optimized for the Indian market, featuring AI-powered search, real-time pricing, comprehensive car comparisons, and advanced analytics. Built to handle 1M+ daily users with 95%+ mobile traffic.
 
 ---
 
@@ -157,7 +157,7 @@ Provide Indian car buyers with the most comprehensive, fast, and user-friendly p
 ## 📁 Project Architecture
 
 ```
-MotorOctane/
+gadizone/
 ├── app/                      # Next.js 15 App Router
 │   ├── [brand-cars]/         # Dynamic brand pages (SSR)
 │   │   └── [model]/          # Dynamic model pages (SSR)
@@ -374,7 +374,7 @@ npm run test:performance    # Load tests
 - **GitHub**: https://github.com/KarimF430/Killer-Whale
 - **Documentation**: See `README.md` and related docs
 - **Issues**: GitHub Issues for bug reports
-- **Email**: support@motoroctane.com
+- **Email**: support@gadizone.com
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Navigation Setup
+ * gadizone Mobile App - Navigation Setup
  * Bottom tabs + stack navigation matching web structure
  */
 

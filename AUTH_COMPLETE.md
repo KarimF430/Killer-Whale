@@ -2,7 +2,7 @@
 
 ## ✅ **Implementation Complete**
 
-Your MotorOctane admin panel now has a fully secure JWT-based authentication system!
+Your gadizone admin panel now has a fully secure JWT-based authentication system!
 
 ---
 
@@ -50,7 +50,7 @@ Your MotorOctane admin panel now has a fully secure JWT-based authentication sys
 
 ## 🔑 **Default Credentials:**
 
-Email: admin@motoroctane.com
+Email: admin@gadizone.com
 Password: Admin@123
 
 **IMPORTANT:** Change these in production!
@@ -109,7 +109,7 @@ Password: Admin@123
 ## 🎨 **Login Page Features:**
 
 - Modern gradient design
-- MotorOctane branding
+- gadizone branding
 - Email input with icon
 - Password input with show/hide
 - Loading spinner during login
@@ -152,7 +152,7 @@ Public routes:
 
 1. Visit http://localhost:5001
 2. Should redirect to /login
-3. Login with admin@motoroctane.com / Admin@123
+3. Login with admin@gadizone.com / Admin@123
 4. Should redirect to dashboard
 5. Click Logout button
 6. Should redirect back to /login

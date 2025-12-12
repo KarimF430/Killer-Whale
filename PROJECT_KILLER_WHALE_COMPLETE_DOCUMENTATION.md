@@ -20,7 +20,7 @@
 ## 🎯 PLATFORM OVERVIEW
 
 ### Mission
-MotorOctane is an enterprise-grade car discovery platform designed to handle 1M+ daily users, providing comprehensive car information, AI-powered search, price comparisons, and interactive tools.
+gadizone is an enterprise-grade car discovery platform designed to handle 1M+ daily users, providing comprehensive car information, AI-powered search, price comparisons, and interactive tools.
 
 ### Key Metrics
 - **Response Time**: 5-10ms API responses
@@ -1218,7 +1218,7 @@ const chatWithAI = async (message: string) => {
 **3. Context-Aware Responses**
 ```typescript
 System Prompt:
-"You are MotorOctane AI, a car expert assistant. You have access to:
+"You are gadizone AI, a car expert assistant. You have access to:
 - 36+ car brands
 - 1000+ car models
 - Detailed specifications
@@ -1784,7 +1784,7 @@ app.use(helmet.contentSecurityPolicy({
     scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.googletagmanager.com'],
     styleSrc: ["'self'", "'unsafe-inline'"],
     imgSrc: ["'self'", 'data:', 'https:'],
-    connectSrc: ["'self'", 'https://api.motoroctane.com']
+    connectSrc: ["'self'", 'https://api.gadizone.com']
   }
 }))
 
@@ -2146,8 +2146,8 @@ contentSecurityPolicy: {
 **CORS Whitelist:**
 ```typescript
 allowedOrigins = [
-  'https://motoroctane.com',
-  'https://www.motoroctane.com',
+  'https://gadizone.com',
+  'https://www.gadizone.com',
   'https://killer-whale101.vercel.app',
   'https://killer-whale.onrender.com',
   'http://localhost:3000',
@@ -2802,7 +2802,7 @@ app.use(session({
     httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000,  // 30 days
     sameSite: 'lax',
-    domain: isProd ? '.motoroctane.com' : undefined
+    domain: isProd ? '.gadizone.com' : undefined
   },
   name: 'sid'
 }))
@@ -2988,7 +2988,7 @@ NODE_ENV=production
 PORT=5001
 
 # Database
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/motoroctane
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/gadizone
 
 # Redis
 REDIS_URL=rediss://user:pass@redis.cloud:6379
@@ -3002,13 +3002,13 @@ SESSION_SECRET=your-super-secret-session-key-32-chars
 R2_ACCOUNT_ID=your-cloudflare-account-id
 R2_ACCESS_KEY_ID=your-r2-access-key
 R2_SECRET_ACCESS_KEY=your-r2-secret-key
-R2_BUCKET_NAME=motoroctane-uploads
+R2_BUCKET_NAME=gadizone-uploads
 R2_ENDPOINT=https://account-id.r2.cloudflarestorage.com
-R2_PUBLIC_BASE_URL=https://cdn.motoroctane.com
+R2_PUBLIC_BASE_URL=https://cdn.gadizone.com
 
 # Frontend
-FRONTEND_URL=https://motoroctane.com
-NEXT_PUBLIC_API_URL=https://api.motoroctane.com
+FRONTEND_URL=https://gadizone.com
+NEXT_PUBLIC_API_URL=https://api.gadizone.com
 
 # Monitoring
 SENTRY_DSN=your-sentry-dsn
@@ -3019,7 +3019,7 @@ SENTRY_DSN=your-sentry-dsn
 ```javascript
 module.exports = {
   apps: [{
-    name: 'motoroctane-backend',
+    name: 'gadizone-backend',
     script: './dist/index.js',
     instances: 'max',  // Cluster mode
     exec_mode: 'cluster',

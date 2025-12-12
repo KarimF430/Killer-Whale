@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Brand Screen
+ * gadizone Mobile App - Brand Screen
  * Section 1: Header + Ad Carousel + Brand Title + Description + Price List
  * Section 2: Filter Pills + Cars List
  */

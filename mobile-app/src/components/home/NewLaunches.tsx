@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - New Launches Section
+ * gadizone Mobile App - New Launches Section
  * Shows newly launched cars with green NEW badge
  */
 

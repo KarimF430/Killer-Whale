@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 // dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const LOCAL_URI = 'mongodb://localhost:27017/motoroctane';
+const LOCAL_URI = 'mongodb://localhost:27017/gadizone';
 const PROD_URI = process.env.MONGODB_URI || (() => {
     throw new Error('MONGODB_URI environment variable is required');
 })();

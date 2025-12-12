@@ -33,7 +33,7 @@ Loaded X brands from storage
 Loaded X models from storage
 Loaded X variants from storage
 Loaded X popular comparisons from storage
-✅ Default admin user created: admin@motoroctane.com / Admin@123
+✅ Default admin user created: admin@gadizone.com / Admin@123
 serving on port 5001
 ```
 
@@ -51,7 +51,7 @@ Or just:
 
 1. Go to: `http://localhost:5001/login`
 2. Enter credentials:
-   - Email: `admin@motoroctane.com`
+   - Email: `admin@gadizone.com`
    - Password: `Admin@123`
 3. Click "Sign In"
 
@@ -84,7 +84,7 @@ fetch('/api/auth/login', {
   headers: { 'Content-Type': 'application/json' },
   credentials: 'include',
   body: JSON.stringify({
-    email: 'admin@motoroctane.com',
+    email: 'admin@gadizone.com',
     password: 'Admin@123'
   })
 })
@@ -147,7 +147,7 @@ cd backend && npm run dev
 # Terminal 2 - Test API
 curl -X POST http://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@motoroctane.com","password":"Admin@123"}'
+  -d '{"email":"admin@gadizone.com","password":"Admin@123"}'
 
 # Should return JSON with token
 ```

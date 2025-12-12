@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Theme Index
+ * gadizone Mobile App - Theme Index
  * Export all theme utilities
  */
 

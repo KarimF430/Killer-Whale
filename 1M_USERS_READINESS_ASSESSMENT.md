@@ -1,7 +1,7 @@
 # 🎯 1M Daily Users Readiness Assessment
 
 **Date:** January 2025  
-**Project:** MotorOctane - Car Catalogue Platform  
+**Project:** gadizone - Car Catalogue Platform  
 **Target:** 1,000,000 daily active users  
 **Overall Readiness:** ⚠️ **65/100 - PARTIALLY READY**
 
@@ -303,7 +303,7 @@ docker run -d -p 6379:6379 redis:7-alpine
 **Required Setup:**
 ```typescript
 // MongoDB Atlas Replica Set (Recommended)
-mongoose.connect('mongodb://mongo1,mongo2,mongo3/motoroctane?replicaSet=rs0', {
+mongoose.connect('mongodb://mongo1,mongo2,mongo3/gadizone?replicaSet=rs0', {
   readPreference: 'secondaryPreferred',
   maxPoolSize: 100
 });

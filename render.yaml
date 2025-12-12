@@ -1,8 +1,8 @@
-# Render Blueprint for MotorOctane
+# Render Blueprint for gadizone
 services:
   # Frontend (Next.js)
   - type: web
-    name: motoroctane-frontend
+    name: gadizone-frontend
     env: node
     plan: starter
     buildCommand: npm install && npm run build
@@ -15,12 +15,12 @@ services:
       - key: NEXT_PUBLIC_API_URL
         fromService:
           type: web
-          name: motoroctane-backend
+          name: gadizone-backend
           property: url
       - key: NEXT_PUBLIC_BACKEND_URL
         fromService:
           type: web
-          name: motoroctane-backend
+          name: gadizone-backend
           property: url
       - key: NEXT_PUBLIC_SENTRY_DSN
         sync: false
@@ -33,7 +33,7 @@ services:
     
   # Backend (Express.js)
   - type: web
-    name: motoroctane-backend
+    name: gadizone-backend
     env: node
     plan: starter
     buildCommand: cd backend && npm ci && npm run build
@@ -68,5 +68,5 @@ services:
 
 databases:
   # MongoDB (if using Render's database)
-  - name: motoroctane-db
+  - name: gadizone-db
     plan: starter

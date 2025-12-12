@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Typography System
+ * gadizone Mobile App - Typography System
  * EXACT match of web globals.css
  * 
  * Font: Inter (Google Fonts)

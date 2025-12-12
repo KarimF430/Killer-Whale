@@ -1,5 +1,5 @@
 /**
- * MotorOctane Mobile App - Common Components Index
+ * gadizone Mobile App - Common Components Index
  */
 
 export { default as Button } from './Button';

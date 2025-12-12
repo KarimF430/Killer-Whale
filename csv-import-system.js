@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * CSV Import System for MotorOctane
+ * CSV Import System for gadizone
  * Imports brands and models from user-provided CSV files
  * Ensures accurate, current, and duplicate-free data
  */
@@ -292,7 +292,7 @@ async function verifyImport() {
 
 // Main execution
 async function main() {
-  console.log('🚀 CSV Import System for MotorOctane\n');
+  console.log('🚀 CSV Import System for gadizone\n');
   
   const token = process.argv[2];
   const brandsCSV = process.argv[3];

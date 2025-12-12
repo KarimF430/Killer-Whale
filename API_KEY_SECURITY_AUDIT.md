@@ -1,6 +1,6 @@
 # API Key Security Audit Report
 **Date:** December 3, 2025  
-**Project:** MotorOctane (Killer Whale)  
+**Project:** gadizone (Killer Whale)  
 **Auditor:** AI Agent
 
 ---

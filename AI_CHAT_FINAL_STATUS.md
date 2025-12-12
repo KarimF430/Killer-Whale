@@ -3,7 +3,7 @@
 ## ✅ What's Been Implemented
 
 ### 1. **ChatGPT-Style UI** ✅
-- Dark theme with MotorOctane branding
+- Dark theme with gadizone branding
 - Clean, modern interface
 - No predefined quick replies (free-form chat)
 - Responsive design
