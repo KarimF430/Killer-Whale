@@ -81,15 +81,18 @@ const nextConfig = {
       "default-src 'self'",
       // Allow unsafe-eval only in development for Next/Webpack dev tooling
       // Added unpkg.com and lottie hosts for Killer Whale loading animation
-      `script-src 'self' 'unsafe-inline'${unsafeEval} 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net`,
+      // Added Clarity and Amplitude domains (including wildcards)
+      `script-src 'self' 'unsafe-inline'${unsafeEval} 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net https://www.clarity.ms https://c.clarity.ms https://scripts.clarity.ms https://*.clarity.ms`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https: http: blob:",
+      // Added Clarity image domains
+      "img-src 'self' data: https: http: blob: https://c.clarity.ms https://*.clarity.ms",
       "font-src 'self' data:",
       // Added lottie.host, unpkg.com, cdn.jsdelivr.net for Killer Whale animation
-      `connect-src 'self' ${connectSrc} https://www.google-analytics.com https://*.sentry.io https://images.unsplash.com https://www.googleapis.com https://lottie.host https://unpkg.com https://cdn.jsdelivr.net`,
+      // Added Amplitude and Clarity connect domains
+      `connect-src 'self' ${connectSrc} https://www.google-analytics.com https://*.sentry.io https://images.unsplash.com https://www.googleapis.com https://lottie.host https://unpkg.com https://cdn.jsdelivr.net https://*.amplitude.com https://api.amplitude.com https://api2.amplitude.com https://*.clarity.ms https://c.clarity.ms`,
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
       // Added wasm-unsafe-eval for Lottie WASM player
-      "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net",
+      "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms",
     ].join('; ')
 
     return [

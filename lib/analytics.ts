@@ -53,8 +53,9 @@ class Analytics {
                         formInteractions: false,
                         fileDownloads: false,
                     },
-                    logLevel: this.config.debug ? amplitude.Types.LogLevel.Debug : amplitude.Types.LogLevel.Warn,
+                    logLevel: amplitude.Types.LogLevel.None,
                 });
+                // Only log our own wrapper message if debug is on
                 this.log('Amplitude initialized');
             }
 
