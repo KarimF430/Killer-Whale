@@ -249,7 +249,7 @@ export async function invalidateRedisCache(pattern: string): Promise<void> {
       const [newCursor, foundKeys] = await redis.scan(
         cursor,
         'MATCH',
-        `cache:${pattern}*`,
+        `cache:*${pattern}*`,
         'COUNT',
         100
       );

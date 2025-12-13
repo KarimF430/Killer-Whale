@@ -1,18 +1,18 @@
-import { invalidateRedisCache } from './server/middleware/redis-cache';
+import { clearAllCache } from './server/middleware/redis-cache';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
 async function clearCache() {
     try {
-        console.log('🗑️ Clearing upcoming cars cache...');
+        console.log('🗑️  Clearing ALL Redis cache...');
 
-        // Clear all upcoming cars cache entries
-        await invalidateRedisCache('v2:upcoming-cars');
+        // Clear entire Redis database
+        await clearAllCache();
 
         console.log('✅ Cache cleared successfully!');
         console.log('');
-        console.log('Please refresh the admin panel now.');
+        console.log('Please refresh the browser/admin panel now.');
 
         process.exit(0);
     } catch (error) {

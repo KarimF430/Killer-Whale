@@ -1842,6 +1842,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       const validatedData = insertModelSchema.parse(req.body);
       console.log('Validated data:', JSON.stringify(validatedData, null, 2));
       const model = await storage.createModel(validatedData);
+
+      // Invalidate both lists
+      await invalidateRedisCache('/api/models');
+      await invalidateRedisCache('/api/models-with-pricing');
+
       res.status(201).json(model);
     } catch (error) {
       console.error('Model creation error:', error);
@@ -1868,6 +1873,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       // Invalidate models cache so frontend sees updated data
       await invalidateRedisCache('/api/models');
+      await invalidateRedisCache('/api/models-with-pricing');
       console.log('🗑️ Models cache invalidated');
 
       res.json(model);
