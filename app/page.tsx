@@ -127,14 +127,32 @@ async function getHomeData() {
   console.log('🔍 Fetching home data from:', backendUrl)
 
   try {
-    // Fetch all data in parallel (6 requests) - Limit set to 80 for balanced performance and coverage
-    const [popularRes, modelsRes, brandsRes, comparisonsRes, newsRes, upcomingCarsRes] = await Promise.all([
+    // Fetch all data in parallel (10 requests) - Including all budget ranges for optimal SSR performance
+    // This eliminates client-side fetching, improves SEO, and leverages ISR + Redis caching
+    const [
+      popularRes,
+      modelsRes,
+      brandsRes,
+      comparisonsRes,
+      newsRes,
+      upcomingCarsRes,
+      // Pre-fetch all budget ranges for Cars by Budget section (SSR optimization)
+      budgetUnder8Res,
+      budgetUnder15Res,
+      budgetUnder25Res,
+      budgetUnder50Res
+    ] = await Promise.all([
       fetch(`${backendUrl}/api/cars/popular`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/models-with-pricing?limit=80`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/popular-comparisons`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/news?limit=6`, { next: { revalidate: 3600 } }),
-      fetch(`${backendUrl}/api/upcoming-cars`, { next: { revalidate: 3600 } })
+      fetch(`${backendUrl}/api/upcoming-cars`, { next: { revalidate: 3600 } }),
+      // Budget cars - fetch 12 each (10 displayed + buffer) with 1-hour cache
+      fetch(`${backendUrl}/api/cars-by-budget/under-8?limit=12`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/cars-by-budget/under-15?limit=12`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/cars-by-budget/under-25?limit=12`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/cars-by-budget/under-50?limit=12`, { next: { revalidate: 3600 } })
     ])
 
     const popularData = await popularRes.json()
@@ -142,6 +160,12 @@ async function getHomeData() {
     const brandsData = await brandsRes.json()
     const comparisonsData = await comparisonsRes.json()
     const upcomingCarsData = await upcomingCarsRes.json()
+
+    // Parse budget cars data
+    const budgetUnder8Data = await budgetUnder8Res.json()
+    const budgetUnder15Data = await budgetUnder15Res.json()
+    const budgetUnder25Data = await budgetUnder25Res.json()
+    const budgetUnder50Data = await budgetUnder50Res.json()
 
     // Check news response
     let newsData = { articles: [] }
@@ -261,6 +285,36 @@ async function getHomeData() {
       isPopular: false
     })) : []
 
+    // ✅ Process Budget Cars (pre-fetched from dedicated API for optimal performance)
+    // This data is ISR-cached for 1 hour + Redis-cached, eliminating runtime DB calls
+    const processBudgetCars = (data: any): Car[] => {
+      const cars = data?.data || []
+      return cars.map((car: any) => ({
+        id: car.id,
+        name: car.name,
+        brand: car.brand,
+        brandName: car.brandName,
+        image: car.image,
+        startingPrice: car.startingPrice,
+        fuelTypes: (car.fuelTypes || ['Petrol']).map(normalizeFuelType),
+        transmissions: (car.transmissions || ['Manual']).map(normalizeTransmission),
+        seating: car.seating || 5,
+        launchDate: car.launchDate || 'Launched',
+        slug: car.slug,
+        isNew: car.isNew || false,
+        isPopular: car.isPopular || false,
+        popularRank: null,
+        newRank: null
+      }))
+    }
+
+    const budgetCarsByRange = {
+      'under-8': processBudgetCars(budgetUnder8Data),
+      'under-15': processBudgetCars(budgetUnder15Data),
+      'under-25': processBudgetCars(budgetUnder25Data),
+      'under-50': processBudgetCars(budgetUnder50Data)
+    }
+
     return {
       popularCars,
       allCars,
@@ -268,7 +322,8 @@ async function getHomeData() {
       brands,
       comparisons: processedComparisons,
       news: newsData.articles || [],
-      upcomingCars
+      upcomingCars,
+      budgetCarsByRange
     }
   } catch (error) {
     console.error('Error fetching home data:', error)
@@ -279,13 +334,19 @@ async function getHomeData() {
       brands: [],
       comparisons: [],
       news: [],
-      upcomingCars: []
+      upcomingCars: [],
+      budgetCarsByRange: {
+        'under-8': [],
+        'under-15': [],
+        'under-25': [],
+        'under-50': []
+      }
     }
   }
 }
 
 export default async function HomePage() {
-  const { popularCars, allCars, newLaunchedCars, brands, comparisons, news, upcomingCars } = await getHomeData()
+  const { popularCars, allCars, newLaunchedCars, brands, comparisons, news, upcomingCars, budgetCarsByRange } = await getHomeData()
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -296,7 +357,7 @@ export default async function HomePage() {
         <HeroSection />
 
         <PageSection background="gray">
-          <CarsByBudget initialCars={allCars} />
+          <CarsByBudget budgetCarsByRange={budgetCarsByRange} />
         </PageSection>
 
         <PageSection background="white">

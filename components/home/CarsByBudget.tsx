@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import CarCard from './CarCard'
 
@@ -20,63 +20,40 @@ interface Car {
   isPopular: boolean
 }
 
-// Helper function to format launch date
-const formatLaunchDate = (date: string): string => {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const parts = date.split('-')
-  if (parts.length === 2) {
-    const year = parts[0]
-    const monthIndex = parseInt(parts[1]) - 1
-    return `${months[monthIndex]} ${year}`
-  }
-  return date
+interface BudgetCarsByRange {
+  'under-8': Car[]
+  'under-15': Car[]
+  'under-25': Car[]
+  'under-50': Car[]
 }
 
-// Helper function to format transmission
-const formatTransmission = (transmission: string): string => {
-  const lower = transmission.toLowerCase()
-  if (lower === 'manual') {
-    return 'Manual'
-  }
-  if (lower === 'automatic') {
-    return 'Automatic'
-  }
-  return transmission.toUpperCase()
+interface CarsByBudgetProps {
+  budgetCarsByRange: BudgetCarsByRange
 }
 
-// Helper function to format fuel type
-const formatFuelType = (fuel: string): string => {
-  const lower = fuel.toLowerCase()
-  if (lower === 'cng') {
-    return 'CNG'
-  }
-  return fuel.charAt(0).toUpperCase() + fuel.slice(1).toLowerCase()
-}
-
-export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[] }) {
-  const [selectedBudget, setSelectedBudget] = useState('under-8')
+/**
+ * ✅ PERFORMANCE OPTIMIZED: Cars by Budget Section
+ * 
+ * Performance Strategy:
+ * 1. All data is pre-fetched on server-side (SSR/ISR) - no client-side API calls
+ * 2. ISR caches the page for 1 hour - subsequent requests serve cached HTML
+ * 3. Backend uses Redis caching - reduces database load
+ * 4. Full SEO support - all content is server-rendered
+ * 
+ * No database calls happen at runtime - all data comes from cached sources.
+ */
+export default function CarsByBudget({ budgetCarsByRange }: CarsByBudgetProps) {
+  const [selectedBudget, setSelectedBudget] = useState<keyof BudgetCarsByRange>('under-8')
 
   const budgetRanges = [
-    { id: 'under-8', label: 'Under ₹8 Lakh', max: 800000 },
-    { id: 'under-15', label: 'Under ₹15 Lakh', max: 1500000 },
-    { id: 'under-25', label: 'Under ₹25 Lakh', max: 2500000 },
-    { id: 'under-50', label: 'Under ₹50 Lakh', max: 5000000 },
+    { id: 'under-8' as const, label: 'Under ₹8 Lakh', max: 800000 },
+    { id: 'under-15' as const, label: 'Under ₹15 Lakh', max: 1500000 },
+    { id: 'under-25' as const, label: 'Under ₹25 Lakh', max: 2500000 },
+    { id: 'under-50' as const, label: 'Under ₹50 Lakh', max: 5000000 },
   ]
 
-  // ✅ OPTIMIZED: Use useMemo to process cars immediately on first render
-  // This eliminates the useEffect delay that caused empty first render
-  const carsByBudget = useMemo(() => {
-    if (initialCars.length === 0) return {}
-
-    return {
-      'under-8': initialCars.filter(car => car.startingPrice > 0 && car.startingPrice <= 800000),
-      'under-15': initialCars.filter(car => car.startingPrice > 800000 && car.startingPrice <= 1500000),
-      'under-25': initialCars.filter(car => car.startingPrice > 1500000 && car.startingPrice <= 2500000),
-      'under-50': initialCars.filter(car => car.startingPrice > 2500000 && car.startingPrice <= 5000000),
-    }
-  }, [initialCars])
-
-  const currentCars = carsByBudget[selectedBudget as keyof typeof carsByBudget] || []
+  // ✅ SSR-OPTIMIZED: Direct access to pre-fetched data - no useEffect, no API calls
+  const currentCars = budgetCarsByRange[selectedBudget] || []
 
   const scrollContainer = (direction: 'left' | 'right') => {
     const container = document.getElementById(`budget-cars-${selectedBudget}`)
@@ -151,7 +128,7 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
               className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {currentCars.slice(0, 10).map((car, index) => (
+              {currentCars.slice(0, 10).map((car) => (
                 <CarCard
                   key={car.id}
                   car={car}
