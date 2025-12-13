@@ -1307,7 +1307,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             isPopular: 1,
             status: 1,
             popularRank: 1,
-            newRank: 1
+            newRank: 1,
+            topRank: 1,
+            bodyType: 1
           }
         }
       ]).toArray();

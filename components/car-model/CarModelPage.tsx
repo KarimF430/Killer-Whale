@@ -14,6 +14,7 @@ import { truncateCarName } from '@/lib/text-utils'
 import { formatPrice, formatPriceRange } from '@/utils/priceFormatter'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import CarCard from '../home/CarCard'
+import { saveVisitedModel } from '../home/CarsYouMightLike'
 import { useViewTracker } from '@/lib/use-view-tracker'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
 // Lazy-load heavy components for faster initial page load (CarWale-style optimization)
@@ -300,13 +301,25 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
   // Load saved city from localStorage after mount to avoid hydration mismatch
   useEffect(() => {
+    console.log('[CarModelPage] useEffect running, model:', model?.name, 'brand:', model?.brand)
     if (typeof window !== 'undefined') {
       const savedCity = localStorage.getItem('selectedCity')
       if (savedCity) {
         setSelectedCity(savedCity)
       }
+
+      // Track visited model for "Cars You Might Like" recommendations
+      if (model?.id && model?.name && model?.brand) {
+        console.log('[CarModelPage] Calling saveVisitedModel for:', model.name)
+        saveVisitedModel({
+          id: model.id,
+          name: model.name,
+          brandName: model.brand,
+          bodyType: model.bodyType
+        })
+      }
     }
-  }, [])
+  }, [model?.id, model?.name, model?.brand, model?.bodyType])
   const [selectedVariant, setSelectedVariant] = useState(model?.variants?.[0]?.name || 'Base Variant')
 
   // Use variants from server-side props (no client-side fetch needed)

@@ -259,7 +259,7 @@ export default function TopCarsByBodyType({ initialCars = [] }: { initialCars?: 
                             {/* View All Card */}
                             {rankedCars.length > 0 && (
                                 <Link
-                                    href={`/cars-by-body-type/${selectedBodyType === 'all' ? '' : selectedBodyType.toLowerCase()}`}
+                                    href={`/top-cars/${selectedBodyType === 'all' ? 'suv' : selectedBodyType.toLowerCase()}`}
                                     className="flex-shrink-0 w-[220px] sm:w-[240px] bg-gradient-to-br from-orange-500 to-red-500 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                                 >
                                     <div className="h-full flex flex-col items-center justify-center p-6 text-center min-h-[280px] sm:min-h-[300px]">

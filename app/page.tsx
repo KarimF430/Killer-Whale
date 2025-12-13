@@ -9,6 +9,14 @@ import Card from '@/components/common/Card'
 import { staticPageSEO } from '@/lib/seo'
 
 // Lazy load below-fold components for better performance
+const CarsYouMightLike = dynamic(() => import('@/components/home/CarsYouMightLike'), {
+  loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse my-4" />
+})
+
+const ExploreElectricCars = dynamic(() => import('@/components/home/ExploreElectricCars'), {
+  loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse my-4" />
+})
+
 const PopularCars = dynamic(() => import('@/components/home/PopularCars'), {
   loading: () => <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
 })
@@ -232,7 +240,7 @@ async function getHomeData() {
         bodyType: model.bodyType || undefined,
         topRank: model.topRank ?? null
       }
-    }) : []
+    }).filter(car => car.startingPrice >= 100000) : [] // Filter out cars with price < 1 lakh
 
     // Process New Launched Cars
     const newLaunchedCars = allCars
@@ -359,6 +367,10 @@ export default async function HomePage() {
         <PageSection background="gray">
           <CarsByBudget budgetCarsByRange={budgetCarsByRange} />
         </PageSection>
+
+        <CarsYouMightLike allCars={allCars} />
+
+        <ExploreElectricCars allCars={allCars} />
 
         <PageSection background="white">
           <TopCarsByBodyType initialCars={allCars} />
