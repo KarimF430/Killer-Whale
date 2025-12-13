@@ -103,7 +103,7 @@ export default function CarsByBudget({ initialCars = [] }: { initialCars?: Car[]
             key={budget.id}
             onClick={() => setSelectedBudget(budget.id)}
             className={`
-              flex-shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-medium 
+              flex-shrink-0 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium 
               transition-all duration-200 whitespace-nowrap
               ${selectedBudget === budget.id
                 ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'

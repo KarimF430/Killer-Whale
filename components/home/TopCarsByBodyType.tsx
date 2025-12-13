@@ -194,7 +194,7 @@ export default function TopCarsByBodyType({ initialCars = [] }: { initialCars?: 
                         key={type.id}
                         onClick={() => setSelectedBodyType(type.id)}
                         className={`
-                            flex-shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-medium 
+                            flex-shrink-0 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium 
                             transition-all duration-200 whitespace-nowrap
                             ${selectedBodyType === type.id
                                 ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'

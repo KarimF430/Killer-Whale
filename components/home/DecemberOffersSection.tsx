@@ -133,7 +133,7 @@ export default function DecemberOffersSection({ initialCars = [], initialBrands 
                             key={brand.id}
                             onClick={() => setSelectedBrand(brand.id)}
                             className={`
-                flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full text-xs sm:text-sm font-medium 
+                flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium 
                 transition-all duration-200 whitespace-nowrap
                 ${isActive
                                     ? `bg-gradient-to-r ${brandColors.from} ${brandColors.to} text-white shadow-md`
