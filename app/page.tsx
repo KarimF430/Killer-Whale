@@ -150,7 +150,7 @@ async function getHomeData() {
       budgetUnder25Res,
       budgetUnder50Res
     ] = await Promise.all([
-      fetch(`${backendUrl}/api/cars/popular`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/cars/popular?limit=10`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/models-with-pricing?limit=80`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/popular-comparisons`, { next: { revalidate: 3600 } }),
