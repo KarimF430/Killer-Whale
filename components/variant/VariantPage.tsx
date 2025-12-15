@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 import { truncateCarName } from '@/lib/text-utils'
 import { formatPrice, formatPriceRange } from '@/utils/priceFormatter'
-import { Heart, Star, Share2, ChevronDown, ChevronRight, Calendar, Users, Fuel, ChevronLeft, Clock, Eye, MessageCircle, ArrowRight, Play, ExternalLink, ThumbsUp, Phone, CheckCircle, Settings } from 'lucide-react'
+import { Heart, Star, Share2, ChevronDown, ChevronRight, Calendar, Users, Fuel, ChevronLeft, Clock, Eye, MessageCircle, ArrowRight, Play, ExternalLink, ThumbsUp, Phone, CheckCircle, Settings, Camera } from 'lucide-react'
 import Footer from '../Footer'
 import PageSection from '../common/PageSection'
 import AdBanner from '../home/AdBanner'
@@ -720,7 +720,15 @@ export default function VariantPage({
         <PageSection background="white" maxWidth="7xl">
           <div id="overview" className="space-y-6">
             {/* Hero Car Image with Gallery - Scrollable */}
-            <div className="relative">
+            <div
+              className="relative group cursor-pointer"
+              onClick={() => {
+                const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
+                const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
+                // Navigate to model gallery (shared for all variants)
+                router.push(`/${brandSlug}-cars/${modelSlug}/images`)
+              }}
+            >
               <div id="variant-gallery" className="aspect-[16/10] bg-gray-100 rounded-2xl overflow-x-auto snap-x snap-mandatory scrollbar-hide flex touch-pan-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
                 {showSkeleton ? (
                   <div className="w-full h-full flex-shrink-0 bg-gray-200 animate-pulse flex items-center justify-center">
@@ -767,10 +775,25 @@ export default function VariantPage({
                 )}
               </div>
 
+              {/* Gallery Overlay - View Gallery Button */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-2xl flex items-center justify-center pointer-events-none">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 px-6 py-3 rounded-lg text-gray-900 font-semibold flex items-center gap-2 shadow-lg">
+                  <Camera className="w-5 h-5" />
+                  View Gallery
+                </div>
+              </div>
+
+              {/* Image Count Badge */}
+              <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2">
+                <Camera className="w-4 h-4" />
+                <span>{1 + (model?.galleryImages?.length || 0)} Images</span>
+              </div>
+
               {/* Gallery Navigation Arrow */}
               {!showSkeleton && ((model?.heroImage && model?.galleryImages && model.galleryImages.length > 0) || (model?.galleryImages && model.galleryImages.length > 1)) && (
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent gallery page navigation
                     const gallery = document.getElementById('variant-gallery');
                     if (gallery) {
                       gallery.scrollBy({ left: gallery.clientWidth, behavior: 'smooth' });

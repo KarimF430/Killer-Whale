@@ -30,6 +30,7 @@ const baseImageHosts = [
   'www.gadizone.com',
   r2Host,
   backendHost,
+  'pub-a4a4bb84fc2d41cba103f4e2a8b5d185.r2.dev', // Cloudflare R2 CDN for car images
   ...extraImageHosts,
 ].filter(Boolean)
 const devImageHosts = ['localhost', '127.0.0.1']

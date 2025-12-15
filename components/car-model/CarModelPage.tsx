@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Star, Heart, Share2, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowRight, Calendar, Fuel, Users, Settings, IndianRupee, MapPin, Phone, MessageCircle, Zap, Shield, Award, TrendingUp, Clock, CheckCircle, AlertCircle, Info, X, Plus, Minus, Eye, ExternalLink, Play, ThumbsUp, ThumbsDown, Wrench, DollarSign, User, Car } from 'lucide-react'
+import { Star, Heart, Share2, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowRight, Calendar, Fuel, Users, Settings, IndianRupee, MapPin, Phone, MessageCircle, Zap, Shield, Award, TrendingUp, Clock, CheckCircle, AlertCircle, Info, X, Plus, Minus, Eye, ExternalLink, Play, ThumbsUp, ThumbsDown, Wrench, DollarSign, User, Car, Camera } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -1023,7 +1023,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
         <PageSection background="white" maxWidth="7xl">
           <div id="overview" className="space-y-6">
             {/* Hero Car Image with Gallery - Scrollable */}
-            <div className="relative">
+            <div className="relative group cursor-pointer" onClick={() => router.push(`/${model.brandSlug}-cars/${model.slug}/images`)}>
               <div id="model-gallery" className="aspect-[16/10] bg-gray-100 rounded-2xl overflow-x-auto snap-x snap-mandatory scrollbar-hide flex touch-pan-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
                 {/* Hero Image */}
                 {model?.heroImage && (
@@ -1053,10 +1053,25 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 ))}
               </div>
 
+              {/* Gallery Overlay - View Gallery Button */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-2xl flex items-center justify-center pointer-events-none">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 px-6 py-3 rounded-lg text-gray-900 font-semibold flex items-center gap-2 shadow-lg">
+                  <Camera className="w-5 h-5" />
+                  View Gallery
+                </div>
+              </div>
+
+              {/* Image Count Badge */}
+              <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2">
+                <Camera className="w-4 h-4" />
+                <span>{1 + (model?.gallery?.length || 0) + (model?.colorImages?.length || 0)} Images</span>
+              </div>
+
               {/* Gallery Navigation Arrow */}
               {model?.gallery && model.gallery.length > 0 && (
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent gallery page navigation
                     const gallery = document.getElementById('model-gallery');
                     if (gallery) {
                       gallery.scrollBy({ left: gallery.clientWidth, behavior: 'smooth' });
@@ -1068,6 +1083,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 </button>
               )}
             </div>
+
 
             {/* Car Title and Actions */}
             <div className="flex items-start justify-between">
