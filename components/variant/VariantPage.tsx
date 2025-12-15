@@ -1162,11 +1162,45 @@ export default function VariantPage({
           <div id="specifications" className="space-y-8">
             {/* SEO Text Section */}
             <div className="space-y-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} {variantName} Info</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName} {displayModelName} {displayVariantName} Info</h2>
               <div className="text-gray-700 leading-relaxed">
-                <p>
-                  Tata Nexon price for the base model starts at Rs. 8.00 Lakh and the top model price goes upto Rs. 15.60 Lakh (Avg. ex-showroom). Nexon price for 49 variants is listed below.
-                </p>
+                {(() => {
+                  const keyFeaturesText = variant?.keyFeatures || variant?.headerSummary || '';
+                  const baseText = `The ${displayBrandName} ${displayModelName} ${displayVariantName} is priced at ${formatPrice(displayPrice / 100000)} (${priceLabel}).`;
+                  const featuresText = keyFeaturesText ? ` Key features include: ${keyFeaturesText}` : '';
+                  const endText = ` ${displayModelName} is available in ${allModelVariants?.length || 1} variants.`;
+                  const fullText = baseText + featuresText + endText;
+                  const truncatedLength = 200;
+                  const shouldTruncate = fullText.length > truncatedLength;
+
+                  return (
+                    <p>
+                      {showFullDescription || !shouldTruncate ? (
+                        <>
+                          {fullText}
+                          {shouldTruncate && (
+                            <button
+                              onClick={() => setShowFullDescription(false)}
+                              className="text-red-600 hover:text-orange-600 font-medium ml-1"
+                            >
+                              Read Less
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {fullText.substring(0, truncatedLength)}...
+                          <button
+                            onClick={() => setShowFullDescription(true)}
+                            className="text-red-600 hover:text-orange-600 font-medium ml-1"
+                          >
+                            Read More
+                          </button>
+                        </>
+                      )}
+                    </p>
+                  );
+                })()}
               </div>
             </div>
 

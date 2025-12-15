@@ -1520,27 +1520,8 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
               {/* SEO Content */}
               <div className="text-gray-700 leading-relaxed">
                 <p>
-                  Tata Nexon price for the base model starts at Rs. 8.00 Lakh and the top model price goes upto Rs. 15.60 Lakh (Avg. ex-showroom). Nexon price for 49 variants is listed below.
-                  {!showFullDescription && (
-                    <button
-                      onClick={() => setShowFullDescription(true)}
-                      className="text-red-600 hover:text-orange-600 font-medium ml-1"
-                    >
-                      Read More
-                    </button>
-                  )}
+                  {model?.brand || 'Car'} {model?.name || 'Model'} price for the base model starts at {formatPrice(displayStartPrice / 100000)} and the top model price goes upto {formatPrice(displayEndPrice / 100000)} ({priceLabel}). {model?.name || 'Model'} price for {model?.variants?.length || 0} variants is listed below.
                 </p>
-                {showFullDescription && (
-                  <p className="mt-2">
-                    The {model?.brand || 'Car'} {model?.name || 'Model'} offers exceptional value for money with its competitive pricing structure across different variants. Each variant comes with unique features and specifications designed to cater to different customer needs and preferences. The pricing includes various safety features, comfort amenities, and modern technology integrations.
-                    <button
-                      onClick={() => setShowFullDescription(false)}
-                      className="text-red-600 hover:text-orange-600 font-medium ml-1"
-                    >
-                      Show Less
-                    </button>
-                  </p>
-                )}
               </div>
             </div>
 
