@@ -47,6 +47,7 @@ import createYouTubeRoutes from "./routes/youtube";
 import aiFeedbackRoutes from "./routes/ai-feedback";
 import reviewsRoutes from "./routes/reviews";
 import adminReviewsRoutes from "./routes/admin-reviews";
+import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -1091,14 +1092,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.get("/api/brands/available-rankings", async (req, res) => {
+  app.get("/api/brands/available-rankings", redisCacheMiddleware(RedisCacheTTL.STATS), async (req, res) => {
     const excludeBrandId = req.query.excludeBrandId as string | undefined;
     const availableRankings = await storage.getAvailableRankings(excludeBrandId);
     res.json(availableRankings);
   });
 
   // Get formatted brand summary with proper sections
-  app.get("/api/brands/:id/formatted", async (req, res) => {
+  app.get("/api/brands/:id/formatted", redisCacheMiddleware(RedisCacheTTL.BRANDS), async (req, res) => {
     try {
       const brand = await storage.getBrand(req.params.id);
       if (!brand) {
@@ -1119,7 +1120,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.get("/api/brands/:id", async (req, res) => {
+  app.get("/api/brands/:id", redisCacheMiddleware(RedisCacheTTL.BRANDS), async (req, res) => {
     const brand = await storage.getBrand(req.params.id);
     if (!brand) {
       return res.status(404).json({ error: "Brand not found" });
@@ -1333,7 +1334,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // FAST SEARCH API - Optimized for instant search results
+  // ZERO-DB SEARCH API - Uses Redis/Memory index, no MongoDB queries
+  // Build search index on startup (called after routes are registered)
+  setTimeout(() => {
+    buildSearchIndex().catch(err =>
+      console.error('❌ Failed to build initial search index:', err)
+    );
+  }, 5000); // Wait 5s for DB connection
+
   app.get("/api/search", publicLimiter, async (req, res) => {
     try {
       const startTime = Date.now();
@@ -1341,8 +1349,26 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
 
       if (!query || query.length < 2) {
-        return res.json({ results: [], count: 0, took: 0 });
+        return res.json({ results: [], count: 0, took: 0, source: 'none' });
       }
+
+      // Try search index first (0 DB hits)
+      const indexResult = await searchFromIndex(query, limit);
+
+      if (indexResult && indexResult.results.length > 0) {
+        const took = Date.now() - startTime;
+        return res.json({
+          results: indexResult.results,
+          count: indexResult.results.length,
+          took,
+          query,
+          source: indexResult.source,
+          indexAge: indexResult.indexAge
+        });
+      }
+
+      // Fallback to MongoDB if index is empty or unavailable
+      console.log(`⚠️ Search index miss for "${query}", falling back to MongoDB`);
 
       const mongoose = (await import('mongoose')).default;
       const db = mongoose.connection.db;
@@ -1407,12 +1433,19 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         results,
         count: results.length,
         took,
-        query
+        query,
+        source: 'mongodb'
       });
     } catch (error) {
       console.error('Error in search:', error);
       res.status(500).json({ error: "Search failed" });
     }
+  });
+
+  // Search index stats endpoint (for debugging)
+  app.get("/api/search/stats", async (req, res) => {
+    const stats = getSearchIndexStats();
+    res.json(stats);
   });
 
   // OPTIMIZED CARS BY BUDGET API - Server-side filtering with pagination and caching
@@ -1849,6 +1882,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       await invalidateRedisCache('/api/models');
       await invalidateRedisCache('/api/models-with-pricing');
 
+      // Rebuild search index with new model
+      invalidateSearchIndex().catch(err => console.error('Search index invalidation failed:', err));
+
       res.status(201).json(model);
     } catch (error) {
       console.error('Model creation error:', error);
@@ -1877,6 +1913,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       await invalidateRedisCache('/api/models');
       await invalidateRedisCache('/api/models-with-pricing');
       console.log('🗑️ Models cache invalidated');
+
+      // Rebuild search index with updated model
+      invalidateSearchIndex().catch(err => console.error('Search index invalidation failed:', err));
 
       res.json(model);
     } catch (error) {
@@ -1911,6 +1950,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       await invalidateRedisCache('/api/models');
       console.log('🗑️ Models cache invalidated');
 
+      // Rebuild search index with updated model
+      invalidateSearchIndex().catch(err => console.error('Search index invalidation failed:', err));
+
       res.json(model);
     } catch (error) {
       console.error('❌ Model PATCH update error:', error);
@@ -1928,6 +1970,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
       console.log(`✅ Model deleted successfully: ${req.params.id}`);
       await triggerBackup('models');
+
+      // Rebuild search index without deleted model
+      invalidateSearchIndex().catch(err => console.error('Search index invalidation failed:', err));
+
       res.status(204).send();
     } catch (error) {
       console.error(`❌ Error deleting model ${req.params.id}:`, error);
@@ -2172,7 +2218,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Get single car by ID (for Favourites)
-  app.get("/api/cars/:id", publicLimiter, async (req: Request, res: Response) => {
+  app.get("/api/cars/:id", publicLimiter, redisCacheMiddleware(RedisCacheTTL.CAR_DETAILS), async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
       let model = await storage.getModel(id);
@@ -2383,7 +2429,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.get("/api/variants/:id", async (req, res) => {
+  app.get("/api/variants/:id", redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
     const variant = await storage.getVariant(req.params.id);
     if (!variant) {
       return res.status(404).json({ error: "Variant not found" });
@@ -2519,7 +2565,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
     });
 
-  app.get("/api/frontend/models/:slug", async (req, res) => {
+  app.get("/api/frontend/models/:slug", redisCacheMiddleware(RedisCacheTTL.MODEL_DETAILS), async (req, res) => {
     try {
       const { slug } = req.params;
       console.log('🚗 Frontend: Getting model by slug:', slug);
