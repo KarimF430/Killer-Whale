@@ -775,13 +775,7 @@ export default function VariantPage({
                 )}
               </div>
 
-              {/* Gallery Overlay - View Gallery Button */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-2xl flex items-center justify-center pointer-events-none">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 px-6 py-3 rounded-lg text-gray-900 font-semibold flex items-center gap-2 shadow-lg">
-                  <Camera className="w-5 h-5" />
-                  View Gallery
-                </div>
-              </div>
+
 
               {/* Image Count Badge */}
               <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2">
@@ -828,9 +822,12 @@ export default function VariantPage({
                       <span className="ml-1">({currentVariantData?.reviewCount || 1234})</span>
                     </div>
                   )}
-                  <button className="text-red-600 hover:text-orange-600 font-medium">
+                  <Link
+                    href={`/${displayBrandName?.toLowerCase().replace(/\s+/g, '-')}-cars/${displayModelName?.toLowerCase().replace(/\s+/g, '-')}/rate-review`}
+                    className="text-red-600 hover:text-orange-600 font-medium"
+                  >
                     Rate & Review
-                  </button>
+                  </Link>
                 </div>
               </div>
 

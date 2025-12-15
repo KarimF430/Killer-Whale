@@ -440,9 +440,12 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
               <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
                 Help other buyers make informed decisions by sharing your honest review
               </p>
-              <button className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2 sm:px-6 sm:py-2 rounded-lg font-medium transition-all duration-200 shadow-md text-sm sm:text-base">
+              <Link
+                href={`/${brand.slug}-cars/write-review`}
+                className="inline-block bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2 sm:px-6 sm:py-2 rounded-lg font-medium transition-all duration-200 shadow-md text-sm sm:text-base"
+              >
                 Write a Review
-              </button>
+              </Link>
             </div>
           </div>
         </div>

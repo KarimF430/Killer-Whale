@@ -194,7 +194,8 @@ export default function ModelGalleryClient({ galleryData }: ModelGalleryClientPr
     return (
         <div className="min-h-screen bg-white">
             {/* Header - White with border */}
-            <div className="bg-white border-b sticky top-0 z-40">
+            {/* Header - White with border */}
+            <div className="bg-white border-b z-40">
                 <div className="px-4 py-3 flex items-center justify-between max-w-7xl mx-auto">
                     <Link
                         href={`/${galleryData.brandSlug}-cars/${galleryData.modelSlug}`}
@@ -224,7 +225,8 @@ export default function ModelGalleryClient({ galleryData }: ModelGalleryClientPr
             </div>
 
             {/* Section Tabs */}
-            <div className="bg-white border-b sticky top-[52px] z-30">
+            {/* Section Tabs */}
+            <div className="bg-white border-b z-30">
                 <div className="px-4 max-w-7xl mx-auto">
                     <div className="flex gap-6 overflow-x-auto scrollbar-hide">
                         {[

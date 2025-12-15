@@ -45,6 +45,8 @@ import aiChatHandler from "./routes/ai-chat";
 import quirkyBitRoutes from "./routes/quirky-bit";
 import createYouTubeRoutes from "./routes/youtube";
 import aiFeedbackRoutes from "./routes/ai-feedback";
+import reviewsRoutes from "./routes/reviews";
+import adminReviewsRoutes from "./routes/admin-reviews";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -2628,6 +2630,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.use('/api/admin/tags', adminTagsRoutes);
   app.use('/api/admin/authors', adminAuthorsRoutes);
   app.use('/api/admin/media', adminMediaRoutes);
+  app.use('/api/admin/reviews', adminReviewsRoutes);
+
+  // Public reviews routes
+  app.use('/api/reviews', publicLimiter, reviewsRoutes);
   app.use('/api/admin/analytics', adminAnalyticsRoutes);
 
   // Admin authentication routes (with rate limiting) - MUST come AFTER specific routes

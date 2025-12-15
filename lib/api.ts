@@ -113,7 +113,7 @@ class ApiClient {
     retries: number = 2
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const defaultHeaders = {
       'Content-Type': 'application/json',
     };
@@ -121,7 +121,7 @@ class ApiClient {
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         console.log(`🚀 API Request (attempt ${attempt + 1}/${retries + 1}): ${url}`);
-        
+
         const response = await fetch(url, {
           ...options,
           headers: {
@@ -146,7 +146,7 @@ class ApiClient {
         return data;
       } catch (error) {
         console.error(`❌ API Error (${endpoint}) - Attempt ${attempt + 1}:`, error);
-        
+
         // If this is the last attempt, return the error
         if (attempt === retries) {
           console.error(`🔍 Final error details:`, {
@@ -154,13 +154,13 @@ class ApiClient {
             error: error instanceof Error ? error.message : error,
             stack: error instanceof Error ? error.stack : undefined
           });
-          
+
           return {
             success: false,
             error: error instanceof Error ? error.message : 'Failed to fetch'
           };
         }
-        
+
         // Wait before retrying (exponential backoff)
         const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s...
         console.log(`⏳ Retrying in ${delay}ms...`);
@@ -303,6 +303,52 @@ class ApiClient {
       environment: string;
       database: string;
     }>('/health');
+  }
+
+  // Review API Methods
+  async getModelReviews(modelSlug: string, params?: {
+    sort?: 'recent' | 'helpful' | 'highest' | 'lowest';
+    rating?: number;
+    limit?: number;
+    offset?: number;
+  }): Promise<ApiResponse<{
+    reviews: any[];
+    total: number;
+    overallRating: number;
+    ratingBreakdown: { 1: number; 2: number; 3: number; 4: number; 5: number };
+    pagination: PaginationMeta;
+  }>> {
+    const searchParams = new URLSearchParams();
+    if (params?.sort) searchParams.append('sort', params.sort);
+    if (params?.rating) searchParams.append('rating', params.rating.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.offset) searchParams.append('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    return this.request(`/api/reviews/${modelSlug}${query ? `?${query}` : ''}`);
+  }
+
+  async voteReview(reviewId: string, type: 'like' | 'dislike', userEmail: string): Promise<ApiResponse<{
+    likes: number;
+    dislikes: number;
+    userVote: 'like' | 'dislike' | null;
+  }>> {
+    return this.request(`/api/reviews/${reviewId}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ type, userEmail })
+    });
+  }
+
+  async addReviewComment(reviewId: string, data: {
+    userName: string;
+    userEmail: string;
+    text: string;
+    parentId?: string;
+  }): Promise<ApiResponse<any>> {
+    return this.request(`/api/reviews/${reviewId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
   }
 }
 

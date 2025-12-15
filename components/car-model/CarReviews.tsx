@@ -2,10 +2,13 @@
 
 import { useState } from 'react'
 import { Star, ThumbsUp, ThumbsDown, User, Calendar, Verified } from 'lucide-react'
+import Link from 'next/link'
 
 interface CarReviewsProps {
   carData: {
     fullName: string
+    brand: string
+    model: string
     rating: number
     reviewCount: number
   }
@@ -74,11 +77,10 @@ export default function CarReviews({ carData }: CarReviewsProps) {
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  className={`h-5 w-5 ${
-                    star <= Math.floor(carData.rating)
+                  className={`h-5 w-5 ${star <= Math.floor(carData.rating)
                       ? 'text-yellow-400 fill-current'
                       : 'text-gray-300'
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -166,11 +168,10 @@ export default function CarReviews({ carData }: CarReviewsProps) {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`h-4 w-4 ${
-                          star <= review.rating
+                        className={`h-4 w-4 ${star <= review.rating
                             ? 'text-yellow-400 fill-current'
                             : 'text-gray-300'
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>
@@ -203,12 +204,15 @@ export default function CarReviews({ carData }: CarReviewsProps) {
       </div>
 
       {/* Write Review CTA */}
-      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
-        <h3 className="font-semibold mb-2">Share Your Experience</h3>
-        <p className="text-gray-600 mb-4">Help others by sharing your {carData.fullName} experience</p>
-        <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium">
+      <div className="bg-gray-50 rounded-lg p-6 text-center">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Own a {carData.fullName}? Share your experience!</h3>
+        <p className="text-gray-600 mb-4">Help other buyers make informed decisions by sharing your honest review</p>
+        <Link
+          href={`/${carData.brand}-cars/${carData.model}/rate-review`}
+          className="inline-block bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all"
+        >
           Write a Review
-        </button>
+        </Link>
       </div>
     </div>
   )

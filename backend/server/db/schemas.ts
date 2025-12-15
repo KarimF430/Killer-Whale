@@ -701,6 +701,118 @@ userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ googleId: 1 }, { unique: true, sparse: true }); // sparse allows null values
 userSchema.index({ isActive: 1 });
 
+// ==================== REVIEW SYSTEM SCHEMAS ====================
+
+// Review Comment Schema (for nested comments)
+const reviewCommentSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  reviewId: { type: String, required: true },
+  parentId: { type: String, default: null }, // For nested replies
+  userName: { type: String, required: true },
+  userEmail: { type: String, required: true },
+  text: { type: String, required: true },
+  likes: { type: Number, default: 0 },
+  dislikes: { type: Number, default: 0 },
+  isApproved: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+reviewCommentSchema.index({ reviewId: 1, createdAt: -1 });
+reviewCommentSchema.index({ parentId: 1 });
+reviewCommentSchema.index({ id: 1 }, { unique: true });
+
+// Review Schema
+const reviewSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  brandSlug: { type: String, required: true },
+  modelSlug: { type: String, required: true },
+  variantSlug: { type: String, default: null },
+
+  // User Info
+  userName: { type: String, required: true },
+  userEmail: { type: String, required: true },
+
+  // Driving Experience
+  drivingExperience: {
+    type: String,
+    enum: ['not_driven', 'short_drive', 'under_500km', 'over_500km'],
+    required: true
+  },
+
+  // Emoji Ratings (1-5)
+  emojiRatings: {
+    mileage: { type: Number, min: 1, max: 5, required: true },
+    maintenanceCost: { type: Number, min: 1, max: 5, required: true },
+    safety: { type: Number, min: 1, max: 5, required: true },
+    featuresAndStyling: { type: Number, min: 1, max: 5, required: true },
+    comfort: { type: Number, min: 1, max: 5, required: true },
+    performance: { type: Number, min: 1, max: 5, required: true }
+  },
+
+  // Star Ratings (1-5)
+  starRatings: {
+    designAndStyling: { type: Number, min: 1, max: 5, required: true },
+    performance: { type: Number, min: 1, max: 5, required: true },
+    valueForMoney: { type: Number, min: 1, max: 5, required: true },
+    featuresAndTechnology: { type: Number, min: 1, max: 5, required: true }
+  },
+
+  // Review Content
+  reviewTitle: { type: String, required: true, minlength: 10 },
+  reviewText: { type: String, required: true, minlength: 300 },
+
+  // Image URLs (max 5)
+  images: [{ type: String }],
+
+  // Voting
+  likes: { type: Number, default: 0 },
+  dislikes: { type: Number, default: 0 },
+
+  // Track who voted (to prevent duplicate votes)
+  likedBy: [{ type: String }], // User emails
+  dislikedBy: [{ type: String }],
+
+  // Overall Rating (calculated from emoji + star ratings)
+  overallRating: { type: Number, min: 1, max: 5 },
+
+  // Moderation
+  isApproved: { type: Boolean, default: false },
+  isVerified: { type: Boolean, default: false }, // Verified owner
+
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+// Calculate overall rating before save
+reviewSchema.pre('save', function () {
+  const emojiAvg = (
+    this.emojiRatings.mileage +
+    this.emojiRatings.maintenanceCost +
+    this.emojiRatings.safety +
+    this.emojiRatings.featuresAndStyling +
+    this.emojiRatings.comfort +
+    this.emojiRatings.performance
+  ) / 6;
+
+  const starAvg = (
+    this.starRatings.designAndStyling +
+    this.starRatings.performance +
+    this.starRatings.valueForMoney +
+    this.starRatings.featuresAndTechnology
+  ) / 4;
+
+  this.overallRating = Math.round(((emojiAvg + starAvg) / 2) * 10) / 10;
+});
+
+reviewSchema.index({ id: 1 }, { unique: true });
+reviewSchema.index({ modelSlug: 1, isApproved: 1, createdAt: -1 });
+reviewSchema.index({ brandSlug: 1, isApproved: 1 });
+reviewSchema.index({ variantSlug: 1, isApproved: 1 });
+reviewSchema.index({ userEmail: 1 });
+reviewSchema.index({ overallRating: -1 });
+reviewSchema.index({ likes: -1 }); // Most helpful
+reviewSchema.index({ createdAt: -1 }); // Most recent
+
 // Export models
 export const Brand = mongoose.model('Brand', brandSchema);
 export const Model = mongoose.model('Model', modelSchema);
@@ -718,3 +830,7 @@ export const NewsMedia = mongoose.model('NewsMedia', newsMediaSchema);
 
 // Export user model
 export const User = mongoose.model('User', userSchema);
+
+// Export review models
+export const Review = mongoose.model('Review', reviewSchema);
+export const ReviewComment = mongoose.model('ReviewComment', reviewCommentSchema);

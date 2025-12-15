@@ -1053,13 +1053,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 ))}
               </div>
 
-              {/* Gallery Overlay - View Gallery Button */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-2xl flex items-center justify-center pointer-events-none">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 px-6 py-3 rounded-lg text-gray-900 font-semibold flex items-center gap-2 shadow-lg">
-                  <Camera className="w-5 h-5" />
-                  View Gallery
-                </div>
-              </div>
+
 
               {/* Image Count Badge */}
               <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2">
@@ -1100,9 +1094,12 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                       <span className="font-semibold">{model?.rating || 4.2}</span>
                       <span className="ml-1">({model?.reviewCount || 1247})</span>
                     </div>
-                    <button className="text-red-600 hover:text-orange-600 font-medium">
+                    <Link
+                      href={`/${model?.brandSlug || model?.brand?.toLowerCase().replace(/\s+/g, '-')}-cars/${model?.slug || model?.name?.toLowerCase().replace(/\s+/g, '-')}/rate-review`}
+                      className="text-red-600 hover:text-orange-600 font-medium"
+                    >
                       Rate & Review
-                    </button>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -2636,9 +2633,12 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                   <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
                     Help other buyers make informed decisions by sharing your honest review
                   </p>
-                  <button className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2 sm:px-6 sm:py-2 rounded-lg font-medium transition-all duration-200 shadow-md text-sm sm:text-base">
+                  <Link
+                    href={`/${model?.brand?.toLowerCase().replace(/\s+/g, '-')}-cars/${model?.name?.toLowerCase().replace(/\s+/g, '-')}/rate-review`}
+                    className="inline-block bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2 sm:px-6 sm:py-2 rounded-lg font-medium transition-all duration-200 shadow-md text-sm sm:text-base"
+                  >
                     Write a Review
-                  </button>
+                  </Link>
                 </div>
               </div>
             </section>

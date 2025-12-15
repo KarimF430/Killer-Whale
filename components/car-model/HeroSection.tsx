@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Star, Share2, Heart, Camera, Play, Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { triggerCarInteraction, initializeAudioContext } from '@/utils/carInteraction'
 import { OptimizedImage } from '@/components/common/OptimizedImage'
+import Link from 'next/link'
 
 interface HeroSectionProps {
   carData: {
@@ -86,6 +87,12 @@ export default function HeroSection({ carData }: HeroSectionProps) {
             <span className="text-xs sm:text-sm text-gray-600 ml-1">
               ({carData.reviewCount.toLocaleString()} reviews)
             </span>
+            <Link
+              href={`/${carData.brand}-cars/${carData.model}/rate-review`}
+              className="text-sm font-medium text-orange-500 hover:text-orange-600 ml-3 hover:underline"
+            >
+              Rate & Review
+            </Link>
           </div>
 
           {/* Action Buttons */}

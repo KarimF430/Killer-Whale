@@ -45,11 +45,6 @@ export default async function VariantDetailPage({ params }: PageProps) {
   const modelName = modelSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
   const variantName = variantSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 
-  console.log('VariantDetailPage: Brand slug:', brandSlug)
-  console.log('VariantDetailPage: Model slug:', modelSlug)
-  console.log('VariantDetailPage: Variant slug:', variantSlug)
-  console.log('VariantDetailPage: Parsed params:', { brandName, modelName, variantName })
-
   // Fetch real data from backend
   try {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
@@ -60,23 +55,13 @@ export default async function VariantDetailPage({ params }: PageProps) {
     })
     const brands = await brandsRes.json()
 
-    console.log('✅ Fetched brands:', brands.length)
-    console.log('🔍 Looking for brandSlug:', brandSlug)
-
     // Normalize slug for matching (same logic as model page)
     const normalizeBrandSlug = (name: string) =>
       name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 
-    console.log('📋 All brands and their normalized slugs:')
-    brands.forEach((b: any) => {
-      console.log(`  - ${b.name} => ${normalizeBrandSlug(b.name)}`)
-    })
-
     const brand = brands.find((b: any) =>
       normalizeBrandSlug(b.name) === brandSlug
     )
-
-    console.log('🎯 Found brand:', brand ? brand.name : 'NOT FOUND')
 
     if (!brand) {
       throw new Error('Brand not found')

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Star, ThumbsUp, ThumbsDown, User, Calendar, Car } from 'lucide-react';
 
 interface Review {
@@ -175,9 +176,8 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
-          i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-        }`}
+        className={`w-4 h-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+          }`}
       />
     ));
   };
@@ -194,7 +194,7 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
   const totalReviews = reviews.length;
   const averageRating = totalReviews > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews : 0;
 
-  const filteredReviews = selectedRating 
+  const filteredReviews = selectedRating
     ? reviews.filter(review => review.rating === selectedRating)
     : reviews;
 
@@ -210,9 +210,12 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
             <p className="text-gray-600 max-w-2xl mx-auto mb-8">
               No reviews available for {brandName} yet. Be the first to share your experience!
             </p>
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+            <Link
+              href={`/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars/write-review`}
+              className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
               Write a Review
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -274,11 +277,10 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedRating(null)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedRating === null
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedRating === null
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               All Reviews
             </button>
@@ -286,11 +288,10 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
               <button
                 key={rating}
                 onClick={() => setSelectedRating(rating)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedRating === rating
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedRating === rating
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 {rating}★
               </button>
@@ -378,9 +379,12 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
             <p className="text-gray-600 mb-6">
               Help other buyers make informed decisions by sharing your honest review
             </p>
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+            <Link
+              href={`/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars/write-review`}
+              className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
               Write a Review
-            </button>
+            </Link>
           </div>
         </div>
       </div>
