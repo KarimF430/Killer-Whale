@@ -4,24 +4,39 @@ import { ChevronLeft } from 'lucide-react'
 import PageSection from '@/components/common/PageSection'
 import Footer from '@/components/Footer'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
-import ElectricCarsClient from './ElectricCarsClient'
+import NewLaunchesClient from './NewLaunchesClient'
 
 // Enable ISR with 1-hour revalidation
 export const revalidate = 3600
 
 // Generate metadata for SEO
+// Generate metadata for SEO
 export async function generateMetadata(): Promise<Metadata> {
+    const { dynamicDescription } = await getNewLaunchesData()
+    let description = `Explore the latest new car launches in India with prices, specifications, and expert reviews. Discover newly launched cars from Maruti, Hyundai, Tata, Mahindra, and more.`
+
+    if (dynamicDescription) {
+        try {
+            const parsed = JSON.parse(dynamicDescription)
+            if (parsed.short) {
+                description = parsed.short
+            }
+        } catch (e) {
+            // Fallback
+        }
+    }
+
     return {
-        title: `Electric Cars in India 2025 - Prices, Range & Specs | gadizone`,
-        description: `Explore all electric cars in India with detailed prices, range, specifications and reviews. Compare EVs from Tesla, Tata, Mahindra, Hyundai, BYD and more.`,
-        keywords: `electric cars India, EV cars, electric vehicles, EV range, zero emission cars, best electric cars 2025`,
+        title: `New Car Launches in India 2025 - Latest Cars, Prices & Specs | gadizone`,
+        description,
+        keywords: `new car launches India, latest cars 2025, new cars India, car prices, recently launched cars`,
         openGraph: {
-            title: `Electric Cars in India 2025`,
-            description: 'Explore all electric cars in India with detailed prices, range and specifications.',
+            title: `New Car Launches in India 2025`,
+            description,
             type: 'website'
         },
         alternates: {
-            canonical: `/electric-cars`
+            canonical: `/new-car-launches-in-india`
         }
     }
 }
@@ -39,7 +54,7 @@ const formatLaunchDate = (date: string): string => {
 }
 
 // Server-side data fetching
-async function getElectricCarsData() {
+async function getNewLaunchesData() {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
     try {
@@ -59,7 +74,7 @@ async function getElectricCarsData() {
             return acc
         }, {})
 
-        // Process all cars
+        // Process all cars and filter new launches
         const allCars = models.map((model: any) => {
             const lowestPrice = model.lowestPrice || model.price || 0
             const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0 ? model.fuelTypes : ['Petrol']
@@ -80,7 +95,7 @@ async function getElectricCarsData() {
                 transmissions,
                 bodyType: model.bodyType,
                 seating: model.seating || 5,
-                launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
+                launchDate: model.launchDate ? formatLaunchDate(model.launchDate) : 'Recently Launched',
                 slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
                 isNew: model.isNew || false,
                 isPopular: model.isPopular || false,
@@ -90,46 +105,38 @@ async function getElectricCarsData() {
             }
         })
 
-        // Filter only electric cars
-        const electricCars = allCars.filter((car: any) =>
-            car.fuelTypes && car.fuelTypes.some((f: string) => f.toLowerCase() === 'electric')
-        )
+        // Filter new launches
+        const newLaunches = allCars
+            .filter((car: any) => car.isNew)
+            .sort((a: any, b: any) => (b.startingPrice || 0) - (a.startingPrice || 0))
 
-        const popularCars = electricCars.filter((c: any) => c.isPopular).slice(0, 10)
-        const newLaunchedCars = electricCars.filter((c: any) => c.isNew).slice(0, 10)
-
-        // Generate dynamic description based on actual car data
-        const topCars = electricCars.slice(0, 3)
+        // Generate dynamic description
+        const topCars = newLaunches.slice(0, 3)
         const topCarNames = topCars.map((car: any) => `${car.brandName} ${car.name}`)
-        const carCount = electricCars.length
-        const topCar = electricCars.length > 0 ? `${electricCars[0].brandName} ${electricCars[0].name}` : null
+        const carCount = newLaunches.length
 
-        let shortDesc = `Thinking of going electric? Explore our comprehensive collection of ${carCount}+ electric cars available in India, featuring the latest EVs with impressive range, fast charging, and zero emissions.`
+        let shortDesc = `Check out ${carCount}+ recently launched cars in India! Discover the latest models featuring cutting-edge technology, modern design, and advanced safety features.`
 
         let extendedDesc = ''
         if (topCarNames.length >= 3) {
-            extendedDesc += ` Leading the EV revolution are ${topCarNames[0]}, ${topCarNames[1]}, and ${topCarNames[2]} - offering cutting-edge technology, exceptional range, and eco-friendly performance.`
+            extendedDesc += ` Fresh arrivals include ${topCarNames[0]}, ${topCarNames[1]}, and ${topCarNames[2]} - making waves in the Indian automobile market with their stunning features.`
         } else if (topCarNames.length >= 1) {
-            extendedDesc += ` The ${topCarNames[0]} is one of the most popular electric cars in India.`
+            extendedDesc += ` The ${topCarNames[0]} is one of the latest additions to the Indian car market.`
         }
 
-        extendedDesc += ` Compare range, battery capacity, charging time, prices, and owner reviews to find your perfect electric vehicle.`
-
-        if (topCar) {
-            extendedDesc += ` Based on popularity and user ratings, we recommend the ${topCar} as an excellent choice for EV buyers in India.`
-        }
+        extendedDesc += ` Compare prices, specifications, mileage, features, and genuine owner reviews to stay updated on the newest car releases.`
 
         const dynamicDescription = JSON.stringify({ short: shortDesc, extended: extendedDesc })
 
-        return { cars: electricCars, popularCars, newLaunchedCars, dynamicDescription }
+        return { cars: newLaunches, dynamicDescription }
     } catch (error) {
-        console.error('Error fetching electric cars data:', error)
-        return { cars: [], popularCars: [], newLaunchedCars: [], dynamicDescription: '' }
+        console.error('Error fetching new launches data:', error)
+        return { cars: [], dynamicDescription: '' }
     }
 }
 
-export default async function ElectricCarsPage() {
-    const { cars, popularCars, newLaunchedCars, dynamicDescription } = await getElectricCarsData()
+export default async function NewLaunchesPage() {
+    const { cars, dynamicDescription } = await getNewLaunchesData()
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -138,7 +145,6 @@ export default async function ElectricCarsPage() {
                     <Ad3DCarousel className="my-4" />
                 </div>
 
-                {/* Header & Filters */}
                 <PageSection background="white">
                     <Link
                         href="/"
@@ -148,10 +154,8 @@ export default async function ElectricCarsPage() {
                         Back to Home
                     </Link>
 
-                    <ElectricCarsClient
+                    <NewLaunchesClient
                         initialCars={cars}
-                        popularCars={popularCars}
-                        newLaunchedCars={newLaunchedCars}
                         dynamicDescription={dynamicDescription || ''}
                     />
                 </PageSection>

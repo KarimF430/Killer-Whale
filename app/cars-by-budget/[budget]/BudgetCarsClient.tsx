@@ -45,6 +45,18 @@ export default function BudgetCarsClient({
 }: BudgetCarsClientProps) {
     const [selectedFuel, setSelectedFuel] = useState<string[]>([])
     const [selectedTransmission, setSelectedTransmission] = useState<string[]>([])
+    const [isExpanded, setIsExpanded] = useState(false)
+
+    // Parse description - supports both JSON format and plain text
+    let shortText = budgetDescription
+    let extendedText = ''
+    try {
+        const parsed = JSON.parse(budgetDescription)
+        shortText = parsed.short || budgetDescription
+        extendedText = parsed.extended || ''
+    } catch {
+        // Plain text fallback - no extended text
+    }
 
     // Apply filters
     const filteredCars = initialCars.filter(car => {
@@ -82,12 +94,22 @@ export default function BudgetCarsClient({
             {/* Header & Filters */}
             <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {budgetLabel} Cars
+                    {budgetLabel.includes('Best Cars') ? budgetLabel : `${budgetLabel} Cars`}
                 </h1>
-                <p className="text-gray-600 mb-6">
-                    {budgetDescription}
-                    <button className="text-red-600 ml-1 font-medium">...read more</button>
-                </p>
+                <div className="text-gray-600 mb-6">
+                    <p className={isExpanded ? '' : 'line-clamp-2'}>
+                        {shortText}
+                        {isExpanded && extendedText}
+                    </p>
+                    {extendedText && (
+                        <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="text-red-600 font-medium hover:text-red-700 transition-colors"
+                        >
+                            {isExpanded ? '...show less' : '...read more'}
+                        </button>
+                    )}
+                </div>
 
                 {/* Filters */}
                 <div className="flex flex-wrap gap-3 pb-4 border-b border-gray-200">

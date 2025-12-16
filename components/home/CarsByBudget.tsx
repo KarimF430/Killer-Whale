@@ -46,10 +46,10 @@ export default function CarsByBudget({ budgetCarsByRange }: CarsByBudgetProps) {
   const [selectedBudget, setSelectedBudget] = useState<keyof BudgetCarsByRange>('under-8')
 
   const budgetRanges = [
-    { id: 'under-8' as const, label: 'Under ₹8 Lakh', max: 800000 },
-    { id: 'under-15' as const, label: 'Under ₹15 Lakh', max: 1500000 },
-    { id: 'under-25' as const, label: 'Under ₹25 Lakh', max: 2500000 },
-    { id: 'under-50' as const, label: 'Under ₹50 Lakh', max: 5000000 },
+    { id: 'under-8' as const, label: 'Under ₹8 Lakh', max: 800000, urlSlug: '8' },
+    { id: 'under-15' as const, label: 'Under ₹15 Lakh', max: 1500000, urlSlug: '15' },
+    { id: 'under-25' as const, label: 'Under ₹25 Lakh', max: 2500000, urlSlug: '25' },
+    { id: 'under-50' as const, label: 'Under ₹50 Lakh', max: 5000000, urlSlug: '50' },
   ]
 
   // ✅ SSR-OPTIMIZED: Direct access to pre-fetched data - no useEffect, no API calls
@@ -143,7 +143,7 @@ export default function CarsByBudget({ budgetCarsByRange }: CarsByBudgetProps) {
               {/* See More tile - always show to encourage visiting budget page for full list */}
               {currentCars.length > 0 && (
                 <Link
-                  href={`/cars-by-budget/${selectedBudget}`}
+                  href={`/best-cars-under-${budgetRanges.find(b => b.id === selectedBudget)?.urlSlug || '10'}-lakh`}
                   className="flex-shrink-0 w-[260px] sm:w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
                 >
                   {/* Top section matching image height */}

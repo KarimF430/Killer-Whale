@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
@@ -19,13 +20,22 @@ interface Car {
     slug: string
     isNew: boolean
     isPopular: boolean
+    bodyType?: string
     rating?: number
     reviews?: number
     variants?: number
 }
 
-// BudgetCarCard component - EXACTLY matched to BrandCarCard from brand page
-export default function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLabel: string }) {
+interface PopularCarsClientProps {
+    initialCars: Car[]
+    dynamicDescription: string
+}
+
+const fuelFilters = ['Petrol', 'Diesel', 'CNG', 'Electric', 'Hybrid']
+const transmissionFilters = ['Manual', 'Automatic']
+
+// PopularCarCard - matches BudgetCarCard exactly
+function PopularCarCard({ car }: { car: Car }) {
     const exShowroomPrice = car.startingPrice
 
     const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
@@ -43,7 +53,6 @@ export default function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLa
         >
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200">
                 <div className="flex min-h-[144px] sm:min-h-[176px]">
-                    {/* Car Image - Responsive */}
                     <div className="w-32 sm:w-48 flex-shrink-0 relative overflow-hidden rounded-l-lg">
                         <img
                             src={car.image}
@@ -72,9 +81,7 @@ export default function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLa
                         )}
                     </div>
 
-                    {/* Car Details - Responsive */}
                     <div className="flex-1 p-2 sm:p-3 md:p-4 flex flex-col justify-between min-w-0">
-                        {/* Top Section */}
                         <div>
                             <div className="flex items-start justify-between mb-0.5 sm:mb-1">
                                 <div className="flex-1 pr-1 sm:pr-2 min-w-0">
@@ -85,7 +92,6 @@ export default function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLa
                                 <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0 mt-0.5 sm:mt-1" />
                             </div>
 
-                            {/* Rating - Responsive */}
                             <div className="flex items-center gap-0.5 sm:gap-1 mb-0.5 sm:mb-1">
                                 <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 fill-current flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -94,13 +100,11 @@ export default function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLa
                                 <span className="text-gray-500 text-xs sm:text-sm whitespace-nowrap">{car.reviews || 1247} Ratings</span>
                             </div>
 
-                            {/* Variants - Responsive */}
                             <div className="text-gray-600 text-xs sm:text-sm mb-1 sm:mb-2">
                                 {car.variants || 0} Variants
                             </div>
                         </div>
 
-                        {/* Bottom Section: Price - Responsive */}
                         <div>
                             <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
                                 <span className="text-base sm:text-xl md:text-2xl font-bold text-red-600">₹ {displayPrice}</span>
@@ -113,5 +117,119 @@ export default function BudgetCarCard({ car, budgetLabel }: { car: Car; budgetLa
                 </div>
             </div>
         </Link>
+    )
+}
+
+export default function PopularCarsClient({
+    initialCars,
+    dynamicDescription
+}: PopularCarsClientProps) {
+    const [selectedFuel, setSelectedFuel] = useState<string[]>([])
+    const [selectedTransmission, setSelectedTransmission] = useState<string[]>([])
+    const [isExpanded, setIsExpanded] = useState(false)
+
+    // Parse description
+    let shortText = "Discover India's most loved cars! Explore our curated collection of popular models."
+    let extendedText = ''
+    try {
+        const parsed = JSON.parse(dynamicDescription)
+        shortText = parsed.short || shortText
+        extendedText = parsed.extended || ''
+    } catch {
+        // Plain text fallback
+    }
+
+    // Apply filters
+    const filteredCars = initialCars.filter(car => {
+        if (selectedFuel.length > 0) {
+            const hasFuel = selectedFuel.some(fuel =>
+                car.fuelTypes.some(f => f.toLowerCase() === fuel.toLowerCase())
+            )
+            if (!hasFuel) return false
+        }
+
+        if (selectedTransmission.length > 0) {
+            const hasTransmission = selectedTransmission.some(trans =>
+                car.transmissions.some(t => t.toLowerCase().includes(trans.toLowerCase()))
+            )
+            if (!hasTransmission) return false
+        }
+
+        return true
+    })
+
+    const toggleFilter = (type: 'fuel' | 'transmission', value: string) => {
+        if (type === 'fuel') {
+            setSelectedFuel(prev =>
+                prev.includes(value) ? prev.filter(f => f !== value) : [...prev, value]
+            )
+        } else {
+            setSelectedTransmission(prev =>
+                prev.includes(value) ? prev.filter(t => t !== value) : [...prev, value]
+            )
+        }
+    }
+
+    return (
+        <>
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    Popular Cars in India
+                </h1>
+                <div className="text-gray-600 mb-6">
+                    <p className={isExpanded ? '' : 'line-clamp-2'}>
+                        {shortText}
+                        {isExpanded && extendedText}
+                    </p>
+                    {extendedText && (
+                        <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="text-red-600 font-medium hover:text-red-700 transition-colors"
+                        >
+                            {isExpanded ? '...show less' : '...read more'}
+                        </button>
+                    )}
+                </div>
+
+                <div className="flex flex-wrap gap-3 pb-4 border-b border-gray-200">
+                    {fuelFilters.map(fuel => (
+                        <button
+                            key={fuel}
+                            onClick={() => toggleFilter('fuel', fuel)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedFuel.includes(fuel)
+                                ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                        >
+                            {fuel}
+                        </button>
+                    ))}
+                    {transmissionFilters.map(trans => (
+                        <button
+                            key={trans}
+                            onClick={() => toggleFilter('transmission', trans)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedTransmission.includes(trans)
+                                ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                        >
+                            {trans}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {filteredCars.length === 0 ? (
+                <div className="text-center py-20">
+                    <p className="text-gray-500 text-lg">No popular cars found matching your filters.</p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {filteredCars.map((car) => (
+                        <PopularCarCard key={car.id} car={car} />
+                    ))}
+                </div>
+            )}
+        </>
     )
 }

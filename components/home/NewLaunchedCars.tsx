@@ -56,15 +56,7 @@ const formatFuelType = (fuel: string): string => {
 }
 
 export default function NewLaunchedCars({ initialCars = [] }: { initialCars?: Car[] }) {
-  const [newLaunchedCars, setNewLaunchedCars] = useState<Car[]>(initialCars)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (initialCars.length > 0) {
-      setNewLaunchedCars(initialCars)
-    }
-  }, [initialCars])
-
+  const newLaunchedCars = initialCars
 
   return (
     <div>
@@ -72,24 +64,7 @@ export default function NewLaunchedCars({ initialCars = [] }: { initialCars?: Ca
 
       {/* Cars Horizontal Scroll */}
       <div className="relative">
-        {loading ? (
-          <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="h-48 bg-gray-200 animate-pulse"></div>
-                <div className="p-5 space-y-3">
-                  <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-                  <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : newLaunchedCars.length === 0 ? (
+        {newLaunchedCars.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>No new launches found.</p>
           </div>
@@ -128,7 +103,7 @@ export default function NewLaunchedCars({ initialCars = [] }: { initialCars?: Ca
               className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {newLaunchedCars.map((car) => (
+              {newLaunchedCars.slice(0, 10).map((car) => (
                 <CarCard
                   key={car.id}
                   car={car}
@@ -139,6 +114,28 @@ export default function NewLaunchedCars({ initialCars = [] }: { initialCars?: Ca
                   }}
                 />
               ))}
+
+              {/* View All Card */}
+              {newLaunchedCars.length > 0 && (
+                <Link
+                  key="view-all-new"
+                  href="/new-car-launches-in-india"
+                  className="flex-shrink-0 w-[220px] sm:w-[240px] bg-gradient-to-br from-orange-500 to-red-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                >
+                  <div className="h-full flex flex-col items-center justify-center p-6 text-center min-h-[280px] sm:min-h-[300px]">
+                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-1">View All</h3>
+                    <p className="text-white/80 text-sm mb-4">New Launches</p>
+                    <div className="px-5 py-2 bg-white text-orange-600 rounded-full font-semibold text-sm">
+                      Explore
+                    </div>
+                  </div>
+                </Link>
+              )}
             </div>
             <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-gray-50 via-gray-50/80 to-transparent pointer-events-none sm:hidden -z-10" />
           </div>

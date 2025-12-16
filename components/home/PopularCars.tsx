@@ -73,7 +73,7 @@ export default function PopularCars({ initialCars = [] }: { initialCars?: Car[] 
               className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {popularCars.map((car) => (
+              {popularCars.slice(0, 10).map((car) => (
                 <CarCard
                   key={car.id}
                   car={car}
@@ -84,6 +84,28 @@ export default function PopularCars({ initialCars = [] }: { initialCars?: Car[] 
                   }}
                 />
               ))}
+
+              {/* View All Card */}
+              {popularCars.length > 0 && (
+                <Link
+                  key="view-all-popular"
+                  href="/popular-cars-in-india"
+                  className="flex-shrink-0 w-[220px] sm:w-[240px] bg-gradient-to-br from-orange-500 to-red-500 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                >
+                  <div className="h-full flex flex-col items-center justify-center p-6 text-center min-h-[280px] sm:min-h-[300px]">
+                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-1">View All</h3>
+                    <p className="text-white/80 text-sm mb-4">Popular Cars</p>
+                    <div className="px-5 py-2 bg-white text-orange-600 rounded-full font-semibold text-sm">
+                      Explore
+                    </div>
+                  </div>
+                </Link>
+              )}
             </div>
             <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-gray-50 via-gray-50/80 to-transparent pointer-events-none sm:hidden -z-10" />
           </div>

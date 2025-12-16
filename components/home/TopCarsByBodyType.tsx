@@ -180,7 +180,7 @@ export default function TopCarsByBodyType({ initialCars = [] }: { initialCars?: 
         <div>
             {/* Section Header */}
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-                Top 10 Cars in India
+                Top Selling Cars in India
             </h2>
 
             {/* Compact Horizontal Scrollable Filter Pills */}
@@ -259,7 +259,7 @@ export default function TopCarsByBodyType({ initialCars = [] }: { initialCars?: 
                             {/* View All Card */}
                             {rankedCars.length > 0 && (
                                 <Link
-                                    href={`/top-cars/${selectedBodyType === 'all' ? 'suv' : selectedBodyType.toLowerCase()}`}
+                                    href="/top-selling-cars-in-india"
                                     className="flex-shrink-0 w-[220px] sm:w-[240px] bg-gradient-to-br from-orange-500 to-red-500 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                                 >
                                     <div className="h-full flex flex-col items-center justify-center p-6 text-center min-h-[280px] sm:min-h-[300px]">

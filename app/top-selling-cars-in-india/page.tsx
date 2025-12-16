@@ -4,24 +4,39 @@ import { ChevronLeft } from 'lucide-react'
 import PageSection from '@/components/common/PageSection'
 import Footer from '@/components/Footer'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
-import ElectricCarsClient from './ElectricCarsClient'
+import TopSellingCarsClient from './TopSellingCarsClient'
 
 // Enable ISR with 1-hour revalidation
 export const revalidate = 3600
 
 // Generate metadata for SEO
+// Generate metadata for SEO
 export async function generateMetadata(): Promise<Metadata> {
+    const { dynamicDescription } = await getTopSellingCarsData()
+    let description = `Explore the top selling cars in India with detailed prices, specifications, and expert reviews. Compare the most popular cars from Maruti, Hyundai, Tata, Mahindra, and more.`
+
+    if (dynamicDescription) {
+        try {
+            const parsed = JSON.parse(dynamicDescription)
+            if (parsed.short) {
+                description = parsed.short
+            }
+        } catch (e) {
+            // Fallback
+        }
+    }
+
     return {
-        title: `Electric Cars in India 2025 - Prices, Range & Specs | gadizone`,
-        description: `Explore all electric cars in India with detailed prices, range, specifications and reviews. Compare EVs from Tesla, Tata, Mahindra, Hyundai, BYD and more.`,
-        keywords: `electric cars India, EV cars, electric vehicles, EV range, zero emission cars, best electric cars 2025`,
+        title: `Top Selling Cars in India 2025 - Prices, Specs & Reviews | gadizone`,
+        description,
+        keywords: `top selling cars India, best selling cars 2025, popular cars India, car prices, car reviews`,
         openGraph: {
-            title: `Electric Cars in India 2025`,
-            description: 'Explore all electric cars in India with detailed prices, range and specifications.',
+            title: `Top Selling Cars in India 2025`,
+            description,
             type: 'website'
         },
         alternates: {
-            canonical: `/electric-cars`
+            canonical: `/top-selling-cars-in-india`
         }
     }
 }
@@ -39,7 +54,7 @@ const formatLaunchDate = (date: string): string => {
 }
 
 // Server-side data fetching
-async function getElectricCarsData() {
+async function getTopSellingCarsData() {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
     try {
@@ -90,46 +105,65 @@ async function getElectricCarsData() {
             }
         })
 
-        // Filter only electric cars
-        const electricCars = allCars.filter((car: any) =>
-            car.fuelTypes && car.fuelTypes.some((f: string) => f.toLowerCase() === 'electric')
-        )
+        // Sort by popularity first, then by price
+        const sortedCars = allCars.sort((a: any, b: any) => {
+            if (a.isPopular && !b.isPopular) return -1
+            if (!a.isPopular && b.isPopular) return 1
+            return (b.startingPrice || 0) - (a.startingPrice || 0)
+        })
 
-        const popularCars = electricCars.filter((c: any) => c.isPopular).slice(0, 10)
-        const newLaunchedCars = electricCars.filter((c: any) => c.isNew).slice(0, 10)
+        // For "All" category, show ALL cars (sorted by popularity)
+        // For specific body types, show top 10
+        const bodyTypes = ['SUV', 'Sedan', 'Hatchback', 'MPV', 'Coupe']
+        const carsByBodyType: Record<string, any[]> = { 'All': sortedCars }
 
-        // Generate dynamic description based on actual car data
-        const topCars = electricCars.slice(0, 3)
+        bodyTypes.forEach(bodyType => {
+            const bodyCars = allCars.filter((car: any) =>
+                car.bodyType && car.bodyType.toLowerCase() === bodyType.toLowerCase()
+            )
+            const sorted = bodyCars.sort((a: any, b: any) => {
+                if (a.isPopular && !b.isPopular) return -1
+                if (!a.isPopular && b.isPopular) return 1
+                return (b.startingPrice || 0) - (a.startingPrice || 0)
+            })
+            carsByBodyType[bodyType] = sorted.slice(0, 10)
+        })
+
+        const popularCars = sortedCars.filter((c: any) => c.isPopular).slice(0, 10)
+        const newLaunchedCars = sortedCars.filter((c: any) => c.isNew).slice(0, 10)
+
+        // Generate dynamic description
+        const topCars = sortedCars.slice(0, 3)
         const topCarNames = topCars.map((car: any) => `${car.brandName} ${car.name}`)
-        const carCount = electricCars.length
-        const topCar = electricCars.length > 0 ? `${electricCars[0].brandName} ${electricCars[0].name}` : null
+        const carCount = sortedCars.length
+        const topCar = sortedCars.length > 0 ? `${sortedCars[0].brandName} ${sortedCars[0].name}` : null
 
-        let shortDesc = `Thinking of going electric? Explore our comprehensive collection of ${carCount}+ electric cars available in India, featuring the latest EVs with impressive range, fast charging, and zero emissions.`
+        let shortDesc = `Discover India's most popular cars! Browse our curated list of ${carCount}+ top-selling models featuring unbeatable value, trusted reliability, and impressive performance across all segments.`
 
         let extendedDesc = ''
         if (topCarNames.length >= 3) {
-            extendedDesc += ` Leading the EV revolution are ${topCarNames[0]}, ${topCarNames[1]}, and ${topCarNames[2]} - offering cutting-edge technology, exceptional range, and eco-friendly performance.`
+            extendedDesc += ` Leading the charts are ${topCarNames[0]}, ${topCarNames[1]}, and ${topCarNames[2]} - India's most loved cars known for their exceptional quality and customer satisfaction.`
         } else if (topCarNames.length >= 1) {
-            extendedDesc += ` The ${topCarNames[0]} is one of the most popular electric cars in India.`
+            extendedDesc += ` The ${topCarNames[0]} is one of the most sought-after cars in India.`
         }
 
-        extendedDesc += ` Compare range, battery capacity, charging time, prices, and owner reviews to find your perfect electric vehicle.`
+        extendedDesc += ` Compare prices, specifications, mileage, features, and genuine owner reviews to find your ideal car.`
 
         if (topCar) {
-            extendedDesc += ` Based on popularity and user ratings, we recommend the ${topCar} as an excellent choice for EV buyers in India.`
+            extendedDesc += ` Based on sales and user ratings, we recommend the ${topCar} as an excellent choice for car buyers in India.`
         }
 
         const dynamicDescription = JSON.stringify({ short: shortDesc, extended: extendedDesc })
 
-        return { cars: electricCars, popularCars, newLaunchedCars, dynamicDescription }
+        return { carsByBodyType, popularCars, newLaunchedCars, dynamicDescription }
     } catch (error) {
-        console.error('Error fetching electric cars data:', error)
-        return { cars: [], popularCars: [], newLaunchedCars: [], dynamicDescription: '' }
+        console.error('Error fetching top selling cars data:', error)
+        return { carsByBodyType: { 'All': [] }, popularCars: [], newLaunchedCars: [], dynamicDescription: '' }
     }
 }
 
-export default async function ElectricCarsPage() {
-    const { cars, popularCars, newLaunchedCars, dynamicDescription } = await getElectricCarsData()
+export default async function TopSellingCarsPage() {
+    const { carsByBodyType, popularCars, newLaunchedCars, dynamicDescription } = await getTopSellingCarsData()
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -138,7 +172,6 @@ export default async function ElectricCarsPage() {
                     <Ad3DCarousel className="my-4" />
                 </div>
 
-                {/* Header & Filters */}
                 <PageSection background="white">
                     <Link
                         href="/"
@@ -148,8 +181,8 @@ export default async function ElectricCarsPage() {
                         Back to Home
                     </Link>
 
-                    <ElectricCarsClient
-                        initialCars={cars}
+                    <TopSellingCarsClient
+                        carsByBodyType={carsByBodyType}
                         popularCars={popularCars}
                         newLaunchedCars={newLaunchedCars}
                         dynamicDescription={dynamicDescription || ''}

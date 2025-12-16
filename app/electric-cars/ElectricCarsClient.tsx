@@ -29,6 +29,7 @@ interface ElectricCarsClientProps {
     initialCars: Car[]
     popularCars: Car[]
     newLaunchedCars: Car[]
+    dynamicDescription?: string
 }
 
 const rangeFilters = [
@@ -62,9 +63,22 @@ const evRangeData: Record<string, number> = {
 export default function ElectricCarsClient({
     initialCars,
     popularCars,
-    newLaunchedCars
+    newLaunchedCars,
+    dynamicDescription = ''
 }: ElectricCarsClientProps) {
     const [selectedRange, setSelectedRange] = useState<string[]>([])
+    const [isExpanded, setIsExpanded] = useState(false)
+
+    // Parse description - supports both JSON format and plain text
+    let shortText = 'Explore all electric cars in India with detailed prices, range, specifications and reviews. Compare EVs from Tesla, Tata, Mahindra, Hyundai, BYD and more.'
+    let extendedText = ''
+    try {
+        const parsed = JSON.parse(dynamicDescription)
+        shortText = parsed.short || shortText
+        extendedText = parsed.extended || ''
+    } catch {
+        // Plain text fallback - no extended text
+    }
 
     // Apply filters
     const filteredCars = initialCars.filter(car => {
@@ -95,10 +109,20 @@ export default function ElectricCarsClient({
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     Electric Cars in India
                 </h1>
-                <p className="text-gray-600 mb-6">
-                    Explore all electric cars in India with detailed prices, range, specifications and reviews. Compare EVs from Tesla, Tata, Mahindra, Hyundai, BYD and more.
-                    <button className="text-emerald-600 ml-1 font-medium">...read more</button>
-                </p>
+                <div className="text-gray-600 mb-6">
+                    <p className={isExpanded ? '' : 'line-clamp-2'}>
+                        {shortText}
+                        {isExpanded && extendedText}
+                    </p>
+                    {extendedText && (
+                        <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
+                        >
+                            {isExpanded ? '...show less' : '...read more'}
+                        </button>
+                    )}
+                </div>
 
                 {/* Filters */}
                 <div className="flex flex-wrap gap-3 pb-4 border-b border-gray-200">

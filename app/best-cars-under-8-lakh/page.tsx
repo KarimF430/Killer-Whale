@@ -1,64 +1,23 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
-import { notFound } from 'next/navigation'
 import PageSection from '@/components/common/PageSection'
 import Footer from '@/components/Footer'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
-import BudgetCarsClient from './BudgetCarsClient'
+import BudgetCarsClient from '@/app/cars-by-budget/[budget]/BudgetCarsClient'
 
-interface PageProps {
-    params: Promise<{ budget: string }>
+// Budget info for this page
+const BUDGET_INFO = {
+    label: 'Under ₹8 Lakh',
+    min: 100000,
+    max: 800000,
+    lakhValue: '8 lakh',
+    title: 'Best Cars Under 8 Lakh',
+    apiSlug: 'under-8'
 }
 
 // Enable ISR with 1-hour revalidation
 export const revalidate = 3600
-
-// Budget ranges configuration
-const budgetRanges: Record<string, { label: string; min: number; max: number; lakhValue: string; title: string }> = {
-    'under-8': {
-        label: 'Under ₹8 Lakh',
-        min: 100000,
-        max: 800000,
-        lakhValue: '8 lakh',
-        title: 'Best Cars Under 8 Lakh'
-    },
-    'under-10': {
-        label: 'Under ₹10 Lakh',
-        min: 100000,
-        max: 1000000,
-        lakhValue: '10 lakh',
-        title: 'Best Cars Under 10 Lakh'
-    },
-    'under-15': {
-        label: 'Under ₹15 Lakh',
-        min: 100000,
-        max: 1500000,
-        lakhValue: '15 lakh',
-        title: 'Best Cars Under 15 Lakh'
-    },
-    'under-25': {
-        label: 'Under ₹25 Lakh',
-        min: 100000,
-        max: 2500000,
-        lakhValue: '25 lakh',
-        title: 'Best Cars Under 25 Lakh'
-    },
-    'under-50': {
-        label: 'Under ₹50 Lakh',
-        min: 100000,
-        max: 5000000,
-        lakhValue: '50 lakh',
-        title: 'Best Cars Under 50 Lakh'
-    },
-    'above-50': {
-        label: 'Above ₹50 Lakh',
-        min: 5000001,
-        max: Infinity,
-        lakhValue: '50 lakh',
-        title: 'Best Luxury Cars Above 50 Lakh'
-    }
-}
 
 // Generate dynamic description based on actual cars data
 function generateDynamicDescription(cars: any[], lakhValue: string, topCarName: string | null): string {
@@ -66,10 +25,8 @@ function generateDynamicDescription(cars: any[], lakhValue: string, topCarName: 
     const topCarNames = topCars.map(car => `${car.brandName} ${car.name}`)
     const carCount = cars.length
 
-    // First part - shown initially (2 lines)
     let shortDesc = `Looking for the perfect car within your budget? Explore our curated selection of ${carCount}+ best cars under Rs. ${lakhValue} in India, featuring top-rated models with excellent mileage, safety features, and value for money.`
 
-    // Extended part - shown on "read more"
     let extendedDesc = ''
 
     if (topCarNames.length >= 3) {
@@ -88,22 +45,17 @@ function generateDynamicDescription(cars: any[], lakhValue: string, topCarName: 
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-    const { budget } = await params
-    const budgetInfo = budgetRanges[budget] || budgetRanges['under-8']
-
-    return {
-        title: `${budgetInfo.title} in India - Prices, Specs & Reviews | gadizone`,
-        description: `Find the best cars ${budgetInfo.label.toLowerCase()} in India. Compare prices, specifications, features, and expert reviews.`,
-        keywords: `cars ${budgetInfo.label.toLowerCase()}, budget cars, best cars under ${budgetInfo.lakhValue}, car prices India`,
-        openGraph: {
-            title: `${budgetInfo.title} in India`,
-            description: `Find the best cars ${budgetInfo.label.toLowerCase()} in India.`,
-            type: 'website'
-        },
-        alternates: {
-            canonical: `/cars-by-budget/${budget}`
-        }
+export const metadata: Metadata = {
+    title: `${BUDGET_INFO.title} in India - Prices, Specs & Reviews | gadizone`,
+    description: `Find the best cars ${BUDGET_INFO.label.toLowerCase()} in India. Compare prices, specifications, features, and expert reviews.`,
+    keywords: `cars ${BUDGET_INFO.label.toLowerCase()}, budget cars, best cars under ${BUDGET_INFO.lakhValue}, car prices India`,
+    openGraph: {
+        title: `${BUDGET_INFO.title} in India`,
+        description: `Find the best cars ${BUDGET_INFO.label.toLowerCase()} in India.`,
+        type: 'website'
+    },
+    alternates: {
+        canonical: `/best-cars-under-8-lakh`
     }
 }
 
@@ -120,20 +72,19 @@ const formatLaunchDate = (date: string): string => {
 }
 
 // Server-side data fetching
-async function getBudgetCarsData(budgetSlug: string) {
+async function getBudgetCarsData() {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
     try {
-        // Fetch budget cars using optimized endpoint
         const [budgetRes, modelsRes, brandsRes] = await Promise.all([
-            fetch(`${backendUrl}/api/cars-by-budget/${budgetSlug}?page=1&limit=100`, { next: { revalidate: 3600 } }),
+            fetch(`${backendUrl}/api/cars-by-budget/${BUDGET_INFO.apiSlug}?page=1&limit=100`, { next: { revalidate: 3600 } }),
             fetch(`${backendUrl}/api/models-with-pricing?limit=20`, { next: { revalidate: 3600 } }),
             fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } })
         ])
 
         if (!budgetRes.ok) {
             console.error('Failed to fetch budget cars')
-            return { cars: [], popularCars: [], newLaunchedCars: [] }
+            return { cars: [], popularCars: [], newLaunchedCars: [], dynamicDescription: '' }
         }
 
         const budgetData = await budgetRes.json()
@@ -142,16 +93,17 @@ async function getBudgetCarsData(budgetSlug: string) {
 
         const models = modelsResponse.data || modelsResponse
 
-        // Create brand map
         const brandMap = brands.reduce((acc: any, brand: any) => {
             acc[brand.id] = brand.name
             return acc
         }, {})
 
-        // Process budget cars
-        const cars = budgetData.data || []
+        const allCars = budgetData.data || []
+        const cars = allCars.filter((car: any) => {
+            const price = car.startingPrice || 0
+            return price >= BUDGET_INFO.min && price <= BUDGET_INFO.max
+        })
 
-        // Process popular/new cars
         const processedCars = models.map((model: any) => {
             const lowestPrice = model.lowestPrice || model.price || 0
             const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0 ? model.fuelTypes : ['Petrol']
@@ -184,11 +136,8 @@ async function getBudgetCarsData(budgetSlug: string) {
         const popularCars = processedCars.filter((c: any) => c.isPopular).slice(0, 10)
         const newLaunchedCars = processedCars.filter((c: any) => c.isNew).slice(0, 10)
 
-        // Generate dynamic description based on actual car data
-        const budgetInfo = budgetRanges[budgetSlug]
-        const lakhValue = budgetInfo?.lakhValue || '10 lakh'
         const topCarName = cars.length > 0 ? `${cars[0].brandName} ${cars[0].name}` : null
-        const dynamicDescription = generateDynamicDescription(cars, lakhValue, topCarName)
+        const dynamicDescription = generateDynamicDescription(cars, BUDGET_INFO.lakhValue, topCarName)
 
         return { cars, popularCars, newLaunchedCars, dynamicDescription }
     } catch (error) {
@@ -197,15 +146,8 @@ async function getBudgetCarsData(budgetSlug: string) {
     }
 }
 
-export default async function BudgetCarsPage({ params }: PageProps) {
-    const { budget: budgetSlug } = await params
-    const budgetInfo = budgetRanges[budgetSlug]
-
-    if (!budgetInfo) {
-        notFound()
-    }
-
-    const { cars, popularCars, newLaunchedCars, dynamicDescription } = await getBudgetCarsData(budgetSlug)
+export default async function BestCarsUnder8LakhPage() {
+    const { cars, popularCars, newLaunchedCars, dynamicDescription } = await getBudgetCarsData()
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -214,7 +156,6 @@ export default async function BudgetCarsPage({ params }: PageProps) {
                     <Ad3DCarousel className="my-4" />
                 </div>
 
-                {/* Header & Filters */}
                 <PageSection background="white">
                     <Link
                         href="/"
@@ -228,7 +169,7 @@ export default async function BudgetCarsPage({ params }: PageProps) {
                         initialCars={cars}
                         popularCars={popularCars}
                         newLaunchedCars={newLaunchedCars}
-                        budgetLabel={budgetInfo.title}
+                        budgetLabel={BUDGET_INFO.title}
                         budgetDescription={dynamicDescription || ''}
                     />
                 </PageSection>
