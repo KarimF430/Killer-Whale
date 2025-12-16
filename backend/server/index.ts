@@ -74,7 +74,9 @@ app.use(pinoHttp({
   },
 }));
 app.use(compression());
-const isProd = process.env.NODE_ENV === 'production';
+// Force production mode if running on Render (to ensure secure cookies work)
+const isRender = !!process.env.RENDER || !!process.env.RENDER_EXTERNAL_URL;
+const isProd = process.env.NODE_ENV === 'production' || isRender;
 
 // Build a production-safe, permissive CSP to support admin app uploads (R2/S3), images and APIs
 const accountId = process.env.R2_ACCOUNT_ID;
@@ -111,6 +113,7 @@ app.use(helmet({
 const allowedOrigins = [
   'https://gadizone.com',
   'https://www.gadizone.com',
+  'https://admin.gadizone.com',
   'https://killer-whale101.vercel.app',
   'https://killer-whale.onrender.com',
   'http://localhost:3000',
@@ -256,8 +259,8 @@ const sessionConfig: any = {
     secure: isProd, // true in production (required for sameSite: 'none')
     httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    sameSite: isProd ? 'none' : 'lax', // 'none' REQUIRED for cross-domain OAuth (backend on onrender.com, frontend on gadizone.com)
-    domain: undefined, // Let browser handle domain automatically
+    sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-subdomain if we want to be extra safe, or 'lax' works for .gadizone.com
+    domain: isProd ? '.gadizone.com' : undefined, // Share cookie across all subdomains (www, admin, etc.)
     path: '/', // Explicitly set cookie path
   },
   name: 'sid', // Custom session ID name

@@ -42,18 +42,23 @@ router.get('/', async (req, res) => {
         session: {
             status: sessionStatus,
             id: sessionID,
-            cookie: req.session?.cookie
+            cookieConfig: req.session?.cookie,
+            hasUser: !!(req.session as any)?.userId
         },
-        cookies: {
-            secure: isProd,
-            sameSite: isProd ? 'none' : 'lax',
-            domain: isProd ? undefined : undefined
+        // We can't access `isProd` directly from index.ts but we can check the cookie property to guess
+        inferredCookieSettings: {
+            secure: req.session?.cookie.secure,
+            sameSite: req.session?.cookie.sameSite,
+            httpOnly: req.session?.cookie.httpOnly,
+            path: req.session?.cookie.path,
+            domain: req.session?.cookie.domain
         },
         headers: {
             host: req.get('host'),
             origin: req.get('origin'),
             'x-forwarded-proto': req.get('x-forwarded-proto'),
-            'x-forwarded-for': req.get('x-forwarded-for')
+            'x-forwarded-for': req.get('x-forwarded-for'),
+            'cookie-present': !!req.get('cookie')
         }
     };
 
