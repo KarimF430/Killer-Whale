@@ -300,6 +300,14 @@ if (!isProd) {
   });
 }
 
+// Debug environment variables
+if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development') {
+  console.log('🌍 Environment Configuration:');
+  console.log('   - FRONTEND_URL:', process.env.FRONTEND_URL || '(Not set - defaulting to localhost)');
+  console.log('   - BACKEND_URL:', process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '(Not set)');
+  console.log('   - NODE_ENV:', process.env.NODE_ENV);
+}
+
 // Initialize services
 (async () => {
   try {

@@ -361,71 +361,129 @@ router.get('/auth/google', (req, res, next) => {
  * GET /api/user/auth/google/callback
  */
 router.get('/auth/google/callback', (req, res, next) => {
-    passport.authenticate('google', { session: false }, async (err: any, user: any) => {
-        console.log('🔄 Google OAuth callback received');
-        console.log('   - Request origin:', req.headers.origin);
-        console.log('   - Request host:', req.headers.host);
-        console.log('   - Session ID before:', req.sessionID);
+    // Helper to render success page
+    const renderSuccessPage = (redirectUrl: string) => {
+        const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Login Successful</title>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <style>
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                            background: #fff;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                            margin: 0;
+                            color: #333;
+                        }
+                        .container {
+                            text-align: center;
+                            padding: 2rem;
+                            border-radius: 8px;
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            background: #fff;
+                            max-width: 400px;
+                            width: 90%;
+                        }
+                        .success-icon {
+                            color: #10B981;
+                            font-size: 48px;
+                            margin-bottom: 1rem;
+                        }
+                        h1 { font-size: 24px; margin-bottom: 0.5rem; }
+                        p { color: #666; margin-bottom: 2rem; }
+                        .btn {
+                            display: inline-block;
+                            background: #EF4444; /* gadizone red */
+                            color: white;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            text-decoration: none;
+                            font-weight: 500;
+                            transition: background 0.2s;
+                        }
+                        .btn:hover { background: #DC2626; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="success-icon">✓</div>
+                        <h1>Login Successful</h1>
+                        <p>You are being redirected to the app...</p>
+                        <a href="${redirectUrl}" class="btn">Click here if not redirected</a>
+                    </div>
+                    <script>
+                        setTimeout(function() {
+                            window.location.href = "${redirectUrl}";
+                        }, 1000);
+                    </script>
+                </body>
+                </html>
+            `;
+        res.send(html);
+    };
 
-        if (err || !user) {
-            console.error('❌ Google OAuth callback error:', err);
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-            return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
-        }
+    try {
+        // Update last login first
+        user.lastLogin = new Date();
+        await user.save();
 
-        try {
-            // Update last login first
-            user.lastLogin = new Date();
-            await user.save();
+        // CRITICAL FIX: Regenerate session FIRST, THEN set data
+        // This prevents race condition where data set before regeneration is lost
+        req.session.regenerate((regenerateErr) => {
+            if (regenerateErr) {
+                console.error('❌ Session regenerate error:', regenerateErr);
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                return res.redirect(`${frontendUrl}/login?error=session_failed`);
+            }
 
-            // CRITICAL FIX: Regenerate session FIRST, THEN set data
-            // This prevents race condition where data set before regeneration is lost
-            req.session.regenerate((regenerateErr) => {
-                if (regenerateErr) {
-                    console.error('❌ Session regenerate error:', regenerateErr);
+            // NOW set session data on the NEW regenerated session
+            (req.session as any).userId = user.id;
+            (req.session as any).userEmail = user.email;
+
+            console.log('✅ Google OAuth successful for:', user.email);
+            console.log('   - User ID:', user.id);
+            console.log('   - Session ID after regeneration:', req.sessionID);
+            console.log('   - Session data:', { userId: (req.session as any).userId, userEmail: (req.session as any).userEmail });
+
+            // CRITICAL: Save session before redirect to ensure cookie is set
+            req.session.save((saveErr) => {
+                if (saveErr) {
+                    console.error('❌ Session save error:', saveErr);
                     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
                     return res.redirect(`${frontendUrl}/login?error=session_failed`);
                 }
 
-                // NOW set session data on the NEW regenerated session
-                (req.session as any).userId = user.id;
-                (req.session as any).userEmail = user.email;
+                console.log('✅ Session saved successfully');
+                console.log('   - Cookie settings:', req.session.cookie);
+                console.log('   - Response headers will include Set-Cookie');
 
-                console.log('✅ Google OAuth successful for:', user.email);
-                console.log('   - User ID:', user.id);
-                console.log('   - Session ID after regeneration:', req.sessionID);
-                console.log('   - Session data:', { userId: (req.session as any).userId, userEmail: (req.session as any).userEmail });
+                // Verify session was saved by checking it exists
+                const sessionUserId = (req.session as any)?.userId;
+                if (!sessionUserId) {
+                    console.error('⚠️  Warning: Session save completed but userId not found in session');
+                }
 
-                // CRITICAL: Save session before redirect to ensure cookie is set
-                req.session.save((saveErr) => {
-                    if (saveErr) {
-                        console.error('❌ Session save error:', saveErr);
-                        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-                        return res.redirect(`${frontendUrl}/login?error=session_failed`);
-                    }
+                // Redirect to frontend home page with success indicator
+                const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+                const targetUrl = `${frontendUrl}/?login=success`;
+                console.log('🔀 Redirecting to:', targetUrl);
 
-                    console.log('✅ Session saved successfully');
-                    console.log('   - Cookie settings:', req.session.cookie);
-                    console.log('   - Response headers will include Set-Cookie');
-
-                    // Verify session was saved by checking it exists
-                    const sessionUserId = (req.session as any)?.userId;
-                    if (!sessionUserId) {
-                        console.error('⚠️  Warning: Session save completed but userId not found in session');
-                    }
-
-                    // Redirect to frontend home page with success indicator
-                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-                    console.log('🔀 Redirecting to:', `${frontendUrl}/?login=success`);
-                    res.redirect(`${frontendUrl}/?login=success`);
-                });
+                // Use robust rendering page instead of direct redirect
+                renderSuccessPage(targetUrl);
             });
-        } catch (error) {
-            console.error('❌ Session creation error:', error);
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-            res.redirect(`${frontendUrl}/login?error=session_failed`);
-        }
-    })(req, res, next);
+        });
+    } catch (error) {
+        console.error('❌ Session creation error:', error);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        res.redirect(`${frontendUrl}/login?error=session_failed`);
+    }
+})(req, res, next);
 });
 
 /**
