@@ -17,6 +17,7 @@ import CarCard from '../home/CarCard'
 import { saveVisitedModel } from '../home/CarsYouMightLike'
 import { useViewTracker } from '@/lib/use-view-tracker'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
+import ImageGalleryModal from '../common/ImageGalleryModal'
 // Lazy-load heavy components for faster initial page load (CarWale-style optimization)
 const ModelYouTube = dynamic(() => import('./ModelYouTube'), {
   loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />,
@@ -288,6 +289,10 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
   const [selectedSpaceComfortIndex, setSelectedSpaceComfortIndex] = useState(0)
   const [selectedStorageIndex, setSelectedStorageIndex] = useState(0)
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
+  // Image Gallery Modal state for highlights and colors
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false)
+  const [galleryImages, setGalleryImages] = useState<Array<{ src: string; alt: string; caption?: string }>>([])
+  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0)
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const [showAllFAQs, setShowAllFAQs] = useState(false)
   const [showAllSimilarCars, setShowAllSimilarCars] = useState(false)
@@ -995,6 +1000,13 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
     }
   }
 
+  // Open gallery modal with images
+  const openGalleryModal = (images: Array<{ src: string; alt: string; caption?: string }>, initialIndex: number = 0) => {
+    setGalleryImages(images)
+    setGalleryInitialIndex(initialIndex)
+    setGalleryModalOpen(true)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sticky Navigation Ribbon */}
@@ -1364,45 +1376,65 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                     }
 
                     return currentHighlights.length > 0 ? (
-                      currentHighlights.map((highlight: any, index: number) => (
-                        <div key={index} className="flex-shrink-0 w-64">
-                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                            <div className="aspect-[4/3] bg-gray-200 relative">
-                              <img
-                                src={
-                                  // Backend format: { url: string, caption: string }
-                                  highlight.url ? (
-                                    highlight.url.startsWith('http://') || highlight.url.startsWith('https://') ? highlight.url :
-                                      highlight.url.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}` :
-                                        highlight.url
-                                  ) :
-                                    // Fallback format: { image: string, title: string }
-                                    highlight.image ? (
-                                      highlight.image.startsWith('http://') || highlight.image.startsWith('https://') ? highlight.image :
-                                        highlight.image.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.image}` :
-                                          highlight.image
-                                    ) :
-                                      `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
-                                }
-                                alt={highlight.caption || highlight.title || 'Car Feature'}
-                                className="w-full h-full object-cover rounded-lg"
-                                loading="lazy"
-                                decoding="async"
-                                onError={(e) => {
-                                  // Fallback to placeholder if image fails to load
-                                  e.currentTarget.src = `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
-                                }}
-                              />
-                              {/* Image Caption Overlay - Backend Caption */}
-                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                                <p className="text-sm font-medium text-center">
-                                  {truncateCaption(highlight.caption || highlight.title || `${model?.brand} ${model?.name} ${activeHighlightTab === 'keyFeatures' ? 'Feature' : activeHighlightTab === 'spaceComfort' ? 'Space' : 'Storage'} ${index + 1}`)}
-                                </p>
+                      currentHighlights.map((highlight: any, index: number) => {
+                        // Build image URL
+                        const imageUrl = highlight.url ? (
+                          highlight.url.startsWith('http://') || highlight.url.startsWith('https://') ? highlight.url :
+                            highlight.url.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}` :
+                              highlight.url
+                        ) : highlight.image ? (
+                          highlight.image.startsWith('http://') || highlight.image.startsWith('https://') ? highlight.image :
+                            highlight.image.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.image}` :
+                              highlight.image
+                        ) : `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`;
+
+                        const caption = highlight.caption || highlight.title || `${model?.brand} ${model?.name} ${activeHighlightTab === 'keyFeatures' ? 'Feature' : activeHighlightTab === 'spaceComfort' ? 'Space' : 'Storage'} ${index + 1}`;
+
+                        return (
+                          <div
+                            key={index}
+                            className="flex-shrink-0 w-64 cursor-pointer"
+                            onClick={() => {
+                              // Build gallery images array from current highlights
+                              const galleryImgs = currentHighlights.map((h: any, idx: number) => ({
+                                src: h.url ? (
+                                  h.url.startsWith('http://') || h.url.startsWith('https://') ? h.url :
+                                    h.url.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${h.url}` :
+                                      h.url
+                                ) : h.image ? (
+                                  h.image.startsWith('http://') || h.image.startsWith('https://') ? h.image :
+                                    h.image.startsWith('/uploads/') ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${h.image}` :
+                                      h.image
+                                ) : `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`,
+                                alt: h.caption || h.title || `Feature ${idx + 1}`,
+                                caption: h.caption || h.title || `${model?.brand} ${model?.name} Feature ${idx + 1}`
+                              }));
+                              openGalleryModal(galleryImgs, index);
+                            }}
+                          >
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+                              <div className="aspect-[4/3] bg-gray-200 relative">
+                                <img
+                                  src={imageUrl}
+                                  alt={caption}
+                                  className="w-full h-full object-cover rounded-lg"
+                                  loading="lazy"
+                                  decoding="async"
+                                  onError={(e) => {
+                                    e.currentTarget.src = `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
+                                  }}
+                                />
+                                {/* Image Caption Overlay - Backend Caption */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                  <p className="text-sm font-medium text-center">
+                                    {truncateCaption(caption)}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       /* Fallback cards if no backend data */
                       <>
@@ -1607,8 +1639,26 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
               {/* Check if backend colorImages exist */}
               {model?.colorImages && model.colorImages.length > 0 ? (
                 <>
-                  {/* Main Car Image Display */}
-                  <div className="relative bg-gray-50 rounded-2xl p-8">
+                  {/* Main Car Image Display - Clickable */}
+                  <div
+                    className="relative bg-gray-50 rounded-2xl p-8 cursor-pointer"
+                    onClick={() => {
+                      // Build color gallery images
+                      const colorGalleryImgs = model.colorImages.map((c, idx) => ({
+                        src: (() => {
+                          if (!c.url) return '';
+                          if (c.url.startsWith('http://') || c.url.startsWith('https://')) return c.url;
+                          if (c.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${c.url}`;
+                          return c.url;
+                        })(),
+                        alt: `${model?.brand || 'Car'} ${model?.name || 'Model'} in ${c.caption}`,
+                        caption: c.caption
+                      }));
+                      // Find current selected index
+                      const currentIdx = model.colorImages.findIndex(c => c.caption === selectedColor);
+                      openGalleryModal(colorGalleryImgs, currentIdx >= 0 ? currentIdx : 0);
+                    }}
+                  >
                     <div className="flex items-center justify-center">
                       <div className="relative max-w-2xl w-full">
                         <img
@@ -1620,7 +1670,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                             return imageUrl;
                           })()}
                           alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${selectedColor || 'default color'}`}
-                          className="w-full h-auto object-contain"
+                          className="w-full h-auto object-contain hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                           decoding="async"
                         />
@@ -1630,6 +1680,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                     {/* Color Name Display */}
                     <div className="text-center mt-6">
                       <h3 className="text-xl font-bold text-gray-900">{truncateCaption(selectedColor || 'Default Color', 30)}</h3>
+                      <p className="text-sm text-gray-500 mt-1">Click to view fullscreen</p>
                     </div>
                   </div>
 
@@ -2697,6 +2748,15 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
       </div>
 
       <Footer />
+
+      {/* Image Gallery Modal for Highlights and Colors */}
+      <ImageGalleryModal
+        images={galleryImages}
+        initialIndex={galleryInitialIndex}
+        isOpen={galleryModalOpen}
+        onClose={() => setGalleryModalOpen(false)}
+        carName={`${model?.brand || 'Car'} ${model?.name || 'Model'}`}
+      />
     </div>
   )
 }

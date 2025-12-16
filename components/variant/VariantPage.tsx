@@ -17,6 +17,7 @@ import UpcomingCars from '../home/UpcomingCars'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
 import UpcomingCarCard from '../home/UpcomingCarCard'
 import { KillerWhaleSpinner } from '../common/KillerWhaleLoader'
+import ImageGalleryModal from '../common/ImageGalleryModal'
 
 interface VariantData {
   brand: string
@@ -116,6 +117,18 @@ export default function VariantPage({
   // Upcoming Cars State
   const [upcomingCars, setUpcomingCars] = useState<UpcomingCar[]>([])
   const [loadingUpcomingCars, setLoadingUpcomingCars] = useState(true)
+
+  // Image Gallery Modal state for highlights
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false)
+  const [galleryImages, setGalleryImages] = useState<Array<{ src: string; alt: string; caption?: string }>>([])
+  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0)
+
+  // Open gallery modal with images
+  const openGalleryModal = (images: Array<{ src: string; alt: string; caption?: string }>, initialIndex: number = 0) => {
+    setGalleryImages(images)
+    setGalleryInitialIndex(initialIndex)
+    setGalleryModalOpen(true)
+  }
 
   // Fetch upcoming cars for this brand
   useEffect(() => {
@@ -1059,36 +1072,58 @@ export default function VariantPage({
                     const variantHighlights = variant?.highlightImages || [];
 
                     return variantHighlights.length > 0 ? (
-                      variantHighlights.map((highlight: any, index: number) => (
-                        <div key={index} className="flex-shrink-0 w-64">
-                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                            <div className="aspect-[4/3] bg-gray-200 relative">
-                              <img
-                                src={(() => {
-                                  if (!highlight.url) return '';
-                                  if (highlight.url.startsWith('http://') || highlight.url.startsWith('https://')) return highlight.url;
-                                  if (highlight.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}`;
-                                  return highlight.url;
-                                })()}
-                                alt={highlight.caption || `${displayBrandName} ${displayModelName} Feature ${index + 1}`}
-                                className="w-full h-full object-cover rounded-lg"
-                                loading="lazy"
-                                decoding="async"
-                                onError={(e) => {
-                                  // Fallback to placeholder if image fails to load
-                                  e.currentTarget.src = `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
-                                }}
-                              />
-                              {/* Image Caption Overlay - Backend Caption */}
-                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
-                                <p className="text-sm font-medium text-center">
-                                  {highlight.caption || `${displayBrandName} ${displayModelName} Feature ${index + 1}`}
-                                </p>
+                      variantHighlights.map((highlight: any, index: number) => {
+                        // Build image URL
+                        const imageUrl = (() => {
+                          if (!highlight.url) return '';
+                          if (highlight.url.startsWith('http://') || highlight.url.startsWith('https://')) return highlight.url;
+                          if (highlight.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${highlight.url}`;
+                          return highlight.url;
+                        })();
+                        const caption = highlight.caption || `${displayBrandName} ${displayModelName} Feature ${index + 1}`;
+
+                        return (
+                          <div
+                            key={index}
+                            className="flex-shrink-0 w-64 cursor-pointer"
+                            onClick={() => {
+                              // Build gallery images array from all highlights
+                              const galleryImgs = variantHighlights.map((h: any, idx: number) => ({
+                                src: (() => {
+                                  if (!h.url) return '';
+                                  if (h.url.startsWith('http://') || h.url.startsWith('https://')) return h.url;
+                                  if (h.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${h.url}`;
+                                  return h.url;
+                                })(),
+                                alt: h.caption || `Feature ${idx + 1}`,
+                                caption: h.caption || `${displayBrandName} ${displayModelName} Feature ${idx + 1}`
+                              }));
+                              openGalleryModal(galleryImgs, index);
+                            }}
+                          >
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+                              <div className="aspect-[4/3] bg-gray-200 relative">
+                                <img
+                                  src={imageUrl}
+                                  alt={caption}
+                                  className="w-full h-full object-cover rounded-lg"
+                                  loading="lazy"
+                                  decoding="async"
+                                  onError={(e) => {
+                                    e.currentTarget.src = `https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop&crop=center`
+                                  }}
+                                />
+                                {/* Image Caption Overlay - Backend Caption */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white p-2">
+                                  <p className="text-sm font-medium text-center">
+                                    {caption}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       /* Fallback cards if no backend data */
                       <>
@@ -1162,7 +1197,7 @@ export default function VariantPage({
           <div id="specifications" className="space-y-8">
             {/* SEO Text Section */}
             <div className="space-y-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName} {displayModelName} {displayVariantName} Info</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Info</h2>
               <div className="text-gray-700 leading-relaxed">
                 {(() => {
                   const keyFeaturesText = variant?.keyFeatures || variant?.headerSummary || '';
@@ -1207,1366 +1242,1366 @@ export default function VariantPage({
             {/* Specifications Section */}
             <div className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
-                {brandName} {variantName} {modelName} Specifications & Features
+                {displayModelName} {displayVariantName} Specifications & Features
               </h2>
 
               {/* Specifications Categories */}
-              <div className="space-y-8">
+              <div className="space-y-4">
                 {/* Comfort & Convenience */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Comfort & Convenience</h3>
-                    <button
-                      onClick={() => toggleSpecSection('comfort')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['comfort'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('comfort')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Comfort & Convenience</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['comfort'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.ventilatedSeats && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Ventilated Seats</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.ventilatedSeats}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['comfort'] && (
+                    <div className="px-6 pb-6">
+                      {/* Preview specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.sunroof && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Sunroof</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.sunroof}</span>
+                              </div>
+                            )}
 
-                          {variant?.sunroof && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Sunroof</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.sunroof}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['comfort'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-                        {variant?.airPurifier && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Air Purifier</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.airPurifier}</span>
-                          </div>
-                        )}
-
-                        {variant?.headsUpDisplay && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Heads Up Display (HUD)</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.headsUpDisplay}</span>
-                          </div>
-                        )}
-
-                        {variant?.cruiseControl && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Cruise Control</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.cruiseControl}</span>
-                          </div>
-                        )}
-
-                        {variant?.rainSensingWipers && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Rain Sensing Wipers</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.rainSensingWipers}</span>
-                          </div>
-                        )}
-
-                        {variant?.automaticHeadlamp && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Automatic Headlamp</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.automaticHeadlamp}</span>
-                          </div>
-                        )}
-
-                        {variant?.followMeHomeHeadlights && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Follow Me Home Headlights</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.followMeHomeHeadlights}</span>
-                          </div>
-                        )}
-
-                        {variant?.ignition && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Ignition</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.ignition}</span>
-                          </div>
-                        )}
-
-                        {variant?.ambientLighting && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Ambient Lighting</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.ambientLighting}</span>
-                          </div>
-                        )}
-
-                        {variant?.airConditioning && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Air Conditioning</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.airConditioning}</span>
-                          </div>
-                        )}
-
-                        {variant?.climateZones && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Climate Zones</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.climateZones}</span>
-                          </div>
-                        )}
-
-                        {variant?.rearACVents && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Rear A/C Vents</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.rearACVents}</span>
-                          </div>
-                        )}
-
-                        {variant?.frontArmrest && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Front Armrest</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.frontArmrest}</span>
-                          </div>
-                        )}
-
-                        {variant?.automaticClimateControl && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Automatic Climate Control</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.automaticClimateControl}</span>
-                          </div>
-                        )}
-
-                        {variant?.airQualityIndexDisplay && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Air Quality Index Display</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.airQualityIndexDisplay}</span>
-                          </div>
-                        )}
-
-                        {variant?.remoteEngineStartStop && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Remote Engine Start / Stop</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.remoteEngineStartStop}</span>
-                          </div>
-                        )}
-
-                        {variant?.remoteClimateControl && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Remote Climate Control</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.remoteClimateControl}</span>
-                          </div>
-                        )}
-
-                        {variant?.steeringAdjustment && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Steering Adjustment</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.steeringAdjustment}</span>
-                          </div>
-                        )}
-
-                        {variant?.steeringWheelMaterial && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Steering Wheel Material</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.steeringWheelMaterial}</span>
-                          </div>
-                        )}
-
-                        {variant?.parkingSensors && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Parking Sensors</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.parkingSensors}</span>
-                          </div>
-                        )}
-
-                        {variant?.keylessEntry && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Keyless Entry</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.keylessEntry}</span>
-                          </div>
-                        )}
-
-                        {variant?.engineStartStopButton && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Engine Start Stop Button</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.engineStartStopButton}</span>
-                          </div>
-                        )}
-
-                        {variant?.gloveCompartment && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Glove Compartment</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.gloveCompartment}</span>
-                          </div>
-                        )}
-
-                        {variant?.centerConsoleArmrest && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Center Console Armrest</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.centerConsoleArmrest}</span>
-                          </div>
-                        )}
-
-                        {variant?.rearArmrest && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Rear Armrest</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.rearArmrest}</span>
-                          </div>
-                        )}
-
-                        {variant?.insideRearViewMirror && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Inside Rear View Mirror</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.insideRearViewMirror}</span>
-                          </div>
-                        )}
-
-                        {variant?.outsideRearViewMirrors && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Outside Rear View Mirrors</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.outsideRearViewMirrors}</span>
-                          </div>
-                        )}
-
-                        {variant?.steeringMountedControls && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Steering Mounted Controls</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.steeringMountedControls}</span>
-                          </div>
-                        )}
-
-                        {variant?.rearWindshieldDefogger && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Rear Windshield Defogger</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.rearWindshieldDefogger}</span>
-                          </div>
-                        )}
-
-                        {variant?.frontWindshieldDefogger && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Front Windshield Defogger</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.frontWindshieldDefogger}</span>
-                          </div>
-                        )}
-
-                        {variant?.cooledGlovebox && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Cooled Glovebox</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.cooledGlovebox}</span>
-                          </div>
+                            {variant?.ventilatedSeats && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Ventilated Seats</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.ventilatedSeats}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('comfort')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['comfort'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['comfort'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['comfort'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+                          {variant?.airPurifier && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Air Purifier</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.airPurifier}</span>
+                            </div>
+                          )}
+
+                          {variant?.headsUpDisplay && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Heads Up Display (HUD)</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.headsUpDisplay}</span>
+                            </div>
+                          )}
+
+                          {variant?.cruiseControl && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Cruise Control</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.cruiseControl}</span>
+                            </div>
+                          )}
+
+                          {variant?.rainSensingWipers && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Rain Sensing Wipers</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.rainSensingWipers}</span>
+                            </div>
+                          )}
+
+                          {variant?.automaticHeadlamp && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Automatic Headlamp</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.automaticHeadlamp}</span>
+                            </div>
+                          )}
+
+                          {variant?.followMeHomeHeadlights && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Follow Me Home Headlights</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.followMeHomeHeadlights}</span>
+                            </div>
+                          )}
+
+                          {variant?.ignition && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Ignition</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.ignition}</span>
+                            </div>
+                          )}
+
+                          {variant?.ambientLighting && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Ambient Lighting</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.ambientLighting}</span>
+                            </div>
+                          )}
+
+                          {variant?.airConditioning && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Air Conditioning</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.airConditioning}</span>
+                            </div>
+                          )}
+
+                          {variant?.climateZones && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Climate Zones</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.climateZones}</span>
+                            </div>
+                          )}
+
+                          {variant?.rearACVents && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Rear A/C Vents</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.rearACVents}</span>
+                            </div>
+                          )}
+
+                          {variant?.frontArmrest && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Front Armrest</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.frontArmrest}</span>
+                            </div>
+                          )}
+
+                          {variant?.automaticClimateControl && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Automatic Climate Control</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.automaticClimateControl}</span>
+                            </div>
+                          )}
+
+                          {variant?.airQualityIndexDisplay && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Air Quality Index Display</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.airQualityIndexDisplay}</span>
+                            </div>
+                          )}
+
+                          {variant?.remoteEngineStartStop && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Remote Engine Start / Stop</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.remoteEngineStartStop}</span>
+                            </div>
+                          )}
+
+                          {variant?.remoteClimateControl && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Remote Climate Control</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.remoteClimateControl}</span>
+                            </div>
+                          )}
+
+                          {variant?.steeringAdjustment && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Steering Adjustment</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.steeringAdjustment}</span>
+                            </div>
+                          )}
+
+                          {variant?.steeringWheelMaterial && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Steering Wheel Material</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.steeringWheelMaterial}</span>
+                            </div>
+                          )}
+
+                          {variant?.parkingSensors && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Parking Sensors</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.parkingSensors}</span>
+                            </div>
+                          )}
+
+                          {variant?.keylessEntry && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Keyless Entry</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.keylessEntry}</span>
+                            </div>
+                          )}
+
+                          {variant?.engineStartStopButton && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Engine Start Stop Button</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.engineStartStopButton}</span>
+                            </div>
+                          )}
+
+                          {variant?.gloveCompartment && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Glove Compartment</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.gloveCompartment}</span>
+                            </div>
+                          )}
+
+                          {variant?.centerConsoleArmrest && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Center Console Armrest</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.centerConsoleArmrest}</span>
+                            </div>
+                          )}
+
+                          {variant?.rearArmrest && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Rear Armrest</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.rearArmrest}</span>
+                            </div>
+                          )}
+
+                          {variant?.insideRearViewMirror && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Inside Rear View Mirror</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.insideRearViewMirror}</span>
+                            </div>
+                          )}
+
+                          {variant?.outsideRearViewMirrors && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Outside Rear View Mirrors</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.outsideRearViewMirrors}</span>
+                            </div>
+                          )}
+
+                          {variant?.steeringMountedControls && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Steering Mounted Controls</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.steeringMountedControls}</span>
+                            </div>
+                          )}
+
+                          {variant?.rearWindshieldDefogger && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Rear Windshield Defogger</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.rearWindshieldDefogger}</span>
+                            </div>
+                          )}
+
+                          {variant?.frontWindshieldDefogger && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Front Windshield Defogger</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.frontWindshieldDefogger}</span>
+                            </div>
+                          )}
+
+                          {variant?.cooledGlovebox && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Cooled Glovebox</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.cooledGlovebox}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-4 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('comfort')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200 py-2 px-4 rounded-lg hover:bg-red-50"
+                        >
+                          <span>{expandedSpecs['comfort'] ? 'View less' : 'View more'}</span>
+                          <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${expandedSpecs['comfort'] ? 'rotate-180' : ''}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Safety */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Safety</h3>
-                    <button
-                      onClick={() => toggleSpecSection('safety')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['safety'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('safety')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Safety</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['safety'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.globalNCAPRating && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Global NCAP Rating</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.globalNCAPRating}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['safety'] && (
+                    <div className="px-6 pb-6">
+                      {/* Preview specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.globalNCAPRating && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Global NCAP Rating</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.globalNCAPRating}</span>
+                              </div>
+                            )}
 
-                          {variant?.airbags && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Airbags</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.airbags}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['safety'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-                        {/* Airbags Location - Only show if data exists */}
-                        {variant?.airbagsLocation && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Airbags Location</span>
-                            <span className="text-gray-900 text-sm">{variant.airbagsLocation}</span>
-                          </div>
-                        )}
-
-                        {/* ADAS Level - Only show if data exists */}
-                        {variant?.adasLevel && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">ADAS Level</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.adasLevel}</span>
-                          </div>
-                        )}
-
-                        {/* ADAS Features - Only show if data exists */}
-                        {variant?.adasFeatures && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">ADAS Features</span>
-                            <span className="text-gray-900 text-sm leading-relaxed">{variant.adasFeatures}</span>
-                          </div>
-                        )}
-
-                        {/* Reverse Camera - Only show if data exists */}
-                        {variant?.reverseCamera && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Reverse Camera</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.reverseCamera}</span>
-                          </div>
-                        )}
-
-                        {/* Reverse Camera Guidelines - Only show if data exists */}
-                        {variant?.reverseCameraGuidelines && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Reverse Camera Guidelines</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.reverseCameraGuidelines}</span>
-                          </div>
-                        )}
-
-                        {/* Tyre Pressure Monitor (TPMS) - Only show if data exists */}
-                        {variant?.tyrePressureMonitor && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Tyre Pressure Monitor (TPMS)</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.tyrePressureMonitor}</span>
-                          </div>
-                        )}
-
-                        {/* Hill Hold Assist - Only show if data exists */}
-                        {variant?.hillHoldAssist && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Hill Hold Assist</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.hillHoldAssist}</span>
-                          </div>
-                        )}
-
-                        {/* Hill Descent Control - Only show if data exists */}
-                        {variant?.hillDescentControl && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Hill Descent Control</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.hillDescentControl}</span>
-                          </div>
-                        )}
-
-                        {/* Roll Over Mitigation - Only show if data exists */}
-                        {variant?.rollOverMitigation && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Roll Over Mitigation</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.rollOverMitigation}</span>
-                          </div>
-                        )}
-
-                        {/* Parking Sensor - Only show if data exists */}
-                        {variant?.parkingSensor && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Parking Sensor</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.parkingSensor}</span>
-                          </div>
-                        )}
-
-                        {/* Disc Brakes - Only show if data exists */}
-                        {variant?.discBrakes && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Disc Brakes</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.discBrakes}</span>
-                          </div>
-                        )}
-
-                        {/* Electronic Stability Program - Only show if data exists */}
-                        {variant?.electronicStabilityProgram && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Electronic Stability Program</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.electronicStabilityProgram}</span>
-                          </div>
-                        )}
-
-                        {/* ABS - Only show if data exists */}
-                        {variant?.abs && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">ABS</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.abs}</span>
-                          </div>
-                        )}
-
-                        {/* EBD - Only show if data exists */}
-                        {variant?.ebd && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">EBD</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.ebd}</span>
-                          </div>
-                        )}
-
-                        {/* Brake Assist (BA) - Only show if data exists */}
-                        {variant?.brakeAssist && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Brake Assist (BA)</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.brakeAssist}</span>
-                          </div>
-                        )}
-
-                        {/* ISOFIX Mounts - Only show if data exists */}
-                        {variant?.isofixMounts && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">ISOFIX Mounts</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.isofixMounts}</span>
-                          </div>
-                        )}
-
-                        {/* Seatbelt Warning - Only show if data exists */}
-                        {variant?.seatbeltWarning && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Seatbelt Warning</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.seatbeltWarning}</span>
-                          </div>
-                        )}
-
-                        {/* Speed Alert System - Only show if data exists */}
-                        {variant?.speedAlertSystem && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Speed Alert System</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.speedAlertSystem}</span>
-                          </div>
-                        )}
-
-                        {/* Speed Sensing Door Locks - Only show if data exists */}
-                        {variant?.speedSensingDoorLocks && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Speed Sensing Door Locks</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.speedSensingDoorLocks}</span>
-                          </div>
-                        )}
-
-                        {/* Immobiliser - Only show if data exists */}
-                        {variant?.immobiliser && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Immobiliser</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.immobiliser}</span>
-                          </div>
+                            {variant?.airbags && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Airbags</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.airbags}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('safety')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['safety'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['safety'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['safety'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+                          {/* Airbags Location - Only show if data exists */}
+                          {variant?.airbagsLocation && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Airbags Location</span>
+                              <span className="text-gray-900 text-sm">{variant.airbagsLocation}</span>
+                            </div>
+                          )}
+
+                          {/* ADAS Level - Only show if data exists */}
+                          {variant?.adasLevel && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">ADAS Level</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.adasLevel}</span>
+                            </div>
+                          )}
+
+                          {/* ADAS Features - Only show if data exists */}
+                          {variant?.adasFeatures && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">ADAS Features</span>
+                              <span className="text-gray-900 text-sm leading-relaxed">{variant.adasFeatures}</span>
+                            </div>
+                          )}
+
+                          {/* Reverse Camera - Only show if data exists */}
+                          {variant?.reverseCamera && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Reverse Camera</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.reverseCamera}</span>
+                            </div>
+                          )}
+
+                          {/* Reverse Camera Guidelines - Only show if data exists */}
+                          {variant?.reverseCameraGuidelines && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Reverse Camera Guidelines</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.reverseCameraGuidelines}</span>
+                            </div>
+                          )}
+
+                          {/* Tyre Pressure Monitor (TPMS) - Only show if data exists */}
+                          {variant?.tyrePressureMonitor && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Tyre Pressure Monitor (TPMS)</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.tyrePressureMonitor}</span>
+                            </div>
+                          )}
+
+                          {/* Hill Hold Assist - Only show if data exists */}
+                          {variant?.hillHoldAssist && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Hill Hold Assist</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.hillHoldAssist}</span>
+                            </div>
+                          )}
+
+                          {/* Hill Descent Control - Only show if data exists */}
+                          {variant?.hillDescentControl && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Hill Descent Control</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.hillDescentControl}</span>
+                            </div>
+                          )}
+
+                          {/* Roll Over Mitigation - Only show if data exists */}
+                          {variant?.rollOverMitigation && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Roll Over Mitigation</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.rollOverMitigation}</span>
+                            </div>
+                          )}
+
+                          {/* Parking Sensor - Only show if data exists */}
+                          {variant?.parkingSensor && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Parking Sensor</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.parkingSensor}</span>
+                            </div>
+                          )}
+
+                          {/* Disc Brakes - Only show if data exists */}
+                          {variant?.discBrakes && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Disc Brakes</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.discBrakes}</span>
+                            </div>
+                          )}
+
+                          {/* Electronic Stability Program - Only show if data exists */}
+                          {variant?.electronicStabilityProgram && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Electronic Stability Program</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.electronicStabilityProgram}</span>
+                            </div>
+                          )}
+
+                          {/* ABS - Only show if data exists */}
+                          {variant?.abs && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">ABS</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.abs}</span>
+                            </div>
+                          )}
+
+                          {/* EBD - Only show if data exists */}
+                          {variant?.ebd && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">EBD</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.ebd}</span>
+                            </div>
+                          )}
+
+                          {/* Brake Assist (BA) - Only show if data exists */}
+                          {variant?.brakeAssist && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Brake Assist (BA)</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.brakeAssist}</span>
+                            </div>
+                          )}
+
+                          {/* ISOFIX Mounts - Only show if data exists */}
+                          {variant?.isofixMounts && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">ISOFIX Mounts</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.isofixMounts}</span>
+                            </div>
+                          )}
+
+                          {/* Seatbelt Warning - Only show if data exists */}
+                          {variant?.seatbeltWarning && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Seatbelt Warning</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.seatbeltWarning}</span>
+                            </div>
+                          )}
+
+                          {/* Speed Alert System - Only show if data exists */}
+                          {variant?.speedAlertSystem && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Speed Alert System</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.speedAlertSystem}</span>
+                            </div>
+                          )}
+
+                          {/* Speed Sensing Door Locks - Only show if data exists */}
+                          {variant?.speedSensingDoorLocks && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Speed Sensing Door Locks</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.speedSensingDoorLocks}</span>
+                            </div>
+                          )}
+
+                          {/* Immobiliser - Only show if data exists */}
+                          {variant?.immobiliser && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Immobiliser</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.immobiliser}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-4 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('safety')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200 py-2 px-4 rounded-lg hover:bg-red-50"
+                        >
+                          <span>{expandedSpecs['safety'] ? 'View less' : 'View more'}</span>
+                          <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${expandedSpecs['safety'] ? 'rotate-180' : ''}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Entertainment & Connectivity */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Entertainment & Connectivity</h3>
-                    <button
-                      onClick={() => toggleSpecSection('entertainment')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['entertainment'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('entertainment')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Entertainment & Connectivity</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['entertainment'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.touchScreenInfotainment && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Touch Screen Infotainment</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.touchScreenInfotainment}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['entertainment'] && (
+                    <div className="px-6 pb-6">
+                      {/* Specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.touchScreenInfotainment && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Touch Screen Infotainment</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.touchScreenInfotainment}</span>
+                              </div>
+                            )}
 
-                          {variant?.androidAppleCarplay && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Android & Apple CarPlay</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.androidAppleCarplay}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['entertainment'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-
-                        {/* Speakers - Only show if data exists */}
-                        {variant?.speakers && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Speakers</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.speakers}</span>
-                          </div>
-                        )}
-
-                        {/* Tweeters - Only show if data exists */}
-                        {variant?.tweeters && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Tweeters</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.tweeters}</span>
-                          </div>
-                        )}
-
-                        {/* Subwoofers - Only show if data exists */}
-                        {variant?.subwoofers && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Subwoofers</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.subwoofers}</span>
-                          </div>
-                        )}
-
-                        {/* USB-C Charging Ports - Only show if data exists */}
-                        {variant?.usbCChargingPorts && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">USB-C Charging Ports</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.usbCChargingPorts}</span>
-                          </div>
-                        )}
-
-                        {/* USB-A Charging Ports - Only show if data exists */}
-                        {variant?.usbAChargingPorts && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">USB-A Charging Ports</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.usbAChargingPorts}</span>
-                          </div>
-                        )}
-
-                        {/* 12V Charging Ports - Only show if data exists */}
-                        {variant?.twelvevChargingPorts && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">12V Charging Ports</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.twelvevChargingPorts}</span>
-                          </div>
-                        )}
-
-                        {/* Wireless Charging - Only show if data exists */}
-                        {variant?.wirelessCharging && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Wireless Charging</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.wirelessCharging}</span>
-                          </div>
-                        )}
-
-                        {/* Connected Car Tech - Only show if data exists */}
-                        {variant?.connectedCarTech && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Connected Car Tech</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.connectedCarTech}</span>
-                          </div>
+                            {variant?.androidAppleCarplay && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Android & Apple CarPlay</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.androidAppleCarplay}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('entertainment')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['entertainment'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['entertainment'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['entertainment'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+
+                          {/* Speakers - Only show if data exists */}
+                          {variant?.speakers && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Speakers</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.speakers}</span>
+                            </div>
+                          )}
+
+                          {/* Tweeters - Only show if data exists */}
+                          {variant?.tweeters && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Tweeters</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.tweeters}</span>
+                            </div>
+                          )}
+
+                          {/* Subwoofers - Only show if data exists */}
+                          {variant?.subwoofers && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Subwoofers</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.subwoofers}</span>
+                            </div>
+                          )}
+
+                          {/* USB-C Charging Ports - Only show if data exists */}
+                          {variant?.usbCChargingPorts && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">USB-C Charging Ports</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.usbCChargingPorts}</span>
+                            </div>
+                          )}
+
+                          {/* USB-A Charging Ports - Only show if data exists */}
+                          {variant?.usbAChargingPorts && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">USB-A Charging Ports</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.usbAChargingPorts}</span>
+                            </div>
+                          )}
+
+                          {/* 12V Charging Ports - Only show if data exists */}
+                          {variant?.twelvevChargingPorts && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">12V Charging Ports</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.twelvevChargingPorts}</span>
+                            </div>
+                          )}
+
+                          {/* Wireless Charging - Only show if data exists */}
+                          {variant?.wirelessCharging && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Wireless Charging</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.wirelessCharging}</span>
+                            </div>
+                          )}
+
+                          {/* Connected Car Tech - Only show if data exists */}
+                          {variant?.connectedCarTech && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Connected Car Tech</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.connectedCarTech}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('entertainment')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
+                        >
+                          <span>{expandedSpecs['entertainment'] ? 'View less' : 'View more'}</span>
+                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['entertainment'] ? 'rotate-270' : 'rotate-90'}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Engine & Transmission */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Engine & Transmission</h3>
-                    <button
-                      onClick={() => toggleSpecSection('engine')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['engine'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('engine')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Engine & Transmission</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['engine'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.engineNamePage4 && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Engine Name</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.engineNamePage4}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['engine'] && (
+                    <div className="px-6 pb-6">
+                      {/* Specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.engineNamePage4 && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Engine Name</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.engineNamePage4}</span>
+                              </div>
+                            )}
 
-                          {variant?.engineCapacity && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Engine Capacity</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.engineCapacity}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['engine'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-                        {/* Fuel - Only show if data exists */}
-                        {variant?.fuel && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Fuel</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.fuel}</span>
-                          </div>
-                        )}
-
-                        {/* Transmission - Only show if data exists */}
-                        {variant?.transmission && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Transmission</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.transmission}</span>
-                          </div>
-                        )}
-
-                        {/* No of Gears - Only show if data exists */}
-                        {variant?.noOfGears && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">No of Gears</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.noOfGears}</span>
-                          </div>
-                        )}
-
-                        {/* Paddle Shifter - Only show if data exists */}
-                        {variant?.paddleShifter && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Paddle Shifter</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.paddleShifter}</span>
-                          </div>
-                        )}
-
-                        {/* Max Power - Only show if data exists */}
-                        {variant?.maxPower && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Max Power</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.maxPower}</span>
-                          </div>
-                        )}
-
-                        {/* Torque - Only show if data exists */}
-                        {variant?.torque && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Torque</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.torque}</span>
-                          </div>
-                        )}
-
-                        {/* 0 to 100 Kmph Time - Only show if data exists */}
-                        {variant?.zeroToHundredKmphTime && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">0 to 100 Kmph Time</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.zeroToHundredKmphTime}</span>
-                          </div>
-                        )}
-
-                        {/* Top Speed - Only show if data exists */}
-                        {variant?.topSpeed && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Top Speed</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.topSpeed}</span>
-                          </div>
-                        )}
-
-                        {/* EV Battery Capacity - Only show if data exists */}
-                        {variant?.evBatteryCapacity && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">EV Battery Capacity</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.evBatteryCapacity}</span>
-                          </div>
-                        )}
-
-                        {/* Hybrid Battery Capacity - Only show if data exists */}
-                        {variant?.hybridBatteryCapacity && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Hybrid Battery Capacity</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.hybridBatteryCapacity}</span>
-                          </div>
-                        )}
-
-                        {/* Battery Type - Only show if data exists */}
-                        {variant?.batteryType && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Battery Type</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.batteryType}</span>
-                          </div>
-                        )}
-
-                        {/* Electric Motor Placement - Only show if data exists */}
-                        {variant?.electricMotorPlacement && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Electric Motor Placement</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.electricMotorPlacement}</span>
-                          </div>
-                        )}
-
-                        {/* EV Range - Only show if data exists */}
-                        {variant?.evRange && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">EV Range</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.evRange}</span>
-                          </div>
-                        )}
-
-                        {/* EV Charging Time - Only show if data exists */}
-                        {variant?.evChargingTime && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">EV Charging Time</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.evChargingTime}</span>
-                          </div>
-                        )}
-
-                        {/* Max Electric Motor Power - Only show if data exists */}
-                        {variant?.maxElectricMotorPower && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Max Electric Motor Power</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.maxElectricMotorPower}</span>
-                          </div>
-                        )}
-
-                        {/* Turbo Charged - Only show if data exists */}
-                        {variant?.turboCharged && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Turbo Charged</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.turboCharged}</span>
-                          </div>
-                        )}
-
-                        {/* Hybrid Type - Only show if data exists */}
-                        {variant?.hybridType && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Hybrid Type</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.hybridType}</span>
-                          </div>
-                        )}
-
-                        {/* Drive Train - Only show if data exists */}
-                        {variant?.driveTrain && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Drive Train</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.driveTrain}</span>
-                          </div>
-                        )}
-
-                        {/* Driving Modes - Only show if data exists */}
-                        {variant?.drivingModes && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Driving Modes</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.drivingModes}</span>
-                          </div>
-                        )}
-
-                        {/* Off Road Modes - Only show if data exists */}
-                        {variant?.offRoadModes && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Off Road Modes</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.offRoadModes}</span>
-                          </div>
-                        )}
-
-                        {/* Differential Lock - Only show if data exists */}
-                        {variant?.differentialLock && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Differential Lock</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.differentialLock}</span>
-                          </div>
-                        )}
-
-                        {/* Limited Slip Differential - Only show if data exists */}
-                        {variant?.limitedSlipDifferential && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Limited Slip Differential</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.limitedSlipDifferential}</span>
-                          </div>
+                            {variant?.engineCapacity && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Engine Capacity</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.engineCapacity}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('engine')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['engine'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['engine'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['engine'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+                          {/* Fuel - Only show if data exists */}
+                          {variant?.fuel && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Fuel</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.fuel}</span>
+                            </div>
+                          )}
+
+                          {/* Transmission - Only show if data exists */}
+                          {variant?.transmission && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Transmission</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.transmission}</span>
+                            </div>
+                          )}
+
+                          {/* No of Gears - Only show if data exists */}
+                          {variant?.noOfGears && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">No of Gears</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.noOfGears}</span>
+                            </div>
+                          )}
+
+                          {/* Paddle Shifter - Only show if data exists */}
+                          {variant?.paddleShifter && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Paddle Shifter</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.paddleShifter}</span>
+                            </div>
+                          )}
+
+                          {/* Max Power - Only show if data exists */}
+                          {variant?.maxPower && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Max Power</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.maxPower}</span>
+                            </div>
+                          )}
+
+                          {/* Torque - Only show if data exists */}
+                          {variant?.torque && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Torque</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.torque}</span>
+                            </div>
+                          )}
+
+                          {/* 0 to 100 Kmph Time - Only show if data exists */}
+                          {variant?.zeroToHundredKmphTime && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">0 to 100 Kmph Time</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.zeroToHundredKmphTime}</span>
+                            </div>
+                          )}
+
+                          {/* Top Speed - Only show if data exists */}
+                          {variant?.topSpeed && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Top Speed</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.topSpeed}</span>
+                            </div>
+                          )}
+
+                          {/* EV Battery Capacity - Only show if data exists */}
+                          {variant?.evBatteryCapacity && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">EV Battery Capacity</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.evBatteryCapacity}</span>
+                            </div>
+                          )}
+
+                          {/* Hybrid Battery Capacity - Only show if data exists */}
+                          {variant?.hybridBatteryCapacity && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Hybrid Battery Capacity</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.hybridBatteryCapacity}</span>
+                            </div>
+                          )}
+
+                          {/* Battery Type - Only show if data exists */}
+                          {variant?.batteryType && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Battery Type</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.batteryType}</span>
+                            </div>
+                          )}
+
+                          {/* Electric Motor Placement - Only show if data exists */}
+                          {variant?.electricMotorPlacement && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Electric Motor Placement</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.electricMotorPlacement}</span>
+                            </div>
+                          )}
+
+                          {/* EV Range - Only show if data exists */}
+                          {variant?.evRange && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">EV Range</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.evRange}</span>
+                            </div>
+                          )}
+
+                          {/* EV Charging Time - Only show if data exists */}
+                          {variant?.evChargingTime && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">EV Charging Time</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.evChargingTime}</span>
+                            </div>
+                          )}
+
+                          {/* Max Electric Motor Power - Only show if data exists */}
+                          {variant?.maxElectricMotorPower && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Max Electric Motor Power</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.maxElectricMotorPower}</span>
+                            </div>
+                          )}
+
+                          {/* Turbo Charged - Only show if data exists */}
+                          {variant?.turboCharged && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Turbo Charged</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.turboCharged}</span>
+                            </div>
+                          )}
+
+                          {/* Hybrid Type - Only show if data exists */}
+                          {variant?.hybridType && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Hybrid Type</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.hybridType}</span>
+                            </div>
+                          )}
+
+                          {/* Drive Train - Only show if data exists */}
+                          {variant?.driveTrain && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Drive Train</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.driveTrain}</span>
+                            </div>
+                          )}
+
+                          {/* Driving Modes - Only show if data exists */}
+                          {variant?.drivingModes && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Driving Modes</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.drivingModes}</span>
+                            </div>
+                          )}
+
+                          {/* Off Road Modes - Only show if data exists */}
+                          {variant?.offRoadModes && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Off Road Modes</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.offRoadModes}</span>
+                            </div>
+                          )}
+
+                          {/* Differential Lock - Only show if data exists */}
+                          {variant?.differentialLock && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Differential Lock</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.differentialLock}</span>
+                            </div>
+                          )}
+
+                          {/* Limited Slip Differential - Only show if data exists */}
+                          {variant?.limitedSlipDifferential && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Limited Slip Differential</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.limitedSlipDifferential}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('engine')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
+                        >
+                          <span>{expandedSpecs['engine'] ? 'View less' : 'View more'}</span>
+                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['engine'] ? 'rotate-270' : 'rotate-90'}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Seating Comfort */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Seating Comfort</h3>
-                    <button
-                      onClick={() => toggleSpecSection('seating')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['seating'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('seating')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Seating Comfort</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['seating'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.seatUpholstery && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Seat Upholstery</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.seatUpholstery}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['seating'] && (
+                    <div className="px-6 pb-6">
+                      {/* Specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.seatUpholstery && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Seat Upholstery</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.seatUpholstery}</span>
+                              </div>
+                            )}
 
-                          {variant?.seatsAdjustment && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Seats Adjustment</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.seatsAdjustment}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['seating'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-                        {variant?.driverSeatAdjustment && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Driver Seat Adjustment</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.driverSeatAdjustment}</span>
-                          </div>
-                        )}
-
-                        {variant?.passengerSeatAdjustment && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Passenger Seat Adjustment</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.passengerSeatAdjustment}</span>
-                          </div>
-                        )}
-
-                        {variant?.rearSeatAdjustment && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Rear Seat Adjustment</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.rearSeatAdjustment}</span>
-                          </div>
-                        )}
-
-                        {variant?.welcomeSeats && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Welcome Seats</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.welcomeSeats}</span>
-                          </div>
-                        )}
-
-                        {variant?.memorySeats && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Memory Seats</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.memorySeats}</span>
-                          </div>
+                            {variant?.seatsAdjustment && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Seats Adjustment</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.seatsAdjustment}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('seating')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['seating'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['seating'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['seating'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+                          {variant?.driverSeatAdjustment && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Driver Seat Adjustment</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.driverSeatAdjustment}</span>
+                            </div>
+                          )}
+
+                          {variant?.passengerSeatAdjustment && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Passenger Seat Adjustment</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.passengerSeatAdjustment}</span>
+                            </div>
+                          )}
+
+                          {variant?.rearSeatAdjustment && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Rear Seat Adjustment</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.rearSeatAdjustment}</span>
+                            </div>
+                          )}
+
+                          {variant?.welcomeSeats && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Welcome Seats</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.welcomeSeats}</span>
+                            </div>
+                          )}
+
+                          {variant?.memorySeats && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Memory Seats</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.memorySeats}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('seating')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
+                        >
+                          <span>{expandedSpecs['seating'] ? 'View less' : 'View more'}</span>
+                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['seating'] ? 'rotate-270' : 'rotate-90'}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Exteriors */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Exteriors</h3>
-                    <button
-                      onClick={() => toggleSpecSection('exteriors')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['exteriors'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('exteriors')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Exteriors</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['exteriors'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.headLights && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Head Lights</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.headLights}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['exteriors'] && (
+                    <div className="px-6 pb-6">
+                      {/* Specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.headLights && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Head Lights</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.headLights}</span>
+                              </div>
+                            )}
 
-                          {variant?.tailLight && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Tail Light</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.tailLight}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['exteriors'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-                        {variant?.frontFogLights && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Front Fog Lights</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.frontFogLights}</span>
-                          </div>
-                        )}
-
-                        {variant?.roofRails && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Roof Rails</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.roofRails}</span>
-                          </div>
-                        )}
-
-                        {variant?.radioAntenna && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Radio Antenna</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.radioAntenna}</span>
-                          </div>
-                        )}
-
-                        {variant?.outsideRearViewMirror && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Outside Rear View Mirror</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.outsideRearViewMirror}</span>
-                          </div>
-                        )}
-
-                        {variant?.daytimeRunningLights && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Daytime Running Lights</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.daytimeRunningLights}</span>
-                          </div>
-                        )}
-
-                        {variant?.sideIndicator && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Side Indicator</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.sideIndicator}</span>
-                          </div>
-                        )}
-
-                        {variant?.rearWindshieldWiper && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Rear Windshield Wiper</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.rearWindshieldWiper}</span>
-                          </div>
+                            {variant?.tailLight && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Tail Light</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.tailLight}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('exteriors')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['exteriors'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['exteriors'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['exteriors'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+                          {variant?.frontFogLights && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Front Fog Lights</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.frontFogLights}</span>
+                            </div>
+                          )}
+
+                          {variant?.roofRails && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Roof Rails</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.roofRails}</span>
+                            </div>
+                          )}
+
+                          {variant?.radioAntenna && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Radio Antenna</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.radioAntenna}</span>
+                            </div>
+                          )}
+
+                          {variant?.outsideRearViewMirror && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Outside Rear View Mirror</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.outsideRearViewMirror}</span>
+                            </div>
+                          )}
+
+                          {variant?.daytimeRunningLights && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Daytime Running Lights</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.daytimeRunningLights}</span>
+                            </div>
+                          )}
+
+                          {variant?.sideIndicator && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Side Indicator</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.sideIndicator}</span>
+                            </div>
+                          )}
+
+                          {variant?.rearWindshieldWiper && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Rear Windshield Wiper</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.rearWindshieldWiper}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('exteriors')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
+                        >
+                          <span>{expandedSpecs['exteriors'] ? 'View less' : 'View more'}</span>
+                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['exteriors'] ? 'rotate-270' : 'rotate-90'}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Dimensions */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Dimensions</h3>
-                    <button
-                      onClick={() => toggleSpecSection('dimensions')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['dimensions'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('dimensions')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Dimensions</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['dimensions'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.groundClearance && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Ground Clearance</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.groundClearance}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['dimensions'] && (
+                    <div className="px-6 pb-6">
+                      {/* Specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.groundClearance && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Ground Clearance</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.groundClearance}</span>
+                              </div>
+                            )}
 
-                          {variant?.length && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Length</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.length}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['dimensions'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-                        {variant?.width && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Width</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.width}</span>
-                          </div>
-                        )}
-
-                        {variant?.height && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Height</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.height}</span>
-                          </div>
-                        )}
-
-                        {variant?.wheelbase && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Wheelbase</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.wheelbase}</span>
-                          </div>
-                        )}
-
-                        {variant?.turningRadius && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Turning Radius</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.turningRadius}</span>
-                          </div>
-                        )}
-
-                        {variant?.kerbWeight && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Kerb Weight</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.kerbWeight}</span>
-                          </div>
+                            {variant?.length && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Length</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.length}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('dimensions')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['dimensions'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['dimensions'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['dimensions'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+                          {variant?.width && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Width</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.width}</span>
+                            </div>
+                          )}
+
+                          {variant?.height && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Height</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.height}</span>
+                            </div>
+                          )}
+
+                          {variant?.wheelbase && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Wheelbase</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.wheelbase}</span>
+                            </div>
+                          )}
+
+                          {variant?.turningRadius && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Turning Radius</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.turningRadius}</span>
+                            </div>
+                          )}
+
+                          {variant?.kerbWeight && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Kerb Weight</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.kerbWeight}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('dimensions')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
+                        >
+                          <span>{expandedSpecs['dimensions'] ? 'View less' : 'View more'}</span>
+                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['dimensions'] ? 'rotate-270' : 'rotate-90'}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Tyre & Suspension */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Tyre & Suspension</h3>
-                    <button
-                      onClick={() => toggleSpecSection('tyre')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['tyre'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('tyre')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Tyre & Suspension</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['tyre'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.frontTyreProfile && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Front Tyre Profile</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.frontTyreProfile}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['tyre'] && (
+                    <div className="px-6 pb-6">
+                      {/* Specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.frontTyreProfile && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Front Tyre Profile</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.frontTyreProfile}</span>
+                              </div>
+                            )}
 
-                          {variant?.rearTyreProfile && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Rear Tyre Profile</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.rearTyreProfile}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['tyre'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-                        {variant?.spareTyreProfile && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Spare Tyre Profile</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.spareTyreProfile}</span>
-                          </div>
-                        )}
-
-                        {variant?.spareWheelType && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Spare Wheel Type</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.spareWheelType}</span>
-                          </div>
-                        )}
-
-                        {variant?.frontSuspension && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Front Suspension</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.frontSuspension}</span>
-                          </div>
-                        )}
-
-                        {variant?.rearSuspension && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Rear Suspension</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.rearSuspension}</span>
-                          </div>
+                            {variant?.rearTyreProfile && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Rear Tyre Profile</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.rearTyreProfile}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('tyre')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['tyre'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['tyre'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['tyre'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+                          {variant?.spareTyreProfile && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Spare Tyre Profile</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.spareTyreProfile}</span>
+                            </div>
+                          )}
+
+                          {variant?.spareWheelType && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Spare Wheel Type</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.spareWheelType}</span>
+                            </div>
+                          )}
+
+                          {variant?.frontSuspension && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Front Suspension</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.frontSuspension}</span>
+                            </div>
+                          )}
+
+                          {variant?.rearSuspension && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Rear Suspension</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.rearSuspension}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('tyre')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
+                        >
+                          <span>{expandedSpecs['tyre'] ? 'View less' : 'View more'}</span>
+                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['tyre'] ? 'rotate-270' : 'rotate-90'}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Storage */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-6 pb-4">
-                    <h3 className="text-xl font-bold text-gray-900">Storage</h3>
-                    <button
-                      onClick={() => toggleSpecSection('storage')}
-                      className="p-1"
-                    >
-                      <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedSpecs['storage'] ? 'rotate-90' : ''}`} />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Clickable Header */}
+                  <button
+                    onClick={() => toggleSpecSection('storage')}
+                    className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <h3 className="text-base font-bold text-gray-900">Storage</h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${expandedSpecs['storage'] ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Content */}
-                  <div className="px-6 pb-6">
-                    {/* Always visible specs */}
-                    <div className="space-y-4">
-                      {showSkeleton ? (
-                        /* Skeleton loading */
-                        <>
-                          {[1, 2].map((index) => (
-                            <div key={index} className="flex justify-between items-center">
-                              <div className="bg-gray-200 animate-pulse h-4 text-base rounded"></div>
-                              <div className="bg-gray-200 animate-pulse h-4 w-1/4 rounded"></div>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          {/* Show first 2 specs always */}
-                          {variant?.cupholders && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Cupholders</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.cupholders}</span>
-                            </div>
-                          )}
+                  {/* Content - Only visible when expanded */}
+                  {expandedSpecs['storage'] && (
+                    <div className="px-6 pb-6">
+                      {/* Specs */}
+                      <div className="space-y-4">
+                        {showSkeleton ? (
+                          /* Skeleton loading */
+                          <>
+                            {[1, 2].map((index) => (
+                              <div key={index} className="flex justify-between items-center py-2">
+                                <div className="bg-gray-200 animate-pulse h-4 w-32 rounded"></div>
+                                <div className="bg-gray-200 animate-pulse h-4 w-24 rounded"></div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {/* Show first 2 specs */}
+                            {variant?.cupholders && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Cupholders</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.cupholders}</span>
+                              </div>
+                            )}
 
-                          {variant?.fuelTankCapacity && (
-                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Fuel Tank Capacity</span>
-                              <span className="text-gray-900 text-sm font-medium">{variant.fuelTankCapacity}</span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Expanded content */}
-                    {expandedSpecs['storage'] && !showSkeleton && (
-                      <div className="mt-4 space-y-4">
-                        {variant?.bootSpace && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Boot Space</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.bootSpace}</span>
-                          </div>
-                        )}
-
-                        {variant?.bootSpaceAfterFoldingRearRowSeats && (
-                          <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                            <span className="text-gray-500 text-sm">Boot Space After Folding Rear Row Seats</span>
-                            <span className="text-gray-900 text-sm font-medium">{variant.bootSpaceAfterFoldingRearRowSeats}</span>
-                          </div>
+                            {variant?.fuelTankCapacity && (
+                              <div className="grid grid-cols-[140px_1fr] gap-4 py-3 border-b border-gray-100">
+                                <span className="text-gray-500 text-sm">Fuel Tank Capacity</span>
+                                <span className="text-gray-900 text-sm font-medium">{variant.fuelTankCapacity}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
-                    )}
 
-                    {/* View More/Less Button */}
-                    <div className="mt-6 flex justify-center">
-                      <button
-                        onClick={() => toggleSpecSection('storage')}
-                        className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
-                      >
-                        <span>{expandedSpecs['storage'] ? 'View less' : 'View more'}</span>
-                        <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['storage'] ? 'rotate-270' : 'rotate-90'}`} />
-                      </button>
+                      {/* Expanded content */}
+                      {expandedSpecs['storage'] && !showSkeleton && (
+                        <div className="mt-4 space-y-4">
+                          {variant?.bootSpace && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Boot Space</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.bootSpace}</span>
+                            </div>
+                          )}
+
+                          {variant?.bootSpaceAfterFoldingRearRowSeats && (
+                            <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
+                              <span className="text-gray-500 text-sm">Boot Space After Folding Rear Row Seats</span>
+                              <span className="text-gray-900 text-sm font-medium">{variant.bootSpaceAfterFoldingRearRowSeats}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View More/Less Button */}
+                      <div className="mt-6 flex justify-center">
+                        <button
+                          onClick={() => toggleSpecSection('storage')}
+                          className="text-red-500 hover:text-red-600 font-medium text-sm flex items-center space-x-1 transition-colors duration-200"
+                        >
+                          <span>{expandedSpecs['storage'] ? 'View less' : 'View more'}</span>
+                          <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${expandedSpecs['storage'] ? 'rotate-270' : 'rotate-90'}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -2581,7 +2616,7 @@ export default function VariantPage({
 
             {/* More Variants Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">More {displayBrandName} {displayModelName} {variantName} Variants</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">More {displayModelName} Variants</h2>
 
               {/* Filter Options - Dynamic based on available variants */}
               <div className="flex flex-wrap gap-3">
@@ -2676,7 +2711,7 @@ export default function VariantPage({
           <div className="space-y-8">
             {/* Variant Summary Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName} {displayModelName} {variantName} Summary</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Summary</h2>
 
               <div className="space-y-6">
                 {/* Description */}
@@ -2785,7 +2820,7 @@ export default function VariantPage({
 
             {/* Engine Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName} {displayModelName} {variantName} Engine</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Engine</h2>
 
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 {/* Engine Header - Always Visible */}
@@ -2905,7 +2940,7 @@ export default function VariantPage({
 
             {/* Mileage Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName} {displayModelName} {variantName} Mileage</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Mileage</h2>
 
               <div className="flex justify-center">
                 <div className="w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
@@ -2951,7 +2986,7 @@ export default function VariantPage({
           <div className="space-y-8">
             {/* City On-Road Prices */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} {variantName} Price Across India</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Price Across India</h2>
 
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 {/* Table Header */}
@@ -2990,50 +3025,6 @@ export default function VariantPage({
 
             {/* Ad Banner */}
             <Ad3DCarousel className="mb-6" />
-
-            {/* Upcoming Cars Section */}
-            {(loadingUpcomingCars || upcomingCars.length > 0) && (
-              <div className="py-6 sm:py-8 bg-white">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Upcoming Cars</h2>
-                <div className="relative">
-                  {loadingUpcomingCars ? (
-                    <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
-                          <div className="h-48 bg-gray-200 animate-pulse"></div>
-                          <div className="p-5 space-y-3">
-                            <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-                            <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
-                            <div className="space-y-2">
-                              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                        {upcomingCars.map((car) => (
-                          <UpcomingCarCard
-                            key={car.id}
-                            car={car}
-                            onClick={() => {
-                              const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                              const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                              window.location.href = `/${brandSlug}-cars/${modelSlug}`
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none sm:hidden -z-10" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </PageSection>
 
@@ -3309,6 +3300,15 @@ export default function VariantPage({
       </div >
 
       <Footer />
+
+      {/* Image Gallery Modal for Highlights */}
+      <ImageGalleryModal
+        images={galleryImages}
+        initialIndex={galleryInitialIndex}
+        isOpen={galleryModalOpen}
+        onClose={() => setGalleryModalOpen(false)}
+        carName={`${displayBrandName || 'Car'} ${displayModelName || 'Model'}`}
+      />
     </div >
   )
 }
