@@ -14,7 +14,7 @@ import monitoringRoutes from "./routes/monitoring";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import { apiLimiter } from "./middleware/rateLimiter";
-import { botDetector, ddosShield } from "./middleware/security";
+import { botDetector } from "./middleware/security";
 import { warmUpCache } from "./middleware/redis-cache";
 import compression from "compression";
 import pinoHttp from "pino-http";
@@ -109,6 +109,9 @@ app.use(helmet({
   crossOriginResourcePolicy: isProd ? undefined : { policy: 'cross-origin' },
 }));
 
+// Apply Bot Detection to all API routes (except internal ones if needed)
+app.use('/api', botDetector);
+
 // SECURE CORS configuration - MUST come before security middleware
 const allowedOrigins = [
   'https://gadizone.com',
@@ -118,8 +121,6 @@ const allowedOrigins = [
   'https://killer-whale.onrender.com',
   'http://localhost:3000',
   'http://localhost:5001',
-  'http://192.168.1.23:3000',
-  'http://192.168.1.23:5001',
   process.env.FRONTEND_URL,
   process.env.NEXT_PUBLIC_API_URL
 ].filter(Boolean);
@@ -251,8 +252,13 @@ if (redisClient) {
 }
 
 // Session Middleware with enhanced cross-domain support
+const sessionSecret = process.env.SESSION_SECRET;
+if (isProd && !sessionSecret) {
+  throw new Error('🚨 SECURITY CRITICAL: SESSION_SECRET must be set in production environment variables.');
+}
+
 const sessionConfig: any = {
-  secret: process.env.SESSION_SECRET || "gadizone_secret_key_2024",
+  secret: sessionSecret || "gadizone_secret_key_2024",
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -260,7 +266,12 @@ const sessionConfig: any = {
     httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-subdomain if we want to be extra safe, or 'lax' works for .gadizone.com
-    domain: isProd ? '.gadizone.com' : undefined, // Share cookie across all subdomains (www, admin, etc.)
+    // Dynamic cookie domain:
+    // 1. If we are on gadizone.com (admin or www), share cookie across subdomains using .gadizone.com
+    // 2. If we are on Render (killer-whale...), do NOT set domain (defaults to current host) to avoid blocking
+    domain: (isProd && (process.env.FRONTEND_URL?.includes('gadizone.com') || process.env.BACKEND_URL?.includes('gadizone.com')))
+      ? '.gadizone.com'
+      : undefined,
     path: '/', // Explicitly set cookie path
   },
   name: 'sid', // Custom session ID name
