@@ -256,12 +256,12 @@ const sessionConfig: any = {
     secure: isProd, // true in production (required for sameSite: 'none')
     httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-domain OAuth
+    sameSite: isProd ? 'none' : 'lax', // 'none' REQUIRED for cross-domain OAuth (backend on onrender.com, frontend on gadizone.com)
     domain: undefined, // Let browser handle domain automatically
     path: '/', // Explicitly set cookie path
   },
   name: 'sid', // Custom session ID name
-  proxy: isProd, // Trust proxy in production for correct secure cookie handling
+  proxy: true, // ALWAYS trust proxy in production/cloud environments (Render/Vercel) for secure cookies to work
 };
 
 // Only use RedisStore if Redis client is available and connected

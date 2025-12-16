@@ -479,7 +479,15 @@ router.get('/auth/google/callback', (req, res, next) => {
                     }
 
                     // Redirect to frontend home page with success indicator
-                    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+                    // PRIORITIZE process.env.FRONTEND_URL for production correctness
+                    let frontendUrl = process.env.FRONTEND_URL || 'https://www.gadizone.com';
+
+                    // Fallback to localhost in dev only if FRONTEND_URL is explicitly missing
+                    if (!process.env.FRONTEND_URL && process.env.NODE_ENV !== 'production') {
+                        frontendUrl = 'http://localhost:3000';
+                    }
+
+                    frontendUrl = frontendUrl.replace(/\/$/, ''); // Remove trailing slash
                     const targetUrl = `${frontendUrl}/?login=success`;
                     console.log('🔀 Redirecting to:', targetUrl);
 
