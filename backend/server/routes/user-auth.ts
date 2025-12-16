@@ -361,9 +361,18 @@ router.get('/auth/google', (req, res, next) => {
  * GET /api/user/auth/google/callback
  */
 router.get('/auth/google/callback', (req, res, next) => {
-    // Helper to render success page
-    const renderSuccessPage = (redirectUrl: string) => {
-        const html = `
+    passport.authenticate('google', { session: false }, async (err: any, user: any) => {
+        console.log('🔄 Google OAuth callback received');
+
+        if (err || !user) {
+            console.error('❌ Google OAuth callback error:', err);
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+        }
+
+        // Helper to render success page
+        const renderSuccessPage = (redirectUrl: string) => {
+            const html = `
                 <!DOCTYPE html>
                 <html>
                 <head>
@@ -425,65 +434,65 @@ router.get('/auth/google/callback', (req, res, next) => {
                 </body>
                 </html>
             `;
-        res.send(html);
-    };
+            res.send(html);
+        };
 
-    try {
-        // Update last login first
-        user.lastLogin = new Date();
-        await user.save();
+        try {
+            // Update last login first
+            user.lastLogin = new Date();
+            await user.save();
 
-        // CRITICAL FIX: Regenerate session FIRST, THEN set data
-        // This prevents race condition where data set before regeneration is lost
-        req.session.regenerate((regenerateErr) => {
-            if (regenerateErr) {
-                console.error('❌ Session regenerate error:', regenerateErr);
-                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-                return res.redirect(`${frontendUrl}/login?error=session_failed`);
-            }
-
-            // NOW set session data on the NEW regenerated session
-            (req.session as any).userId = user.id;
-            (req.session as any).userEmail = user.email;
-
-            console.log('✅ Google OAuth successful for:', user.email);
-            console.log('   - User ID:', user.id);
-            console.log('   - Session ID after regeneration:', req.sessionID);
-            console.log('   - Session data:', { userId: (req.session as any).userId, userEmail: (req.session as any).userEmail });
-
-            // CRITICAL: Save session before redirect to ensure cookie is set
-            req.session.save((saveErr) => {
-                if (saveErr) {
-                    console.error('❌ Session save error:', saveErr);
+            // CRITICAL FIX: Regenerate session FIRST, THEN set data
+            // This prevents race condition where data set before regeneration is lost
+            req.session.regenerate((regenerateErr) => {
+                if (regenerateErr) {
+                    console.error('❌ Session regenerate error:', regenerateErr);
                     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
                     return res.redirect(`${frontendUrl}/login?error=session_failed`);
                 }
 
-                console.log('✅ Session saved successfully');
-                console.log('   - Cookie settings:', req.session.cookie);
-                console.log('   - Response headers will include Set-Cookie');
+                // NOW set session data on the NEW regenerated session
+                (req.session as any).userId = user.id;
+                (req.session as any).userEmail = user.email;
 
-                // Verify session was saved by checking it exists
-                const sessionUserId = (req.session as any)?.userId;
-                if (!sessionUserId) {
-                    console.error('⚠️  Warning: Session save completed but userId not found in session');
-                }
+                console.log('✅ Google OAuth successful for:', user.email);
+                console.log('   - User ID:', user.id);
+                console.log('   - Session ID after regeneration:', req.sessionID);
+                console.log('   - Session data:', { userId: (req.session as any).userId, userEmail: (req.session as any).userEmail });
 
-                // Redirect to frontend home page with success indicator
-                const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
-                const targetUrl = `${frontendUrl}/?login=success`;
-                console.log('🔀 Redirecting to:', targetUrl);
+                // CRITICAL: Save session before redirect to ensure cookie is set
+                req.session.save((saveErr) => {
+                    if (saveErr) {
+                        console.error('❌ Session save error:', saveErr);
+                        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                        return res.redirect(`${frontendUrl}/login?error=session_failed`);
+                    }
 
-                // Use robust rendering page instead of direct redirect
-                renderSuccessPage(targetUrl);
+                    console.log('✅ Session saved successfully');
+                    console.log('   - Cookie settings:', req.session.cookie);
+                    console.log('   - Response headers will include Set-Cookie');
+
+                    // Verify session was saved by checking it exists
+                    const sessionUserId = (req.session as any)?.userId;
+                    if (!sessionUserId) {
+                        console.error('⚠️  Warning: Session save completed but userId not found in session');
+                    }
+
+                    // Redirect to frontend home page with success indicator
+                    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+                    const targetUrl = `${frontendUrl}/?login=success`;
+                    console.log('🔀 Redirecting to:', targetUrl);
+
+                    // Use robust rendering page instead of direct redirect
+                    renderSuccessPage(targetUrl);
+                });
             });
-        });
-    } catch (error) {
-        console.error('❌ Session creation error:', error);
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        res.redirect(`${frontendUrl}/login?error=session_failed`);
-    }
-})(req, res, next);
+        } catch (error) {
+            console.error('❌ Session creation error:', error);
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            res.redirect(`${frontendUrl}/login?error=session_failed`);
+        }
+    })(req, res, next);
 });
 
 /**
