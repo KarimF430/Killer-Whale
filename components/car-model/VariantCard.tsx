@@ -18,13 +18,13 @@ interface VariantCardProps {
 
 export default function VariantCard({ variant, onClick, onGetPrice, onCompare }: VariantCardProps) {
   // Get on-road price
-  const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
+  const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
     exShowroomPrice: variant.price * 100000, // Convert lakhs to rupees
     fuelType: variant.fuel
   })
 
   const displayPrice = isOnRoadMode ? (onRoadPrice / 100000) : variant.price
-  const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-Showroom'
+  const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
 
   return (
     <div

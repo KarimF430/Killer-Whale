@@ -125,7 +125,7 @@ export default function UpcomingCarsClient({
     return (
         <>
             <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
                     Upcoming Cars in India
                 </h1>
                 <div className="text-gray-600 mb-6">

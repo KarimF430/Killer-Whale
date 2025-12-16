@@ -38,13 +38,13 @@ const transmissionFilters = ['Manual', 'Automatic']
 function PopularCarCard({ car }: { car: Car }) {
     const exShowroomPrice = car.startingPrice
 
-    const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
+    const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
         exShowroomPrice,
         fuelType: car.lowestPriceFuelType || car.fuelTypes[0] || 'Petrol'
     })
 
     const displayPrice = isOnRoadMode ? (onRoadPrice / 100000).toFixed(2) : (exShowroomPrice / 100000).toFixed(2)
-    const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-Showroom'
+    const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
 
     return (
         <Link
@@ -111,7 +111,7 @@ function PopularCarCard({ car }: { car: Car }) {
                                 <span className="text-sm sm:text-base md:text-lg font-semibold text-red-600">Lakh</span>
                                 <span className="text-gray-500 text-xs sm:text-sm">Onwards</span>
                             </div>
-                            <span className="text-[10px] sm:text-xs text-gray-500">{priceLabel} Price</span>
+                            <span className="text-[10px] sm:text-xs text-gray-500">{priceLabel}</span>
                         </div>
                     </div>
                 </div>
@@ -173,7 +173,7 @@ export default function PopularCarsClient({
     return (
         <>
             <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
                     Popular Cars in India
                 </h1>
                 <div className="text-gray-600 mb-6">

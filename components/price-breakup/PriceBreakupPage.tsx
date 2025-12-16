@@ -910,30 +910,16 @@ export default function PriceBreakupPage({
       {/* Section 1: Hero with Car Image, Variant/City Selection, and On-Road Price */}
       <PageSection background="white" maxWidth="7xl">
         <div id="overview" className="pt-4 pb-8">
-          {/* Page Title */}
+          {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
               {modelName} Price in {selectedCity.split(',')[0]}
             </h1>
-            <p className="text-gray-600 text-base">
-              {loadingVariants ? (
-                'Loading price information...'
-              ) : modelVariants.length > 0 ? (
-                (() => {
-                  const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
-                  const lowestExPrice = Math.min(...modelVariants.map(v => v.price)) / 100000
-                  const highestExPrice = Math.max(...modelVariants.map(v => v.price)) / 100000
-                  const lowestOnRoadBreakup = calculateOnRoadPrice(Math.min(...modelVariants.map(v => v.price)), state, 'Petrol')
-                  const highestOnRoadBreakup = calculateOnRoadPrice(Math.max(...modelVariants.map(v => v.price)), state, 'Petrol')
-                  const lowestOnRoadPrice = lowestOnRoadBreakup.totalOnRoadPrice / 100000
-                  const highestOnRoadPrice = highestOnRoadBreakup.totalOnRoadPrice / 100000
-
-                  return `The on road price of the ${modelName} in ${selectedCity.split(',')[0]} ranges from Rs. ${formatPrice(lowestOnRoadPrice)} to Rs. ${formatPrice(highestOnRoadPrice)}. The ex-showroom price is between Rs. ${formatPrice(lowestExPrice)} and Rs. ${formatPrice(highestExPrice)}.`
-                })()
-              ) : (
-                `Price information for ${modelName} in ${selectedCity.split(',')[0]}.`
-              )}
-              <button className="text-red-600 ml-1 font-medium">...more</button>
+            <p className="text-gray-600 leading-relaxed">
+              The on road price of the {modelName} in {selectedCity.split(',')[0]} ranges from Rs. {formatIndianPrice(priceBreakup ? priceBreakup.totalOnRoadPrice : (modelVariants[0]?.price || 0))} to Rs. {formatIndianPrice(Math.max(...(modelVariants.map(v => v.price) || [0])))}. The ex-showroom price is between Rs. {formatIndianPrice(Math.min(...(modelVariants.map(v => v.price) || [0])))} and Rs. {formatIndianPrice(Math.max(...(modelVariants.map(v => v.price) || [0])))}.
+            </p>
+            <p className="text-gray-600 mt-2">
+              {modelName} On-Road Price in {selectedCity.split(',')[0]} starts at ₹{((modelVariants[0]?.price || 0) / 100000).toFixed(2)} Lakh. Check RTO charges, insurance cost, and EMI options.
             </p>
           </div>
 
@@ -1120,11 +1106,11 @@ export default function PriceBreakupPage({
               </div>
             </div>
           </div>
-        </div>
-      </PageSection>
+        </div >
+      </PageSection >
 
       {/* Section 2: AD Banner & EMI Calculator */}
-      <PageSection background="gray" maxWidth="7xl">
+      < PageSection background="gray" maxWidth="7xl" >
         <div className="py-8 space-y-8">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
@@ -1163,10 +1149,10 @@ export default function PriceBreakupPage({
             </Link>
           </div>
         </div>
-      </PageSection>
+      </PageSection >
 
       {/* Section 3: More Variants */}
-      <PageSection background="white" maxWidth="7xl">
+      < PageSection background="white" maxWidth="7xl" >
         <div id="variants" className="space-y-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
             More {brandName} {modelName} Variants
@@ -1239,10 +1225,10 @@ export default function PriceBreakupPage({
             </div>
           )}
         </div>
-      </PageSection>
+      </PageSection >
 
       {/* Section 4: AD Banner, Similar Cars & Popular Cars */}
-      <PageSection background="white" maxWidth="7xl">
+      < PageSection background="white" maxWidth="7xl" >
         <div id="similar-cars" className="space-y-12">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
@@ -1411,10 +1397,10 @@ export default function PriceBreakupPage({
             </div>
           </div>
         </div>
-      </PageSection>
+      </PageSection >
 
       {/* Section 5: AD Banner & Owner Reviews */}
-      <PageSection background="white" maxWidth="7xl">
+      < PageSection background="white" maxWidth="7xl" >
         <div id="reviews" className="py-8 space-y-12">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
@@ -1641,10 +1627,10 @@ export default function PriceBreakupPage({
             </div>
           </div>
         </div>
-      </PageSection>
+      </PageSection >
 
       {/* Section 6: AD Banner, FAQ & Brand Dealers */}
-      <PageSection background="white" maxWidth="7xl">
+      < PageSection background="white" maxWidth="7xl" >
         <div id="faq" className="py-8 space-y-12">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
@@ -1721,10 +1707,10 @@ export default function PriceBreakupPage({
             </div>
           </div>
         </div>
-      </PageSection>
+      </PageSection >
 
       {/* Section 7: Price across India, AD Banner & Share Feedback */}
-      <PageSection background="white" maxWidth="7xl">
+      < PageSection background="white" maxWidth="7xl" >
         <div className="py-8 space-y-12">
           {/* Price across India */}
           <div id="price-cities" className="space-y-8">
@@ -1835,10 +1821,10 @@ export default function PriceBreakupPage({
             </div>
           </div>
         </div>
-      </PageSection>
+      </PageSection >
 
       {/* Footer */}
-      <Footer />
-    </div>
+      < Footer />
+    </div >
   )
 }

@@ -48,13 +48,13 @@ const evRangeData: Record<string, string> = {
 export default function ElectricCarCard({ car }: { car: Car }) {
     const exShowroomPrice = car.startingPrice
 
-    const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
+    const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
         exShowroomPrice,
         fuelType: 'Electric'
     })
 
     const displayPrice = isOnRoadMode ? (onRoadPrice / 100000).toFixed(2) : (exShowroomPrice / 100000).toFixed(2)
-    const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-Showroom'
+    const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
     const range = evRangeData[car.name] || '400-500 km'
 
     return (
@@ -126,7 +126,7 @@ export default function ElectricCarCard({ car }: { car: Car }) {
                                 <span className="text-base sm:text-lg md:text-xl font-semibold text-emerald-600">Lakh</span>
                                 <span className="text-gray-500 text-sm sm:text-base">Onwards</span>
                             </div>
-                            <span className="text-xs sm:text-sm text-gray-500">{priceLabel} Price</span>
+                            <span className="text-xs sm:text-sm text-gray-500">{priceLabel}</span>
                         </div>
                     </div>
                 </div>

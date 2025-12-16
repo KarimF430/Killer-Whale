@@ -68,14 +68,14 @@ export default function UpcomingCarCard({ car, onClick }: UpcomingCarCardProps) 
     const isFav = isFavourite(car.id)
 
     // Get on-road price using expectedPriceMin
-    const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
+    const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
         exShowroomPrice: car.expectedPriceMin,
         fuelType: car.fuelTypes?.[0] || 'Petrol'
     })
 
     // Use on-road price if mode is enabled, otherwise ex-showroom
     const displayPrice = isOnRoadMode ? onRoadPrice : car.expectedPriceMin
-    const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-Showroom'
+    const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
 
     return (
         <div
@@ -152,7 +152,7 @@ export default function UpcomingCarCard({ car, onClick }: UpcomingCarCardProps) 
                         <span className="text-red-600 font-bold text-lg sm:text-xl">₹ {(displayPrice / 100000).toFixed(2)} Lakh</span>
                         <span className="text-gray-500 text-xs sm:text-sm ml-2">Onwards</span>
                     </div>
-                    <span className="text-xs text-gray-500 mt-1">{priceLabel} Price</span>
+                    <span className="text-xs text-gray-500 mt-1">{priceLabel}</span>
                 </div>
 
                 <div className="space-y-2 sm:space-y-2.5 text-sm text-gray-600 mb-3 sm:mb-4">

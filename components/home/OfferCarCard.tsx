@@ -49,14 +49,14 @@ export default function OfferCarCard({ car, onClick, discountPercent = 15 }: Off
     const isFav = isFavourite(car.id)
 
     // Get on-road price (lightning fast with caching)
-    const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
+    const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
         exShowroomPrice: car.startingPrice,
         fuelType: car.lowestPriceFuelType || car.fuelTypes?.[0] || 'Petrol'
     })
 
     // Use on-road price if mode is enabled, otherwise ex-showroom
     const displayPrice = isOnRoadMode ? onRoadPrice : car.startingPrice
-    const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-Showroom'
+    const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
 
     return (
         <div
@@ -124,7 +124,7 @@ export default function OfferCarCard({ car, onClick, discountPercent = 15 }: Off
                         <span className="text-red-600 font-bold text-lg sm:text-xl">₹ {(displayPrice / 100000).toFixed(2)} Lakh</span>
                         <span className="text-gray-500 text-xs sm:text-sm ml-2">Onwards</span>
                     </div>
-                    <span className="text-xs text-gray-500 mt-1">{priceLabel} Price</span>
+                    <span className="text-xs text-gray-500 mt-1">{priceLabel}</span>
                 </div>
 
                 <div className="space-y-2 sm:space-y-2.5 text-sm text-gray-600 mb-3 sm:mb-4">

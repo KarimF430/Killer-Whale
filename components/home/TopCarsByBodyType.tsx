@@ -43,13 +43,13 @@ const BODY_TYPES = [
 function TopCarCard({ car, rank, onClick }: { car: RankedCar; rank: number; onClick: () => void }) {
     const { isFavourite, toggleFavourite } = useFavourites()
     const isFav = isFavourite(car.id)
-    const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
+    const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
         exShowroomPrice: car.startingPrice,
         fuelType: car.lowestPriceFuelType || car.fuelTypes?.[0] || 'Petrol'
     })
 
     const displayPrice = isOnRoadMode ? onRoadPrice : car.startingPrice
-    const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-Showroom'
+    const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
 
     return (
         <div
@@ -116,7 +116,7 @@ function TopCarCard({ car, rank, onClick }: { car: RankedCar; rank: number; onCl
                         <span className="text-red-600 font-bold text-base sm:text-lg">₹ {(displayPrice / 100000).toFixed(2)} Lakh</span>
                         <span className="text-gray-500 text-[10px] sm:text-xs">Onwards</span>
                     </div>
-                    <span className="text-[10px] text-gray-400">On-Road Price</span>
+                    <span className="text-[10px] text-gray-400">{priceLabel}</span>
                 </div>
 
                 <button

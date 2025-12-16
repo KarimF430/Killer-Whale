@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Star, ChevronRight } from 'lucide-react'
+import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 
 interface BrandCarItemProps {
     car: {
@@ -21,10 +23,18 @@ interface BrandCarItemProps {
 
 export default function BrandCarItem({ car, brandSlug }: BrandCarItemProps) {
     const router = useRouter()
+    const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
+        exShowroomPrice: car.startingPrice,
+        fuelType: 'Petrol'
+    })
+
     const brandSlugFormatted = car.brandName.toLowerCase().replace(/\s+/g, '-')
     const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
     const modelPageUrl = `/${brandSlugFormatted}-cars/${modelSlug}`
     const rateReviewUrl = `/${brandSlugFormatted}-cars/${modelSlug}/rate-review`
+
+    const displayPrice = isOnRoadMode ? onRoadPrice : car.startingPrice
+    const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
 
     const formatPrice = (price: number) => {
         if (price === 0) return 'Price Not Available'
@@ -90,10 +100,10 @@ export default function BrandCarItem({ car, brandSlug }: BrandCarItemProps) {
 
                     {/* Price */}
                     <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-bold text-red-600">{formatPrice(car.startingPrice)}</span>
+                        <span className="text-xl font-bold text-red-600">{formatPrice(displayPrice)}</span>
                         <span className="text-sm text-gray-500">Onwards</span>
                     </div>
-                    <p className="text-xs text-gray-500">On-Road Price</p>
+                    <p className="text-xs text-gray-500">{priceLabel}</p>
                 </div>
 
                 {/* Arrow Icon */}

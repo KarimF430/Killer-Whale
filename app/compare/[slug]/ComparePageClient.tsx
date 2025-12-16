@@ -231,6 +231,8 @@ export default function ComparePageClient({
     const item1 = validItems[0]
     const item2 = validItems[1]
 
+    if (!item1.variant || !item2.variant) return null
+
     const price1 = getOnRoadPrice(item1.variant.price, item1.variant.fuelType)
     const price2 = getOnRoadPrice(item2.variant.price, item2.variant.fuelType)
 
@@ -473,12 +475,11 @@ export default function ComparePageClient({
         {/* Header with Share Button */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
               {comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}
             </h1>
             <p className="text-base text-gray-600 leading-relaxed">
-              {seoText}
-              <span className="text-orange-600 font-bold cursor-pointer hover:text-orange-700">more</span>
+              Detailed comparison of {comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}. Compare prices, specifications, mileage, safety rating, and features to choose the best car for you.
             </p>
           </div>
           <button
@@ -494,8 +495,8 @@ export default function ComparePageClient({
         {/* Comparison Cards - Side by Side, Mobile Friendly */}
         <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-2 mb-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {comparisonItems.map((item, index) => {
-            // Handle empty slot
-            if (!item) {
+            // Handle empty slot or corrupted item
+            if (!item || !item.variant) {
               return (
                 <div
                   key={index}
@@ -634,7 +635,7 @@ export default function ComparePageClient({
 
           {/* EMI Values - Two Columns */}
           <div className="grid grid-cols-2 gap-6">
-            {comparisonItems.filter((item): item is ComparisonItem => item !== null).map((item, index) => {
+            {comparisonItems.filter((item): item is ComparisonItem => item !== null && !!item.variant).map((item, index) => {
               const onRoadPrice = getOnRoadPrice(item.variant.price, item.variant.fuelType)
               const emi = calculateEMI(onRoadPrice)
 
@@ -685,7 +686,7 @@ export default function ComparePageClient({
                 {expandedSections[section.id] && (
                   <div className="pb-4 space-y-2">
                     {section.specs.map((spec) => {
-                      const validItems = comparisonItems.filter((item): item is ComparisonItem => item !== null)
+                      const validItems = comparisonItems.filter((item): item is ComparisonItem => item !== null && !!item.variant)
                       const values = validItems.map(item => item.variant[spec.key] || 'N/A')
                       const allSame = values.every(v => v === values[0])
                       if (showDifferences && allSame) return null
@@ -701,7 +702,7 @@ export default function ComparePageClient({
                             )}
                           </div>
                           <div className="grid grid-cols-2 gap-4">
-                            {comparisonItems.filter((item): item is ComparisonItem => item !== null).map((item, idx) => (
+                            {comparisonItems.filter((item): item is ComparisonItem => item !== null && !!item.variant).map((item, idx) => (
                               <div key={idx} className={`text-sm font-medium ${!allSame ? 'text-gray-900' : 'text-gray-600'}`}>
                                 {item.variant[spec.key] || 'N/A'}
                               </div>
@@ -739,7 +740,7 @@ export default function ComparePageClient({
           ) : (
             <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4" style={{ scrollbarWidth: 'thin' }}>
               {similarCars.map((car) => {
-                const firstValidItem = comparisonItems.find((item): item is ComparisonItem => item !== null)
+                const firstValidItem = comparisonItems.find((item): item is ComparisonItem => item !== null && !!item.variant)
                 if (!firstValidItem) return null
 
                 // Fix: Handle undefined or zero prices

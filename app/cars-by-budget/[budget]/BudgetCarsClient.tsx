@@ -93,7 +93,7 @@ export default function BudgetCarsClient({
         <>
             {/* Header & Filters */}
             <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
                     {budgetLabel.includes('Best Cars') ? budgetLabel : `${budgetLabel} Cars`}
                 </h1>
                 <div className="text-gray-600 mb-6">
