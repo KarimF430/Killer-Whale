@@ -301,6 +301,10 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
   const [selectedRating, setSelectedRating] = useState<number | null>(null)
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'rating' | 'helpful'>('newest')
 
+  // Active section tracking for sticky navigation
+  const [activeSection, setActiveSection] = useState('hero')
+  const navRef = useRef<HTMLDivElement>(null)
+
   // Load car models for hyperlink generation
   useCarModelsData()
 
@@ -524,7 +528,6 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
   const [activeHighlightTab, setActiveHighlightTab] = useState<'keyFeatures' | 'spaceComfort' | 'storageConvenience'>('keyFeatures')
   const [showVariantDropdown, setShowVariantDropdown] = useState(false)
   const [showCityDropdown, setShowCityDropdown] = useState(false)
-  const [activeSection, setActiveSection] = useState('overview')
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isLiked, setIsLiked] = useState(false)
   const [selectedColor, setSelectedColor] = useState<string>('')
@@ -553,6 +556,38 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
       setSelectedColor(model.colorImages[0].caption || '')
     }
   }, [model?.colorImages, selectedColor])
+
+  // Intersection Observer for sticky navigation highlighting
+  useEffect(() => {
+    // Section IDs for navigation
+    const sectionIds = ['overview', 'emi-highlights', 'variants', 'colors', 'pros-cons', 'engine', 'mileage', 'similar-cars', 'news-videos', 'faq-reviews']
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id)
+            // Auto-scroll the nav to show active item
+            if (navRef.current) {
+              const activeButton = navRef.current.querySelector(`[data-section="${entry.target.id}"]`)
+              if (activeButton) {
+                activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+              }
+            }
+          }
+        })
+      },
+      { rootMargin: '-20% 0px -70% 0px', threshold: 0 }
+    )
+
+    // Observe all navigable sections
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id)
+      if (element) observer.observe(element)
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   const variantDropdownRef = useRef<HTMLDivElement>(null)
   const cityDropdownRef = useRef<HTMLDivElement>(null)
@@ -1012,10 +1047,11 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
       {/* Sticky Navigation Ribbon */}
       <div className="bg-white border-b sticky top-0 z-40 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
+          <div ref={navRef} className="flex space-x-1 overflow-x-auto scrollbar-hide">
             {sections.map((section) => (
               <button
                 key={section.id}
+                data-section={section.id}
                 onClick={() => scrollToSection(section.id)}
                 className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeSection === section.id
                   ? 'border-red-600 text-red-600'

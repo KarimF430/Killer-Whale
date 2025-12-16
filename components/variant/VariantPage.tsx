@@ -101,9 +101,21 @@ export default function VariantPage({
 }) {
   const router = useRouter()
   const [expandedSpecs, setExpandedSpecs] = useState<Record<string, boolean>>({})
-  const [activeSection, setActiveSection] = useState('')
+  const [activeSection, setActiveSection] = useState('overview')
   const [isSticky, setIsSticky] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
+  const navRef = useRef<HTMLDivElement>(null)
+
+  // Navigation sections for sticky ribbon
+  const navSections = [
+    { id: 'overview', name: 'Overview' },
+    { id: 'highlights', name: 'EMI & Highlights' },
+    { id: 'specifications', name: 'Specifications' },
+    { id: 'more-variants', name: 'Variants' },
+    { id: 'engine-mileage', name: 'Engine & Mileage' },
+    { id: 'price-across-india', name: 'Price' },
+    { id: 'similar-cars', name: 'Similar Cars' }
+  ]
 
   // Backend data fetching states
   const [variant, setVariant] = useState<any>(null)
@@ -310,6 +322,50 @@ export default function VariantPage({
 
   const variantDropdownRef = useRef<HTMLDivElement>(null)
   const cityDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Intersection Observer for sticky navigation highlighting
+  useEffect(() => {
+    const sectionIds = navSections.map(s => s.id)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id)
+            // Auto-scroll the nav to show active item
+            if (navRef.current) {
+              const activeButton = navRef.current.querySelector(`[data-section="${entry.target.id}"]`)
+              if (activeButton) {
+                activeButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+              }
+            }
+          }
+        })
+      },
+      { rootMargin: '-20% 0px -70% 0px', threshold: 0 }
+    )
+
+    // Observe all navigable sections
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id)
+      if (element) observer.observe(element)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  // Scroll to section helper
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const headerOffset = 60
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY
+      window.scrollTo({
+        top: elementPosition - headerOffset,
+        behavior: 'smooth'
+      })
+    }
+  }
 
   // Optimized data fetching - use server-side data if available, otherwise fetch client-side
   useEffect(() => {
@@ -674,20 +730,6 @@ export default function VariantPage({
     }))
   }
 
-  // Smooth scroll to section
-  const scrollToSection = (sectionId: string) => {
-    setActiveSection(sectionId)
-    const element = document.getElementById(sectionId)
-    if (element) {
-      const headerHeight = 80 // Account for navigation ribbon
-      const elementPosition = element.offsetTop - headerHeight
-      window.scrollTo({
-        top: elementPosition,
-        behavior: 'smooth'
-      })
-    }
-  }
-
   // Fast loading state - show skeleton instead of blank page
   const showSkeleton = loading || initialLoad
 
@@ -713,14 +755,18 @@ export default function VariantPage({
       {/* Sticky Navigation Ribbon */}
       <div className="variant-nav-ribbon bg-white border-b sticky top-0 z-40 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
-            {navigationSections.map((section) => (
+          <div ref={navRef} className="flex space-x-1 overflow-x-auto scrollbar-hide">
+            {navSections.map((section) => (
               <button
                 key={section.id}
+                data-section={section.id}
                 onClick={() => scrollToSection(section.id)}
-                className="py-3 px-4 font-medium text-sm whitespace-nowrap text-gray-500 hover:text-gray-700 transition-colors"
+                className={`py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeSection === section.id
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
               >
-                {section.label}
+                {section.name}
               </button>
             ))}
           </div>
@@ -2610,7 +2656,7 @@ export default function VariantPage({
 
         {/* Section 4: AD Banner + More Variants */}
         <PageSection background="white" maxWidth="7xl">
-          <div className="space-y-8">
+          <div id="more-variants" className="space-y-8">
             {/* Ad Banner */}
             <Ad3DCarousel className="mb-6" />
 
@@ -2708,7 +2754,7 @@ export default function VariantPage({
 
         {/* Section 5: Variant Summary, AD Banner, Engine & Mileage */}
         <PageSection background="white" maxWidth="7xl">
-          <div className="space-y-8">
+          <div id="engine-mileage" className="space-y-8">
             {/* Variant Summary Section */}
             <div className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Summary</h2>
@@ -2904,14 +2950,14 @@ export default function VariantPage({
                     ) : (
                       <>
                         <p className="text-gray-700 text-sm leading-relaxed mb-6">
-                          Suitable for both city driving and highway cruising. The {variant?.engineName || currentVariantData.engine} engine offers excellent fuel efficiency with smooth acceleration. It provides a perfect balance between performance and economy, making it ideal for daily commuting and long-distance travel.
+                          Suitable for both city driving and highway cruising. The {variant?.engineName || currentVariantData?.engine} engine offers excellent fuel efficiency with smooth acceleration. It provides a perfect balance between performance and economy, making it ideal for daily commuting and long-distance travel.
                         </p>
 
                         {/* Engine Specs */}
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-bold text-gray-900 mb-3 text-center">
                             {(() => {
-                              const trans = variant?.engineTransmission || variant?.transmission || currentVariantData.transmission
+                              const trans = variant?.engineTransmission || variant?.transmission || currentVariantData?.transmission
                               return trans.toLowerCase() === 'manual' ? 'Manual' : trans.toUpperCase()
                             })()}
                           </h4>
@@ -2919,11 +2965,11 @@ export default function VariantPage({
                           <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Power:</p>
-                              <p className="font-medium text-gray-900">{variant?.enginePower || currentVariantData.power}</p>
+                              <p className="font-medium text-gray-900">{variant?.enginePower || currentVariantData?.power}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Torque:</p>
-                              <p className="font-medium text-gray-900">{variant?.engineTorque || currentVariantData.torque}</p>
+                              <p className="font-medium text-gray-900">{variant?.engineTorque || currentVariantData?.torque}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Transmission:</p>
@@ -2948,7 +2994,7 @@ export default function VariantPage({
                   <div className="text-center mb-4">
                     <h3 className="text-red-500 font-bold text-sm mb-1">Engine & Transmission</h3>
                     <h4 className="text-red-500 font-bold text-base mb-1">
-                      {variant?.mileageEngineName || variant?.engineName || currentVariantData.engine}
+                      {variant?.mileageEngineName || variant?.engineName || currentVariantData?.engine}
                     </h4>
                   </div>
 
@@ -2983,7 +3029,7 @@ export default function VariantPage({
 
         {/* Section 6: City On-Road Prices, AD Banner & Upcoming Cars */}
         <PageSection background="white" maxWidth="7xl">
-          <div className="space-y-8">
+          <div id="price-across-india" className="space-y-8">
             {/* City On-Road Prices */}
             <div className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Price Across India</h2>
@@ -3030,7 +3076,7 @@ export default function VariantPage({
 
         {/* Section 7: New Launched Cars, AD Banner & Feedback */}
         <PageSection background="white" maxWidth="7xl">
-          <div className="space-y-12">
+          <div id="similar-cars" className="space-y-12">
             {/* Similar Cars Section - Exact copy from CarModelPage */}
             <div className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
