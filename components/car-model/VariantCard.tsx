@@ -24,7 +24,7 @@ export default function VariantCard({ variant, onClick, onGetPrice, onCompare }:
   })
 
   const displayPrice = isOnRoadMode ? (onRoadPrice / 100000) : variant.price
-  const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
+  const priceLabel = isOnRoadMode ? 'On-Road Price' : 'Ex-Showroom Price'
 
   return (
     <div

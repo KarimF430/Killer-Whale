@@ -2741,7 +2741,7 @@ export default function VariantPage({
                     onClick={() => {
                       const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                       const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
-                      router.push(`/ ${brandSlug} -cars / ${modelSlug}/variants`)
+                      router.push(`/${brandSlug}-cars/${modelSlug}/variants`)
                     }}
                   >
                     View All {transformedVariants.length} Variants

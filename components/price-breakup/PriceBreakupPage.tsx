@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronDown, Share2, Heart, Calendar, Fuel, Users } from 'lucide-react'
+import { ChevronDown, ChevronUp, Share2, Heart, Calendar, Fuel, Users } from 'lucide-react'
 import { formatPrice } from '@/utils/priceFormatter'
 import { calculateOnRoadPrice, OnRoadPriceBreakup } from '@/lib/rto-data-optimized'
 import PageSection from '../common/PageSection'
@@ -244,6 +244,7 @@ export default function PriceBreakupPage({
   }, [selectedVariantName, selectedCity, initialVariants])
 
   const [priceBreakup, setPriceBreakup] = useState<OnRoadPriceBreakup | null>(initialPriceBreakup)
+  const [isTextExpanded, setIsTextExpanded] = useState(false)
 
   // Calculate EMI for display (20% down, 7 years, 8% interest)
   const calculateDisplayEMI = (price: number) => {
@@ -915,12 +916,30 @@ export default function PriceBreakupPage({
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               {modelName} Price in {selectedCity.split(',')[0]}
             </h1>
-            <p className="text-gray-600 leading-relaxed">
-              The on road price of the {modelName} in {selectedCity.split(',')[0]} ranges from Rs. {formatIndianPrice(priceBreakup ? priceBreakup.totalOnRoadPrice : (modelVariants[0]?.price || 0))} to Rs. {formatIndianPrice(Math.max(...(modelVariants.map(v => v.price) || [0])))}. The ex-showroom price is between Rs. {formatIndianPrice(Math.min(...(modelVariants.map(v => v.price) || [0])))} and Rs. {formatIndianPrice(Math.max(...(modelVariants.map(v => v.price) || [0])))}.
-            </p>
-            <p className="text-gray-600 mt-2">
-              {modelName} On-Road Price in {selectedCity.split(',')[0]} starts at ₹{((modelVariants[0]?.price || 0) / 100000).toFixed(2)} Lakh. Check RTO charges, insurance cost, and EMI options.
-            </p>
+            <div className="relative">
+              <div className={`text-gray-600 leading-relaxed transition-all duration-300 ${!isTextExpanded ? 'line-clamp-2' : ''}`}>
+                <p>
+                  The on road price of the {modelName} in {selectedCity.split(',')[0]} ranges from Rs. {formatIndianPrice(priceBreakup ? priceBreakup.totalOnRoadPrice : (modelVariants[0]?.price || 0))} to Rs. {formatIndianPrice(Math.max(...(modelVariants.map(v => v.price) || [0])))}. The ex-showroom price is between Rs. {formatIndianPrice(Math.min(...(modelVariants.map(v => v.price) || [0])))} and Rs. {formatIndianPrice(Math.max(...(modelVariants.map(v => v.price) || [0])))}.
+                </p>
+                <p className="mt-2">
+                  {modelName} On-Road Price in {selectedCity.split(',')[0]} starts at ₹{((modelVariants[0]?.price || 0) / 100000).toFixed(2)} Lakh. Check RTO charges, insurance cost, and EMI options.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsTextExpanded(!isTextExpanded)}
+                className="flex items-center text-blue-600 font-medium text-sm mt-1 hover:text-blue-700 transition-colors"
+              >
+                {isTextExpanded ? (
+                  <>
+                    Read Less <ChevronUp className="w-4 h-4 ml-1" />
+                  </>
+                ) : (
+                  <>
+                    Read More <ChevronDown className="w-4 h-4 ml-1" />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -1090,7 +1109,7 @@ export default function PriceBreakupPage({
                       {/* Total On-Road Price - Clean highlight */}
                       <div className="mt-4 sm:mt-5">
                         <div className="bg-green-50 rounded-lg p-3 sm:p-4 border border-green-100">
-                          <div className="text-xs sm:text-sm text-gray-500 mb-1">On-Road Price in {selectedCity.split(',')[0]}</div>
+                          <div className="text-xs sm:text-sm text-gray-500 mb-1">On-Road Price</div>
                           <div className="text-xl sm:text-2xl font-bold text-green-600">
                             ₹ {formatIndianPrice(priceBreakup.totalOnRoadPrice)}
                           </div>
