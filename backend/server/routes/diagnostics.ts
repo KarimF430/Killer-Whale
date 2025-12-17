@@ -11,7 +11,11 @@ const redis = getRedisClient();
  * GET /api/diagnostics
  */
 router.get('/', async (req, res) => {
-    const isProd = process.env.NODE_ENV === 'production';
+    const isProd = process.env.NODE_ENV === 'production' || !!process.env.RENDER;
+    const isGadizoneDomain = isProd && (
+        process.env.FRONTEND_URL?.includes('gadizone.com') ||
+        process.env.BACKEND_URL?.includes('gadizone.com')
+    );
 
     // Check Redis Cache Connection
     let redisCacheStatus = 'disconnected';
@@ -33,7 +37,18 @@ router.get('/', async (req, res) => {
     const diagnostics = {
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
+        isProd,
+        isRender: !!process.env.RENDER,
         trustProxy: req.app.get('trust proxy'),
+
+        // CRITICAL: Domain configuration for cookies
+        domainConfig: {
+            FRONTEND_URL: process.env.FRONTEND_URL || '(not set)',
+            BACKEND_URL: process.env.BACKEND_URL || '(not set)',
+            isGadizoneDomain,
+            expectedCookieDomain: isGadizoneDomain ? '.gadizone.com' : '(not set - defaults to host)',
+        },
+
         redis: {
             cache: redisCacheStatus,
             url_configured: !!process.env.REDIS_URL,
@@ -43,10 +58,12 @@ router.get('/', async (req, res) => {
             status: sessionStatus,
             id: sessionID,
             cookieConfig: req.session?.cookie,
-            hasUser: !!(req.session as any)?.userId
+            hasUser: !!(req.session as any)?.userId,
+            userId: (req.session as any)?.userId || null,
+            userEmail: (req.session as any)?.userEmail || null
         },
         // We can't access `isProd` directly from index.ts but we can check the cookie property to guess
-        inferredCookieSettings: {
+        actualCookieSettings: {
             secure: req.session?.cookie.secure,
             sameSite: req.session?.cookie.sameSite,
             httpOnly: req.session?.cookie.httpOnly,
@@ -58,11 +75,68 @@ router.get('/', async (req, res) => {
             origin: req.get('origin'),
             'x-forwarded-proto': req.get('x-forwarded-proto'),
             'x-forwarded-for': req.get('x-forwarded-for'),
-            'cookie-present': !!req.get('cookie')
+            'cookie-present': !!req.get('cookie'),
+            'cookie-header': req.get('cookie') ? 'sid=' + (req.get('cookie')?.includes('sid=') ? 'present' : 'missing') : 'no cookies'
         }
     };
 
     res.json(diagnostics);
+});
+
+/**
+ * Test Session Storage
+ * GET /api/diagnostics/test-session
+ * This endpoint tests if sessions are being saved to Redis correctly
+ */
+router.get('/test-session', (req, res) => {
+    const session = req.session as any;
+
+    // Check if test value was previously set
+    const previousValue = session.testValue;
+    const previousTimestamp = session.testTimestamp;
+
+    // Set new test value
+    session.testValue = 'session_test_' + Date.now();
+    session.testTimestamp = new Date().toISOString();
+
+    // Save session explicitly
+    req.session.save((err) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to save session: ' + err.message,
+                sessionId: req.sessionID
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Session test - refresh this page to verify persistence',
+            sessionId: req.sessionID,
+            currentValue: session.testValue,
+            previousValue: previousValue || '(none - first visit)',
+            previousTimestamp: previousTimestamp || '(none)',
+            cookieDomain: req.session.cookie.domain,
+            instruction: 'If previousValue shows the value from your last request, sessions are working correctly!'
+        });
+    });
+});
+
+/**
+ * Clear Test Session
+ * GET /api/diagnostics/clear-test
+ */
+router.get('/clear-test', (req, res) => {
+    const session = req.session as any;
+    delete session.testValue;
+    delete session.testTimestamp;
+
+    req.session.save((err) => {
+        res.json({
+            success: !err,
+            message: err ? 'Failed to clear: ' + err.message : 'Test session data cleared'
+        });
+    });
 });
 
 export default router;

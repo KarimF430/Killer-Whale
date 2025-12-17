@@ -257,21 +257,34 @@ if (isProd && !sessionSecret) {
   throw new Error('🚨 SECURITY CRITICAL: SESSION_SECRET must be set in production environment variables.');
 }
 
+// Determine if we're using gadizone.com domain
+const isGadizoneDomain = isProd && (
+  process.env.FRONTEND_URL?.includes('gadizone.com') ||
+  process.env.BACKEND_URL?.includes('gadizone.com')
+);
+
+console.log('🔧 Session Cookie Configuration:');
+console.log(`   - isProd: ${isProd}`);
+console.log(`   - isGadizoneDomain: ${isGadizoneDomain}`);
+console.log(`   - FRONTEND_URL: ${process.env.FRONTEND_URL}`);
+console.log(`   - BACKEND_URL: ${process.env.BACKEND_URL}`);
+
 const sessionConfig: any = {
   secret: sessionSecret || "gadizone_secret_key_2024",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: isProd, // true in production (required for sameSite: 'none')
+    secure: isProd, // true in production (required for HTTPS and sameSite: 'none')
     httpOnly: true,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-subdomain if we want to be extra safe, or 'lax' works for .gadizone.com
+    // IMPORTANT: For cross-origin fetch requests (www.gadizone.com -> admin.gadizone.com),
+    // we MUST use 'none' because 'lax' only sends cookies on same-site or top-level navigations.
+    // 'none' + 'secure' allows credentials: 'include' to work across subdomains.
+    sameSite: isProd ? 'none' : 'lax',
     // Dynamic cookie domain:
     // 1. If we are on gadizone.com (admin or www), share cookie across subdomains using .gadizone.com
     // 2. If we are on Render (killer-whale...), do NOT set domain (defaults to current host) to avoid blocking
-    domain: (isProd && (process.env.FRONTEND_URL?.includes('gadizone.com') || process.env.BACKEND_URL?.includes('gadizone.com')))
-      ? '.gadizone.com'
-      : undefined,
+    domain: isGadizoneDomain ? '.gadizone.com' : undefined,
     path: '/', // Explicitly set cookie path
   },
   name: 'sid', // Custom session ID name

@@ -262,16 +262,30 @@ router.post('/logout', (req, res) => {
  */
 router.get('/me', async (req, res) => {
     try {
+        // Enhanced debugging for production session issues
+        console.log('🔍 /api/user/me called');
+        console.log('   - Session ID:', req.sessionID);
+        console.log('   - Session userId:', (req.session as any)?.userId);
+        console.log('   - Session userEmail:', (req.session as any)?.userEmail);
+        console.log('   - Cookie header:', req.headers.cookie ? 'present' : 'missing');
+        console.log('   - Origin:', req.headers.origin);
+        console.log('   - Cookies received:', req.cookies);
+
         const userId = (req.session as any)?.userId;
 
         if (!userId) {
+            console.log('   ❌ No userId in session, returning 401');
             return res.status(401).json({ message: 'Not authenticated' });
         }
 
+        console.log('   ✅ userId found:', userId);
         const user = await User.findOne({ id: userId });
         if (!user) {
+            console.log('   ❌ User not found in database for id:', userId);
             return res.status(404).json({ message: 'User not found' });
         }
+
+        console.log('   ✅ User found:', user.email);
 
         // Return user data (without password)
         const userResponse = {
@@ -469,8 +483,17 @@ router.get('/auth/google/callback', (req, res, next) => {
                     }
 
                     console.log('✅ Session saved successfully');
-                    console.log('   - Cookie settings:', req.session.cookie);
-                    console.log('   - Response headers will include Set-Cookie');
+                    console.log('   - Session ID:', req.sessionID);
+                    console.log('   - Cookie settings:', JSON.stringify(req.session.cookie, null, 2));
+                    console.log('   - Cookie domain:', req.session.cookie.domain);
+                    console.log('   - Cookie secure:', req.session.cookie.secure);
+                    console.log('   - Cookie sameSite:', req.session.cookie.sameSite);
+                    console.log('   - Cookie httpOnly:', req.session.cookie.httpOnly);
+                    console.log('   - Cookie path:', req.session.cookie.path);
+
+                    // Log what Set-Cookie header will look like
+                    const cookieHeader = res.getHeader('Set-Cookie');
+                    console.log('   - Set-Cookie header will be:', cookieHeader);
 
                     // Verify session was saved by checking it exists
                     const sessionUserId = (req.session as any)?.userId;
