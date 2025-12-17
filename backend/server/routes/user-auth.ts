@@ -19,6 +19,15 @@ const loginLimiter = rateLimit({
     skipSuccessfulRequests: true, // Don't count successful logins
 });
 
+// OTP-specific rate limiter - prevents OTP abuse
+const otpLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 3, // 3 OTP requests per window per IP
+    message: 'Too many OTP requests. Please try again after 15 minutes.',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 /**
  * User Registration with Email Verification
  * POST /api/user/register
@@ -747,6 +756,476 @@ router.post('/reset-password', async (req, res) => {
     } catch (error) {
         console.error('Reset password error:', error);
         res.status(500).json({ message: 'Failed to reset password' });
+    }
+});
+
+/**
+ * Send OTP for Login
+ * POST /api/user/send-otp
+ */
+router.post('/send-otp', otpLimiter, async (req, res) => {
+    try {
+        const { email } = req.body;
+        console.log(`📧 OTP request for: ${email}`);
+
+        // Validation
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: 'Invalid email format' });
+        }
+
+        // Find user
+        const user = await User.findOne({ email: email.toLowerCase() });
+
+        if (!user) {
+            // For security, don't reveal if email exists
+            // But for user experience, we'll tell them to sign up
+            return res.status(404).json({
+                message: 'No account found with this email. Please sign up first.',
+                isNewEmail: true
+            });
+        }
+
+        // Check if account is active
+        if (!user.isActive) {
+            return res.status(403).json({ message: 'Account is disabled. Please contact support.' });
+        }
+
+        // Check if account is locked
+        if (user.lockUntil && user.lockUntil > new Date()) {
+            const remainingMinutes = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
+            return res.status(423).json({
+                message: `Account temporarily locked. Please try again in ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}.`,
+                locked: true
+            });
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Hash OTP before storing (security)
+        const hashedOtp = await bcrypt.hash(otp, 10);
+
+        // Store OTP with 5-minute expiry
+        user.otp = hashedOtp;
+        user.otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+        user.otpAttempts = 0; // Reset attempts on new OTP
+        user.updatedAt = new Date();
+        await user.save();
+
+        // Send OTP email
+        const emailResult = await sendEmail(
+            user.email,
+            'otpLogin',
+            {
+                name: user.firstName || '',
+                otp: otp
+            }
+        );
+
+        if (!emailResult.success) {
+            console.error('❌ Failed to send OTP email:', emailResult.error);
+            return res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+        }
+
+        console.log(`✅ OTP sent to: ${user.email}`);
+
+        // Mask email for response
+        const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
+
+        res.json({
+            message: 'OTP sent successfully!',
+            maskedEmail: maskedEmail
+        });
+
+    } catch (error) {
+        console.error('Send OTP error:', error);
+        res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+    }
+});
+
+/**
+ * Verify OTP and Login
+ * POST /api/user/verify-otp
+ */
+router.post('/verify-otp', loginLimiter, async (req, res) => {
+    try {
+        const { email, otp, rememberMe } = req.body;
+        console.log(`🔐 OTP verification attempt for: ${email}`);
+
+        // Validation
+        if (!email || !otp) {
+            return res.status(400).json({ message: 'Email and OTP are required' });
+        }
+
+        // OTP format validation (6 digits)
+        if (!/^\d{6}$/.test(otp)) {
+            return res.status(400).json({ message: 'Invalid OTP format. Please enter 6 digits.' });
+        }
+
+        // Find user
+        const user = await User.findOne({ email: email.toLowerCase() });
+
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or OTP' });
+        }
+
+        // Check if account is locked
+        if (user.lockUntil && user.lockUntil > new Date()) {
+            const remainingMinutes = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
+            return res.status(423).json({
+                message: `Account temporarily locked. Please try again in ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}.`,
+                locked: true
+            });
+        }
+
+        // Reset lock if expired
+        if (user.lockUntil && user.lockUntil <= new Date()) {
+            user.otpAttempts = 0;
+            user.lockUntil = null as any;
+        }
+
+        // Check if OTP exists and not expired
+        if (!user.otp || !user.otpExpires) {
+            return res.status(400).json({
+                message: 'No OTP found. Please request a new one.',
+                expired: true
+            });
+        }
+
+        if (user.otpExpires < new Date()) {
+            // Clear expired OTP
+            user.otp = null as any;
+            user.otpExpires = null as any;
+            await user.save();
+            return res.status(400).json({
+                message: 'OTP has expired. Please request a new one.',
+                expired: true
+            });
+        }
+
+        // Verify OTP with timing-safe comparison
+        const isOtpValid = await bcrypt.compare(otp, user.otp);
+
+        if (!isOtpValid) {
+            // Increment failed attempts
+            user.otpAttempts = (user.otpAttempts || 0) + 1;
+
+            // Lock account after 5 failed attempts
+            if (user.otpAttempts >= 5) {
+                user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // Lock for 15 minutes
+                user.otp = null as any;
+                user.otpExpires = null as any;
+                await user.save();
+                console.log(`🔒 Account locked for user: ${user.email} (${user.otpAttempts} failed OTP attempts)`);
+                return res.status(423).json({
+                    message: 'Too many failed attempts. Account locked for 15 minutes.',
+                    locked: true
+                });
+            }
+
+            await user.save();
+            const remainingAttempts = 5 - user.otpAttempts;
+            console.log(`⚠️ Failed OTP attempt for: ${user.email} (${remainingAttempts} attempts remaining)`);
+
+            return res.status(401).json({
+                message: 'Invalid OTP. Please try again.',
+                remainingAttempts: remainingAttempts > 0 ? remainingAttempts : 0
+            });
+        }
+
+        // OTP is valid - Clear OTP and reset attempts
+        user.otp = null as any;
+        user.otpExpires = null as any;
+        user.otpAttempts = 0;
+        user.lockUntil = null as any;
+        user.lastLogin = new Date();
+        user.isEmailVerified = true; // OTP login verifies email
+        user.updatedAt = new Date();
+        await user.save();
+
+        console.log(`✅ OTP verified for: ${user.email}`);
+
+        // Create session
+        (req.session as any).userId = user.id;
+        (req.session as any).userEmail = user.email;
+
+        // Set session expiry based on "Remember Me"
+        if (rememberMe) {
+            req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+        } else {
+            req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours
+        }
+
+        // Send welcome email (non-blocking)
+        sendEmail(
+            user.email,
+            'welcomeLogin',
+            { name: user.firstName || 'there' }
+        ).catch(err => console.warn('⚠️ Welcome email failed:', err));
+
+        // Save session before responding
+        req.session.save((err) => {
+            if (err) {
+                console.error('❌ Session save error:', err);
+                return res.status(500).json({ message: 'Login failed. Please try again.' });
+            }
+
+            console.log('✅ Session saved after OTP verification');
+
+            // Return user data (without password/otp)
+            const userResponse = {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                dateOfBirth: user.dateOfBirth,
+                profileImage: user.profileImage,
+                savedCars: user.savedCars,
+                lastLogin: user.lastLogin
+            };
+
+            res.json({
+                message: 'Login successful!',
+                user: userResponse
+            });
+        });
+
+    } catch (error) {
+        console.error('Verify OTP error:', error);
+        res.status(500).json({ message: 'Login failed. Please try again.' });
+    }
+});
+
+/**
+ * Send OTP for Registration (Step 1)
+ * POST /api/user/register-send-otp
+ */
+router.post('/register-send-otp', otpLimiter, async (req, res) => {
+    try {
+        const { firstName, lastName, email, phone, dateOfBirth } = req.body;
+        console.log(`📧 Registration OTP request for: ${email}`);
+
+        // Validation
+        if (!firstName || !lastName || !email) {
+            return res.status(400).json({
+                message: 'First name, last name, and email are required'
+            });
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: 'Invalid email format' });
+        }
+
+        // Check if email already exists
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            return res.status(409).json({
+                message: 'This email is already registered. Please login instead.',
+                alreadyExists: true
+            });
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Hash OTP
+        const hashedOtp = await bcrypt.hash(otp, 10);
+
+        // Store pending registration data in a temporary collection or session
+        // For simplicity, we'll create the user with isEmailVerified=false and store OTP
+        const userId = uuidv4();
+        const pendingUser = new User({
+            id: userId,
+            email: email.toLowerCase(),
+            password: null, // No password for OTP-based registration
+            firstName,
+            lastName,
+            phone: phone || null,
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+            isEmailVerified: false,
+            isActive: false, // Not active until OTP verified
+            otp: hashedOtp,
+            otpExpires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+            otpAttempts: 0,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+
+        await pendingUser.save();
+
+        // Send OTP email
+        const emailResult = await sendEmail(
+            email.toLowerCase(),
+            'otpLogin',
+            {
+                name: firstName,
+                otp: otp
+            }
+        );
+
+        if (!emailResult.success) {
+            // Rollback - delete the pending user
+            await User.deleteOne({ id: userId });
+            console.error('❌ Failed to send registration OTP email:', emailResult.error);
+            return res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+        }
+
+        console.log(`✅ Registration OTP sent to: ${email}`);
+
+        // Mask email for response
+        const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
+
+        res.json({
+            message: 'OTP sent successfully!',
+            maskedEmail: maskedEmail,
+            userId: userId
+        });
+
+    } catch (error: any) {
+        console.error('Register send OTP error:', error);
+        // Handle duplicate key error
+        if (error.code === 11000) {
+            return res.status(409).json({
+                message: 'This email is already registered. Please login instead.',
+                alreadyExists: true
+            });
+        }
+        res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+    }
+});
+
+/**
+ * Verify OTP and Complete Registration (Step 2)
+ * POST /api/user/register-verify-otp
+ */
+router.post('/register-verify-otp', loginLimiter, async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        console.log(`🔐 Registration OTP verification for: ${email}`);
+
+        // Validation
+        if (!email || !otp) {
+            return res.status(400).json({ message: 'Email and OTP are required' });
+        }
+
+        // OTP format validation (6 digits)
+        if (!/^\d{6}$/.test(otp)) {
+            return res.status(400).json({ message: 'Invalid OTP format. Please enter 6 digits.' });
+        }
+
+        // Find pending user
+        const user = await User.findOne({ email: email.toLowerCase(), isActive: false });
+
+        if (!user) {
+            return res.status(400).json({
+                message: 'No pending registration found. Please start again.',
+                notFound: true
+            });
+        }
+
+        // Check if OTP exists and not expired
+        if (!user.otp || !user.otpExpires) {
+            return res.status(400).json({
+                message: 'No OTP found. Please request a new one.',
+                expired: true
+            });
+        }
+
+        if (user.otpExpires < new Date()) {
+            // Delete expired pending registration
+            await User.deleteOne({ id: user.id });
+            return res.status(400).json({
+                message: 'OTP has expired. Please register again.',
+                expired: true
+            });
+        }
+
+        // Verify OTP
+        const isOtpValid = await bcrypt.compare(otp, user.otp);
+
+        if (!isOtpValid) {
+            user.otpAttempts = (user.otpAttempts || 0) + 1;
+
+            if (user.otpAttempts >= 5) {
+                // Delete after too many failed attempts
+                await User.deleteOne({ id: user.id });
+                return res.status(423).json({
+                    message: 'Too many failed attempts. Please register again.',
+                    locked: true
+                });
+            }
+
+            await user.save();
+            const remainingAttempts = 5 - user.otpAttempts;
+
+            return res.status(401).json({
+                message: 'Invalid OTP. Please try again.',
+                remainingAttempts
+            });
+        }
+
+        // OTP is valid - Activate the account
+        user.otp = null as any;
+        user.otpExpires = null as any;
+        user.otpAttempts = 0;
+        user.isEmailVerified = true;
+        user.isActive = true;
+        user.lastLogin = new Date();
+        user.updatedAt = new Date();
+        await user.save();
+
+        console.log(`✅ Registration completed for: ${user.email}`);
+
+        // Create session
+        (req.session as any).userId = user.id;
+        (req.session as any).userEmail = user.email;
+
+        // Send welcome email (non-blocking)
+        sendEmail(
+            user.email,
+            'welcome',
+            { name: user.firstName || 'there' }
+        ).catch(err => console.warn('⚠️ Welcome email failed:', err));
+
+        // Save session
+        req.session.save((err) => {
+            if (err) {
+                console.error('❌ Session save error:', err);
+                return res.status(500).json({ message: 'Account created but login failed. Please login manually.' });
+            }
+
+            console.log('✅ Session saved after registration');
+
+            const userResponse = {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                dateOfBirth: user.dateOfBirth,
+                profileImage: user.profileImage,
+                savedCars: user.savedCars,
+                lastLogin: user.lastLogin
+            };
+
+            res.status(201).json({
+                message: 'Account created successfully! Welcome to gadizone.',
+                user: userResponse
+            });
+        });
+
+    } catch (error) {
+        console.error('Register verify OTP error:', error);
+        res.status(500).json({ message: 'Registration failed. Please try again.' });
     }
 });
 

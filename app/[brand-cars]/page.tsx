@@ -19,6 +19,9 @@ import CarComparison from '@/components/common/CarComparison'
 import { FloatingAIBot } from '@/components/FloatingAIBot'
 import { generateBrandSEO } from '@/lib/seo'
 
+// Enable ISR with 1-hour revalidation
+export const revalidate = 3600
+
 interface BrandPageProps {
   params: Promise<{
     'brand-cars': string
@@ -41,7 +44,7 @@ async function fetchBrandData(brandSlug: string) {
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     const response = await fetch(`${backendUrl}/api/brands`, {
-      cache: 'no-store',
+      next: { revalidate: 3600 },
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
@@ -82,7 +85,7 @@ async function fetchBrandModels(brandId: string) {
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     const response = await fetch(`${backendUrl}/api/frontend/brands/${brandId}/models`, {
-      cache: 'no-store',
+      next: { revalidate: 3600 },
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',

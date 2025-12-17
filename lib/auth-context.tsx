@@ -20,6 +20,10 @@ interface AuthContextType {
     login: (email: string, password: string, rememberMe: boolean) => Promise<void>
     logout: () => Promise<void>
     register: (data: RegisterData) => Promise<void>
+    sendOtp: (email: string) => Promise<{ maskedEmail: string }>
+    verifyOtp: (email: string, otp: string, rememberMe: boolean) => Promise<void>
+    registerSendOtp: (data: RegisterDataOtp) => Promise<{ maskedEmail: string }>
+    registerVerifyOtp: (email: string, otp: string) => Promise<void>
 }
 
 interface RegisterData {
@@ -29,6 +33,14 @@ interface RegisterData {
     phone?: string
     dateOfBirth?: string
     password: string
+}
+
+interface RegisterDataOtp {
+    firstName: string
+    lastName: string
+    email: string
+    phone?: string
+    dateOfBirth?: string
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -123,6 +135,74 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(responseData.user)
     }
 
+    const sendOtp = async (email: string): Promise<{ maskedEmail: string }> => {
+        const response = await fetch(`${backendUrl}/api/user/send-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email })
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.message || 'Failed to send OTP')
+        }
+
+        const data = await response.json()
+        return { maskedEmail: data.maskedEmail }
+    }
+
+    const verifyOtp = async (email: string, otp: string, rememberMe: boolean) => {
+        const response = await fetch(`${backendUrl}/api/user/verify-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, otp, rememberMe })
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.message || 'OTP verification failed')
+        }
+
+        const data = await response.json()
+        setUser(data.user)
+    }
+
+    const registerSendOtp = async (data: RegisterDataOtp): Promise<{ maskedEmail: string }> => {
+        const response = await fetch(`${backendUrl}/api/user/register-send-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(data)
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.message || 'Failed to send OTP')
+        }
+
+        const result = await response.json()
+        return { maskedEmail: result.maskedEmail }
+    }
+
+    const registerVerifyOtp = async (email: string, otp: string) => {
+        const response = await fetch(`${backendUrl}/api/user/register-verify-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, otp })
+        })
+
+        if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.message || 'OTP verification failed')
+        }
+
+        const data = await response.json()
+        setUser(data.user)
+    }
+
     return (
         <AuthContext.Provider
             value={{
@@ -131,7 +211,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 isLoading,
                 login,
                 logout,
-                register
+                register,
+                sendOtp,
+                verifyOtp,
+                registerSendOtp,
+                registerVerifyOtp
             }}
         >
             {children}

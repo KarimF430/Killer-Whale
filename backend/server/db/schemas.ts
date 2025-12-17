@@ -685,6 +685,11 @@ const userSchema = new mongoose.Schema({
   failedLoginAttempts: { type: Number, default: 0 },
   lockUntil: { type: Date, default: null },
 
+  // OTP Authentication
+  otp: { type: String, default: null },
+  otpExpires: { type: Date, default: null },
+  otpAttempts: { type: Number, default: 0 },
+
   // User Data
   savedCars: [{ type: String }], // Array of variant IDs
   comparisonHistory: [{ type: String }], // Array of model IDs

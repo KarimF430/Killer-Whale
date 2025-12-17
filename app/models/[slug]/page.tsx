@@ -1,6 +1,9 @@
 import CarModelPage from '@/components/car-model/CarModelPage'
 import { notFound } from 'next/navigation'
 
+// Enable ISR with 1-hour revalidation for better performance
+export const revalidate = 3600
+
 interface ModelPageProps {
   params: Promise<{
     slug: string
@@ -11,18 +14,18 @@ async function getModelData(slug: string) {
   try {
     // Parse slug to get brand and model (e.g., "maruti-suzuki-grand-vitara" -> brand: "maruti-suzuki", model: "grand-vitara")
     // We need to handle multi-word brand names like "maruti-suzuki"
-    
+
     // Get all brands first to match properly
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
     const brandsResponse = await fetch(`${backendUrl}/api/brands`)
     if (!brandsResponse.ok) throw new Error('Failed to fetch brands')
-    
+
     const brands = await brandsResponse.json()
-    
+
     // Find the brand by matching slug patterns
     let brandData = null
     let model = null
-    
+
     for (const brand of brands) {
       const brandSlug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       if (slug.startsWith(brandSlug + '-')) {
@@ -31,22 +34,22 @@ async function getModelData(slug: string) {
         break
       }
     }
-    
+
     if (!brandData || !model) throw new Error('Brand or model not found in slug')
-    
+
     // Get models for this brand
     const modelsResponse = await fetch(`${backendUrl}/api/frontend/brands/${brandData.id}/models`)
     if (!modelsResponse.ok) throw new Error('Failed to fetch models')
-    
+
     const modelsData = await modelsResponse.json()
     const modelData = modelsData.models.find((m: any) => m.slug === model)
     if (!modelData) throw new Error('Model not found')
-    
+
     // Get detailed model data directly from models API
     let detailedModelData = null
     try {
       // Fetch directly using model ID
-      const detailResponse = await fetch(`${backendUrl}/api/models/${modelData.id}`, { cache: 'no-store' })
+      const detailResponse = await fetch(`${backendUrl}/api/models/${modelData.id}`, { next: { revalidate: 3600 } })
       if (detailResponse.ok) {
         detailedModelData = await detailResponse.json()
         console.log('✅ Successfully fetched detailed model data:', detailedModelData)
@@ -56,11 +59,11 @@ async function getModelData(slug: string) {
     } catch (error) {
       console.log('❌ Error fetching detailed model data:', error)
     }
-    
+
     console.log('Model ID:', modelData.id)
     console.log('Detailed model data:', detailedModelData)
     console.log('Header SEO:', detailedModelData?.headerSeo)
-    
+
     // Helper function to format image URLs
     const formatImageUrl = (url: string | undefined): string | undefined => {
       if (!url) return undefined
@@ -71,14 +74,14 @@ async function getModelData(slug: string) {
 
     // Build gallery array from backend data
     const galleryImages: string[] = []
-    
+
     // Add hero image first
     const heroImageUrl = detailedModelData?.heroImage || modelData.image
     if (heroImageUrl) {
       const fullUrl = formatImageUrl(heroImageUrl)
       if (fullUrl) galleryImages.push(fullUrl)
     }
-    
+
     // Add gallery images from backend
     if (detailedModelData?.galleryImages && Array.isArray(detailedModelData.galleryImages)) {
       detailedModelData.galleryImages.forEach((img: any) => {
@@ -108,7 +111,7 @@ async function getModelData(slug: string) {
         caption: img.caption || ''
       })).filter((img: any) => img.url)
     }
-    
+
     console.log('Gallery images from backend:', detailedModelData?.galleryImages)
     console.log('Final gallery array:', galleryImages)
     console.log('✅ Highlight images:', {
@@ -117,7 +120,7 @@ async function getModelData(slug: string) {
       storageConvenienceImages: formatHighlightImages(detailedModelData?.storageConvenienceImages),
       colorImages: formatColorImages(detailedModelData?.colorImages)
     })
-    
+
     const enhancedModelData = {
       id: modelData.id,
       slug: modelData.slug,
@@ -222,7 +225,7 @@ async function getModelData(slug: string) {
         { condition: 'Combined', value: parseFloat(modelData.mileage.split(' ')[0]), unit: 'kmpl' }
       ]
     }
-    
+
     return enhancedModelData
   } catch (error) {
     console.error('Error fetching model data:', error)
@@ -233,10 +236,10 @@ async function getModelData(slug: string) {
 export default async function ModelPage({ params }: ModelPageProps) {
   const resolvedParams = await params
   const modelData = await getModelData(resolvedParams.slug)
-  
+
   if (!modelData) {
     notFound()
   }
-  
+
   return <CarModelPage model={modelData} />
 }
