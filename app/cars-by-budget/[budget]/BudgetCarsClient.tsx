@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import CarCard from '@/components/home/CarCard'
 import BudgetCarCard from './BudgetCarCard'
@@ -46,6 +46,11 @@ export default function BudgetCarsClient({
     const [selectedFuel, setSelectedFuel] = useState<string[]>([])
     const [selectedTransmission, setSelectedTransmission] = useState<string[]>([])
     const [isExpanded, setIsExpanded] = useState(false)
+
+    // Scroll to top on page load
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     // Parse description - supports both JSON format and plain text
     let shortText = budgetDescription

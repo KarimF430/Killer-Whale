@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Calendar, Fuel } from 'lucide-react'
 
@@ -102,6 +102,11 @@ export default function UpcomingCarsClient({
 }: UpcomingCarsClientProps) {
     const [selectedBodyType, setSelectedBodyType] = useState<string>('All')
     const [isExpanded, setIsExpanded] = useState(false)
+
+    // Scroll to top on page load
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     // Parse description
     let shortText = "Stay ahead with upcoming cars launching in India! Get exclusive early access to expected prices and launch dates."

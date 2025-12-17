@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
@@ -120,6 +120,11 @@ export default function NewLaunchesClient({
     const [selectedFuel, setSelectedFuel] = useState<string[]>([])
     const [selectedTransmission, setSelectedTransmission] = useState<string[]>([])
     const [isExpanded, setIsExpanded] = useState(false)
+
+    // Scroll to top on page load
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     // Parse description
     let shortText = "Check out recently launched cars in India! Discover the latest models featuring cutting-edge technology."

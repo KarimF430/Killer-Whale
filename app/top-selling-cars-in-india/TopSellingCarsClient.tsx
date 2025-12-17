@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import CarCard from '@/components/home/CarCard'
@@ -136,6 +136,11 @@ export default function TopSellingCarsClient({
 }: TopSellingCarsClientProps) {
     const [selectedBodyType, setSelectedBodyType] = useState<string>('All')
     const [isExpanded, setIsExpanded] = useState(false)
+
+    // Scroll to top on page load
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     // Parse description - supports both JSON format and plain text
     let shortText = "Discover India's most popular cars! Browse our curated list of top-selling models featuring unbeatable value, trusted reliability, and impressive performance."

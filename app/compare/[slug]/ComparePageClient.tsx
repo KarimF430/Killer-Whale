@@ -86,6 +86,11 @@ export default function ComparePageClient({
   // No need to fetch initial data since it's provided via props
   // useEffect for slug resolution removed
 
+  // Scroll to top on page load to prevent starting from bottom
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   const generateSeoText = (modelNames: string[]) => {
     if (modelNames.length === 0) return ''
     return `gadizone brings you comparison of ${modelNames.join(', ')}...`

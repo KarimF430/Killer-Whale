@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import CarCard from '@/components/home/CarCard'
 import ElectricCarCard from './ElectricCarCard'
 
@@ -68,6 +68,11 @@ export default function ElectricCarsClient({
 }: ElectricCarsClientProps) {
     const [selectedRange, setSelectedRange] = useState<string[]>([])
     const [isExpanded, setIsExpanded] = useState(false)
+
+    // Scroll to top on page load
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     // Parse description - supports both JSON format and plain text
     let shortText = 'Explore all electric cars in India with detailed prices, range, specifications and reviews. Compare EVs from Tesla, Tata, Mahindra, Hyundai, BYD and more.'

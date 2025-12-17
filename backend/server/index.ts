@@ -19,7 +19,7 @@ import { warmUpCache } from "./middleware/redis-cache";
 import compression from "compression";
 import pinoHttp from "pino-http";
 import session from "express-session";
-import { RedisStore } from "connect-redis";
+import RedisStore from "connect-redis";
 import { init as sentryInit, setupExpressErrorHandler } from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 

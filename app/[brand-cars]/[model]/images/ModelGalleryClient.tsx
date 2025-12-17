@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, Camera, ChevronDown } from 'lucide-react'
@@ -97,6 +97,11 @@ export default function ModelGalleryClient({ galleryData }: ModelGalleryClientPr
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [modalInitialIndex, setModalInitialIndex] = useState(0)
     const [showAll, setShowAll] = useState(false)
+
+    // Scroll to top on page load
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     // Prepare all images with categories - memoized
     const allImages: GalleryImage[] = useMemo(() => {

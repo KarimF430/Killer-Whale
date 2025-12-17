@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
@@ -127,6 +127,11 @@ export default function PopularCarsClient({
     const [selectedFuel, setSelectedFuel] = useState<string[]>([])
     const [selectedTransmission, setSelectedTransmission] = useState<string[]>([])
     const [isExpanded, setIsExpanded] = useState(false)
+
+    // Scroll to top on page load
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     // Parse description
     let shortText = "Discover India's most loved cars! Explore our curated collection of popular models."
