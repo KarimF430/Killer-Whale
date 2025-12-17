@@ -20,12 +20,17 @@ const createTransporter = (): Transporter | null => {
       socketTimeout: 15000,
     });
   } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    // Development/Production: Gmail
+    // Development/Production: Gmail (Explicit Configuration via Port 587)
     return nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // Must be false for port 587 (STARTTLS)
       auth: {
         user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD, // App-specific password
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false // Helps with potential cloud cert issues
       },
       connectionTimeout: 10000, // 10 seconds
       greetingTimeout: 10000,
