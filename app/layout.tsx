@@ -5,6 +5,7 @@ import Header from '@/components/Header'
 import { FavouritesProvider } from '@/lib/favourites-context'
 import { AuthProvider } from '@/lib/auth-context'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
+import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -166,6 +167,7 @@ export default function RootLayout({
         <AnalyticsProvider>
           <AuthProvider>
             <FavouritesProvider>
+              <WebVitalsReporter />
               <Header />
               {children}
             </FavouritesProvider>

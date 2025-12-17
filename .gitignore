@@ -122,3 +122,21 @@ temp/
 *.sln
 *.sw?
 backend/scripts/
+grafana-v11.4.0/conf/custom.ini
+
+# Monitoring Binaries
+*.tar.gz
+grafana-v*/
+prometheus-*/
+
+# Test Results
+playwright-report/
+test-results/
+k6/
+
+
+# Monitoring Config
+prometheus.yml
+grafana_dashboard.json
+/monitoring/
+render.yaml

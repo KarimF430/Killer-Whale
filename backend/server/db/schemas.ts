@@ -791,19 +791,19 @@ const reviewSchema = new mongoose.Schema({
 // Calculate overall rating before save
 reviewSchema.pre('save', function () {
   const emojiAvg = (
-    this.emojiRatings.mileage +
-    this.emojiRatings.maintenanceCost +
-    this.emojiRatings.safety +
-    this.emojiRatings.featuresAndStyling +
-    this.emojiRatings.comfort +
-    this.emojiRatings.performance
+    (this.emojiRatings?.mileage || 0) +
+    (this.emojiRatings?.maintenanceCost || 0) +
+    (this.emojiRatings?.safety || 0) +
+    (this.emojiRatings?.featuresAndStyling || 0) +
+    (this.emojiRatings?.comfort || 0) +
+    (this.emojiRatings?.performance || 0)
   ) / 6;
 
   const starAvg = (
-    this.starRatings.designAndStyling +
-    this.starRatings.performance +
-    this.starRatings.valueForMoney +
-    this.starRatings.featuresAndTechnology
+    (this.starRatings?.designAndStyling || 0) +
+    (this.starRatings?.performance || 0) +
+    (this.starRatings?.valueForMoney || 0) +
+    (this.starRatings?.featuresAndTechnology || 0)
   ) / 4;
 
   this.overallRating = Math.round(((emojiAvg + starAvg) / 2) * 10) / 10;

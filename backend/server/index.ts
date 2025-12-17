@@ -22,6 +22,7 @@ import session from "express-session";
 import RedisStore from "connect-redis";
 import { init as sentryInit, setupExpressErrorHandler } from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
+import { register, httpRequestDurationMicroseconds, frontendWebVitals } from "./monitoring/metrics";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -238,6 +239,48 @@ app.use((req, res, next) => {
   });
 
   next();
+});
+
+// --- Prometheus Metrics Middleware ---
+app.use((req, res, next) => {
+  if (req.path === '/metrics') return next(); // Don't measure metrics endpoint itself
+
+  const start = process.hrtime();
+  res.on('finish', () => {
+    const duration = process.hrtime(start);
+    const durationSeconds = duration[0] + duration[1] / 1e9;
+
+    // Record duration in histogram
+    httpRequestDurationMicroseconds.observe(
+      {
+        method: req.method,
+        route: req.route ? req.route.path : req.path,
+        status_code: res.statusCode
+      },
+      durationSeconds
+    );
+  });
+  next();
+});
+
+// --- Prometheus Metrics Endpoint ---
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
+// --- Frontend Web Vitals Endpoint ---
+app.post('/api/monitoring/vitals', (req, res) => {
+  const { name, value } = req.body;
+
+  if (name && value) {
+    // Value typically comes in milliseconds, convert to seconds for consistency if needed, 
+    // or keep as is. Core Web Vitals often use raw values. 
+    // Usually LCP/FID are in ms. CLS is a score (unitless).
+    // Let's store raw values but be mindful in Grafana.
+    frontendWebVitals.observe({ metric_name: name }, value);
+  }
+  res.status(200).send('OK');
 });
 
 // Redis Client for Sessions (unified configuration)
