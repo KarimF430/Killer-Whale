@@ -15,6 +15,9 @@ const createTransporter = (): Transporter | null => {
         user: process.env.SMTP_USER!,
         pass: process.env.SMTP_PASSWORD!,
       },
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
   } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
     // Development/Production: Gmail
@@ -24,6 +27,9 @@ const createTransporter = (): Transporter | null => {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASSWORD, // App-specific password
       },
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
   } else {
     console.warn('⚠️  No email configuration found. Emails will not be sent.');
