@@ -49,9 +49,8 @@ export default function FeedbackBox({ brandName }: FeedbackBoxProps) {
         key={i}
         type="button"
         onClick={() => handleRatingClick(i + 1)}
-        className={`w-8 h-8 transition-colors ${
-          i < formData.rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
-        }`}
+        className={`w-8 h-8 transition-colors ${i < formData.rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
+          }`}
       >
         <Star className={`w-full h-full ${i < formData.rating ? 'fill-current' : ''}`} />
       </button>
@@ -68,7 +67,7 @@ export default function FeedbackBox({ brandName }: FeedbackBoxProps) {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageSquare className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Thank You!</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Thank You!</h2>
             <p className="text-gray-600 text-lg">
               Your feedback about {brandName} has been submitted successfully. We appreciate your input!
             </p>
@@ -86,7 +85,7 @@ export default function FeedbackBox({ brandName }: FeedbackBoxProps) {
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageSquare className="w-8 h-8 text-blue-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Share Your Feedback</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Share Your Feedback</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Help us improve our {brandName} brand page. Your feedback is valuable to us and helps other car buyers make informed decisions.
             </p>
@@ -172,11 +171,10 @@ export default function FeedbackBox({ brandName }: FeedbackBoxProps) {
               <button
                 type="submit"
                 disabled={!isFormValid || isSubmitting}
-                className={`w-full flex items-center justify-center space-x-2 py-3 px-6 rounded-lg font-semibold transition-all ${
-                  isFormValid && !isSubmitting
+                className={`w-full flex items-center justify-center space-x-2 py-3 px-6 rounded-lg font-semibold transition-all ${isFormValid && !isSubmitting
                     ? 'bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 {isSubmitting ? (
                   <>

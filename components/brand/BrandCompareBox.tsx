@@ -140,7 +140,7 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
     return (
       <section className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
             Compare {brandName.charAt(0).toUpperCase() + brandName.slice(1)} Cars
           </h2>
           {/* Comparison Cards Horizontal Scroll */}
@@ -166,7 +166,7 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
     return (
       <section className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
             Compare {brandName.charAt(0).toUpperCase() + brandName.slice(1)} Cars
           </h2>
           <div className="text-center py-8 bg-white rounded-xl border border-gray-200">
@@ -187,7 +187,7 @@ export default function BrandCompareBox({ brandName }: BrandCompareBoxProps) {
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header - Only change from home page */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
           Compare {brandName.charAt(0).toUpperCase() + brandName.slice(1)} Cars
         </h2>
 

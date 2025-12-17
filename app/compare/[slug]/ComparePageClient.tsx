@@ -657,7 +657,7 @@ export default function ComparePageClient({
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Specifications</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Specifications</h2>
               <div className="h-1 w-32 bg-gradient-to-r from-orange-600 to-red-600 rounded-full mt-2"></div>
             </div>
             <label className="flex items-center gap-2 cursor-pointer bg-orange-50 px-4 py-2 rounded-lg hover:bg-orange-100 transition-colors">
@@ -723,7 +723,7 @@ export default function ComparePageClient({
 
         {/* Compare With Similar Cars */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Compare With Similar Cars</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare With Similar Cars</h2>
 
           {loadingSimilarCars ? (
             <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4">
@@ -832,7 +832,7 @@ export default function ComparePageClient({
         {/* Similar Cars Section - Exact copy from Model Page */}
         <div className="mb-6">
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
               Similar Cars You May Like
             </h2>
 
@@ -971,7 +971,7 @@ export default function ComparePageClient({
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900">Add Car to Compare</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Add Car to Compare</h2>
               <button
                 onClick={() => setShowAddCarModal(false)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"

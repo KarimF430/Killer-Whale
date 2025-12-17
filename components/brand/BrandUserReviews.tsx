@@ -204,7 +204,7 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
       <section className="bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
               {brandName} User Reviews
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto mb-8">
@@ -226,7 +226,7 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
     <section className="bg-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
             {brandName} User Reviews
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -373,7 +373,7 @@ export default function BrandUserReviews({ brandName }: BrandUserReviewsProps) {
         {/* Write Review CTA */}
         <div className="text-center mt-12">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
               Own a {brandName} car? Share your experience!
             </h3>
             <p className="text-gray-600 mb-6">

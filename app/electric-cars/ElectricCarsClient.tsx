@@ -157,7 +157,7 @@ export default function ElectricCarsClient({
             {/* Popular Cars */}
             {popularCars.length > 0 && (
                 <div className="mt-12">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-8">Popular Electric Cars</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Popular Electric Cars</h2>
                     <div className="relative group">
                         <button
                             onClick={() => {
@@ -201,7 +201,7 @@ export default function ElectricCarsClient({
             {/* New Launches */}
             {newLaunchedCars.length > 0 && (
                 <div className="mt-12">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-8">New Electric Launches</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">New Electric Launches</h2>
                     <div className="relative group">
                         <button
                             onClick={() => {

@@ -927,7 +927,7 @@ export default function PriceBreakupPage({
               </div>
               <button
                 onClick={() => setIsTextExpanded(!isTextExpanded)}
-                className="flex items-center text-blue-600 font-medium text-sm mt-1 hover:text-blue-700 transition-colors"
+                className="flex items-center text-red-600 font-medium text-sm mt-1 hover:text-orange-600 transition-colors"
               >
                 {isTextExpanded ? (
                   <>
@@ -1426,7 +1426,7 @@ export default function PriceBreakupPage({
 
           {/* Owner Reviews Section */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">{brandName} {modelName} Owner Reviews</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} Owner Reviews</h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Rating Summary */}
@@ -1656,7 +1656,7 @@ export default function PriceBreakupPage({
 
           {/* FAQ Section */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">{brandName} {modelName} FAQ</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} FAQ</h2>
 
             <div className="space-y-4 max-w-4xl mx-auto">
               {faqs.map((faq, index) => (
@@ -1689,7 +1689,7 @@ export default function PriceBreakupPage({
 
           {/* Brand Dealers Section */}
           <div id="dealers">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{brandName} Dealers in {selectedCity.split(',')[0]}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} Dealers in {selectedCity.split(',')[0]}</h2>
             <p className="text-gray-600 mb-8">
               Planning to Buy {modelName}? Here are a few showrooms/dealers in {selectedCity.split(',')[0]}
             </p>
@@ -1778,7 +1778,7 @@ export default function PriceBreakupPage({
           {/* Share Your Feedback */}
           <div id="feedback" className="max-w-2xl mx-auto">
             <div className="bg-white border border-gray-200 rounded-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">Share Your Feedback</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">Share Your Feedback</h2>
               <p className="text-gray-600 text-center mb-8">
                 Help us improve by sharing your thoughts about this page
               </p>
