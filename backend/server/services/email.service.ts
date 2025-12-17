@@ -384,20 +384,57 @@ export const sendEmail = async (
     return { success: false, error: 'Invalid email address' };
   }
 
-  if (!transporter) {
-    console.error('❌ Email service not configured');
-    return { success: false, error: 'Email service not configured' };
-  }
-
+  // Handle different template parameter types
+  let emailContent;
   try {
-    // Handle different template parameter types
-    let emailContent;
     if (template === 'otpLogin') {
       emailContent = emailTemplates[template](data.name, data.otp || '');
     } else if (template === 'welcomeLogin' || template === 'welcome') {
       emailContent = emailTemplates[template](data.name);
     } else {
       emailContent = emailTemplates[template](data.name, data.url || '');
+    }
+  } catch (err: any) {
+    return { success: false, error: 'Template error: ' + err.message };
+  }
+
+  // Priority: Try Resend API first (HTTP - works everywhere)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const { default: axios } = await import('axios');
+      const from = process.env.EMAIL_FROM || 'onboarding@resend.dev'; // Default testing domain
+
+      await axios.post(
+        'https://api.resend.com/emails',
+        {
+          from: `gadizone <${from}>`,
+          to: [to],
+          subject: emailContent.subject,
+          html: emailContent.html,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log(`✅ Email sent via Resend API to ${to}`);
+      return { success: true };
+    } catch (error: any) {
+      console.error('❌ Resend API error:', error.response?.data || error.message);
+      // Fallback to SMTP if Resend fails? No, usually if API key is set we expect it to work.
+      // But we can let it fall through if we want. For now, return error.
+      return { success: false, error: 'Resend API failed: ' + (error.response?.data?.message || error.message) };
+    }
+  }
+
+  try {
+    if (!transporter) {
+      // ... existing transporter check ...
+      console.error('❌ Email service not configured (No Resend Key and No SMTP/Gmail)');
+      return { success: false, error: 'Email service not configured' };
     }
 
     const from = process.env.GMAIL_USER || process.env.SMTP_USER || 'noreply@gadizone.com';
@@ -409,7 +446,7 @@ export const sendEmail = async (
       html: emailContent.html,
     });
 
-    console.log(`✅ Email sent successfully to ${to}: ${emailContent.subject}`);
+    console.log(`✅ Email sent via SMTP to ${to}`);
     return { success: true };
   } catch (error: any) {
     console.error('❌ Email send error:', error.message || error);
