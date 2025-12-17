@@ -139,4 +139,51 @@ router.get('/clear-test', (req, res) => {
     });
 });
 
+/**
+ * Test Email Service
+ * GET /api/diagnostics/test-email?email=test@example.com
+ */
+router.get('/test-email', async (req, res) => {
+    const emailTo = req.query.email as string || process.env.GMAIL_USER || 'test@example.com';
+
+    // Import dynamically to avoid circular dependencies if any
+    const { sendEmail } = await import('../services/email.service');
+
+    try {
+        const result = await sendEmail(
+            emailTo,
+            'welcome', // Use welcome template as it's simple
+            { name: 'Test User' }
+        );
+
+        if (result.success) {
+            res.json({
+                success: true,
+                message: `Email sent successfully to ${emailTo}`,
+                timestamp: new Date().toISOString(),
+                config: {
+                    user: process.env.GMAIL_USER ? 'Set' : 'Missing',
+                    pass: process.env.GMAIL_APP_PASSWORD ? 'Set (length: ' + process.env.GMAIL_APP_PASSWORD.length + ')' : 'Missing'
+                }
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: 'Failed to send email',
+                error: result.error,
+                config: {
+                    user: process.env.GMAIL_USER ? 'Set' : 'Missing',
+                    pass: process.env.GMAIL_APP_PASSWORD ? 'Set (length: ' + process.env.GMAIL_APP_PASSWORD.length + ')' : 'Missing'
+                }
+            });
+        }
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: 'Unexpected error testing email',
+            error: error.message
+        });
+    }
+});
+
 export default router;
