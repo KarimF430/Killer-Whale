@@ -89,12 +89,24 @@ export default function ImageGalleryModal({
     // Prevent body scroll when modal is open
     useEffect(() => {
         if (isOpen) {
+            // Store current scroll position
+            const scrollY = window.scrollY
+            document.body.style.position = 'fixed'
+            document.body.style.top = `-${scrollY}px`
+            document.body.style.width = '100%'
             document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
         }
+
         return () => {
-            document.body.style.overflow = ''
+            // Cleanup on unmount or when isOpen changes to false
+            if (isOpen) { // Only cleanup if it was open (handles unexpected unmounts)
+                const scrollY = document.body.style.top
+                document.body.style.position = ''
+                document.body.style.top = ''
+                document.body.style.width = ''
+                document.body.style.overflow = ''
+                window.scrollTo(0, parseInt(scrollY || '0') * -1)
+            }
         }
     }, [isOpen])
 
