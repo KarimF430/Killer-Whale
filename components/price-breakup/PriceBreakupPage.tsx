@@ -154,7 +154,6 @@ export default function PriceBreakupPage({
     { id: 'reviews', name: 'Reviews' },
     { id: 'faq', name: 'FAQ' },
     { id: 'dealers', name: 'Dealers' },
-    { id: 'price-cities', name: 'Price Across Cities' },
     { id: 'feedback', name: 'Feedback' }
   ]
 
@@ -1731,47 +1730,6 @@ export default function PriceBreakupPage({
       {/* Section 7: Price across India, AD Banner & Share Feedback */}
       < PageSection background="white" maxWidth="7xl" >
         <div className="py-8 space-y-12">
-          {/* Price across India */}
-          <div id="price-cities" className="space-y-8">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {brandName} {modelName} {selectedVariantName} Price across India
-            </h2>
-
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              {/* Table Header */}
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <div className="grid grid-cols-2 gap-4">
-                  <h3 className="text-lg font-semibold text-gray-900">City</h3>
-                  <h3 className="text-lg font-semibold text-gray-900">On-Road Prices</h3>
-                </div>
-              </div>
-
-              {/* City Price List */}
-              <div className="divide-y divide-gray-200">
-                {cityPrices.map((city) => (
-                  <div key={city.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                    <div className="grid grid-cols-2 gap-4">
-                      <span className="text-red-600 font-medium hover:text-red-700 cursor-pointer">
-                        {city.name}
-                      </span>
-                      <span className="text-gray-900 font-semibold">
-                        Rs. {city.price.toFixed(2)} Lakh
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* View More Cities Button */}
-              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
-                <button className="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center justify-center space-x-1 mx-auto">
-                  <span>View More Cities</span>
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
 

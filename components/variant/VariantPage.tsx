@@ -3030,45 +3030,6 @@ export default function VariantPage({
         {/* Section 6: City On-Road Prices, AD Banner & Upcoming Cars */}
         <PageSection background="white" maxWidth="7xl">
           <div id="price-across-india" className="space-y-8">
-            {/* City On-Road Prices */}
-            <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Price Across India</h2>
-
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                {/* Table Header */}
-                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                  <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                    <h3 className="text-lg font-semibold text-gray-900">City</h3>
-                    <h3 className="text-lg font-semibold text-gray-900">On-Road Prices</h3>
-                  </div>
-                </div>
-
-                {/* City Price List */}
-                <div className="divide-y divide-gray-200">
-                  {currentVariantData?.cities?.map((city, index) => (
-                    <div key={city.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                      <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                        <span className="text-red-600 font-medium hover:text-red-700 cursor-pointer">
-                          {city.name}
-                        </span>
-                        <span className="text-gray-900 font-semibold">
-                          Rs. {(currentVariantData?.price ? currentVariantData.price + (index * 0.1) + 0.5 : 0).toFixed(2)} Lakh
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* View More Cities Button */}
-                <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
-                  <button className="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center justify-center space-x-1">
-                    <span>View More Cities</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
             {/* Ad Banner */}
             <Ad3DCarousel className="mb-6" />
           </div>
