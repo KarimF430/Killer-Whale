@@ -21,6 +21,9 @@ export default function VariantFormPage2() {
     enabled: isEditMode && !!params.id,
   });
 
+  // Check if electric
+  const isElectric = existingVariant?.fuelType?.toLowerCase()?.includes('electric');
+
   const [formData, setFormData] = useState({
     // Engine Data
     engineName: '',
@@ -224,7 +227,7 @@ export default function VariantFormPage2() {
                 <Input
                   value={formData.engineSpeed}
                   onChange={(e) => handleInputChange('engineSpeed', e.target.value)}
-                  placeholder="Transmission speed"
+                  placeholder={isElectric ? "Driving Range (e.g. ~510 km)" : "Transmission speed"}
                 />
               </div>
             </div>
@@ -233,7 +236,7 @@ export default function VariantFormPage2() {
 
         {/* Variant Mileage */}
         <div className="space-y-6">
-          <h2 className="text-lg font-semibold">Variant Mileage</h2>
+          <h2 className="text-lg font-semibold">{isElectric ? 'Driving Range Parameters' : 'Variant Mileage'}</h2>
 
           <div className="space-y-4">
             <h3 className="font-medium">1. Engine & Transmission Name</h3>
@@ -249,7 +252,7 @@ export default function VariantFormPage2() {
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Company Claimed</Label>
+              <Label>{isElectric ? 'Range (Claimed)' : 'Company Claimed'}</Label>
               <Input
                 value={formData.mileageCompanyClaimed}
                 onChange={(e) => handleInputChange('mileageCompanyClaimed', e.target.value)}
@@ -258,7 +261,7 @@ export default function VariantFormPage2() {
             </div>
 
             <div className="space-y-2">
-              <Label>City Real World</Label>
+              <Label>{isElectric ? 'City Range' : 'City Real World'}</Label>
               <Input
                 value={formData.mileageCityRealWorld}
                 onChange={(e) => handleInputChange('mileageCityRealWorld', e.target.value)}
@@ -267,7 +270,7 @@ export default function VariantFormPage2() {
             </div>
 
             <div className="space-y-2">
-              <Label>Highway Real World</Label>
+              <Label>{isElectric ? 'Highway Range' : 'Highway Real World'}</Label>
               <Input
                 value={formData.mileageHighwayRealWorld}
                 onChange={(e) => handleInputChange('mileageHighwayRealWorld', e.target.value)}

@@ -37,6 +37,8 @@ interface ModelData {
   brandSlug: string
   brand: string
   name: string
+  fuelTypes?: string[]
+  reviews?: any[]
   heroImage: string
   gallery: string[]
   rating: number
@@ -1680,7 +1682,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                     className="relative bg-gray-50 rounded-2xl p-8 cursor-pointer"
                     onClick={() => {
                       // Build color gallery images
-                      const colorGalleryImgs = model.colorImages.map((c, idx) => ({
+                      const colorGalleryImgs = model.colorImages?.map((c, idx) => ({
                         src: (() => {
                           if (!c.url) return '';
                           if (c.url.startsWith('http://') || c.url.startsWith('https://')) return c.url;
@@ -1689,9 +1691,9 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                         })(),
                         alt: `${model?.brand || 'Car'} ${model?.name || 'Model'} in ${c.caption}`,
                         caption: c.caption
-                      }));
+                      })) || [];
                       // Find current selected index
-                      const currentIdx = model.colorImages.findIndex(c => c.caption === selectedColor);
+                      const currentIdx = model.colorImages?.findIndex(c => c.caption === selectedColor) ?? 0;
                       openGalleryModal(colorGalleryImgs, currentIdx >= 0 ? currentIdx : 0);
                     }}
                   >
@@ -2117,7 +2119,9 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                                     <p className="font-medium text-gray-900">{(engine as any).torque}</p>
                                   </div>
                                   <div>
-                                    <p className="text-xs text-gray-500 mb-1">Transmission:</p>
+                                    <p className="text-xs text-gray-500 mb-1">
+                                      {model?.fuelTypes?.includes('electric') ? 'Driving Range:' : 'Top Speed:'}
+                                    </p>
                                     <p className="font-medium text-gray-900">{(engine as any).speed}</p>
                                   </div>
                                 </div>
@@ -2172,7 +2176,9 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
           <div id="mileage" className="space-y-8">
             {/* Mileage Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Mileage</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
+                {model?.brand || 'Car'} {model?.name || 'Model'} {model?.fuelTypes?.includes('electric') ? 'Driving Range' : 'Mileage'}
+              </h2>
 
               {/* Horizontal Scrollable Mileage Cards */}
               <div className="relative">
@@ -2202,17 +2208,23 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                         {/* Mileage Details */}
                         <div className="space-y-2">
                           <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">Company Claimed</span>
+                            <span className="text-gray-600 text-sm">
+                              {model?.fuelTypes?.includes('electric') ? 'Range (Claimed)' : 'Company Claimed'}
+                            </span>
                             <span className="text-gray-900 font-bold text-sm">{companyClaimed}</span>
                           </div>
 
                           <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">City Real World</span>
+                            <span className="text-gray-600 text-sm">
+                              {model?.fuelTypes?.includes('electric') ? 'City Range' : 'City Real World'}
+                            </span>
                             <span className="text-gray-900 font-bold text-sm">{cityRealWorld}</span>
                           </div>
 
                           <div className="flex justify-between items-center py-2">
-                            <span className="text-gray-600 text-sm">Highway Real World</span>
+                            <span className="text-gray-600 text-sm">
+                              {model?.fuelTypes?.includes('electric') ? 'Highway Range' : 'Highway Real World'}
+                            </span>
                             <span className="text-gray-900 font-bold text-sm">{highwayRealWorld}</span>
                           </div>
                         </div>

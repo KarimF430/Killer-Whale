@@ -639,6 +639,9 @@ export default function VariantPage({
   // currentVariantData.price is in lakhs, so convert to rupees for the hook
   const exShowroomPriceInRupees = (currentVariantData?.price || 0) * 100000
 
+  // Helper to check if electric
+  const isElectric = currentVariantData?.fuelType?.toLowerCase()?.includes('electric')
+
   const { onRoadPrice, isOnRoadMode } = useOnRoadPrice({
     exShowroomPrice: exShowroomPriceInRupees,
     fuelType: currentVariantData?.fuelType || 'Petrol'
@@ -766,7 +769,7 @@ export default function VariantPage({
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
-                {section.name}
+                {section.id === 'engine-mileage' && isElectric ? 'Motor & Range' : section.name}
               </button>
             ))}
           </div>
@@ -2031,7 +2034,9 @@ export default function VariantPage({
                           {/* Top Speed - Only show if data exists */}
                           {variant?.topSpeed && (
                             <div className="grid grid-cols-[140px_1fr] gap-4 py-2">
-                              <span className="text-gray-500 text-sm">Top Speed</span>
+                              <span className="text-gray-500 text-sm">
+                                {isElectric ? 'Driving Range' : 'Top Speed'}
+                              </span>
                               <span className="text-gray-900 text-sm font-medium">{variant.topSpeed}</span>
                             </div>
                           )}
@@ -2986,7 +2991,9 @@ export default function VariantPage({
 
             {/* Mileage Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Mileage</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
+                {displayModelName} {displayVariantName} {isElectric ? 'Driving Range' : 'Mileage'}
+              </h2>
 
               <div className="flex justify-center">
                 <div className="w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
@@ -3001,23 +3008,29 @@ export default function VariantPage({
                   {/* Mileage Details */}
                   <div className="space-y-2">
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-gray-600 text-sm">Company Claimed</span>
+                      <span className="text-gray-600 text-sm">
+                        {isElectric ? 'Range (Claimed)' : 'Company Claimed'}
+                      </span>
                       <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageCompanyClaimed || currentVariantData?.mileage} Kmpl
+                        {variant?.mileageCompanyClaimed || currentVariantData?.mileage} {isElectric ? 'km' : 'Kmpl'}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-gray-600 text-sm">City Real World</span>
+                      <span className="text-gray-600 text-sm">
+                        {isElectric ? 'City Range' : 'City Real World'}
+                      </span>
                       <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageCityRealWorld || (currentVariantData?.mileage ? currentVariantData.mileage * 0.85 : 0).toFixed(1)} Kmpl
+                        {variant?.mileageCityRealWorld || (currentVariantData?.mileage ? currentVariantData.mileage * 0.85 : 0).toFixed(1)} {isElectric ? 'km' : 'Kmpl'}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-gray-600 text-sm">Highway Real World</span>
+                      <span className="text-gray-600 text-sm">
+                        {isElectric ? 'Highway Range' : 'Highway Real World'}
+                      </span>
                       <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageHighwayRealWorld || (currentVariantData?.mileage ? currentVariantData.mileage * 1.1 : 0).toFixed(1)} Kmpl
+                        {variant?.mileageHighwayRealWorld || (currentVariantData?.mileage ? currentVariantData.mileage * 1.1 : 0).toFixed(1)} {isElectric ? 'km' : 'Kmpl'}
                       </span>
                     </div>
                   </div>
