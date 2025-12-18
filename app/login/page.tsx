@@ -157,6 +157,11 @@ export default function LoginPage() {
                         : `Code sent to ${maskedEmail}`
                     }
                 </p>
+                {step === 'email' && (
+                    <p className="text-xs text-red-100 mt-2 max-w-sm mx-auto opacity-90">
+                        By logging in, you will receive updates on latest car launches, price drops, and automotive news.
+                    </p>
+                )}
             </div>
 
             {/* Form Container */}

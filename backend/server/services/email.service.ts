@@ -54,7 +54,7 @@ try {
 }
 
 // Email templates with branded design
-const emailTemplates = {
+export const emailTemplates = {
   verification: (name: string, verificationUrl: string) => ({
     subject: '🚗 Verify Your gadizone Account',
     html: `
@@ -369,13 +369,190 @@ const emailTemplates = {
       </html>
     `,
   }),
+
+  // New Launch Alert Template
+  newLaunchAlert: (name: string, carData: { name: string; brand: string; price: string; image?: string; url: string }) => ({
+    subject: `New Launch: ${carData.brand} ${carData.name}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Helvetica', 'Arial', sans-serif; background-color: #f8f9fa;">
+        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td align="center" style="padding: 20px 0;">
+              <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 30px 40px; border-bottom: 2px solid #dc2626;">
+                    <h1 style="color: #1f2937; margin: 0; font-size: 24px; font-weight: 600;">Latest Car Launch</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 30px 40px;">
+                    <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                      Dear ${name || 'Subscriber'},
+                    </p>
+                    <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                      The all-new <strong>${carData.brand} ${carData.name}</strong> has just been launched in India.
+                    </p>
+                    <div style="background: #f3f4f6; border-radius: 6px; padding: 20px; margin: 0 0 24px 0; border: 1px solid #e5e7eb;">
+                      <h3 style="color: #111827; margin: 0 0 8px 0; font-size: 18px;">${carData.brand} ${carData.name}</h3>
+                      <p style="color: #4b5563; font-size: 15px; margin: 0 0 12px 0;">Starting Price</p>
+                      <p style="color: #dc2626; font-size: 24px; font-weight: 700; margin: 0;">${carData.price}</p>
+                    </div>
+                ${carData.image ? `
+                    <div style="margin-bottom: 24px;">
+                        <img src="${carData.image}" alt="${carData.brand} ${carData.name}" style="width: 100%; height: auto; border-radius: 6px; border: 1px solid #e5e7eb;">
+                    </div>`
+        : ''}
+                    <a href="${carData.url}" style="display: inline-block; background-color: #1f2937; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: 500; font-size: 15px;">
+                      View Specification
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #f8f9fa; padding: 20px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
+                    <p style="color: #6b7280; font-size: 12px; margin: 0;">
+                      You are receiving this email because you subscribed to new launch alerts.<br>
+                      <a href="${process.env.FRONTEND_URL}/unsubscribe" style="color: #6b7280; text-decoration: underline;">Unsubscribe</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `,
+  }),
+
+  // Weekly Digest Template
+  weeklyDigest: (name: string, data: { recommendations: Array<{ name: string; brand: string; price: string; url: string }> }) => ({
+    subject: `Weekly Car Recommendations - ${new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Helvetica', 'Arial', sans-serif; background-color: #f8f9fa;">
+        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td align="center" style="padding: 20px 0;">
+              <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 30px 40px; border-bottom: 2px solid #dc2626;">
+                    <h1 style="color: #1f2937; margin: 0; font-size: 24px; font-weight: 600;">Your Weekly Selection</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 30px 40px;">
+                    <p style="color: #4b5563; font-size: 16px; margin: 0 0 20px 0;">
+                      Dear ${name || 'Subscriber'},
+                    </p>
+                    <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                      Here are the latest cars that match your preferences for this week:
+                    </p>
+                    ${data.recommendations && data.recommendations.length > 0 ? data.recommendations.map(car => `
+                      <div style="padding: 16px; border-bottom: 1px solid #f3f4f6;">
+                        <h3 style="color: #111827; margin: 0 0 4px 0; font-size: 16px;">${car.brand} ${car.name}</h3>
+                        <p style="color: #dc2626; font-weight: 600; margin: 0 0 8px 0;">${car.price}</p>
+                        <a href="${car.url}" style="color: #4b5563; text-decoration: underline; font-size: 14px;">View Details</a>
+                      </div>
+                    `).join('') : '<p>No new recommendations this week.</p>'}
+                    <div style="margin-top: 24px; text-align: center;">
+                        <a href="${process.env.FRONTEND_URL}" style="display: inline-block; background-color: #1f2937; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: 500; font-size: 15px;">
+                        Browse All Cars
+                        </a>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #f8f9fa; padding: 20px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
+                    <p style="color: #6b7280; font-size: 12px; margin: 0;">
+                      © ${new Date().getFullYear()} gadizone. All rights reserved.<br>
+                      <a href="${process.env.FRONTEND_URL}/unsubscribe" style="color: #6b7280; text-decoration: underline;">Unsubscribe</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `,
+  }),
+
+  // Price Drop Alert Template
+  priceDropAlert: (name: string, carData: { name: string; brand: string; oldPrice: string; newPrice: string; savings: string; url: string }) => ({
+    subject: `Price Drop: ${carData.brand} ${carData.name}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Helvetica', 'Arial', sans-serif; background-color: #f8f9fa;">
+        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td align="center" style="padding: 20px 0;">
+              <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 30px 40px; border-bottom: 2px solid #059669;">
+                    <h1 style="color: #1f2937; margin: 0; font-size: 24px; font-weight: 600;">Price Drop Alert</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 30px 40px;">
+                    <p style="color: #4b5563; font-size: 16px; margin: 0 0 20px 0;">
+                      Dear ${name || 'Subscriber'},
+                    </p>
+                    <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                      A car in your watchlist has just become more affordable:
+                    </p>
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 20px; margin: 0 0 24px 0;">
+                      <h3 style="color: #059669; margin: 0 0 12px 0; font-size: 18px;">${carData.brand} ${carData.name}</h3>
+                      <div style="margin-bottom: 8px;">
+                          <span style="color: #9ca3af; text-decoration: line-through; font-size: 14px;">${carData.oldPrice}</span>
+                          <span style="color: #059669; font-weight: 700; font-size: 20px; margin-left: 8px;">${carData.newPrice}</span>
+                      </div>
+                      <p style="color: #047857; margin: 0; font-size: 14px; font-weight: 500;">You save ${carData.savings}</p>
+                    </div>
+                    <a href="${carData.url}" style="display: inline-block; background-color: #1f2937; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: 500; font-size: 15px;">
+                      View Details
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #f8f9fa; padding: 20px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
+                    <p style="color: #6b7280; font-size: 12px; margin: 0;">
+                      You are receiving this because you subscribed to price alerts.<br>
+                      <a href="${process.env.FRONTEND_URL}/unsubscribe" style="color: #6b7280; text-decoration: underline;">Unsubscribe</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `,
+  }),
 };
 
 // Send email function with robust error handling
 export const sendEmail = async (
   to: string,
   template: keyof typeof emailTemplates,
-  data: { name: string; url?: string; otp?: string }
+  data: any
 ): Promise<{ success: boolean; error?: string }> => {
   // Validate email address
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -387,7 +564,13 @@ export const sendEmail = async (
   // Handle different template parameter types
   let emailContent;
   try {
-    if (template === 'otpLogin') {
+    if (['weeklyDigest', 'newLaunchAlert', 'priceDropAlert'].includes(template)) {
+      // PRIORITY: data.userName (User) -> data.name (Car/Model - BAD for greeting) -> Default
+      // We MUST use userName if available prevents "Dear Creta"
+      const name = data.userName || 'Car Enthusiast';
+      // Pass the entire data object as the second argument
+      emailContent = emailTemplates[template](name, data);
+    } else if (template === 'otpLogin') {
       emailContent = emailTemplates[template](data.name, data.otp || '');
     } else if (template === 'welcomeLogin' || template === 'welcome') {
       emailContent = emailTemplates[template](data.name);
@@ -395,6 +578,7 @@ export const sendEmail = async (
       emailContent = emailTemplates[template](data.name, data.url || '');
     }
   } catch (err: any) {
+    console.error(`Error generating email content for template ${template}:`, err);
     return { success: false, error: 'Template error: ' + err.message };
   }
 

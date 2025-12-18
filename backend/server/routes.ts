@@ -47,6 +47,8 @@ import createYouTubeRoutes from "./routes/youtube";
 import aiFeedbackRoutes from "./routes/ai-feedback";
 import reviewsRoutes from "./routes/reviews";
 import adminReviewsRoutes from "./routes/admin-reviews";
+import adminEmailRoutes from "./routes/admin-emails.routes";
+import priceHistoryRoutes from "./routes/price-history.routes";
 import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
 
 // Function to format brand summary with proper sections
@@ -1885,6 +1887,25 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       // Rebuild search index with new model
       invalidateSearchIndex().catch(err => console.error('Search index invalidation failed:', err));
 
+      // Send new launch alert emails (async, don't block response)
+      if (process.env.EMAIL_SCHEDULER_ENABLED === 'true') {
+        import('./services/email-scheduler.service').then(({ emailScheduler }) => {
+          // Get brand name for the email
+          storage.getBrand(validatedData.brandId).then(brand => {
+            const modelWithBrand = {
+              ...model,
+              brandName: brand?.name || 'Unknown',
+              startingPrice: validatedData.price || 0
+            };
+            emailScheduler.sendNewLaunchAlert(modelWithBrand).catch(err => {
+              console.error('Failed to send new launch alert:', err);
+            });
+          });
+        }).catch(err => {
+          console.error('Failed to load email scheduler:', err);
+        });
+      }
+
       res.status(201).json(model);
     } catch (error) {
       console.error('Model creation error:', error);
@@ -2476,12 +2497,46 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
 
+      // Get old variant data before update for price comparison
+      const oldVariant = await storage.getVariant(req.params.id);
+
       const variant = await storage.updateVariant(req.params.id, req.body);
       if (!variant) {
         return res.status(404).json({ error: "Variant not found" });
       }
 
       console.log('✅ Variant updated successfully');
+
+      // Check for price changes and record in history
+      if (oldVariant && req.body.price && oldVariant.price !== req.body.price) {
+        console.log(`💰 Price change detected: ${oldVariant.price} → ${req.body.price}`);
+
+        // Record price change (async, don't block response)
+        if (process.env.EMAIL_SCHEDULER_ENABLED === 'true') {
+          import('./services/price-monitoring.service').then(async ({ priceMonitoringService }) => {
+            try {
+              // Get model and brand info
+              const model = await storage.getModel(variant.modelId);
+              const brand = model ? await storage.getBrand(model.brandId) : null;
+
+              await priceMonitoringService.recordPriceChange({
+                variantId: variant.id,
+                modelId: variant.modelId,
+                brandId: variant.brandId,
+                variantName: variant.name,
+                modelName: model?.name || 'Unknown',
+                brandName: brand?.name || 'Unknown',
+                previousPrice: oldVariant.price,
+                newPrice: req.body.price
+              });
+            } catch (error) {
+              console.error('Failed to record price change:', error);
+            }
+          }).catch(err => {
+            console.error('Failed to load price monitoring service:', err);
+          });
+        }
+      }
 
       // Invalidate variants cache
       invalidateRedisCache('/api/variants');
@@ -2677,6 +2732,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.use('/api/admin/authors', adminAuthorsRoutes);
   app.use('/api/admin/media', adminMediaRoutes);
   app.use('/api/admin/reviews', adminReviewsRoutes);
+  app.use('/api/admin/emails', adminEmailRoutes);
+
+  // Price history routes (public)
+  app.use('/api/price-history', publicLimiter, priceHistoryRoutes);
 
   // Public reviews routes
   app.use('/api/reviews', publicLimiter, reviewsRoutes);

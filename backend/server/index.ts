@@ -449,6 +449,11 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
     app.use('/api/diagnostics', diagnosticsRoutes);
     console.log('✅ Diagnostics routes registered at /api/diagnostics');
 
+    // Register recommendations routes (personalized car suggestions)
+    const recommendationsRoutes = (await import('./routes/recommendations')).default;
+    app.use('/api/recommendations', recommendationsRoutes);
+    console.log('✅ Recommendations routes registered at /api/recommendations');
+
     // Register API routes FIRST before Vite
     registerRoutes(app, storage);
 
@@ -505,11 +510,28 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
     const PORT = parseInt(process.env.PORT || "5001", 10);
     server.listen(PORT, "0.0.0.0", () => {
       log(`Server running on port ${PORT}`);
+
+      // Start email scheduler if enabled
+      if (process.env.EMAIL_SCHEDULER_ENABLED === 'true') {
+        import('./services/email-scheduler.service').then(({ emailScheduler }) => {
+          emailScheduler.start();
+        }).catch((error) => {
+          console.error('Failed to start email scheduler:', error);
+        });
+      } else {
+        log('Email scheduler disabled (set EMAIL_SCHEDULER_ENABLED=true to enable)');
+      }
     });
 
     // Graceful shutdown
     const shutdown = async () => {
       log('received shutdown signal, closing server');
+
+      // Stop email scheduler
+      if (process.env.EMAIL_SCHEDULER_ENABLED === 'true') {
+        const { emailScheduler } = await import('./services/email-scheduler.service');
+        emailScheduler.stop();
+      }
 
       // Close Redis connection
       const { closeRedisConnection } = await import('./config/redis-config');

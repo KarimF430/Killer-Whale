@@ -694,6 +694,32 @@ const userSchema = new mongoose.Schema({
   savedCars: [{ type: String }], // Array of variant IDs
   comparisonHistory: [{ type: String }], // Array of model IDs
 
+  // Email Subscription Preferences
+  emailPreferences: {
+    newsletter: { type: Boolean, default: true },
+    newLaunches: { type: Boolean, default: true },
+    priceDrops: { type: Boolean, default: true },
+    weeklyDigest: { type: Boolean, default: false },
+    comparisons: { type: Boolean, default: true },
+    frequency: {
+      type: String,
+      enum: ['immediate', 'daily', 'weekly'],
+      default: 'weekly'
+    },
+    lastEmailSent: { type: Date, default: null },
+    unsubscribedAt: { type: Date, default: null }
+  },
+
+  // Auto-learned Car Preferences (from user activity)
+  carPreferences: {
+    budgetMin: { type: Number, default: null },
+    budgetMax: { type: Number, default: null },
+    preferredBodyTypes: [{ type: String }],     // ['SUV', 'Sedan']
+    preferredBrands: [{ type: String }],        // ['Hyundai', 'Tata']
+    preferredFuelTypes: [{ type: String }],     // ['Petrol', 'Electric']
+    preferredTransmissions: [{ type: String }]  // ['Automatic']
+  },
+
   // Timestamps
   lastLogin: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },

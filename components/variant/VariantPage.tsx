@@ -3077,15 +3077,15 @@ export default function VariantPage({
         {/* Section 7: New Launched Cars, AD Banner & Feedback */}
         <PageSection background="white" maxWidth="7xl">
           <div id="similar-cars" className="space-y-12">
-            {/* Similar Cars Section - Exact copy from CarModelPage */}
+            {/* Similar Cars Section - Same as Model Page */}
             <div className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
                 Similar Cars To {displayModelName || 'model'}
               </h2>
 
-              {/* Cars Horizontal Scroll - Exact copy from model page */}
+              {/* Cars Horizontal Scroll */}
               <div className="relative">
-                {loading ? (
+                {!model ? (
                   <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -3134,7 +3134,6 @@ export default function VariantPage({
                       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
                       {(model?.similarCars || []).map((car: any) => {
-                        // Transform the data to match CarCard interface
                         const transformedCar = {
                           id: car.id,
                           name: car.name,
@@ -3147,7 +3146,7 @@ export default function VariantPage({
                           transmissions: car.transmissionTypes || ['Manual'],
                           seating: car.seating || 5,
                           launchDate: car.launchDate || 'Recently Launched',
-                          slug: car.slug || `${car.brandName?.toLowerCase().replace(/\s+/g, '-')}-${car.name?.toLowerCase().replace(/\s+/g, '-')}`,
+                          slug: car.slug || car.brandName?.toLowerCase().replace(/\s+/g, '-') + '-' + car.name?.toLowerCase().replace(/\s+/g, '-'),
                           isNew: car.isNew || false,
                           isPopular: car.isPopular || false
                         }
@@ -3159,7 +3158,7 @@ export default function VariantPage({
                             onClick={() => {
                               const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
                               const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                              window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                              window.location.href = '/' + brandSlug + '-cars/' + modelSlug
                             }}
                           />
                         )
@@ -3170,13 +3169,13 @@ export default function VariantPage({
               </div>
             </div>
 
-            {/* Compare With Similar Cars Section - Dynamic with body type matching */}
+            {/* Compare With Similar Cars Section - Same as Model Page */}
             <div className="space-y-4">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare With Similar Cars</h2>
 
               {/* Comparison Cards - Horizontal Scroll */}
               <div className="relative">
-                {loading ? (
+                {!model ? (
                   <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl border border-gray-200 p-4">
@@ -3194,8 +3193,6 @@ export default function VariantPage({
                     style={{ scrollbarWidth: 'thin', msOverflowStyle: 'auto' }}
                   >
                     {(model?.similarCars || []).map((car: any) => {
-                      // Calculate on-road prices using the same logic as Model Page
-                      // Use the model's actual starting price (already in rupees from backend)
                       const modelStartingPrice = model?.startingPrice || variant?.price || 0
                       const currentModelOnRoad = getOnRoadPrice(modelStartingPrice, 'Petrol')
                       const compareCarOnRoad = getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol')
@@ -3209,7 +3206,7 @@ export default function VariantPage({
                               <div className="relative mb-2">
                                 <img
                                   src={model?.heroImage || ''}
-                                  alt={`${displayBrandName} ${displayModelName}`}
+                                  alt={displayBrandName + ' ' + displayModelName}
                                   className="w-full h-20 object-contain"
                                   loading="lazy"
                                   decoding="async"
@@ -3219,13 +3216,13 @@ export default function VariantPage({
                                 <div className="text-xs text-gray-500">{displayBrandName}</div>
                                 <div className="font-bold text-sm text-gray-900 mb-1">{displayModelName}</div>
                                 <div className="text-red-600 font-bold text-sm">
-                                  ₹ {(currentModelOnRoad / 100000).toFixed(2)} Lakh
+                                  Rs. {(currentModelOnRoad / 100000).toFixed(2)} Lakh
                                 </div>
                                 <div className="text-xs text-gray-500">On-Road Price</div>
                               </div>
                             </div>
 
-                            {/* VS Badge - Positioned between cards */}
+                            {/* VS Badge */}
                             <div className="flex items-center justify-center" style={{ marginTop: '30px' }}>
                               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center shadow-md">
                                 <span className="text-white text-xs font-bold">VS</span>
@@ -3237,7 +3234,7 @@ export default function VariantPage({
                               <div className="relative mb-2">
                                 <img
                                   src={car.image || '/placeholder-car.png'}
-                                  alt={`${car.brandName} ${car.name}`}
+                                  alt={car.brandName + ' ' + car.name}
                                   className="w-full h-20 object-contain"
                                   loading="lazy"
                                   decoding="async"
@@ -3247,7 +3244,7 @@ export default function VariantPage({
                                 <div className="text-xs text-gray-500">{car.brandName}</div>
                                 <div className="font-bold text-sm text-gray-900 mb-1">{car.name}</div>
                                 <div className="text-red-600 font-bold text-sm">
-                                  ₹ {(compareCarOnRoad / 100000).toFixed(2)} Lakh
+                                  Rs. {(compareCarOnRoad / 100000).toFixed(2)} Lakh
                                 </div>
                                 <div className="text-xs text-gray-500">On-Road Price</div>
                               </div>
@@ -3256,9 +3253,9 @@ export default function VariantPage({
 
                           <button
                             onClick={() => {
-                              const currentModelSlug = `${displayBrandName?.toLowerCase().replace(/\s+/g, '-')}-${displayModelName?.toLowerCase().replace(/\s+/g, '-')}`
-                              const compareModelSlug = `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
-                              router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
+                              const currentModelSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-') + '-' + displayModelName?.toLowerCase().replace(/\s+/g, '-')
+                              const compareModelSlug = car.brandName.toLowerCase().replace(/\s+/g, '-') + '-' + car.name.toLowerCase().replace(/\s+/g, '-')
+                              router.push('/compare/' + currentModelSlug + '-vs-' + compareModelSlug)
                             }}
                             className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm"
                           >
