@@ -23,6 +23,22 @@ let inMemoryCache: Map<string, SearchResult> = new Map();
 let lastIndexBuild = 0;
 let isBuilding = false;
 
+/**
+ * Helper function to scan keys using SCAN (non-blocking, safe for production)
+ */
+async function scanKeys(redis: Redis, pattern: string): Promise<string[]> {
+    const keys: string[] = [];
+    let cursor = '0';
+
+    do {
+        const [newCursor, foundKeys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+        cursor = newCursor;
+        keys.push(...foundKeys);
+    } while (cursor !== '0');
+
+    return keys;
+}
+
 export interface SearchResult {
     id: string;
     name: string;
@@ -136,16 +152,23 @@ export async function buildSearchIndex(): Promise<void> {
 async function storeInRedis(redis: Redis, entries: SearchResult[], brandCount: number): Promise<void> {
     const pipeline = redis.pipeline();
 
-    // Clear old index keys
-    const oldKeys = await redis.keys(`${SEARCH_INDEX_PREFIX}*`);
+    // Clear old index keys using SCAN (safe for production)
+    const oldKeys = await scanKeys(redis, `${SEARCH_INDEX_PREFIX}*`);
     if (oldKeys.length > 0) {
-        pipeline.del(...oldKeys);
+        // Delete in batches to avoid command too long
+        for (let i = 0; i < oldKeys.length; i += 100) {
+            const batch = oldKeys.slice(i, i + 100);
+            await redis.del(...batch);
+        }
     }
 
-    // Clear old data keys
-    const oldDataKeys = await redis.keys(`${SEARCH_DATA_PREFIX}*`);
+    // Clear old data keys using SCAN
+    const oldDataKeys = await scanKeys(redis, `${SEARCH_DATA_PREFIX}*`);
     if (oldDataKeys.length > 0) {
-        pipeline.del(...oldDataKeys);
+        for (let i = 0; i < oldDataKeys.length; i += 100) {
+            const batch = oldDataKeys.slice(i, i + 100);
+            await redis.del(...batch);
+        }
     }
 
     // Store each entry as JSON and create index keys
@@ -288,8 +311,8 @@ async function searchInRedis(redis: Redis, query: string, limit: number): Promis
     const ids = await redis.zrange(indexKey, 0, limit - 1);
 
     if (ids.length === 0) {
-        // Try prefix matching
-        const keys = await redis.keys(`${SEARCH_INDEX_PREFIX}${query}*`);
+        // Try prefix matching using SCAN instead of KEYS
+        const keys = await scanKeys(redis, `${SEARCH_INDEX_PREFIX}${query}*`);
         if (keys.length > 0) {
             // Union multiple keys
             const allIds = await Promise.all(
@@ -345,10 +368,16 @@ export async function invalidateSearchIndex(): Promise<void> {
     const redis = getRedisClient();
     if (redis) {
         try {
-            const keys = await redis.keys(`${SEARCH_INDEX_PREFIX}*`);
-            const dataKeys = await redis.keys(`${SEARCH_DATA_PREFIX}*`);
-            if (keys.length > 0) await redis.del(...keys);
-            if (dataKeys.length > 0) await redis.del(...dataKeys);
+            const keys = await scanKeys(redis, `${SEARCH_INDEX_PREFIX}*`);
+            const dataKeys = await scanKeys(redis, `${SEARCH_DATA_PREFIX}*`);
+
+            // Delete in batches
+            for (let i = 0; i < keys.length; i += 100) {
+                await redis.del(...keys.slice(i, i + 100));
+            }
+            for (let i = 0; i < dataKeys.length; i += 100) {
+                await redis.del(...dataKeys.slice(i, i + 100));
+            }
             await redis.del(SEARCH_INDEX_META);
         } catch (error) {
             console.error('Failed to invalidate Redis search index:', error);

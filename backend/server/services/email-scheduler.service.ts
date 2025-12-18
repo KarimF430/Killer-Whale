@@ -24,26 +24,52 @@ class EmailSchedulerService {
             return;
         }
 
+        // Skip if explicitly disabled
+        if (process.env.EMAIL_SCHEDULER_ENABLED === 'false') {
+            console.log('📧 Email scheduler disabled via env var');
+            return;
+        }
+
         console.log('📧 Starting email scheduler...');
-        this.isEnabled = true;
 
-        // Weekly Digest - Every Monday at 9 AM
-        const weeklyDigestCron = process.env.WEEKLY_DIGEST_CRON || '0 9 * * 1';
-        this.weeklyDigestJob = cron.schedule(weeklyDigestCron, async () => {
-            console.log('📨 Running weekly digest job...');
-            await this.sendWeeklyDigests();
-        });
+        try {
+            // Weekly Digest - Every Monday at 9 AM (node-cron 5-field format)
+            // Get from env, strip quotes and extra whitespace
+            let weeklyDigestCron = (process.env.WEEKLY_DIGEST_CRON || '0 9 * * 1').trim().replace(/^["']|["']$/g, '');
 
-        // Price Drop Monitor - Daily at 8 AM
-        const priceCheckCron = process.env.PRICE_CHECK_CRON || '0 8 * * *';
-        this.priceMonitorJob = cron.schedule(priceCheckCron, async () => {
-            console.log('💰 Running price drop monitor...');
-            await this.checkPriceDrops();
-        });
+            // Validate the expression
+            if (!cron.validate(weeklyDigestCron)) {
+                console.warn(`⚠️ Invalid WEEKLY_DIGEST_CRON expression: "${weeklyDigestCron}", using default`);
+                weeklyDigestCron = '0 9 * * 1';
+            }
 
-        console.log('✅ Email scheduler started');
-        console.log(`   - Weekly digest: ${weeklyDigestCron}`);
-        console.log(`   - Price monitor: ${priceCheckCron}`);
+            this.weeklyDigestJob = cron.schedule(weeklyDigestCron, async () => {
+                console.log('📨 Running weekly digest job...');
+                await this.sendWeeklyDigests();
+            });
+
+            // Price Drop Monitor - Daily at 8 AM
+            let priceCheckCron = (process.env.PRICE_CHECK_CRON || '0 8 * * *').trim().replace(/^["']|["']$/g, '');
+
+            if (!cron.validate(priceCheckCron)) {
+                console.warn(`⚠️ Invalid PRICE_CHECK_CRON expression: "${priceCheckCron}", using default`);
+                priceCheckCron = '0 8 * * *';
+            }
+
+            this.priceMonitorJob = cron.schedule(priceCheckCron, async () => {
+                console.log('💰 Running price drop monitor...');
+                await this.checkPriceDrops();
+            });
+
+            this.isEnabled = true;
+            console.log('✅ Email scheduler started');
+            console.log(`   - Weekly digest: ${weeklyDigestCron}`);
+            console.log(`   - Price monitor: ${priceCheckCron}`);
+        } catch (error: any) {
+            console.error('❌ Failed to start email scheduler:', error.message);
+            console.error('   Scheduler will not run. Check cron expressions in environment variables.');
+            // Don't throw - let the server continue without the scheduler
+        }
     }
 
     /**
@@ -84,7 +110,7 @@ class EmailSchedulerService {
                     { 'emailPreferences.frequency': 'weekly' },
                     { 'emailPreferences.frequency': { $exists: false } }
                 ]
-            }).select('email name emailPreferences carPreferences');
+            }).select('email firstName emailPreferences carPreferences');
 
             console.log(`📬 Found ${users.length} users for weekly digest`);
 
@@ -116,15 +142,16 @@ class EmailSchedulerService {
                             return;
                         }
 
-                        // Send email
-                        await sendEmail({
-                            to: user.email,
-                            ...emailTemplates.weeklyDigest(user.name || 'Car Enthusiast', {
-                                recommendations: recommendations.slice(0, 5),
-                                priceDrops: [], // TODO: Implement price drop tracking
-                                newVariants: []  // TODO: Implement new variant tracking
-                            })
-                        });
+                        // Send email using 3-arg signature
+                        const userName = (user as any).firstName || 'Car Enthusiast';
+                        await sendEmail(
+                            user.email,
+                            'weeklyDigest',
+                            {
+                                userName: userName,
+                                recommendations: recommendations.slice(0, 5)
+                            }
+                        );
 
                         // Update last email sent
                         await User.updateOne(
@@ -176,15 +203,9 @@ class EmailSchedulerService {
             // Use user preferences if available
             const preferences = user.carPreferences || {};
 
-            // Get recommendations based on preferences
-            const recommendations = await getPersonalizedRecommendations({
-                budgetMin: preferences.budgetMin,
-                budgetMax: preferences.budgetMax,
-                bodyTypes: preferences.preferredBodyTypes,
-                brands: preferences.preferredBrands,
-                fuelTypes: preferences.preferredFuelTypes,
-                limit: 10
-            });
+            // Get recommendations using user ID
+            const userId = user._id?.toString() || user.id;
+            const recommendations = await getPersonalizedRecommendations(userId);
 
             return recommendations.map((rec: any) => ({
                 name: rec.name,
@@ -215,7 +236,7 @@ class EmailSchedulerService {
                     { 'carPreferences.preferredBodyTypes': model.bodyType },
                     { 'carPreferences.preferredBrands': { $exists: false } }
                 ]
-            }).select('email name');
+            }).select('email firstName');
 
             console.log(`🚀 Sending new launch alert for ${model.name} to ${users.length} users`);
 
@@ -227,16 +248,19 @@ class EmailSchedulerService {
 
                 await Promise.all(batch.map(async (user) => {
                     try {
-                        await sendEmail({
-                            to: user.email,
-                            ...emailTemplates.newLaunchAlert(user.name || 'Car Enthusiast', {
+                        const userName = (user as any).firstName || 'Car Enthusiast';
+                        await sendEmail(
+                            user.email,
+                            'newLaunchAlert',
+                            {
+                                userName: userName,
                                 name: model.name,
                                 brand: model.brandName,
                                 price: `₹${(model.startingPrice / 100000).toFixed(2)} Lakh`,
                                 image: model.heroImage,
                                 url: `${process.env.FRONTEND_URL}/${model.brandName.toLowerCase().replace(/\s+/g, '-')}-cars/${model.name.toLowerCase().replace(/\s+/g, '-')}`
-                            })
-                        });
+                            }
+                        );
 
                         sentCount++;
                         console.log(`✅ Sent new launch alert to ${user.email}`);
@@ -266,10 +290,15 @@ class EmailSchedulerService {
      */
     async sendPriceDropAlert(user: any, carData: any) {
         try {
-            await sendEmail({
-                to: user.email,
-                ...emailTemplates.priceDropAlert(user.name || 'Car Enthusiast', carData)
-            });
+            const userName = user.firstName || user.name || 'Car Enthusiast';
+            await sendEmail(
+                user.email,
+                'priceDropAlert',
+                {
+                    userName: userName,
+                    ...carData
+                }
+            );
 
             console.log(`✅ Sent price drop alert to ${user.email} for ${carData.name}`);
 
@@ -285,21 +314,22 @@ class EmailSchedulerService {
         console.log('🧪 Manually triggering weekly digest...');
 
         if (userId) {
-            const user = await User.findById(userId).select('email name emailPreferences carPreferences');
+            const user = await User.findById(userId).select('email firstName emailPreferences carPreferences');
             if (!user) {
                 throw new Error('User not found');
             }
 
             const recommendations = await this.getPersonalizedRecommendations(user);
 
-            await sendEmail({
-                to: user.email,
-                ...emailTemplates.weeklyDigest(user.name || 'Car Enthusiast', {
-                    recommendations: recommendations.slice(0, 5),
-                    priceDrops: [],
-                    newVariants: []
-                })
-            });
+            const userName = (user as any).firstName || 'Car Enthusiast';
+            await sendEmail(
+                user.email,
+                'weeklyDigest',
+                {
+                    userName: userName,
+                    recommendations: recommendations.slice(0, 5)
+                }
+            );
 
             console.log(`✅ Test email sent to ${user.email}`);
         } else {
