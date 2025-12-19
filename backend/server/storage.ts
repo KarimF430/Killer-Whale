@@ -13,7 +13,7 @@ export interface IStorage {
   getAvailableRankings(excludeBrandId?: string): Promise<number[]>;
 
   // Models
-  getModels(brandId?: string): Promise<Model[]>;
+  getModels(brandId?: string, includeInactive?: boolean): Promise<Model[]>;
   getModelsWithPricing(brandId?: string): Promise<any[]>;
   getModel(id: string): Promise<Model | undefined>;
   createModel(model: InsertModel): Promise<Model>;
@@ -282,11 +282,18 @@ export class PersistentStorage implements IStorage {
   }
 
   // Models
-  async getModels(brandId?: string): Promise<Model[]> {
+  async getModels(brandId?: string, includeInactive: boolean = false): Promise<Model[]> {
+    let filtered = this.models;
+
     if (brandId) {
-      return this.models.filter(m => m.brandId === brandId);
+      filtered = filtered.filter(m => m.brandId === brandId);
     }
-    return [...this.models];
+
+    if (!includeInactive) {
+      filtered = filtered.filter(m => m.status === 'active');
+    }
+
+    return filtered;
   }
 
   async getModel(id: string): Promise<Model | undefined> {

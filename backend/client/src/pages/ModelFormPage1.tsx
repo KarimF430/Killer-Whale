@@ -8,9 +8,12 @@ import { useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useModelForm } from "@/contexts/ModelFormContext";
 import type { Brand, Model } from "@shared/schema";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ModelFormPage1() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const params = useParams();
   const { formData, updateFormData, resetFormData, saveProgress, isEditMode: contextIsEditMode, setEditMode } = useModelForm();
   const isEditMode = !!params.id;
@@ -47,6 +50,32 @@ export default function ModelFormPage1() {
     exteriorDesign: '',
     comfortConvenience: '',
   });
+
+  const toggleStatus = async (newStatus: 'active' | 'inactive') => {
+    if (!editingModelId) return;
+
+    if (newStatus === 'inactive' && !window.confirm('Are you sure you want to deactivate this model? It will be hidden from the public website.')) {
+      return;
+    }
+
+    try {
+      await apiRequest('PUT', `/api/models/${editingModelId}`, { status: newStatus });
+      await queryClient.invalidateQueries({ queryKey: ['/api/models'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/models', editingModelId] });
+
+      toast({
+        title: `Model ${newStatus === 'active' ? 'Activated' : 'Deactivated'}`,
+        description: `The model is now ${newStatus}.`,
+      });
+    } catch (error) {
+      console.error('Status update failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update model status.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Set edit mode in context
   useEffect(() => {
@@ -184,20 +213,31 @@ export default function ModelFormPage1() {
         </div>
 
         <div className="flex gap-4">
-          <Button
-            type="button"
-            variant="default"
-            data-testid="button-activate-model"
-          >
-            activate Model
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            data-testid="button-deactivate-model"
-          >
-            Deactivate Model
-          </Button>
+          {isEditMode && existingModel && (
+            <>
+              {existingModel.status !== 'active' && (
+                <Button
+                  type="button"
+                  variant="default"
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => toggleStatus('active')}
+                  data-testid="button-activate-model"
+                >
+                  Activate Model
+                </Button>
+              )}
+              {existingModel.status === 'active' && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => toggleStatus('inactive')}
+                  data-testid="button-deactivate-model"
+                >
+                  Deactivate Model
+                </Button>
+              )}
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

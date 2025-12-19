@@ -1208,9 +1208,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
     const brandId = req.query.brandId as string | undefined;
     const fields = req.query.fields as string | undefined;
+    const includeInactive = req.query.includeInactive === 'true';
 
     // Get all models for the brand
-    const allModels = await storage.getModels(brandId);
+    const allModels = await storage.getModels(brandId, includeInactive);
 
     // Field projection optimization
     if (fields) {

@@ -15,7 +15,7 @@ export default function ModelList() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const { data: modelsResponse, isLoading } = useQuery<any>({
-    queryKey: ['/api/models?limit=all'],
+    queryKey: ['/api/models?limit=all&includeInactive=true'],
   });
 
   // ✅ Handle both new array format and old cached paginated format

@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import VariantPage from '@/components/variant/VariantPage'
 import { generateVariantSEO } from '@/lib/seo'
 import { FloatingAIBot } from '@/components/FloatingAIBot'
@@ -64,7 +65,7 @@ export default async function VariantDetailPage({ params }: PageProps) {
     )
 
     if (!brand) {
-      throw new Error('Brand not found')
+      notFound()
     }
 
     // Fetch models for this brand
@@ -77,7 +78,7 @@ export default async function VariantDetailPage({ params }: PageProps) {
     )
 
     if (!model) {
-      throw new Error('Model not found')
+      notFound()
     }
 
     // Fetch variants for this model
