@@ -1160,14 +1160,51 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
   app.patch("/api/brands/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
-      const brand = await storage.updateBrand(req.params.id, req.body);
+      const brandId = req.params.id;
+      const updateData = req.body;
+
+      // If status is being changed, cascade to models and variants
+      if (updateData.status) {
+        const newStatus = updateData.status;
+        console.log(`🔄 Changing brand ${brandId} status to ${newStatus} - cascading to models and variants`);
+
+        // Get MongoDB connection for bulk updates
+        const mongoose = (await import('mongoose')).default;
+        const db = mongoose.connection.db;
+
+        if (db) {
+          // Update all models for this brand
+          const modelsResult = await db.collection('models').updateMany(
+            { brandId: brandId },
+            { $set: { status: newStatus, updatedAt: new Date() } }
+          );
+
+          // Update all variants for this brand
+          const variantsResult = await db.collection('variants').updateMany(
+            { brandId: brandId },
+            { $set: { status: newStatus, updatedAt: new Date() } }
+          );
+
+          console.log(`✅ Status cascade complete: ${modelsResult.modifiedCount} models and ${variantsResult.modifiedCount} variants updated to ${newStatus}`);
+        }
+      }
+
+      // Update the brand itself
+      const brand = await storage.updateBrand(brandId, updateData);
       if (!brand) {
         return res.status(404).json({ error: "Brand not found" });
       }
 
       // Backup after update
       await triggerBackup('brands');
+
+      // Invalidate all relevant caches
       await invalidateRedisCache('/api/brands');
+      await invalidateRedisCache('/api/models');
+      await invalidateRedisCache('/api/variants');
+
+      // Rebuild search index to reflect status changes
+      invalidateSearchIndex().catch(err => console.error('Search index invalidation failed:', err));
 
       res.json({
         ...brand,

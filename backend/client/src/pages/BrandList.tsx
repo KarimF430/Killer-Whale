@@ -6,13 +6,15 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Brand } from "@shared/schema";
+import { useState, useMemo } from "react";
 
 export default function BrandList() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   const { data: brands = [], isLoading } = useQuery<Brand[]>({
-    queryKey: ['/api/brands'],
+    queryKey: ['/api/brands?includeInactive=true'],
   });
 
   const deleteBrand = useMutation({
@@ -20,7 +22,7 @@ export default function BrandList() {
       return await apiRequest('DELETE', `/api/brands/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/brands'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/brands?includeInactive=true'] });
       queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
       toast({
         title: "Brand deleted",
@@ -41,6 +43,19 @@ export default function BrandList() {
       deleteBrand.mutate(id);
     }
   };
+
+  // Filter brands based on selected status
+  const filteredBrands = useMemo(() => {
+    if (statusFilter === 'all') return brands;
+    return brands.filter(brand => brand.status === statusFilter);
+  }, [brands, statusFilter]);
+
+  // Count brands by status
+  const brandCounts = useMemo(() => {
+    const active = brands.filter(b => b.status === 'active').length;
+    const inactive = brands.filter(b => b.status === 'inactive').length;
+    return { all: brands.length, active, inactive };
+  }, [brands]);
 
   if (isLoading) {
     return (
@@ -66,10 +81,15 @@ export default function BrandList() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-semibold">Total Brands</h1>
-          <select className="px-3 py-1.5 border rounded-md text-sm" data-testid="select-filters">
-            <option>Filters</option>
-            <option>Active</option>
-            <option>Inactive</option>
+          <select
+            className="px-3 py-1.5 border rounded-md text-sm"
+            data-testid="select-filters"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+          >
+            <option value="all">All ({brandCounts.all})</option>
+            <option value="active">Active ({brandCounts.active})</option>
+            <option value="inactive">Inactive ({brandCounts.inactive})</option>
           </select>
         </div>
         <Button onClick={() => setLocation('/brands/new')} data-testid="button-add-brand">
@@ -79,12 +99,15 @@ export default function BrandList() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {brands.length === 0 ? (
+        {filteredBrands.length === 0 ? (
           <div className="col-span-full text-center py-12 text-muted-foreground">
-            No brands found. Create your first brand to get started.
+            {statusFilter === 'all'
+              ? 'No brands found. Create your first brand to get started.'
+              : `No ${statusFilter} brands found.`
+            }
           </div>
         ) : (
-          brands.map((brand) => (
+          filteredBrands.map((brand) => (
             <BrandCard
               key={brand.id}
               id={brand.id}

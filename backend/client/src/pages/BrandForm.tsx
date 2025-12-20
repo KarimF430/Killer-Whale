@@ -267,7 +267,11 @@ export default function BrandForm() {
                   ? 'bg-red-500 hover:bg-red-600 text-white'
                   : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                   }`}
-                onClick={() => setFormData({ ...formData, status: 'inactive' })}
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to deactivate this brand? All associated models and variants will also be hidden from the public website.')) {
+                    setFormData({ ...formData, status: 'inactive' });
+                  }
+                }}
                 data-testid="button-deactivate-brand"
               >
                 Deactivate Brand
