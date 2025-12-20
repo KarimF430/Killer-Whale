@@ -1,0 +1,15 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Car body in teal -->
+  <path d="M8 24C8 24 10 18 14 18H34C38 18 40 24 40 24V30H8V24Z" fill="#14B8A6"/>
+  <path d="M14 18L16 14H32L34 18" fill="#14B8A6"/>
+  <rect x="10" y="24" width="28" height="6" fill="#14B8A6"/>
+  
+  <!-- Windows -->
+  <path d="M17 18L18 15H30L31 18H17Z" fill="#0D9488"/>
+  
+  <!-- Wheels (black) -->
+  <circle cx="16" cy="30" r="4" fill="#1F2937"/>
+  <circle cx="32" cy="30" r="4" fill="#1F2937"/>
+  <circle cx="16" cy="30" r="2" fill="#374151"/>
+  <circle cx="32" cy="30" r="2" fill="#374151"/>
+</svg>
