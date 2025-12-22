@@ -2037,31 +2037,40 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
             {/* Engine Highlights */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Engine</h2>
+              {/* Dynamic title based on fuel type */}
+              {(() => {
+                const isEV = model?.fuelTypes?.some(f => f?.toLowerCase() === 'electric') || model?.name?.toLowerCase().includes('ev') || model?.name?.toLowerCase().includes('electric')
+                return (
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                    {model?.brand || 'Car'} {model?.name || 'Model'} {isEV ? 'Motor & Battery' : 'Engine'}
+                  </h2>
+                )
+              })()}
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {/* Use backend engineSummaries if available, otherwise fallback to engineOptions */}
                 {(model?.engineSummaries && model.engineSummaries.length > 0 ? model.engineSummaries : engineOptions).map((engine: any, index: number) => {
                   const engineId = model?.engineSummaries ? `engine-${index}` : engine.id
                   const engineTitle = model?.engineSummaries ? engine.title : engine.name
                   const engineSummary = model?.engineSummaries ? engine.summary : engine.description
+                  const isElectric = model?.fuelTypes?.includes('electric') || engineTitle?.toLowerCase().includes('electric') || engineTitle?.toLowerCase().includes('kwh')
 
                   return (
                     <div key={engineId} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                       {/* Engine Header - Always Visible */}
-                      <div className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-orange-500 rounded flex items-center justify-center">
-                              <span className="text-white font-bold text-sm">
+                      <div className="p-4 sm:p-6">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-red-600 to-orange-500 rounded flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-xs sm:text-sm">
                                 {index + 1}
                               </span>
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900">{engineTitle}</h3>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">{engineTitle}</h3>
                           </div>
                           <button
                             onClick={() => setExpandedEngine(expandedEngine === engineId ? null : engineId)}
-                            className="text-red-500 hover:text-red-600 font-medium text-sm transition-colors"
+                            className="text-red-500 hover:text-red-600 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap flex-shrink-0"
                           >
                             {expandedEngine === engineId ? 'Show Less' : 'Read More'}
                           </button>
@@ -2069,11 +2078,11 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
                         {/* Collapsed Preview */}
                         {expandedEngine !== engineId && model?.engineSummaries && (
-                          <ul className="space-y-1 mt-3">
+                          <ul className="mt-3">
                             {parseBulletPoints(engineSummary).slice(0, 1).map((point, idx) => (
-                              <li key={idx} className="flex items-start space-x-2">
-                                <span className="text-gray-400 mt-1">•</span>
-                                <span className="text-gray-600 text-sm">{point}</span>
+                              <li key={idx} className="flex items-start gap-2">
+                                <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+                                <span className="text-gray-600 text-sm leading-relaxed">{point}</span>
                               </li>
                             ))}
                           </ul>
@@ -2087,43 +2096,50 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
                       {/* Expanded Content */}
                       {expandedEngine === engineId && (
-                        <div className="px-6 pb-6">
+                        <div className="px-4 sm:px-6 pb-4 sm:pb-6">
                           {/* Backend engine summary with bullet points */}
                           {model?.engineSummaries ? (
                             <>
-                              <ul className="space-y-2 mb-6">
+                              <ul className="space-y-2 mb-4 sm:mb-6">
                                 {parseBulletPoints(engineSummary).map((point, idx) => (
-                                  <li key={idx} className="flex items-start space-x-2">
-                                    <span className="text-gray-400 mt-1">•</span>
+                                  <li key={idx} className="flex items-start gap-2">
+                                    <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
                                     <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
                                   </li>
                                 ))}
                               </ul>
 
-                              {/* Engine Specs from backend */}
-                              <div className="bg-gray-50 rounded-lg p-4">
-                                {/* Transmission Label - uppercase except Manual */}
-                                <h4 className="font-bold text-gray-900 mb-3 text-center">
+                              {/* Engine Specs from backend - Mobile Optimized */}
+                              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                                {/* Transmission Label */}
+                                <h4 className="font-bold text-gray-900 mb-3 text-center text-sm sm:text-base uppercase tracking-wide">
                                   {(() => {
                                     const trans = (engine as any).transmission || ''
+                                    if (isElectric) return 'Single Speed Reduction Gear'
                                     return trans.toLowerCase() === 'manual' ? 'Manual' : trans.toUpperCase()
                                   })()}
                                 </h4>
 
-                                <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
-                                  <div>
-                                    <p className="text-xs text-gray-500 mb-1">Power:</p>
-                                    <p className="font-medium text-gray-900">{(engine as any).power}</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-gray-500 mb-1">Torque:</p>
-                                    <p className="font-medium text-gray-900">{(engine as any).torque}</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-xs text-gray-500 mb-1">
-                                      {model?.fuelTypes?.includes('electric') ? 'Driving Range:' : 'Top Speed:'}
+                                <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Power:</p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight">
+                                      {(engine as any).power}
                                     </p>
-                                    <p className="font-medium text-gray-900">{(engine as any).speed}</p>
+                                  </div>
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Torque:</p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight">
+                                      {isElectric ? 'Instant Torque' : (engine as any).torque}
+                                    </p>
+                                  </div>
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">
+                                      {isElectric ? 'Range:' : 'Top Speed:'}
+                                    </p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight">
+                                      {(engine as any).speed}
+                                    </p>
                                   </div>
                                 </div>
                               </div>
@@ -2131,30 +2147,30 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                           ) : (
                             /* Fallback to legacy engine structure */
                             <>
-                              <p className="text-gray-700 text-sm leading-relaxed mb-6">
+                              <p className="text-gray-700 text-sm leading-relaxed mb-4 sm:mb-6">
                                 {engineSummary}
                               </p>
 
                               {/* Engine Variants */}
-                              <div className="space-y-4">
+                              <div className="space-y-3 sm:space-y-4">
                                 {(engine as any).variants.map((variant: any, idx: number) => (
-                                  <div key={idx} className="bg-gray-50 rounded-lg p-4">
-                                    <h4 className="font-bold text-gray-900 mb-3 text-center">
+                                  <div key={idx} className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                                    <h4 className="font-bold text-gray-900 mb-3 text-center text-sm sm:text-base">
                                       {variant.type}
                                     </h4>
 
-                                    <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
-                                      <div>
-                                        <p className="text-xs text-gray-500 mb-1">Power:</p>
-                                        <p className="font-medium text-gray-900">{variant.power}</p>
+                                    <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                                      <div className="p-2 sm:p-0">
+                                        <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Power:</p>
+                                        <p className="font-semibold text-gray-900 text-xs sm:text-sm">{variant.power}</p>
                                       </div>
-                                      <div>
-                                        <p className="text-xs text-gray-500 mb-1">Torque:</p>
-                                        <p className="font-medium text-gray-900">{variant.torque}</p>
+                                      <div className="p-2 sm:p-0">
+                                        <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Torque:</p>
+                                        <p className="font-semibold text-gray-900 text-xs sm:text-sm">{variant.torque}</p>
                                       </div>
-                                      <div>
-                                        <p className="text-xs text-gray-500 mb-1">Transmission:</p>
-                                        <p className="font-medium text-gray-900">{variant.transmission}</p>
+                                      <div className="p-2 sm:p-0">
+                                        <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Transmission:</p>
+                                        <p className="font-semibold text-gray-900 text-xs sm:text-sm">{variant.transmission}</p>
                                       </div>
                                     </div>
                                   </div>
@@ -2177,83 +2193,102 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
           <div id="mileage" className="space-y-8">
             {/* Mileage Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
-                {model?.brand || 'Car'} {model?.name || 'Model'} {model?.fuelTypes?.includes('electric') ? 'Driving Range' : 'Mileage'}
-              </h2>
+              {(() => {
+                const mileageItems = model?.mileageData && model.mileageData.length > 0 ? model.mileageData : mileageData
+                const isSingleCard = mileageItems.length === 1
+                const isElectric = model?.fuelTypes?.some(f => f?.toLowerCase() === 'electric') || model?.name?.toLowerCase().includes('ev') || model?.name?.toLowerCase().includes('electric')
 
-              {/* Horizontal Scrollable Mileage Cards */}
-              <div className="relative">
-                <div
-                  ref={mileageScrollRef}
-                  className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                  {/* Use backend mileageData if available, otherwise fallback */}
-                  {(model?.mileageData && model.mileageData.length > 0 ? model.mileageData : mileageData).map((mileage: any, index: number) => {
-                    const engineName = model?.mileageData ? mileage.engineName : mileage.engine
-                    const companyClaimed = model?.mileageData ? mileage.companyClaimed : mileage.companyClaimed
-                    const cityRealWorld = model?.mileageData ? mileage.cityRealWorld : mileage.cityRealWorld
-                    const highwayRealWorld = model?.mileageData ? mileage.highwayRealWorld : mileage.highwayRealWorld
+                return (
+                  <>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                      {model?.brand || 'Car'} {model?.name || 'Model'} {isElectric ? 'Driving Range' : 'Mileage'}
+                    </h2>
+                    <div
+                      ref={mileageScrollRef}
+                      className={`flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 ${isSingleCard ? 'justify-center' : ''}`}
+                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                      onScroll={(e) => {
+                        const container = e.currentTarget
+                        const scrollLeft = container.scrollLeft
+                        const cardWidth = 272 // w-64 (256px) + gap (16px)
+                        const newIndex = Math.round(scrollLeft / cardWidth)
+                        if (newIndex !== selectedMileageEngine && newIndex >= 0 && newIndex < mileageItems.length) {
+                          setSelectedMileageEngine(newIndex)
+                        }
+                      }}
+                    >
+                      {/* Use backend mileageData if available, otherwise fallback */}
+                      {mileageItems.map((mileage: any, index: number) => {
+                        const engineName = model?.mileageData ? mileage.engineName : mileage.engine
+                        const companyClaimed = model?.mileageData ? mileage.companyClaimed : mileage.companyClaimed
+                        const cityRealWorld = model?.mileageData ? mileage.cityRealWorld : mileage.cityRealWorld
+                        const highwayRealWorld = model?.mileageData ? mileage.highwayRealWorld : mileage.highwayRealWorld
 
-                    return (
-                      <div
-                        key={index}
-                        className="flex-shrink-0 w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300"
-                      >
-                        {/* Engine Header */}
-                        <div className="text-center mb-4">
-                          <h3 className="text-red-500 font-bold text-sm mb-1">Engine & Transmission</h3>
-                          <h4 className="text-red-500 font-bold text-base">{engineName}</h4>
-                        </div>
+                        return (
+                          <div
+                            key={index}
+                            className={`flex-shrink-0 w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300 ${isSingleCard ? 'mx-auto' : ''}`}
+                          >
+                            {/* Engine/Battery Header - Dynamic for EVs */}
+                            <div className="text-center mb-4">
+                              <h3 className="text-red-500 font-bold text-sm mb-1">
+                                {isElectric ? 'Battery & Range' : 'Engine & Transmission'}
+                              </h3>
+                              <h4 className="text-red-500 font-bold text-base">{engineName}</h4>
+                            </div>
 
-                        {/* Mileage Details */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">
-                              {model?.fuelTypes?.includes('electric') ? 'Range (Claimed)' : 'Company Claimed'}
-                            </span>
-                            <span className="text-gray-900 font-bold text-sm">{companyClaimed}</span>
+                            {/* Mileage/Range Details */}
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span className="text-gray-600 text-sm">
+                                  {isElectric ? 'Range (Claimed)' : 'Company Claimed'}
+                                </span>
+                                <span className="text-gray-900 font-bold text-sm">{companyClaimed}</span>
+                              </div>
+
+                              <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span className="text-gray-600 text-sm">
+                                  {isElectric ? 'City Range' : 'City Real World'}
+                                </span>
+                                <span className="text-gray-900 font-bold text-sm">{cityRealWorld}</span>
+                              </div>
+
+                              <div className="flex justify-between items-center py-2">
+                                <span className="text-gray-600 text-sm">
+                                  {isElectric ? 'Highway Range' : 'Highway Real World'}
+                                </span>
+                                <span className="text-gray-900 font-bold text-sm">{highwayRealWorld}</span>
+                              </div>
+                            </div>
                           </div>
+                        )
+                      })}
+                    </div>
 
-                          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">
-                              {model?.fuelTypes?.includes('electric') ? 'City Range' : 'City Real World'}
-                            </span>
-                            <span className="text-gray-900 font-bold text-sm">{cityRealWorld}</span>
-                          </div>
-
-                          <div className="flex justify-between items-center py-2">
-                            <span className="text-gray-600 text-sm">
-                              {model?.fuelTypes?.includes('electric') ? 'Highway Range' : 'Highway Real World'}
-                            </span>
-                            <span className="text-gray-900 font-bold text-sm">{highwayRealWorld}</span>
-                          </div>
-                        </div>
+                    {/* Pagination Dots - Only show if more than 1 card */}
+                    {!isSingleCard && (
+                      <div className="flex justify-center space-x-2 mt-4">
+                        {mileageItems.map((_: any, index: number) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setSelectedMileageEngine(index)
+                              if (mileageScrollRef.current) {
+                                const cardWidth = 272 // w-64 (256px) + gap (16px)
+                                mileageScrollRef.current.scrollTo({ left: cardWidth * index, behavior: 'smooth' })
+                              }
+                            }}
+                            className={`h-3 rounded-full transition-all duration-300 ${selectedMileageEngine === index
+                              ? 'bg-gradient-to-r from-red-600 to-orange-500 w-8'
+                              : 'bg-gray-300 hover:bg-gray-400 w-3'
+                              }`}
+                          />
+                        ))}
                       </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Pagination Dots */}
-              <div className="flex justify-center space-x-2 mt-4">
-                {(model?.mileageData && model.mileageData.length > 0 ? model.mileageData : mileageData).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setSelectedMileageEngine(index)
-                      if (mileageScrollRef.current) {
-                        const cardWidth = 300 // approximate card width + gap
-                        mileageScrollRef.current.scrollTo({ left: cardWidth * index, behavior: 'smooth' })
-                      }
-                    }}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${selectedMileageEngine === index
-                      ? 'bg-gradient-to-r from-red-600 to-orange-500 w-8'
-                      : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
-                  />
-                ))}
-              </div>
+                    )}
+                  </>
+                )
+              })()}
             </div>
 
             {/* Ad Banner */}

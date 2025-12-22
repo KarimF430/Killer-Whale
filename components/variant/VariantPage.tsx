@@ -2772,9 +2772,10 @@ export default function VariantPage({
                     <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                     <h3 className="text-lg font-bold text-gray-900">Description</h3>
                   </div>
-                  {variant?.description ? (
+                  {/* Use variant description, then model description, then fallback */}
+                  {(variant?.description || model?.description) ? (
                     <ul className="space-y-2">
-                      {parseBulletPoints(variant.description).map((point: string, index: number) => (
+                      {parseBulletPoints(variant?.description || model?.description || '').map((point: string, index: number) => (
                         <li key={index} className="flex items-start space-x-2">
                           <span className="text-gray-400 mt-1">•</span>
                           <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
@@ -2789,7 +2790,7 @@ export default function VariantPage({
                       )}
                     </p>
                   )}
-                  {!variant?.description && (
+                  {!(variant?.description || model?.description) && (
                     <button
                       onClick={() => setShowSummaryDescription(!showSummaryDescription)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
@@ -2805,9 +2806,10 @@ export default function VariantPage({
                     <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                     <h3 className="text-lg font-bold text-gray-900">Exterior Design</h3>
                   </div>
-                  {variant?.exteriorDesign ? (
+                  {/* Use variant exteriorDesign, then model exteriorDesign, then fallback */}
+                  {(variant?.exteriorDesign || model?.exteriorDesign) ? (
                     <ul className="space-y-2">
-                      {parseBulletPoints(variant.exteriorDesign).map((point: string, index: number) => (
+                      {parseBulletPoints(variant?.exteriorDesign || model?.exteriorDesign || '').map((point: string, index: number) => (
                         <li key={index} className="flex items-start space-x-2">
                           <span className="text-gray-400 mt-1">•</span>
                           <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
@@ -2818,11 +2820,11 @@ export default function VariantPage({
                     <p className="text-gray-700 text-sm leading-relaxed mb-3">
                       The {displayBrandName} {displayModelName} comes with a modern and stylish exterior design. The front features sleek headlamps with integrated DRLs and a bold grille design that gives it a distinctive appearance.
                       {showSummaryExterior && (
-                        <span> The side profile features clean lines with subtle character lines running along the doors. The rear design includes wraparound tail lamps and a compact boot lid.</span>
+                        <span> The side profile features clean lines with subtle character lines running along the doors. The rear design includes wraparound tail lamps and a compact boot lid. The overall design philosophy emphasizes simplicity and functionality while maintaining an attractive appearance that appeals to a wide range of customers.</span>
                       )}
                     </p>
                   )}
-                  {!variant?.exteriorDesign && (
+                  {!(variant?.exteriorDesign || model?.exteriorDesign) && (
                     <button
                       onClick={() => setShowSummaryExterior(!showSummaryExterior)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
@@ -2838,9 +2840,10 @@ export default function VariantPage({
                     <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                     <h3 className="text-lg font-bold text-gray-900">Comfort & Convenience</h3>
                   </div>
-                  {variant?.comfortConvenience ? (
+                  {/* Use variant comfortConvenience, then model comfortConvenience, then fallback */}
+                  {(variant?.comfortConvenience || model?.comfortConvenience) ? (
                     <ul className="space-y-2">
-                      {parseBulletPoints(variant.comfortConvenience).map((point: string, index: number) => (
+                      {parseBulletPoints(variant?.comfortConvenience || model?.comfortConvenience || '').map((point: string, index: number) => (
                         <li key={index} className="flex items-start space-x-2">
                           <span className="text-gray-400 mt-1">•</span>
                           <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
@@ -2849,13 +2852,13 @@ export default function VariantPage({
                     </ul>
                   ) : (
                     <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                      The interior features a well-designed dashboard with premium materials. It comes equipped with a touchscreen infotainment system, automatic climate control, and various comfort features for an enhanced driving experience.
+                      On the inside, the {displayModelName} comes with a thoughtfully designed interior layout. The cabin features a well-designed dashboard with premium materials. It comes equipped with a touchscreen infotainment system, automatic climate control, and various comfort features for an enhanced driving experience.
                       {showSummaryComfort && (
-                        <span> Additional comfort features include air conditioning, power windows, central locking, and comfortable fabric upholstery. The cabin offers adequate storage spaces including door pockets, glove compartment, and cup holders.</span>
+                        <span> Additional comfort features include air conditioning, power windows, central locking, and comfortable fabric upholstery. The cabin offers adequate storage spaces including door pockets, glove compartment, and cup holders. Safety features include dual airbags, ABS with EBD, and rear parking sensors for enhanced driving confidence.</span>
                       )}
                     </p>
                   )}
-                  {!variant?.comfortConvenience && (
+                  {!(variant?.comfortConvenience || model?.comfortConvenience) && (
                     <button
                       onClick={() => setShowSummaryComfort(!showSummaryComfort)}
                       className="text-red-500 hover:text-red-600 text-sm font-medium"
@@ -2872,171 +2875,217 @@ export default function VariantPage({
 
             {/* Engine Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Engine</h2>
+              {/* Dynamic title based on fuel type */}
+              {(() => {
+                const isEV = currentVariantData?.fuelType?.toLowerCase() === 'electric' || displayModelName?.toLowerCase().includes('ev') || displayModelName?.toLowerCase().includes('electric') || displayVariantName?.toLowerCase().includes('electric')
+                return (
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                    {displayModelName} {displayVariantName} {isEV ? 'Motor & Battery' : 'Engine'}
+                  </h2>
+                )
+              })()}
 
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                {/* Engine Header - Always Visible */}
-                <div className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-orange-500 rounded flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">1</span>
+              <div className="space-y-3 sm:space-y-4">
+                {(() => {
+                  const isEV = currentVariantData?.fuelType?.toLowerCase() === 'electric' || displayModelName?.toLowerCase().includes('ev') || displayModelName?.toLowerCase().includes('electric') || displayVariantName?.toLowerCase().includes('electric')
+
+                  return (
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      {/* Engine Header - Always Visible */}
+                      <div className="p-4 sm:p-6">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-red-600 to-orange-500 rounded flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-xs sm:text-sm">1</span>
+                            </div>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">
+                              {variant?.engineName || currentVariantData?.engine}
+                            </h3>
+                          </div>
+                          <button
+                            onClick={() => setExpandedEngine(!expandedEngine)}
+                            className="text-red-500 hover:text-red-600 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap flex-shrink-0"
+                          >
+                            {expandedEngine ? 'Show Less' : 'Read More'}
+                          </button>
+                        </div>
+
+                        {/* Collapsed Preview */}
+                        {!expandedEngine && variant?.engineSummary && (
+                          <ul className="mt-3">
+                            {parseBulletPoints(variant.engineSummary).slice(0, 1).map((point: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+                                <span className="text-gray-600 text-sm leading-relaxed">{point}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {!expandedEngine && !variant?.engineSummary && (
+                          <p className="text-gray-600 text-sm mt-3 line-clamp-2">
+                            {isEV
+                              ? `High-performance electric motor delivering instant torque and smooth acceleration.`
+                              : `Suitable for both city driving and highway cruising. The ${variant?.engineName || currentVariantData?.engine} engine offers excellent fuel efficiency with smooth acceleration.`
+                            }
+                          </p>
+                        )}
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900">
-                        {variant?.engineName || currentVariantData?.engine}
-                      </h3>
+
+                      {/* Expanded Content */}
+                      {expandedEngine && (
+                        <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                          {/* Backend engine summary with bullet points */}
+                          {variant?.engineSummary ? (
+                            <>
+                              <ul className="space-y-2 mb-4 sm:mb-6">
+                                {parseBulletPoints(variant.engineSummary).map((point: string, idx: number) => (
+                                  <li key={idx} className="flex items-start gap-2">
+                                    <span className="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+                                    <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
+                                  </li>
+                                ))}
+                              </ul>
+
+                              {/* Engine Specs from backend - Mobile Optimized */}
+                              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                                {/* Transmission Label */}
+                                <h4 className="font-bold text-gray-900 mb-3 text-center text-sm sm:text-base uppercase tracking-wide">
+                                  {(() => {
+                                    const trans = variant?.engineTransmission || variant?.transmission || currentVariantData?.transmission
+                                    if (isEV) return 'Single Speed Reduction Gear'
+                                    return trans?.toLowerCase() === 'manual' ? 'Manual' : trans?.toUpperCase()
+                                  })()}
+                                </h4>
+
+                                <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Power:</p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight">
+                                      {variant?.enginePower || currentVariantData?.power}
+                                    </p>
+                                  </div>
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Torque:</p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight">
+                                      {isEV ? 'Instant Torque' : (variant?.engineTorque || currentVariantData?.torque)}
+                                    </p>
+                                  </div>
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">
+                                      {isEV ? 'Range:' : 'Top Speed:'}
+                                    </p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight">
+                                      {variant?.engineSpeed || 'N/A'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-gray-700 text-sm leading-relaxed mb-4 sm:mb-6">
+                                {isEV
+                                  ? `The electric motor provides instant torque delivery for quick acceleration. It offers a perfect balance between performance and efficiency, making it ideal for daily commuting and long-distance travel with zero emissions.`
+                                  : `Suitable for both city driving and highway cruising. The ${variant?.engineName || currentVariantData?.engine} engine offers excellent fuel efficiency with smooth acceleration. It provides a perfect balance between performance and economy, making it ideal for daily commuting and long-distance travel.`
+                                }
+                              </p>
+
+                              {/* Engine Specs */}
+                              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                                <h4 className="font-bold text-gray-900 mb-3 text-center text-sm sm:text-base uppercase tracking-wide">
+                                  {(() => {
+                                    const trans = variant?.engineTransmission || variant?.transmission || currentVariantData?.transmission
+                                    if (isEV) return 'Single Speed Reduction Gear'
+                                    return trans?.toLowerCase() === 'manual' ? 'Manual' : trans?.toUpperCase()
+                                  })()}
+                                </h4>
+
+                                <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Power:</p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">{variant?.enginePower || currentVariantData?.power}</p>
+                                  </div>
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">Torque:</p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">
+                                      {isEV ? 'Instant Torque' : (variant?.engineTorque || currentVariantData?.torque)}
+                                    </p>
+                                  </div>
+                                  <div className="p-2 sm:p-0">
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-1">
+                                      {isEV ? 'Range:' : 'Top Speed:'}
+                                    </p>
+                                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">{variant?.engineSpeed || 'N/A'}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <button
-                      onClick={() => setExpandedEngine(!expandedEngine)}
-                      className="text-red-500 hover:text-red-600 font-medium text-sm transition-colors"
-                    >
-                      {expandedEngine ? 'Show Less' : 'Read More'}
-                    </button>
-                  </div>
-
-                  {/* Collapsed Preview */}
-                  {!expandedEngine && variant?.engineSummary && (
-                    <ul className="space-y-1 mt-3">
-                      {parseBulletPoints(variant.engineSummary).slice(0, 1).map((point: string, idx: number) => (
-                        <li key={idx} className="flex items-start space-x-2">
-                          <span className="text-gray-400 mt-1">•</span>
-                          <span className="text-gray-600 text-sm">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {!expandedEngine && !variant?.engineSummary && (
-                    <p className="text-gray-600 text-sm mt-3 line-clamp-2">
-                      Suitable for both city driving and highway cruising. The {variant?.engineName || currentVariantData?.engine} engine offers excellent fuel efficiency with smooth acceleration.
-                    </p>
-                  )}
-                </div>
-
-                {/* Expanded Content */}
-                {expandedEngine && (
-                  <div className="px-6 pb-6">
-                    {/* Backend engine summary with bullet points */}
-                    {variant?.engineSummary ? (
-                      <>
-                        <ul className="space-y-2 mb-6">
-                          {parseBulletPoints(variant.engineSummary).map((point: string, idx: number) => (
-                            <li key={idx} className="flex items-start space-x-2">
-                              <span className="text-gray-400 mt-1">•</span>
-                              <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
-                            </li>
-                          ))}
-                        </ul>
-
-                        {/* Engine Specs from backend */}
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          {/* Transmission Label */}
-                          <h4 className="font-bold text-gray-900 mb-3 text-center">
-                            {(() => {
-                              const trans = variant?.engineTransmission || variant?.transmission || currentVariantData?.transmission
-                              return trans.toLowerCase() === 'manual' ? 'Manual' : trans.toUpperCase()
-                            })()}
-                          </h4>
-
-                          <div className="grid grid-cols-3 gap-4 text-center">
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Power:</p>
-                              <p className="font-medium text-gray-900">{variant?.enginePower || currentVariantData?.power}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Torque:</p>
-                              <p className="font-medium text-gray-900">{variant?.engineTorque || currentVariantData?.torque}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Transmission:</p>
-                              <p className="font-medium text-gray-900">{variant?.engineSpeed || 'N/A'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-gray-700 text-sm leading-relaxed mb-6">
-                          Suitable for both city driving and highway cruising. The {variant?.engineName || currentVariantData?.engine} engine offers excellent fuel efficiency with smooth acceleration. It provides a perfect balance between performance and economy, making it ideal for daily commuting and long-distance travel.
-                        </p>
-
-                        {/* Engine Specs */}
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <h4 className="font-bold text-gray-900 mb-3 text-center">
-                            {(() => {
-                              const trans = variant?.engineTransmission || variant?.transmission || currentVariantData?.transmission
-                              return trans.toLowerCase() === 'manual' ? 'Manual' : trans.toUpperCase()
-                            })()}
-                          </h4>
-
-                          <div className="grid grid-cols-3 gap-4 text-center">
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Power:</p>
-                              <p className="font-medium text-gray-900">{variant?.enginePower || currentVariantData?.power}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Torque:</p>
-                              <p className="font-medium text-gray-900">{variant?.engineTorque || currentVariantData?.torque}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Transmission:</p>
-                              <p className="font-medium text-gray-900">{variant?.engineSpeed || 'N/A'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
+                  )
+                })()}
               </div>
             </div>
 
             {/* Mileage Section */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
-                {displayModelName} {displayVariantName} {isElectric ? 'Driving Range' : 'Mileage'}
-              </h2>
+              {(() => {
+                const isEV = currentVariantData?.fuelType?.toLowerCase() === 'electric' || displayModelName?.toLowerCase().includes('ev') || displayModelName?.toLowerCase().includes('electric') || displayVariantName?.toLowerCase().includes('electric')
 
-              <div className="flex justify-center">
-                <div className="w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
-                  {/* Engine Header */}
-                  <div className="text-center mb-4">
-                    <h3 className="text-red-500 font-bold text-sm mb-1">Engine & Transmission</h3>
-                    <h4 className="text-red-500 font-bold text-base mb-1">
-                      {variant?.mileageEngineName || variant?.engineName || currentVariantData?.engine}
-                    </h4>
-                  </div>
+                return (
+                  <>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                      {displayModelName} {displayVariantName} {isEV ? 'Driving Range' : 'Mileage'}
+                    </h2>
 
-                  {/* Mileage Details */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-gray-600 text-sm">
-                        {isElectric ? 'Range (Claimed)' : 'Company Claimed'}
-                      </span>
-                      <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageCompanyClaimed || currentVariantData?.mileage} {isElectric ? 'km' : 'Kmpl'}
-                      </span>
+                    <div className="flex justify-center">
+                      <div className="w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
+                        {/* Engine/Battery Header - Dynamic for EVs */}
+                        <div className="text-center mb-4">
+                          <h3 className="text-red-500 font-bold text-sm mb-1">
+                            {isEV ? 'Battery & Range' : 'Engine & Transmission'}
+                          </h3>
+                          <h4 className="text-red-500 font-bold text-base mb-1">
+                            {variant?.mileageEngineName || variant?.engineName || currentVariantData?.engine}
+                          </h4>
+                        </div>
+
+                        {/* Mileage/Range Details */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span className="text-gray-600 text-sm">
+                              {isEV ? 'Range (Claimed)' : 'Company Claimed'}
+                            </span>
+                            <span className="text-gray-900 font-bold text-sm">
+                              {variant?.mileageCompanyClaimed || currentVariantData?.mileage} {isEV ? 'km' : 'Kmpl'}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span className="text-gray-600 text-sm">
+                              {isEV ? 'City Range' : 'City Real World'}
+                            </span>
+                            <span className="text-gray-900 font-bold text-sm">
+                              {variant?.mileageCityRealWorld || (currentVariantData?.mileage ? (currentVariantData.mileage * 0.85).toFixed(1) : 0)} {isEV ? 'km' : 'Kmpl'}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center py-2">
+                            <span className="text-gray-600 text-sm">
+                              {isEV ? 'Highway Range' : 'Highway Real World'}
+                            </span>
+                            <span className="text-gray-900 font-bold text-sm">
+                              {variant?.mileageHighwayRealWorld || (currentVariantData?.mileage ? (currentVariantData.mileage * 1.1).toFixed(1) : 0)} {isEV ? 'km' : 'Kmpl'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-gray-600 text-sm">
-                        {isElectric ? 'City Range' : 'City Real World'}
-                      </span>
-                      <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageCityRealWorld || (currentVariantData?.mileage ? currentVariantData.mileage * 0.85 : 0).toFixed(1)} {isElectric ? 'km' : 'Kmpl'}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-gray-600 text-sm">
-                        {isElectric ? 'Highway Range' : 'Highway Real World'}
-                      </span>
-                      <span className="text-gray-900 font-bold text-sm">
-                        {variant?.mileageHighwayRealWorld || (currentVariantData?.mileage ? currentVariantData.mileage * 1.1 : 0).toFixed(1)} {isElectric ? 'km' : 'Kmpl'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  </>
+                )
+              })()}
             </div>
           </div>
         </PageSection>
