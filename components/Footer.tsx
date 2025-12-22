@@ -36,7 +36,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/new-cars" className="text-gray-300 hover:text-red-400 transition-colors">
+                <Link href="/top-selling-cars-in-india" className="text-gray-300 hover:text-red-400 transition-colors">
                   New Cars
                 </Link>
               </li>
@@ -46,8 +46,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/brands" className="text-gray-300 hover:text-red-400 transition-colors">
-                  Car Brands
+                <Link href="/electric-cars" className="text-gray-300 hover:text-red-400 transition-colors">
+                  Electric Cars
                 </Link>
               </li>
               <li>
@@ -56,7 +56,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/news" className="text-gray-300 hover:text-red-400 transition-colors">
+                <Link href="/fuel-cost-calculator" className="text-gray-300 hover:text-red-400 transition-colors">
+                  Fuel Calculator
+                </Link>
+              </li>
+              <li>
+                <Link href="/news" className="text-gray-300 hover:text-orange-400 transition-colors">
                   Car News
                 </Link>
               </li>
@@ -68,28 +73,33 @@ export default function Footer() {
             <h3 className="text-lg font-semibold">Popular Brands</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/cars/maruti-suzuki" className="text-gray-300 hover:text-red-400 transition-colors">
+                <Link href="/maruti-suzuki-cars" className="text-gray-300 hover:text-red-400 transition-colors">
                   Maruti Suzuki
                 </Link>
               </li>
               <li>
-                <Link href="/cars/hyundai" className="text-gray-300 hover:text-orange-400 transition-colors">
+                <Link href="/hyundai-cars" className="text-gray-300 hover:text-orange-400 transition-colors">
                   Hyundai
                 </Link>
               </li>
               <li>
-                <Link href="/cars/tata" className="text-gray-300 hover:text-red-400 transition-colors">
+                <Link href="/tata-cars" className="text-gray-300 hover:text-red-400 transition-colors">
                   Tata
                 </Link>
               </li>
               <li>
-                <Link href="/cars/mahindra" className="text-gray-300 hover:text-orange-400 transition-colors">
+                <Link href="/mahindra-cars" className="text-gray-300 hover:text-orange-400 transition-colors">
                   Mahindra
                 </Link>
               </li>
               <li>
-                <Link href="/cars/kia" className="text-gray-300 hover:text-red-400 transition-colors">
+                <Link href="/kia-cars" className="text-gray-300 hover:text-red-400 transition-colors">
                   Kia
+                </Link>
+              </li>
+              <li>
+                <Link href="/toyota-cars" className="text-gray-300 hover:text-orange-400 transition-colors">
+                  Toyota
                 </Link>
               </li>
             </ul>
@@ -132,14 +142,14 @@ export default function Footer() {
               <Link href="/privacy-policy" className="text-gray-400 hover:text-red-400 transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/terms-of-service" className="text-gray-400 hover:text-orange-400 transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/about" className="text-gray-400 hover:text-red-400 transition-colors">
+              <Link href="/about-us" className="text-gray-400 hover:text-orange-400 transition-colors">
                 About Us
               </Link>
-              <Link href="/contact" className="text-gray-400 hover:text-orange-400 transition-colors">
+              <Link href="/contact-us" className="text-gray-400 hover:text-red-400 transition-colors">
                 Contact
+              </Link>
+              <Link href="/feedback" className="text-gray-400 hover:text-orange-400 transition-colors">
+                Feedback
               </Link>
             </div>
           </div>
