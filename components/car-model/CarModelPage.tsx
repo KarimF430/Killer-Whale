@@ -462,7 +462,8 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
     ? endingPriceData.onRoadPrice
     : actualEndingPrice
 
-  const priceLabel = startingPriceData.isOnRoadMode ? 'On-Road' : 'Ex-showroom'
+  const cityName = selectedCity.split(',')[0] || 'Delhi'
+  const priceLabel = startingPriceData.isOnRoadMode ? `On-Road Price in ${cityName}` : 'Ex-showroom Price'
 
   // Calculate EMI for display (20% down, 7 years, 8% interest)
   const calculateDisplayEMI = (price: number) => {
@@ -1224,7 +1225,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 {formatPriceRange(displayStartPrice / 100000, displayEndPrice / 100000)}
               </div>
               <div className="text-sm text-gray-500">
-                *{model?.isUpcomingCar ? 'Expected On-Road Price' : priceLabel}
+                *{model?.isUpcomingCar ? `Expected On-Road Price in ${cityName}` : priceLabel}
               </div>
 
               <button

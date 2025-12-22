@@ -649,7 +649,8 @@ export default function VariantPage({
 
   // displayPrice should be in rupees for formatPrice to work correctly
   const displayPrice = isOnRoadMode ? onRoadPrice : exShowroomPriceInRupees
-  const priceLabel = isOnRoadMode ? 'On-Road' : 'Ex-showroom'
+  const cityName = selectedCity.split(',')[0] || 'Delhi'
+  const priceLabel = isOnRoadMode ? `On-Road Price in ${cityName}` : 'Ex-showroom Price'
 
   // Calculate EMI for display (20% down, 7 years, 8% interest)
   const calculateDisplayEMI = (price: number) => {
