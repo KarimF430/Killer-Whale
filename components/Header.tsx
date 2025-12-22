@@ -6,25 +6,28 @@ import Script from 'next/script'
 import { Search, Menu, X, MapPin, LogOut, User as UserIcon, ChevronDown, ChevronUp } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
-// Budget ranges for New Cars dropdown
+// Budget ranges for New Cars dropdown - matches home page CarsByBudget
 const BUDGET_RANGES = [
   { label: 'Under ₹10 Lakh', slug: '10' },
   { label: '₹10-15 Lakh', slug: '15' },
   { label: '₹15-20 Lakh', slug: '20' },
   { label: '₹20-25 Lakh', slug: '25' },
   { label: '₹25-30 Lakh', slug: '30' },
-  { label: '₹30-50 Lakh', slug: '50' },
-  { label: '₹50L-1 Crore', slug: '1-crore' },
+  { label: '₹30-40 Lakh', slug: '40' },
+  { label: '₹40-50 Lakh', slug: '50' },
+  { label: '₹50-60 Lakh', slug: '60' },
+  { label: '₹60-80 Lakh', slug: '80' },
+  { label: '₹80L-1 Cr', slug: '1-crore' },
   { label: 'Above ₹1 Crore', slug: 'above-1-crore' },
 ]
 
-// Body types for Top Selling dropdown
+// Body types for Top Selling dropdown - matches /top-cars/[bodyType] route
 const BODY_TYPES = [
   { label: 'SUV', slug: 'suv' },
   { label: 'Sedan', slug: 'sedan' },
   { label: 'Hatchback', slug: 'hatchback' },
-  { label: 'MPV', slug: 'mpv' },
-  { label: 'Coupe', slug: 'coupe' },
+  { label: 'MUV/MPV', slug: 'muv' },
+  { label: 'Luxury', slug: 'luxury' },
 ]
 
 // Popular brands
@@ -53,6 +56,7 @@ export default function Header() {
   const [newCarsOpen, setNewCarsOpen] = useState(false)
   const [topSellingOpen, setTopSellingOpen] = useState(false)
   const [brandsOpen, setBrandsOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
 
   useEffect(() => {
     setIsRevving(true)
@@ -76,6 +80,7 @@ export default function Header() {
       setNewCarsOpen(false)
       setTopSellingOpen(false)
       setBrandsOpen(false)
+      setMoreOpen(false)
     }
   }
 
@@ -203,7 +208,7 @@ export default function Header() {
 
               {/* New Cars Dropdown */}
               <div>
-                <button onClick={() => setNewCarsOpen(!newCarsOpen)} className="w-full flex items-center justify-between text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg transition-all">
+                <button onClick={() => setNewCarsOpen(!newCarsOpen)} className="w-full flex items-center justify-between text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg transition-all">
                   <span>New Cars</span>
                   {newCarsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </button>
@@ -220,7 +225,7 @@ export default function Header() {
 
               {/* Top Selling Dropdown */}
               <div>
-                <button onClick={() => setTopSellingOpen(!topSellingOpen)} className="w-full flex items-center justify-between text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg transition-all">
+                <button onClick={() => setTopSellingOpen(!topSellingOpen)} className="w-full flex items-center justify-between text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg transition-all">
                   <span>Top Selling Cars</span>
                   {topSellingOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </button>
@@ -228,7 +233,7 @@ export default function Header() {
                   <div className="ml-4 mt-1 space-y-1 border-l-2 border-orange-200 pl-4">
                     <Link href="/top-selling-cars-in-india" className="block text-gray-600 hover:text-orange-600 py-2 text-sm font-medium" onClick={closeMenu}>All Top Selling</Link>
                     {BODY_TYPES.map((type) => (
-                      <Link key={type.slug} href={`/top-selling-${type.slug}-in-india`} className="block text-gray-600 hover:text-orange-600 py-2 text-sm" onClick={closeMenu}>
+                      <Link key={type.slug} href={`/top-cars/${type.slug}`} className="block text-gray-600 hover:text-orange-600 py-2 text-sm" onClick={closeMenu}>
                         {type.label}
                       </Link>
                     ))}
@@ -238,7 +243,7 @@ export default function Header() {
 
               {/* Brands Dropdown */}
               <div>
-                <button onClick={() => setBrandsOpen(!brandsOpen)} className="w-full flex items-center justify-between text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg transition-all">
+                <button onClick={() => setBrandsOpen(!brandsOpen)} className="w-full flex items-center justify-between text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg transition-all">
                   <span>Cars by Brands</span>
                   {brandsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </button>
@@ -255,21 +260,30 @@ export default function Header() {
 
               <div className="border-t border-gray-200 my-2"></div>
 
-              <Link href="/news" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>Latest News</Link>
-              <Link href="/compare" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>Compare Cars</Link>
+              <Link href="/news" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Latest News</Link>
+              <Link href="/compare" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Compare Cars</Link>
 
               <div className="border-t border-gray-200 my-2"></div>
 
-              <Link href="/fuel-cost-calculator" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>Fuel Calculator</Link>
-              <Link href="/emi-calculator" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>EMI Calculator</Link>
-              <Link href="/location" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>Know On-Road Price</Link>
+              <Link href="/fuel-cost-calculator" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Fuel Calculator</Link>
+              <Link href="/emi-calculator" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>EMI Calculator</Link>
+              <Link href="/location" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Know On-Road Price</Link>
 
-              <div className="border-t border-gray-200 my-2"></div>
-
-              <Link href="/about-us" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>About Us</Link>
-              <Link href="/contact-us" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>Contact Us</Link>
-              <Link href="/feedback" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>Feedback</Link>
-              <Link href="/privacy-policy" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-3 px-4 rounded-lg" onClick={closeMenu}>Privacy Policy</Link>
+              {/* View More Dropdown */}
+              <div>
+                <button onClick={() => setMoreOpen(!moreOpen)} className="w-full flex items-center justify-between text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg transition-all">
+                  <span>View More</span>
+                  {moreOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </button>
+                {moreOpen && (
+                  <div className="ml-4 mt-1 space-y-1 border-l-2 border-orange-200 pl-4">
+                    <Link href="/about-us" className="block text-gray-600 hover:text-orange-600 py-2 text-sm" onClick={closeMenu}>About Us</Link>
+                    <Link href="/contact-us" className="block text-gray-600 hover:text-orange-600 py-2 text-sm" onClick={closeMenu}>Contact Us</Link>
+                    <Link href="/feedback" className="block text-gray-600 hover:text-orange-600 py-2 text-sm" onClick={closeMenu}>Feedback</Link>
+                    <Link href="/privacy-policy" className="block text-gray-600 hover:text-orange-600 py-2 text-sm" onClick={closeMenu}>Privacy Policy</Link>
+                  </div>
+                )}
+              </div>
 
               {/* Login/User */}
               {isAuthenticated && user ? (
@@ -286,7 +300,7 @@ export default function Header() {
                   </button>
                 </div>
               ) : (
-                <Link href="/login" className="text-white bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 font-medium py-3 px-4 rounded-lg text-center shadow-md mt-2" onClick={closeMenu}>
+                <Link href="/login" className="text-white bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 font-medium py-2.5 px-4 rounded-lg text-center shadow-md mt-3" onClick={closeMenu}>
                   Login
                 </Link>
               )}
