@@ -1,3 +1,6 @@
+'use client'
+
+import React from 'react'
 import Link from 'next/link'
 import { Calendar, Users, Fuel, Heart, Gauge } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
@@ -65,7 +68,12 @@ const formatExpectedLaunchDate = (dateString: string): string => {
 
 export default function UpcomingCarCard({ car, onClick }: UpcomingCarCardProps) {
     const { isFavourite, toggleFavourite } = useFavourites()
-    const isFav = isFavourite(car.id)
+    const [mounted, setMounted] = React.useState(false)
+    const isFav = mounted ? isFavourite(car.id) : false
+
+    React.useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // Get on-road price using expectedPriceMin
     const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({

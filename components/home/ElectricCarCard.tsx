@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { Heart, Fuel, Zap } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import { useFavourites } from '@/lib/favourites-context'

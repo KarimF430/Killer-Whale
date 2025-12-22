@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useRef } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { Heart } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
@@ -42,7 +42,13 @@ const BODY_TYPES = [
 // Compact Car Card with Ranking Badge (no fuel/transmission)
 function TopCarCard({ car, rank, onClick }: { car: RankedCar; rank: number; onClick: () => void }) {
     const { isFavourite, toggleFavourite } = useFavourites()
-    const isFav = isFavourite(car.id)
+    const [mounted, setMounted] = React.useState(false)
+    const isFav = mounted ? isFavourite(car.id) : false
+
+    React.useEffect(() => {
+        setMounted(true)
+    }, [])
+
     const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
         exShowroomPrice: car.startingPrice,
         fuelType: car.lowestPriceFuelType || car.fuelTypes?.[0] || 'Petrol'

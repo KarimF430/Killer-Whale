@@ -1,3 +1,6 @@
+'use client'
+
+import React from 'react'
 import Link from 'next/link'
 import { Calendar, Users, Fuel, Heart, Gauge } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
@@ -72,7 +75,12 @@ const formatLaunchDate = (dateString: string): string => {
 
 export default function CarCard({ car, onClick }: CarCardProps) {
   const { isFavourite, toggleFavourite } = useFavourites()
-  const isFav = isFavourite(car.id)
+  const [mounted, setMounted] = React.useState(false)
+  const isFav = mounted ? isFavourite(car.id) : false
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Get on-road price (lightning fast with caching)
   const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
