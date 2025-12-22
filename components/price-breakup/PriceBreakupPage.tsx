@@ -973,7 +973,13 @@ export default function PriceBreakupPage({
               {/* Car Name with Icons */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {brandName} {modelName} {selectedVariantName}
+                  <Link
+                    href={`/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars/${modelName.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="hover:text-orange-600 transition-colors"
+                  >
+                    {brandName} {modelName}
+                  </Link>
+                  {' '}{selectedVariantName}
                 </h2>
                 <div className="flex items-center space-x-3">
                   <button
@@ -1053,7 +1059,7 @@ export default function PriceBreakupPage({
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 {/* Header - Standard red-orange gradient theme */}
                 <div className="bg-gradient-to-r from-red-600 to-orange-500 px-4 sm:px-6 py-4">
-                  <h3 className="text-lg sm:text-xl font-bold text-white">On-Road Price</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-white">On-Road Price in {selectedCity.split(',')[0]}</h3>
                 </div>
 
                 <div className="p-4 sm:p-5">
@@ -1108,7 +1114,7 @@ export default function PriceBreakupPage({
                       {/* Total On-Road Price - Clean highlight */}
                       <div className="mt-4 sm:mt-5">
                         <div className="bg-green-50 rounded-lg p-3 sm:p-4 border border-green-100">
-                          <div className="text-xs sm:text-sm text-gray-500 mb-1">On-Road Price</div>
+                          <div className="text-xs sm:text-sm text-gray-500 mb-1">On-Road Price in {selectedCity.split(',')[0]}</div>
                           <div className="text-xl sm:text-2xl font-bold text-green-600">
                             ₹ {formatIndianPrice(priceBreakup.totalOnRoadPrice)}
                           </div>
