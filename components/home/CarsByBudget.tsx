@@ -20,15 +20,11 @@ interface Car {
   isPopular: boolean
 }
 
-interface BudgetCarsByRange {
-  'under-8': Car[]
-  'under-15': Car[]
-  'under-25': Car[]
-  'under-50': Car[]
-}
+// Budget range IDs
+type BudgetRangeId = 'under-10' | 'under-15' | 'under-20' | 'under-25' | 'under-30' | 'under-40' | 'under-50' | 'under-60' | 'under-80' | 'under-100' | 'above-100'
 
 interface CarsByBudgetProps {
-  budgetCarsByRange: BudgetCarsByRange
+  allCars: Car[]
 }
 
 /**
@@ -40,20 +36,32 @@ interface CarsByBudgetProps {
  * 3. Backend uses Redis caching - reduces database load
  * 4. Full SEO support - all content is server-rendered
  * 
- * No database calls happen at runtime - all data comes from cached sources.
+ * Client-side filtering from allCars data - no additional API calls needed.
  */
-export default function CarsByBudget({ budgetCarsByRange }: CarsByBudgetProps) {
-  const [selectedBudget, setSelectedBudget] = useState<keyof BudgetCarsByRange>('under-8')
+export default function CarsByBudget({ allCars }: CarsByBudgetProps) {
+  const [selectedBudget, setSelectedBudget] = useState<BudgetRangeId>('under-10')
 
-  const budgetRanges = [
-    { id: 'under-8' as const, label: 'Under ₹8 Lakh', max: 800000, urlSlug: '8' },
-    { id: 'under-15' as const, label: 'Under ₹15 Lakh', max: 1500000, urlSlug: '15' },
-    { id: 'under-25' as const, label: 'Under ₹25 Lakh', max: 2500000, urlSlug: '25' },
-    { id: 'under-50' as const, label: 'Under ₹50 Lakh', max: 5000000, urlSlug: '50' },
+  const budgetRanges: { id: BudgetRangeId; label: string; min: number; max: number; urlSlug: string }[] = [
+    { id: 'under-10', label: 'Under ₹10 Lakh', min: 0, max: 1000000, urlSlug: '10' },
+    { id: 'under-15', label: '₹10-15 Lakh', min: 1000001, max: 1500000, urlSlug: '15' },
+    { id: 'under-20', label: '₹15-20 Lakh', min: 1500001, max: 2000000, urlSlug: '20' },
+    { id: 'under-25', label: '₹20-25 Lakh', min: 2000001, max: 2500000, urlSlug: '25' },
+    { id: 'under-30', label: '₹25-30 Lakh', min: 2500001, max: 3000000, urlSlug: '30' },
+    { id: 'under-40', label: '₹30-40 Lakh', min: 3000001, max: 4000000, urlSlug: '40' },
+    { id: 'under-50', label: '₹40-50 Lakh', min: 4000001, max: 5000000, urlSlug: '50' },
+    { id: 'under-60', label: '₹50-60 Lakh', min: 5000001, max: 6000000, urlSlug: '60' },
+    { id: 'under-80', label: '₹60-80 Lakh', min: 6000001, max: 8000000, urlSlug: '80' },
+    { id: 'under-100', label: '₹80L-1 Cr', min: 8000001, max: 10000000, urlSlug: '1-crore' },
+    { id: 'above-100', label: 'Above ₹1 Crore', min: 10000001, max: Infinity, urlSlug: 'above-1-crore' },
   ]
 
-  // ✅ SSR-OPTIMIZED: Direct access to pre-fetched data - no useEffect, no API calls
-  const currentCars = budgetCarsByRange[selectedBudget] || []
+  // Filter cars based on selected budget range
+  const selectedRange = budgetRanges.find(b => b.id === selectedBudget)
+  const currentCars = allCars.filter(car => {
+    const price = car.startingPrice
+    if (!selectedRange) return false
+    return price >= selectedRange.min && price <= selectedRange.max
+  }).slice(0, 10) // Limit to 10 cars, 11th is "See More" card
 
   const scrollContainer = (direction: 'left' | 'right') => {
     const container = document.getElementById(`budget-cars-${selectedBudget}`)
@@ -70,27 +78,62 @@ export default function CarsByBudget({ budgetCarsByRange }: CarsByBudgetProps) {
     <div>
       <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Cars by Budget</h2>
 
-      {/* Budget Filter Buttons - Compact like Top 10 Cars */}
-      <div
-        className="flex gap-2 overflow-x-auto scrollbar-hide mb-5 pb-1"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {budgetRanges.map((budget) => (
-          <button
-            key={budget.id}
-            onClick={() => setSelectedBudget(budget.id)}
-            className={`
-              flex-shrink-0 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium 
-              transition-all duration-200 whitespace-nowrap
-              ${selectedBudget === budget.id
-                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
-              }
-            `}
-          >
-            {budget.label}
-          </button>
-        ))}
+      {/* Budget Filter Buttons with Scroll Arrows */}
+      <div className="relative group/filters mb-5">
+        {/* Left Scroll Arrow for Filters */}
+        <button
+          onClick={() => {
+            const container = document.getElementById('budget-filters-scroll')
+            if (container) {
+              container.scrollBy({ left: -200, behavior: 'smooth' })
+            }
+          }}
+          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover/filters:opacity-100 -ml-4"
+          aria-label="Scroll filters left"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        {/* Right Scroll Arrow for Filters */}
+        <button
+          onClick={() => {
+            const container = document.getElementById('budget-filters-scroll')
+            if (container) {
+              container.scrollBy({ left: 200, behavior: 'smooth' })
+            }
+          }}
+          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover/filters:opacity-100 -mr-4"
+          aria-label="Scroll filters right"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        <div
+          id="budget-filters-scroll"
+          className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {budgetRanges.map((budget) => (
+            <button
+              key={budget.id}
+              onClick={() => setSelectedBudget(budget.id)}
+              className={`
+                flex-shrink-0 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium 
+                transition-all duration-200 whitespace-nowrap
+                ${selectedBudget === budget.id
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
+                }
+              `}
+            >
+              {budget.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Cars Horizontal Scroll */}
@@ -143,7 +186,7 @@ export default function CarsByBudget({ budgetCarsByRange }: CarsByBudgetProps) {
               {/* See More tile - always show to encourage visiting budget page for full list */}
               {currentCars.length > 0 && (
                 <Link
-                  href={`/best-cars-under-${budgetRanges.find(b => b.id === selectedBudget)?.urlSlug || '10'}-lakh`}
+                  href={`/best-cars-under-${selectedRange?.urlSlug || '10'}-lakh`}
                   className="flex-shrink-0 w-[260px] sm:w-72 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
                 >
                   {/* Top section matching image height */}
@@ -158,7 +201,7 @@ export default function CarsByBudget({ budgetCarsByRange }: CarsByBudgetProps) {
                   {/* Bottom section matching card info height */}
                   <div className="p-4 sm:p-5 bg-gradient-to-br from-orange-500 to-orange-600">
                     <h4 className="text-xl sm:text-2xl font-bold text-white text-center mb-3 sm:mb-4">
-                      {budgetRanges.find(b => b.id === selectedBudget)?.label} Cars
+                      {selectedRange?.label} Cars
                     </h4>
 
                     {/* Spacer to match card height */}

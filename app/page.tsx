@@ -151,7 +151,7 @@ async function getHomeData() {
       budgetUnder50Res
     ] = await Promise.all([
       fetch(`${backendUrl}/api/cars/popular?limit=10`, { next: { revalidate: 3600 } }),
-      fetch(`${backendUrl}/api/models-with-pricing?limit=80`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/models-with-pricing?limit=200`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/popular-comparisons`, { next: { revalidate: 3600 } }),
       fetch(`${backendUrl}/api/news?limit=6`, { next: { revalidate: 3600 } }),
@@ -365,7 +365,7 @@ export default async function HomePage() {
         <HeroSection />
 
         <PageSection background="gray">
-          <CarsByBudget budgetCarsByRange={budgetCarsByRange} />
+          <CarsByBudget allCars={allCars} />
         </PageSection>
 
         <CarsYouMightLike allCars={allCars} />

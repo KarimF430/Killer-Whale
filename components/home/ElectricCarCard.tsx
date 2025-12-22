@@ -26,7 +26,12 @@ interface ElectricCarCardProps {
 
 export default function ElectricCarCard({ car, onClick }: ElectricCarCardProps) {
     const { isFavourite, toggleFavourite } = useFavourites()
-    const isFav = isFavourite(car.id)
+    const [mounted, setMounted] = React.useState(false)
+    const isFav = mounted ? isFavourite(car.id) : false
+
+    React.useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // Get on-road price
     const { onRoadPrice, isOnRoadMode, city } = useOnRoadPrice({
