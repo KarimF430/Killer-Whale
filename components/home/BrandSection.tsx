@@ -39,27 +39,26 @@ export default function BrandSection({ initialBrands = [] }: BrandSectionProps) 
 
   return (
     <div>
-      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Popular Brands</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Popular Brands</h2>
 
-      {/* Brands Grid */}
-      <div className="grid grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
-        {/* Show only backend brands */}
+      {/* Brands Grid - Refined UI */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 sm:gap-4 mb-6">
         {(showAllBrands ? allBrands : allBrands.slice(0, 6)).map((brand) => (
           <Link
             key={brand.id}
             href={`/${brand.slug}-cars`}
-            className="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-all duration-300 p-4 text-center"
+            className="group bg-white rounded-xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all duration-300 p-3 sm:p-4 text-center"
           >
             {/* Brand Logo */}
-            <div className="h-16 flex items-center justify-center mb-3">
+            <div className="h-12 sm:h-14 flex items-center justify-center mb-2">
               {brand.logo && brand.logo.startsWith('http') ? (
                 <img
                   src={brand.logo}
                   alt={`${brand.name} logo`}
-                  width={48}
-                  height={48}
+                  width={40}
+                  height={40}
                   loading="lazy"
-                  className="w-12 h-12 object-contain"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain group-hover:scale-110 transition-transform duration-300"
                   onError={(e) => {
                     const target = e.currentTarget
                     target.style.display = 'none'
@@ -67,40 +66,41 @@ export default function BrandSection({ initialBrands = [] }: BrandSectionProps) 
                   }}
                 />
               ) : null}
-              <div className={`w-12 h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-lg flex items-center justify-center ${brand.logo && brand.logo.startsWith('http') ? 'hidden' : ''}`}>
-                <span className="text-sm font-bold text-white">
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-sm ${brand.logo && brand.logo.startsWith('http') ? 'hidden' : ''}`}>
+                <span className="text-xs sm:text-sm font-bold text-white">
                   {brand.name.split(' ').map((word: string) => word.charAt(0)).join('')}
                 </span>
               </div>
             </div>
 
             {/* Brand Name */}
-            <h3 className="font-medium text-gray-900 text-sm">{brand.name}</h3>
+            <h3 className="font-medium text-gray-800 text-xs sm:text-sm group-hover:text-orange-600 transition-colors line-clamp-1">{brand.name}</h3>
           </Link>
         ))}
       </div>
 
-      {/* Show All Brands Button */}
-      <div className="text-center">
-        <button
-          onClick={() => setShowAllBrands(!showAllBrands)}
-          className="inline-flex items-center bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2.5 sm:px-8 sm:py-4 rounded-lg font-semibold text-sm sm:text-lg transition-all duration-200 shadow-md"
-        >
-          {showAllBrands ? (
-            <>
-              <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
-              <span className="hidden sm:inline">Show Less Brands</span>
-              <span className="sm:hidden">Show Less</span>
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
-              <span className="hidden sm:inline">Show All {allBrands.length} Brands</span>
-              <span className="sm:hidden">Show All {allBrands.length} Brands</span>
-            </>
-          )}
-        </button>
-      </div>
+      {/* Show All Brands Button - Original Gradient Style */}
+      {allBrands.length > 6 && (
+        <div className="text-center">
+          <button
+            onClick={() => setShowAllBrands(!showAllBrands)}
+            className="inline-flex items-center bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2.5 sm:px-8 sm:py-4 rounded-lg font-semibold text-sm sm:text-lg transition-all duration-200 shadow-md"
+          >
+            {showAllBrands ? (
+              <>
+                <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">Show Less Brands</span>
+                <span className="sm:hidden">Show Less</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+                <span>Show All {allBrands.length} Brands</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
