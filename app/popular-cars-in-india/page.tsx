@@ -69,42 +69,53 @@ async function getPopularCarsData() {
 
         const models = modelsResponse.data || modelsResponse
 
-        // Create brand map
+        // Create brand map and active brands set
+        const activeBrandIds = new Set<string>()
         const brandMap = brands.reduce((acc: any, brand: any) => {
+            // Only add to active set if status is active (default to active for safety if missing)
+            const isActive = brand.status === 'active' || !brand.status
+            if (isActive) {
+                activeBrandIds.add(brand.id)
+                if (brand._id) activeBrandIds.add(brand._id)
+            }
+
             acc[brand.id] = brand.name
+            if (brand._id) acc[brand._id] = brand.name
             return acc
         }, {})
 
-        // Process all cars
-        const allCars = models.map((model: any) => {
-            const lowestPrice = model.lowestPrice || model.price || 0
-            const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0 ? model.fuelTypes : ['Petrol']
-            const transmissions = model.transmissionTypes && model.transmissionTypes.length > 0 ? model.transmissionTypes : ['Manual']
-            const heroImage = model.heroImage
-                ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
-                : ''
+        // Process all cars - filter by active brand
+        const allCars = models
+            .filter((model: any) => activeBrandIds.has(model.brandId)) // Filter inactive brands
+            .map((model: any) => {
+                const lowestPrice = model.lowestPrice || model.price || 0
+                const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0 ? model.fuelTypes : ['Petrol']
+                const transmissions = model.transmissionTypes && model.transmissionTypes.length > 0 ? model.transmissionTypes : ['Manual']
+                const heroImage = model.heroImage
+                    ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`)
+                    : ''
 
-            return {
-                id: model.id,
-                name: model.name,
-                brand: model.brandId,
-                brandName: brandMap[model.brandId] || 'Unknown',
-                image: heroImage,
-                startingPrice: lowestPrice,
-                lowestPriceFuelType: model.lowestPriceFuelType || fuelTypes[0],
-                fuelTypes,
-                transmissions,
-                bodyType: model.bodyType,
-                seating: model.seating || 5,
-                launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
-                slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
-                isNew: model.isNew || false,
-                isPopular: model.isPopular || false,
-                rating: 4.5,
-                reviews: 1247,
-                variants: model.variantCount || 0
-            }
-        })
+                return {
+                    id: model.id,
+                    name: model.name,
+                    brand: model.brandId,
+                    brandName: brandMap[model.brandId] || 'Unknown',
+                    image: heroImage,
+                    startingPrice: lowestPrice,
+                    lowestPriceFuelType: model.lowestPriceFuelType || fuelTypes[0],
+                    fuelTypes,
+                    transmissions,
+                    bodyType: model.bodyType,
+                    seating: model.seating || 5,
+                    launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
+                    slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+                    isNew: model.isNew || false,
+                    isPopular: model.isPopular || false,
+                    rating: 4.5,
+                    reviews: 1247,
+                    variants: model.variantCount || 0
+                }
+            })
 
         // Filter popular cars and sort
         const popularCars = allCars

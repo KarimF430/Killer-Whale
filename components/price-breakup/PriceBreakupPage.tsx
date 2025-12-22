@@ -430,94 +430,64 @@ export default function PriceBreakupPage({
     fetchData()
   }, [brandName, modelName, variantParam, initialVariants, initialModel])
 
-  // Fetch popular cars from backend
+  // Fetch popular cars from backend - using same /api/cars/popular as home page
   useEffect(() => {
     const fetchPopularCars = async () => {
       try {
         setLoadingPopularCars(true)
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
-        // Fetch all models, brands, and variants
-        const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models`),
-          fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants?fields=minimal`)
+        // Fetch brands to check active status
+        const [popularRes, brandsRes] = await Promise.all([
+          fetch(`${backendUrl}/api/cars/popular?limit=20`), // Fetch more to allow for filtering
+          fetch(`${backendUrl}/api/brands`)
         ])
 
-        if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
-          console.error('Failed to fetch popular cars data')
+        if (!popularRes.ok || !brandsRes.ok) {
+          console.error('Failed to fetch popular cars or brands')
           setPopularCars([])
           setLoadingPopularCars(false)
           return
         }
 
-        const models = await modelsRes.json()
+        const popularData = await popularRes.json()
         const brands = await brandsRes.json()
-        const variants = await variantsRes.json()
 
-        // Create a map of brand IDs to brand names
-        const brandMap = brands.reduce((acc: Record<string, string>, brand: any) => {
-          acc[brand.id] = brand.name
-          return acc
-        }, {})
 
-        // Filter only popular models
-        const popularModels = models.filter((model: any) => model.isPopular === true)
+        // Create map of active brand IDs and names
+        const activeBrandIds = new Set(
+          brands
+            .filter((b: any) => b.status === 'active')
+            .map((b: any) => b.id)
+        )
+        const activeBrandNames = new Set(
+          brands
+            .filter((b: any) => b.status === 'active')
+            .map((b: any) => b.name)
+        )
 
-        // Process each popular model
-        const processedCars = popularModels.map((model: any) => {
-          // Find all variants for this model
-          const modelVariants = variants.filter((v: any) => v.modelId === model.id)
+        // Process popular cars - filter by active brand (check both ID and name)
+        const processedCars = Array.isArray(popularData) ? popularData
+          .filter((car: any) => activeBrandIds.has(car.brandId) || activeBrandNames.has(car.brandName) || activeBrandNames.has(car.brand)) // Only show active brands
+          .slice(0, 10) // Limit to 10 after filtering
+          .map((car: any) => ({
+            id: car.id,
+            name: car.name,
+            brand: car.brandId,
+            brandName: car.brandName,
+            image: car.image ? (car.image.startsWith('http') ? car.image : `${backendUrl}${car.image}`) : '',
+            startingPrice: car.startingPrice,
+            fuelTypes: car.fuelTypes || ['Petrol'],
+            transmissions: car.transmissions || ['Manual'],
+            seating: car.seating || 5,
+            launchDate: car.launchDate ? `Launched ${formatLaunchDate(car.launchDate)}` : 'Launched',
+            slug: `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`,
+            isNew: car.isNew || false,
+            isPopular: car.isPopular || true,
+            popularRank: car.popularRank || null
+          })) : []
 
-          // Find lowest price variant
-          const lowestPrice = modelVariants.length > 0
-            ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-            : model.price || 0
-
-          // Get unique fuel types and transmissions
-          const fuelTypes = model.fuelTypes && model.fuelTypes.length > 0
-            ? model.fuelTypes
-            : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-
-          const transmissions = model.transmissions && model.transmissions.length > 0
-            ? model.transmissions
-            : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-
-          // Get hero image - handle full URLs and relative paths
-          const heroImage = model.heroImage
-            ? (model.heroImage.startsWith('http')
-              ? model.heroImage
-              : model.heroImage.startsWith('/uploads/') || model.heroImage.startsWith('/')
-                ? `${backendUrl}${model.heroImage}`
-                : `${backendUrl}/uploads/${model.heroImage}`)
-            : ''
-
-          return {
-            id: model.id,
-            name: model.name,
-            brand: model.brandId,
-            brandName: brandMap[model.brandId] || 'Unknown',
-            image: heroImage,
-            startingPrice: lowestPrice,
-            fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
-            transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
-            seating: model.seating || 5,
-            launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
-            slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
-            isNew: model.isNew || false,
-            isPopular: model.isPopular || false,
-            popularRank: model.popularRank || null
-          }
-        })
-
-        // Sort by popularRank
-        const sortedCars = processedCars.sort((a: any, b: any) => {
-          const rankA = a.popularRank || 999
-          const rankB = b.popularRank || 999
-          return rankA - rankB
-        })
-
-        setPopularCars(sortedCars)
+        setPopularCars(processedCars)
       } catch (error) {
         console.error('Error fetching popular cars:', error)
       } finally {
@@ -570,72 +540,71 @@ export default function PriceBreakupPage({
         setLoadingSimilarCars(true)
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
-        // Fetch all models, brands, and variants (same as CarModelPage)
-        const [modelsRes, brandsRes, variantsRes] = await Promise.all([
-          fetch(`${backendUrl}/api/models`),
-          fetch(`${backendUrl}/api/brands`),
-          fetch(`${backendUrl}/api/variants?fields=minimal`)
+        // Fetch models with pricing (matches CarModelPage) and brands
+        const [modelsRes, brandsRes] = await Promise.all([
+          fetch(`${backendUrl}/api/models-with-pricing?limit=20`), // Fetch more to allow for filtering
+          fetch(`${backendUrl}/api/brands`)
         ])
 
-        if (!modelsRes.ok || !brandsRes.ok || !variantsRes.ok) {
+        if (!modelsRes.ok || !brandsRes.ok) {
           console.error('Failed to fetch similar cars data')
           setSimilarCars([])
           setLoadingSimilarCars(false)
           return
         }
 
-        const models = await modelsRes.json()
+        const modelsData = await modelsRes.json()
         const brands = await brandsRes.json()
-        const variants = await variantsRes.json()
 
-        // Create a map of brand IDs to brand names (same as CarModelPage)
+        const models = modelsData.data || modelsData || []
+
+        // Create a map of active brand IDs and names
+        const activeBrandIds = new Set<string>()
         const brandMap = brands.reduce((acc: Record<string, string>, brand: any) => {
+          // Only add to active set if status is active (default to active for safety if missing)
+          const isActive = brand.status === 'active' || !brand.status
+          if (isActive) {
+            activeBrandIds.add(brand.id)
+            if (brand._id) activeBrandIds.add(brand._id)
+          }
+
           acc[brand.id] = brand.name
+          if (brand._id) acc[brand._id] = brand.name
           return acc
         }, {})
 
-        // Process each model to find lowest variant price (same as CarModelPage)
+        // Process each model - filter by active brand first
         const processedCars = models
-          .filter((m: any) => m.id !== model.id) // Exclude current model
+          .filter((m: any) => m.id !== model.id && activeBrandIds.has(m.brandId)) // Exclude current model & inactive brands
+          .slice(0, 10) // Limit to 10 similar cars after filtering
           .map((m: any) => {
-            // Find all variants for this model
-            const modelVariants = variants.filter((v: any) => v.modelId === m.id)
+            // Use model's lowestPrice directly from API if available, else usage price
+            const lowestPrice = m.lowestPrice || m.price || 0
 
-            // Find lowest price variant
-            const lowestPrice = modelVariants.length > 0
-              ? Math.min(...modelVariants.map((v: any) => v.price || 0))
-              : m.price || 0
-
-            // Get unique fuel types and transmissions from model or variants
-            const fuelTypes = m.fuelTypes && m.fuelTypes.length > 0
-              ? m.fuelTypes
-              : Array.from(new Set(modelVariants.map((v: any) => v.fuel).filter(Boolean)))
-
-            const transmissions = m.transmissions && m.transmissions.length > 0
-              ? m.transmissions
-              : Array.from(new Set(modelVariants.map((v: any) => v.transmission).filter(Boolean)))
-
-            // Get hero image from model (same as CarModelPage)
+            // Get hero image - handle full URLs and relative paths
             const heroImage = m.heroImage
               ? (m.heroImage.startsWith('http')
                 ? m.heroImage
-                : `${backendUrl}${m.heroImage}`)
+                : m.heroImage.startsWith('/uploads/') || m.heroImage.startsWith('/')
+                  ? `${backendUrl}${m.heroImage}`
+                  : `${backendUrl}/uploads/${m.heroImage}`)
               : ''
 
             return {
               id: m.id,
               name: m.name,
               brand: m.brandId,
-              brandName: brandMap[m.brandId] || 'Unknown',
+              brandName: brandMap[m.brandId] || m.brandName || 'Unknown',
               image: heroImage,
               startingPrice: lowestPrice,
-              fuelTypes: fuelTypes.length > 0 ? fuelTypes : ['Petrol'],
-              transmissions: transmissions.length > 0 ? transmissions : ['Manual'],
+              fuelTypes: m.fuelTypes && m.fuelTypes.length > 0 ? m.fuelTypes : ['Petrol'],
+              transmissions: m.transmissions && m.transmissions.length > 0 ? m.transmissions : ['Manual'],
               seating: m.seating || 5,
               launchDate: m.launchDate ? `Launched ${formatLaunchDateForSimilar(m.launchDate)}` : 'Launched',
-              slug: `${(brandMap[m.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
+              slug: `${(brandMap[m.brandId] || m.brandName || '').toLowerCase().replace(/\s+/g, '-')}-${m.name.toLowerCase().replace(/\s+/g, '-')}`,
               isNew: m.isNew || false,
-              isPopular: m.isPopular || false
+              isPopular: m.isPopular || false,
+              popularRank: m.popularRank || null
             }
           })
 
@@ -762,7 +731,7 @@ export default function PriceBreakupPage({
         const brandSlug = brandName.toLowerCase().replace(/\s+/g, '-')
         const modelSlug = modelName.toLowerCase().replace(/\s+/g, '-')
         const citySlug = savedCity.split(',')[0].toLowerCase().replace(/\s+/g, '-')
-        router.push(`/${brandSlug}-cars/${modelSlug}/price-in/${citySlug}`)
+        router.push(`/${brandSlug}-cars/${modelSlug}/price-in-${citySlug}`)
       }
     }
 

@@ -189,58 +189,73 @@ async function getHomeData() {
     }
 
     const models = modelsData.data || modelsData
-    const brands = brandsData
+    // Filter brands to only active ones
+    const brands = Array.isArray(brandsData)
+      ? brandsData.filter((b: any) => b.status === 'active' || !b.status)
+      : []
 
-    // Create brand map
+    // Create brand map and active brands set
+    const activeBrandIds = new Set<string>()
+    const activeBrandNames = new Set<string>()
     const brandMap = brands.reduce((acc: any, brand: any) => {
+      // Since we already filtered brands, all brands here are active
+      activeBrandIds.add(brand.id)
+      if (brand._id) activeBrandIds.add(brand._id)
+      activeBrandNames.add(brand.name) // Add brand name for popular cars filter
+
       acc[brand.id] = brand.name
+      if (brand._id) acc[brand._id] = brand.name
       return acc
     }, {})
 
     // Process Popular Cars with normalization
-    const popularCars: Car[] = Array.isArray(popularData) ? popularData.map((car: any) => ({
-      id: car.id,
-      name: car.name,
-      brand: car.brandId,
-      brandName: car.brandName,
-      image: car.image ? (car.image.startsWith('http') ? car.image : `${backendUrl}${car.image}`) : '',
-      startingPrice: car.startingPrice,
-      popularRank: (car as any).popularRank ?? null,
-      newRank: (car as any).newRank ?? null,
-      lowestPriceFuelType: (car as any).lowestPriceFuelType,
-      fuelTypes: (car.fuelTypes || ['Petrol']).map(normalizeFuelType),
-      transmissions: (car.transmissions || ['Manual']).map(normalizeTransmission),
-      seating: car.seating,
-      launchDate: car.launchDate ? `Launched ${formatLaunchDate(car.launchDate)}` : 'Launched',
-      slug: `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`,
-      isNew: car.isNew,
-      isPopular: car.isPopular,
+    const popularCars: Car[] = Array.isArray(popularData) ? popularData
+      .filter((car: any) => activeBrandIds.has(car.brandId) || activeBrandNames.has(car.brandName) || activeBrandNames.has(car.brand)) // Filter inactive brands
+      .map((car: any) => ({
+        id: car.id,
+        name: car.name,
+        brand: car.brandId,
+        brandName: car.brandName,
+        image: car.image ? (car.image.startsWith('http') ? car.image : `${backendUrl}${car.image}`) : '',
+        startingPrice: car.startingPrice,
+        popularRank: (car as any).popularRank ?? null,
+        newRank: (car as any).newRank ?? null,
+        lowestPriceFuelType: (car as any).lowestPriceFuelType,
+        fuelTypes: (car.fuelTypes || ['Petrol']).map(normalizeFuelType),
+        transmissions: (car.transmissions || ['Manual']).map(normalizeTransmission),
+        seating: car.seating,
+        launchDate: car.launchDate ? `Launched ${formatLaunchDate(car.launchDate)}` : 'Launched',
+        slug: `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`,
+        isNew: car.isNew,
+        isPopular: car.isPopular,
 
-    })) : []
+      })) : []
 
     // Process All Cars (for Budget) with normalization
-    const allCars: Car[] = Array.isArray(models) ? models.map((model: any) => {
-      const brandName = brandMap[model.brandId] || 'Unknown'
-      return {
-        id: model.id,
-        name: model.name,
-        brand: model.brandId,
-        brandName: brandName,
-        image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`) : '/car-placeholder.jpg',
-        startingPrice: model.lowestPrice || 0,
-        fuelTypes: (model.fuelTypes || ['Petrol']).map(normalizeFuelType),
-        transmissions: (model.transmissions || ['Manual']).map(normalizeTransmission),
-        seating: 5,
-        launchDate: model.launchDate || 'Launched',
-        slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
-        isNew: model.isNew || false,
-        isPopular: model.isPopular || false,
-        popularRank: model.popularRank ?? null,
-        newRank: model.newRank ?? null,
-        bodyType: model.bodyType || undefined,
-        topRank: model.topRank ?? null
-      }
-    }).filter(car => car.startingPrice >= 100000) : [] // Filter out cars with price < 1 lakh
+    const allCars: Car[] = Array.isArray(models) ? models
+      .filter((model: any) => activeBrandIds.has(model.brandId)) // Filter inactive brands
+      .map((model: any) => {
+        const brandName = brandMap[model.brandId] || 'Unknown'
+        return {
+          id: model.id,
+          name: model.name,
+          brand: model.brandId,
+          brandName: brandName,
+          image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`) : '/car-placeholder.jpg',
+          startingPrice: model.lowestPrice || 0,
+          fuelTypes: (model.fuelTypes || ['Petrol']).map(normalizeFuelType),
+          transmissions: (model.transmissions || ['Manual']).map(normalizeTransmission),
+          seating: 5,
+          launchDate: model.launchDate || 'Launched',
+          slug: `${brandName.toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+          isNew: model.isNew || false,
+          isPopular: model.isPopular || false,
+          popularRank: model.popularRank ?? null,
+          newRank: model.newRank ?? null,
+          bodyType: model.bodyType || undefined,
+          topRank: model.topRank ?? null
+        }
+      }).filter(car => car.startingPrice >= 100000) : [] // Filter out cars with price < 1 lakh
 
     // Process New Launched Cars
     const newLaunchedCars = allCars

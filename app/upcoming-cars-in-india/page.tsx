@@ -66,34 +66,45 @@ async function getUpcomingCarsData() {
         const upcomingCars = await modelsRes.json()
         const brands = await brandsRes.json()
 
-        // Create brand map
+        // Create brand map and active brands set
+        const activeBrandIds = new Set<string>()
         const brandMap = brands.reduce((acc: any, brand: any) => {
+            // Only add to active set if status is active (default to active for safety if missing)
+            const isActive = brand.status === 'active' || !brand.status
+            if (isActive) {
+                activeBrandIds.add(brand.id)
+                if (brand._id) activeBrandIds.add(brand._id)
+            }
+
             acc[brand.id] = brand.name
+            if (brand._id) acc[brand._id] = brand.name
             return acc
         }, {})
 
-        // Process upcoming cars
-        const processedCars = (upcomingCars.data || upcomingCars || []).map((car: any) => {
-            const heroImage = car.image || car.heroImage
-                ? ((car.image || car.heroImage).startsWith('http') ? (car.image || car.heroImage) : `${backendUrl}${car.image || car.heroImage}`)
-                : ''
+        // Process upcoming cars - filter by active brand
+        const processedCars = (upcomingCars.data || upcomingCars || [])
+            .filter((car: any) => activeBrandIds.has(car.brandId)) // Filter inactive brands
+            .map((car: any) => {
+                const heroImage = car.image || car.heroImage
+                    ? ((car.image || car.heroImage).startsWith('http') ? (car.image || car.heroImage) : `${backendUrl}${car.image || car.heroImage}`)
+                    : ''
 
-            return {
-                id: car.id,
-                name: car.name,
-                brand: car.brandId,
-                brandName: brandMap[car.brandId] || car.brandName || 'Unknown',
-                image: heroImage,
-                expectedPriceMin: car.expectedPriceMin || car.expectedPrice || 0,
-                expectedPriceMax: car.expectedPriceMax || car.expectedPrice || 0,
-                fuelTypes: car.fuelTypes || ['Petrol'],
-                expectedLaunchDate: car.expectedLaunchDate ? formatLaunchDate(car.expectedLaunchDate) : 'Coming Soon',
-                bodyType: car.bodyType,
-                isNew: false,
-                isPopular: car.isPopular || false,
-                isUpcoming: true
-            }
-        })
+                return {
+                    id: car.id,
+                    name: car.name,
+                    brand: car.brandId,
+                    brandName: brandMap[car.brandId] || car.brandName || 'Unknown',
+                    image: heroImage,
+                    expectedPriceMin: car.expectedPriceMin || car.expectedPrice || 0,
+                    expectedPriceMax: car.expectedPriceMax || car.expectedPrice || 0,
+                    fuelTypes: car.fuelTypes || ['Petrol'],
+                    expectedLaunchDate: car.expectedLaunchDate ? formatLaunchDate(car.expectedLaunchDate) : 'Coming Soon',
+                    bodyType: car.bodyType,
+                    isNew: false,
+                    isPopular: car.isPopular || false,
+                    isUpcoming: true
+                }
+            })
 
         // Generate dynamic description
         const topCars = processedCars.slice(0, 3)

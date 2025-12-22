@@ -196,6 +196,17 @@ const nextConfig = {
   outputFileTracingExcludes: {
     '*': ['./backend/**/*'],
   },
+
+  // URL rewrites: Map /price-in-{city} to /price-in/{city}
+  async rewrites() {
+    return [
+      {
+        // Match /{brand}-cars/{model}/price-in-{city}
+        source: '/:brand-cars/:model/price-in-:city',
+        destination: '/:brand-cars/:model/price-in/:city',
+      },
+    ]
+  },
 };
 
 module.exports = nextConfig;

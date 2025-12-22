@@ -997,7 +997,7 @@ export default function VariantPage({
                     .replace(/^-|-$/g, '')           // Remove leading/trailing
 
                   // Navigate directly to price-in route with variant parameter
-                  router.push(`/${brandSlug}-cars/${modelSlug}/price-in/${citySlug}?variant=${variantSlug}`)
+                  router.push(`/${brandSlug}-cars/${modelSlug}/price-in-${citySlug}?variant=${variantSlug}`)
                 }}
                 className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
@@ -2727,7 +2727,7 @@ export default function VariantPage({
                           .replace(/^-|-$/g, '')           // Remove leading/trailing
 
                         // Navigate directly to price-in route with variant parameter
-                        router.push(`/${brandSlug}-cars/${modelSlug}/price-in/${citySlug}?variant=${varSlug}`)
+                        router.push(`/${brandSlug}-cars/${modelSlug}/price-in-${citySlug}?variant=${varSlug}`)
                       }}
                       onCompare={(e) => e.stopPropagation()}
                     />

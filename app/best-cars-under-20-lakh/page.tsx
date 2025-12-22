@@ -7,12 +7,12 @@ import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 import BudgetCarsClient from '@/app/cars-by-budget/[budget]/BudgetCarsClient'
 
 const BUDGET_INFO = {
-    label: 'Under ₹25 Lakh',
-    min: 100000,
-    max: 2500000,
-    lakhValue: '25 lakh',
-    title: 'Best Cars Under 25 Lakh',
-    apiSlug: 'under-25'
+    label: 'Under ₹20 Lakh',
+    min: 0,
+    max: 2000000,
+    lakhValue: '20 lakh',
+    title: 'Best Cars Under 20 Lakh',
+    apiSlug: 'under-20'
 }
 
 export const revalidate = 3600
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
         type: 'website'
     },
     alternates: {
-        canonical: `/best-cars-under-25-lakh`
+        canonical: `/best-cars-under-20-lakh`
     }
 }
 
@@ -83,10 +83,8 @@ async function getBudgetCarsData() {
 
         const models = modelsResponse.data || modelsResponse
 
-        // Create brand map and active brands set
         const activeBrandIds = new Set<string>()
         const brandMap = brands.reduce((acc: any, brand: any) => {
-            // Only add to active set if status is active (default to active for safety if missing)
             const isActive = brand.status === 'active' || !brand.status
             if (isActive) {
                 activeBrandIds.add(brand.id)
@@ -98,16 +96,14 @@ async function getBudgetCarsData() {
             return acc
         }, {})
 
-        // Filter budget cars - check for active brand
         const allCars = budgetData.data || []
         const cars = allCars.filter((car: any) => {
             const price = car.startingPrice || 0
-            // Filter by budget AND active brand
             return price >= BUDGET_INFO.min && price <= BUDGET_INFO.max && activeBrandIds.has(car.brandId || car.brand)
         })
 
         const processedCars = models
-            .filter((model: any) => activeBrandIds.has(model.brandId)) // Filter inactive brands
+            .filter((model: any) => activeBrandIds.has(model.brandId))
             .map((model: any) => ({
                 id: model.id,
                 name: model.name,
@@ -140,7 +136,7 @@ async function getBudgetCarsData() {
     }
 }
 
-export default async function BestCarsUnder25LakhPage() {
+export default async function BestCarsUnder20LakhPage() {
     const { cars, popularCars, newLaunchedCars, dynamicDescription } = await getBudgetCarsData()
 
     return (

@@ -7,12 +7,12 @@ import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 import BudgetCarsClient from '@/app/cars-by-budget/[budget]/BudgetCarsClient'
 
 const BUDGET_INFO = {
-    label: 'Under ₹25 Lakh',
-    min: 100000,
-    max: 2500000,
-    lakhValue: '25 lakh',
-    title: 'Best Cars Under 25 Lakh',
-    apiSlug: 'under-25'
+    label: 'Above ₹1 Crore',
+    min: 10000000,
+    max: 1000000000,
+    lakhValue: '1 crore',
+    title: 'Best Cars Above 1 Crore',
+    apiSlug: 'above-100'
 }
 
 export const revalidate = 3600
@@ -22,19 +22,19 @@ function generateDynamicDescription(cars: any[], lakhValue: string, topCarName: 
     const topCarNames = topCars.map(car => `${car.brandName} ${car.name}`)
     const carCount = cars.length
 
-    let shortDesc = `Looking for the perfect car within your budget? Explore our curated selection of ${carCount}+ best cars under Rs. ${lakhValue} in India, featuring top-rated models with excellent mileage, safety features, and value for money.`
+    let shortDesc = `Looking for the perfect premium car? Explore our curated selection of ${carCount}+ best cars above Rs. ${lakhValue} in India, featuring luxury models with top-tier performance and features.`
     let extendedDesc = ''
 
     if (topCarNames.length >= 3) {
-        extendedDesc += ` Top picks in this price segment include ${topCarNames[0]}, ${topCarNames[1]}, and ${topCarNames[2]} - each offering a unique blend of style, performance, and affordability.`
+        extendedDesc += ` Top premium picks include ${topCarNames[0]}, ${topCarNames[1]}, and ${topCarNames[2]} - each offering a unique blend of luxury, performance, and status.`
     } else if (topCarNames.length >= 1) {
-        extendedDesc += ` The ${topCarNames[0]} stands out as one of the most sought-after choices in this segment.`
+        extendedDesc += ` The ${topCarNames[0]} stands out as one of the most exclusive choices in this segment.`
     }
 
-    extendedDesc += ` Compare specifications, on-road prices, mileage figures, interior features, and genuine owner reviews to make an informed decision.`
+    extendedDesc += ` Compare specifications, on-road prices, mileage figures, interior features, and genuine owner reviews to make an informed decision on your luxury car purchase.`
 
     if (topCarName) {
-        extendedDesc += ` Based on popularity and user ratings, we recommend the ${topCarName} as an excellent choice for buyers in this budget.`
+        extendedDesc += ` Based on popularity and user ratings, we recommend the ${topCarName} as an excellent choice for luxury car buyers.`
     }
 
     return JSON.stringify({ short: shortDesc, extended: extendedDesc })
@@ -43,14 +43,14 @@ function generateDynamicDescription(cars: any[], lakhValue: string, topCarName: 
 export const metadata: Metadata = {
     title: `${BUDGET_INFO.title} in India - Prices, Specs & Reviews | gadizone`,
     description: `Find the best cars ${BUDGET_INFO.label.toLowerCase()} in India. Compare prices, specifications, features, and expert reviews.`,
-    keywords: `cars ${BUDGET_INFO.label.toLowerCase()}, budget cars, best cars under ${BUDGET_INFO.lakhValue}, car prices India`,
+    keywords: `luxury cars India, cars above 1 crore, premium cars India, best cars above 1 crore, car prices India`,
     openGraph: {
         title: `${BUDGET_INFO.title} in India`,
         description: `Find the best cars ${BUDGET_INFO.label.toLowerCase()} in India.`,
         type: 'website'
     },
     alternates: {
-        canonical: `/best-cars-under-25-lakh`
+        canonical: `/best-cars-under-above-1-crore-lakh`
     }
 }
 
@@ -83,10 +83,8 @@ async function getBudgetCarsData() {
 
         const models = modelsResponse.data || modelsResponse
 
-        // Create brand map and active brands set
         const activeBrandIds = new Set<string>()
         const brandMap = brands.reduce((acc: any, brand: any) => {
-            // Only add to active set if status is active (default to active for safety if missing)
             const isActive = brand.status === 'active' || !brand.status
             if (isActive) {
                 activeBrandIds.add(brand.id)
@@ -98,16 +96,14 @@ async function getBudgetCarsData() {
             return acc
         }, {})
 
-        // Filter budget cars - check for active brand
         const allCars = budgetData.data || []
         const cars = allCars.filter((car: any) => {
             const price = car.startingPrice || 0
-            // Filter by budget AND active brand
             return price >= BUDGET_INFO.min && price <= BUDGET_INFO.max && activeBrandIds.has(car.brandId || car.brand)
         })
 
         const processedCars = models
-            .filter((model: any) => activeBrandIds.has(model.brandId)) // Filter inactive brands
+            .filter((model: any) => activeBrandIds.has(model.brandId))
             .map((model: any) => ({
                 id: model.id,
                 name: model.name,
@@ -140,7 +136,7 @@ async function getBudgetCarsData() {
     }
 }
 
-export default async function BestCarsUnder25LakhPage() {
+export default async function BestCarsAbove1CrorePage() {
     const { cars, popularCars, newLaunchedCars, dynamicDescription } = await getBudgetCarsData()
 
     return (

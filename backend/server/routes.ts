@@ -1504,11 +1504,19 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       const budgetRanges: Record<string, { min: number; max: number; label: string }> = {
         'under-5-lakh': { min: 0, max: 500000, label: 'Under ₹5 Lakh' },
         'under-8-lakh': { min: 0, max: 800000, label: 'Under ₹8 Lakh' },
-        'under-8': { min: 100000, max: 800000, label: 'Under ₹8 Lakh' },
-        'under-15': { min: 800001, max: 1500000, label: 'Under ₹15 Lakh' },
-        'under-25': { min: 1500001, max: 2500000, label: 'Under ₹25 Lakh' },
-        'under-50': { min: 2500001, max: 5000000, label: 'Under ₹50 Lakh' },
-        'above-50': { min: 5000001, max: 999999999, label: 'Above ₹50 Lakh' }
+        'under-8': { min: 0, max: 800000, label: 'Under ₹8 Lakh' },
+        'under-10': { min: 0, max: 1000000, label: 'Under ₹10 Lakh' },
+        'under-15': { min: 0, max: 1500000, label: 'Under ₹15 Lakh' },
+        'under-20': { min: 0, max: 2000000, label: 'Under ₹20 Lakh' },
+        'under-25': { min: 0, max: 2500000, label: 'Under ₹25 Lakh' },
+        'under-30': { min: 0, max: 3000000, label: 'Under ₹30 Lakh' },
+        'under-40': { min: 0, max: 4000000, label: 'Under ₹40 Lakh' },
+        'under-50': { min: 0, max: 5000000, label: 'Under ₹50 Lakh' },
+        'under-60': { min: 0, max: 6000000, label: 'Under ₹60 Lakh' },
+        'under-80': { min: 0, max: 8000000, label: 'Under ₹80 Lakh' },
+        'under-100': { min: 0, max: 10000000, label: 'Under ₹1 Crore' },
+        'above-50': { min: 5000001, max: 999999999, label: 'Above ₹50 Lakh' },
+        'above-100': { min: 10000001, max: 999999999, label: 'Above ₹1 Crore' }
       };
 
       const currentBudget = budgetRanges[budget] || budgetRanges['under-8'];
@@ -1624,6 +1632,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           id: car.id,
           name: car.name,
           brand: car.brandId,
+          brandId: car.brandId,
           brandName,
           image: heroImage,
           startingPrice: car.startingPrice || 0,
@@ -1933,7 +1942,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             const modelWithBrand = {
               ...model,
               brandName: brand?.name || 'Unknown',
-              startingPrice: validatedData.price || 0
+              startingPrice: (req.body as any).price || 0
             };
             emailScheduler.sendNewLaunchAlert(modelWithBrand).catch(err => {
               console.error('Failed to send new launch alert:', err);

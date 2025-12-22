@@ -8,11 +8,11 @@ import BudgetCarsClient from '@/app/cars-by-budget/[budget]/BudgetCarsClient'
 
 const BUDGET_INFO = {
     label: 'Under ₹10 Lakh',
-    min: 100000,
+    min: 0,
     max: 1000000,
     lakhValue: '10 lakh',
     title: 'Best Cars Under 10 Lakh',
-    apiSlug: 'under-8'
+    apiSlug: 'under-10'
 }
 
 export const revalidate = 3600
@@ -82,33 +82,50 @@ async function getBudgetCarsData() {
         const brands = await brandsRes.json()
 
         const models = modelsResponse.data || modelsResponse
-        const brandMap = brands.reduce((acc: any, brand: any) => { acc[brand.id] = brand.name; return acc }, {})
+
+        // Create brand map and active brands set
+        const activeBrandIds = new Set<string>()
+        const brandMap = brands.reduce((acc: any, brand: any) => {
+            // Only add to active set if status is active (default to active for safety if missing)
+            const isActive = brand.status === 'active' || !brand.status
+            if (isActive) {
+                activeBrandIds.add(brand.id)
+                if (brand._id) activeBrandIds.add(brand._id)
+            }
+
+            acc[brand.id] = brand.name
+            if (brand._id) acc[brand._id] = brand.name
+            return acc
+        }, {})
 
         const allCars = budgetData.data || []
         const cars = allCars.filter((car: any) => {
             const price = car.startingPrice || 0
-            return price >= BUDGET_INFO.min && price <= BUDGET_INFO.max
+            // Filter by budget AND active brand
+            return price >= BUDGET_INFO.min && price <= BUDGET_INFO.max && activeBrandIds.has(car.brandId || car.brand)
         })
 
-        const processedCars = models.map((model: any) => ({
-            id: model.id,
-            name: model.name,
-            brand: model.brandId,
-            brandName: brandMap[model.brandId] || 'Unknown',
-            image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`) : '',
-            startingPrice: model.lowestPrice || model.price || 0,
-            lowestPriceFuelType: model.lowestPriceFuelType || (model.fuelTypes?.[0] || 'Petrol'),
-            fuelTypes: model.fuelTypes?.length > 0 ? model.fuelTypes : ['Petrol'],
-            transmissions: model.transmissionTypes?.length > 0 ? model.transmissionTypes : ['Manual'],
-            seating: model.seating || 5,
-            launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
-            slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
-            isNew: model.isNew || false,
-            isPopular: model.isPopular || false,
-            rating: 4.5,
-            reviews: 1247,
-            variants: model.variantCount || 0
-        }))
+        const processedCars = models
+            .filter((model: any) => activeBrandIds.has(model.brandId)) // Filter inactive brands
+            .map((model: any) => ({
+                id: model.id,
+                name: model.name,
+                brand: model.brandId,
+                brandName: brandMap[model.brandId] || 'Unknown',
+                image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`) : '',
+                startingPrice: model.lowestPrice || model.price || 0,
+                lowestPriceFuelType: model.lowestPriceFuelType || (model.fuelTypes?.[0] || 'Petrol'),
+                fuelTypes: model.fuelTypes?.length > 0 ? model.fuelTypes : ['Petrol'],
+                transmissions: model.transmissionTypes?.length > 0 ? model.transmissionTypes : ['Manual'],
+                seating: model.seating || 5,
+                launchDate: model.launchDate ? `Launched ${formatLaunchDate(model.launchDate)}` : 'Launched',
+                slug: `${(brandMap[model.brandId] || '').toLowerCase().replace(/\s+/g, '-')}-${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+                isNew: model.isNew || false,
+                isPopular: model.isPopular || false,
+                rating: 4.5,
+                reviews: 1247,
+                variants: model.variantCount || 0
+            }))
 
         const popularCars = processedCars.filter((c: any) => c.isPopular).slice(0, 10)
         const newLaunchedCars = processedCars.filter((c: any) => c.isNew).slice(0, 10)

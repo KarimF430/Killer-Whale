@@ -278,8 +278,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
           return []
         }),
       // ✅ Uses models-with-pricing endpoint (has lowestPrice already)
-      // ✅ OPTIMIZATION: Reduced limit from 20 to 6 (matches similar cars display)
-      fetch(`${backendUrl}/api/models-with-pricing?limit=6`, { next: { revalidate: 3600 } })
+      // ✅ OPTIMIZATION: Increased limit to 20 to allow filtering of inactive brands
+      fetch(`${backendUrl}/api/models-with-pricing?limit=20`, { next: { revalidate: 3600 } })
         .then(res => res.ok ? res.json() : { data: [] })
         .catch(() => ({ data: [] }))
     ])
@@ -299,13 +299,23 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     }
 
     // Process Similar Cars (Server-Side)
+    const activeBrandIds = new Set<string>()
     const brandMap = brands.reduce((acc: any, brand: any) => {
+      // Only keep track of active brands
+      const isActive = brand.status === 'active' || !brand.status
+      if (isActive) {
+        activeBrandIds.add(brand.id)
+        if (brand._id) activeBrandIds.add(brand._id)
+      }
+
       acc[brand.id] = brand.name
+      if (brand._id) acc[brand._id] = brand.name
       return acc
     }, {})
 
     const similarCars = similarModelsData
-      .filter((m: any) => m.id !== modelData.id)
+      .filter((m: any) => m.id !== modelData.id && (activeBrandIds.has(m.brandId) || (m.brand && activeBrandIds.has(m.brand.id))))
+      .slice(0, 6) // Limit to 6 to match UI design
       .map((m: any) => {
         // ✅ OPTIMIZED: Use model's lowestPrice directly (from models-with-pricing endpoint)
         const lowestPrice = m.lowestPrice || m.price || 0
