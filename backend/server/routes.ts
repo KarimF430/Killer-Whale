@@ -49,6 +49,7 @@ import reviewsRoutes from "./routes/reviews";
 import adminReviewsRoutes from "./routes/admin-reviews";
 import adminEmailRoutes from "./routes/admin-emails.routes";
 import priceHistoryRoutes from "./routes/price-history.routes";
+import adminHumanizeRoutes from "./routes/admin-humanize";
 import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
 
 // Function to format brand summary with proper sections
@@ -2872,6 +2873,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+  // Humanize AI Content Routes
+  app.use('/api/admin/humanize', adminHumanizeRoutes);
 }
 
 

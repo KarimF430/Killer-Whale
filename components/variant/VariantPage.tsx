@@ -2766,14 +2766,13 @@ export default function VariantPage({
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Summary</h2>
 
               <div className="space-y-6">
-                {/* Description */}
-                <div>
-                  <div className="flex items-center space-x-2 mb-3">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <h3 className="text-lg font-bold text-gray-900">Description</h3>
-                  </div>
-                  {/* Use variant description, then model description, then fallback */}
-                  {(variant?.description || model?.description) ? (
+                {/* Description - Only show if backend data exists */}
+                {(variant?.description || model?.description) && (
+                  <div>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <h3 className="text-lg font-bold text-gray-900">Description</h3>
+                    </div>
                     <ul className="space-y-2">
                       {parseBulletPoints(variant?.description || model?.description || '').map((point: string, index: number) => (
                         <li key={index} className="flex items-start space-x-2">
@@ -2782,32 +2781,16 @@ export default function VariantPage({
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                      The {displayBrandName} {displayModelName} is a {currentVariantData?.fuelType} {currentVariantData?.transmission?.toLowerCase()} variant that belongs to the premium hatchback segment. It offers excellent value for money with modern features and was launched in {currentVariantData?.launchYear}.
-                      {showSummaryDescription && (
-                        <span> The vehicle offers excellent value for money with its efficient engine, modern features, and reliable performance. It's designed for urban commuting with a focus on fuel efficiency and ease of driving.</span>
-                      )}
-                    </p>
-                  )}
-                  {!(variant?.description || model?.description) && (
-                    <button
-                      onClick={() => setShowSummaryDescription(!showSummaryDescription)}
-                      className="text-red-500 hover:text-red-600 text-sm font-medium"
-                    >
-                      {showSummaryDescription ? 'Show Less' : 'Read More'}
-                    </button>
-                  )}
-                </div>
-
-                {/* Exterior Design */}
-                <div>
-                  <div className="flex items-center space-x-2 mb-3">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <h3 className="text-lg font-bold text-gray-900">Exterior Design</h3>
                   </div>
-                  {/* Use variant exteriorDesign, then model exteriorDesign, then fallback */}
-                  {(variant?.exteriorDesign || model?.exteriorDesign) ? (
+                )}
+
+                {/* Exterior Design - Only show if backend data exists */}
+                {(variant?.exteriorDesign || model?.exteriorDesign) && (
+                  <div>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <h3 className="text-lg font-bold text-gray-900">Exterior Design</h3>
+                    </div>
                     <ul className="space-y-2">
                       {parseBulletPoints(variant?.exteriorDesign || model?.exteriorDesign || '').map((point: string, index: number) => (
                         <li key={index} className="flex items-start space-x-2">
@@ -2816,32 +2799,16 @@ export default function VariantPage({
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                      The {displayBrandName} {displayModelName} comes with a modern and stylish exterior design. The front features sleek headlamps with integrated DRLs and a bold grille design that gives it a distinctive appearance.
-                      {showSummaryExterior && (
-                        <span> The side profile features clean lines with subtle character lines running along the doors. The rear design includes wraparound tail lamps and a compact boot lid. The overall design philosophy emphasizes simplicity and functionality while maintaining an attractive appearance that appeals to a wide range of customers.</span>
-                      )}
-                    </p>
-                  )}
-                  {!(variant?.exteriorDesign || model?.exteriorDesign) && (
-                    <button
-                      onClick={() => setShowSummaryExterior(!showSummaryExterior)}
-                      className="text-red-500 hover:text-red-600 text-sm font-medium"
-                    >
-                      {showSummaryExterior ? 'Show Less' : 'Read More'}
-                    </button>
-                  )}
-                </div>
-
-                {/* Comfort & Convenience */}
-                <div>
-                  <div className="flex items-center space-x-2 mb-3">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <h3 className="text-lg font-bold text-gray-900">Comfort & Convenience</h3>
                   </div>
-                  {/* Use variant comfortConvenience, then model comfortConvenience, then fallback */}
-                  {(variant?.comfortConvenience || model?.comfortConvenience) ? (
+                )}
+
+                {/* Comfort & Convenience - Only show if backend data exists */}
+                {(variant?.comfortConvenience || model?.comfortConvenience) && (
+                  <div>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <h3 className="text-lg font-bold text-gray-900">Comfort & Convenience</h3>
+                    </div>
                     <ul className="space-y-2">
                       {parseBulletPoints(variant?.comfortConvenience || model?.comfortConvenience || '').map((point: string, index: number) => (
                         <li key={index} className="flex items-start space-x-2">
@@ -2850,23 +2817,8 @@ export default function VariantPage({
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                      On the inside, the {displayModelName} comes with a thoughtfully designed interior layout. The cabin features a well-designed dashboard with premium materials. It comes equipped with a touchscreen infotainment system, automatic climate control, and various comfort features for an enhanced driving experience.
-                      {showSummaryComfort && (
-                        <span> Additional comfort features include air conditioning, power windows, central locking, and comfortable fabric upholstery. The cabin offers adequate storage spaces including door pockets, glove compartment, and cup holders. Safety features include dual airbags, ABS with EBD, and rear parking sensors for enhanced driving confidence.</span>
-                      )}
-                    </p>
-                  )}
-                  {!(variant?.comfortConvenience || model?.comfortConvenience) && (
-                    <button
-                      onClick={() => setShowSummaryComfort(!showSummaryComfort)}
-                      className="text-red-500 hover:text-red-600 text-sm font-medium"
-                    >
-                      {showSummaryComfort ? 'Show Less' : 'Read More'}
-                    </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -3029,64 +2981,70 @@ export default function VariantPage({
               </div>
             </div>
 
-            {/* Mileage Section */}
-            <div className="space-y-6">
-              {(() => {
-                const isEV = currentVariantData?.fuelType?.toLowerCase() === 'electric' || displayModelName?.toLowerCase().includes('ev') || displayModelName?.toLowerCase().includes('electric') || displayVariantName?.toLowerCase().includes('electric')
+            {/* Mileage Section - Only show if backend mileage data exists */}
+            {(variant?.mileageCompanyClaimed || variant?.mileageCityRealWorld || variant?.mileageHighwayRealWorld) && (
+              <div className="space-y-6">
+                {(() => {
+                  const isEV = currentVariantData?.fuelType?.toLowerCase() === 'electric' || displayModelName?.toLowerCase().includes('ev') || displayModelName?.toLowerCase().includes('electric') || displayVariantName?.toLowerCase().includes('electric')
 
-                return (
-                  <>
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
-                      {displayModelName} {displayVariantName} {isEV ? 'Driving Range' : 'Mileage'}
-                    </h2>
+                  return (
+                    <>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                        {displayModelName} {displayVariantName} {isEV ? 'Driving Range' : 'Mileage'}
+                      </h2>
 
-                    <div className="flex justify-center">
-                      <div className="w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
-                        {/* Engine/Battery Header - Dynamic for EVs */}
-                        <div className="text-center mb-4">
-                          <h3 className="text-red-500 font-bold text-sm mb-1">
-                            {isEV ? 'Battery & Range' : 'Engine & Transmission'}
-                          </h3>
-                          <h4 className="text-red-500 font-bold text-base mb-1">
-                            {variant?.mileageEngineName || variant?.engineName || currentVariantData?.engine}
-                          </h4>
-                        </div>
-
-                        {/* Mileage/Range Details */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">
-                              {isEV ? 'Range (Claimed)' : 'Company Claimed'}
-                            </span>
-                            <span className="text-gray-900 font-bold text-sm">
-                              {variant?.mileageCompanyClaimed || currentVariantData?.mileage} {isEV ? 'km' : 'Kmpl'}
-                            </span>
+                      <div className="flex justify-center">
+                        <div className="w-64 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-300">
+                          {/* Engine/Battery Header - Dynamic for EVs */}
+                          <div className="text-center mb-4">
+                            <h3 className="text-red-500 font-bold text-sm mb-1">
+                              {isEV ? 'Battery & Range' : 'Engine & Transmission'}
+                            </h3>
+                            <h4 className="text-red-500 font-bold text-base mb-1">
+                              {variant?.mileageEngineName || variant?.engineName || currentVariantData?.engine}
+                            </h4>
                           </div>
 
-                          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">
-                              {isEV ? 'City Range' : 'City Real World'}
-                            </span>
-                            <span className="text-gray-900 font-bold text-sm">
-                              {variant?.mileageCityRealWorld || (currentVariantData?.mileage ? (currentVariantData.mileage * 0.85).toFixed(1) : 0)} {isEV ? 'km' : 'Kmpl'}
-                            </span>
-                          </div>
+                          {/* Mileage/Range Details */}
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                              <span className="text-gray-600 text-sm">
+                                {isEV ? 'Range (Claimed)' : 'Company Claimed'}
+                              </span>
+                              <span className="text-gray-900 font-bold text-sm">
+                                {variant?.mileageCompanyClaimed} {isEV ? 'km' : 'Kmpl'}
+                              </span>
+                            </div>
 
-                          <div className="flex justify-between items-center py-2">
-                            <span className="text-gray-600 text-sm">
-                              {isEV ? 'Highway Range' : 'Highway Real World'}
-                            </span>
-                            <span className="text-gray-900 font-bold text-sm">
-                              {variant?.mileageHighwayRealWorld || (currentVariantData?.mileage ? (currentVariantData.mileage * 1.1).toFixed(1) : 0)} {isEV ? 'km' : 'Kmpl'}
-                            </span>
+                            {variant?.mileageCityRealWorld && (
+                              <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span className="text-gray-600 text-sm">
+                                  {isEV ? 'City Range' : 'City Real World'}
+                                </span>
+                                <span className="text-gray-900 font-bold text-sm">
+                                  {variant?.mileageCityRealWorld} {isEV ? 'km' : 'Kmpl'}
+                                </span>
+                              </div>
+                            )}
+
+                            {variant?.mileageHighwayRealWorld && (
+                              <div className="flex justify-between items-center py-2">
+                                <span className="text-gray-600 text-sm">
+                                  {isEV ? 'Highway Range' : 'Highway Real World'}
+                                </span>
+                                <span className="text-gray-900 font-bold text-sm">
+                                  {variant?.mileageHighwayRealWorld} {isEV ? 'km' : 'Kmpl'}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </>
-                )
-              })()}
-            </div>
+                    </>
+                  )
+                })()}
+              </div>
+            )}
           </div>
         </PageSection>
 
