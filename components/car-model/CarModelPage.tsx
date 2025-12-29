@@ -27,8 +27,8 @@ const ModelFAQ = dynamic(() => import('./ModelFAQ'), {
   loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />,
   ssr: false
 })
-import { triggerCarInteraction, initializeAudioContext } from '@/utils/carInteraction'
-import { KillerWhaleSpinner } from '../common/KillerWhaleLoader'
+
+
 import ModelOwnerReviews from './ModelOwnerReviews'
 
 interface ModelData {
@@ -539,22 +539,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
   const [selectedColor, setSelectedColor] = useState<string>('')
   const mainCarImageRef = useRef<HTMLImageElement>(null)
 
-  // Initialize audio context for car interactions
-  useEffect(() => {
-    const handleFirstInteraction = () => {
-      initializeAudioContext()
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
-    }
 
-    document.addEventListener('click', handleFirstInteraction)
-    document.addEventListener('touchstart', handleFirstInteraction)
-
-    return () => {
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
-    }
-  }, [])
 
   // Initialize selectedColor with first color when model loads
   useEffect(() => {
@@ -1183,15 +1168,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                   <Share2 className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => {
-                    setIsLiked(!isLiked)
-                    // Trigger headlight blink and honk sound
-                    // Pass the image container (parent div) not the img element
-                    const imageContainer = mainCarImageRef.current?.parentElement
-                    if (imageContainer) {
-                      triggerCarInteraction(imageContainer)
-                    }
-                  }}
+                  onClick={() => setIsLiked(!isLiked)}
                   className={`p-2 transition-colors ${isLiked ? 'text-red-600' : 'text-gray-400 hover:text-red-600'
                     }`}
                 >
@@ -1624,7 +1601,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
               <div className="space-y-4">
                 {loadingVariants ? (
                   <div className="text-center py-8">
-                    <KillerWhaleSpinner size={60} />
+                    <div className="w-12 h-12 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin mx-auto"></div>
                     <p className="text-gray-500 mt-4">Loading variants...</p>
                   </div>
                 ) : filteredVariants.length > 0 ? (

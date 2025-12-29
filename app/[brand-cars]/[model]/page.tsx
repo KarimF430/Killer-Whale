@@ -199,15 +199,15 @@ async function getUpcomingCarData(brandSlug: string, modelSlug: string) {
       mileageData: upcomingCarData.mileageData || [],
       faqs: upcomingCarData.faqs || [],
       highlights: {
-        keyFeatures: [],
-        spaceComfort: [],
-        storageConvenience: []
+        keyFeatures: [] as any[],
+        spaceComfort: [] as any[],
+        storageConvenience: [] as any[]
       },
-      colors: [],
+      colors: [] as any[],
       summary: upcomingCarData.summary || `The ${brandData.name} ${upcomingCarData.name} is an exciting upcoming vehicle.`,
       engineHighlights: 'Engine details will be announced closer to launch.',
-      mileage: [],
-      similarCars: []
+      mileage: [] as any[],
+      similarCars: [] as any[]
     }
   } catch (error) {
     console.log('Not an upcoming car:', error)
@@ -560,8 +560,10 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     const fallbackModel = modelSlug.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 
     return {
+      isUpcomingCar: false,
       id: 'fallback-id',
       slug: modelSlug,
+      brandSlug: brandSlug.replace('-cars', ''),
       brand: fallbackBrand,
       name: fallbackModel,
       heroImage: 'https://images.unsplash.com/photo-1549399084-d56e05c50b8d?w=800&h=600&fit=crop',
@@ -571,6 +573,10 @@ async function getModelData(brandSlug: string, modelSlug: string) {
       seoDescription: `${fallbackBrand} ${fallbackModel} - Premium vehicle with excellent features.`,
       startingPrice: 500000,
       endingPrice: 800000,
+      bodyType: 'SUV', // Default Fallback
+      subBodyType: 'Compact SUV',
+      expectedLaunchDate: '',
+      formattedLaunchDate: '',
       variants: [],
       cities: [
         { name: 'Delhi', onRoadPrice: 550000 },
@@ -612,7 +618,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
         { condition: 'City', value: 18.6, unit: 'kmpl' },
         { condition: 'Highway', value: 24.2, unit: 'kmpl' },
         { condition: 'Combined', value: 21.0, unit: 'kmpl' }
-      ]
+      ],
+      similarCars: [] as any[]
     }
   }
 }

@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { Calendar, Users, Fuel, Heart, Gauge } from 'lucide-react'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import { useFavourites } from '@/lib/favourites-context'
+import { OptimizedImage } from '@/components/common/OptimizedImage'
+
 
 interface Car {
   id: string
@@ -131,17 +133,15 @@ export default function CarCard({ car, onClick }: CarCardProps) {
 
 
         {/* Car Image */}
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center relative">
           {car.image ? (
-            <img
+            <OptimizedImage
               src={car.image}
               alt={`${car.brandName} ${car.name}`}
-              className="w-full h-full object-contain object-center transition-transform duration-300"
-              loading="lazy"
-              decoding="async"
-              onError={(e) => {
-                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
-              }}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
+              className="object-contain p-2"
+              priority={car.isPopular || car.isNew} // Prioritize if popular/new (likely LCP)
             />
           ) : (
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='#374151' className="w-3/4 h-3/4">

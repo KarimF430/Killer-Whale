@@ -13,6 +13,8 @@
 
 import Image, { ImageProps } from 'next/image'
 import { useState, forwardRef } from 'react'
+import { resolveR2Url } from '@/lib/image-utils'
+
 
 interface OptimizedImageProps extends Omit<ImageProps, 'placeholder' | 'blurDataURL'> {
     fallbackSrc?: string
@@ -35,7 +37,10 @@ export const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
     className,
     ...props
 }, ref) => {
-    const [imgSrc, setImgSrc] = useState(src)
+    // Resolve R2 URL immediately for the initial source
+    // This bypasses the backend proxy if it's a local /uploads/ path
+    const resolvedSrc = resolveR2Url(src as string);
+    const [imgSrc, setImgSrc] = useState(resolvedSrc)
     const [isLoading, setIsLoading] = useState(true)
 
     const handleError = () => {
@@ -43,6 +48,7 @@ export const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
             setImgSrc(fallbackSrc)
         }
     }
+
 
     const handleLoad = () => {
         setIsLoading(false)

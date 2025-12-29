@@ -39,6 +39,54 @@ export function getOptimizedImageUrl(
 }
 
 /**
+ * Resolves a local upload path to a direct R2 URL if available
+ * Bypasses backend proxy redirects for better performance
+ */
+export function resolveR2Url(path: string | null | undefined): string {
+    if (!path) return '/api/placeholder/800/600';
+
+    // If already absolute URL, return as is
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+
+    // Get R2 Base URL from env
+    const r2Base = process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ||
+        process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_HOST;
+
+    if (r2Base && path.startsWith('/uploads/')) {
+        // Remove /uploads/ prefix if the R2 bucket structure doesn't include it
+        // OR keep it if the bucket mimics the folder structure. 
+        // Based on backend/server/index.ts, the R2 target is `${publicBase}/${relPath}`
+        // where relPath is path without leading slash. 
+        // If path is `/uploads/img.jpg`, relPath in backend logic (line 162) was `uploads/img.jpg`?
+        // No, backend: req.path (e.g. /uploads/x.jpg) -> relPath = x.jpg (line 162: replace(/^\/+/, ''))?
+        // Wait, backend line 162: `const relPath = reqPath.replace(/^\/+/, '');`
+        // If reqPath is `/uploads/x.jpg`, relPath is `uploads/x.jpg`.
+        // Then target is `publicBase/uploads/x.jpg`.
+
+        // Wait, let's re-read backend code carefully.
+        // app.get('/uploads/*', ...)
+        // req.path IS `/uploads/x.jpg` (express router matches relative to mount? No, app.get('/uploads/*') matches full path)
+        // If I mount `app.use('/uploads', ...)` then req.path is relative.
+        // But `app.get('/uploads/*', ...)` -> req.path is full path.
+        // So relPath = `uploads/x.jpg`.
+        // So R2 URL = `R2_BASE/uploads/x.jpg`.
+
+        // However, usually uploads are stored in root of bucket or a specific folder.
+        // Let's assume the path should be concatenated.
+
+        const cleanPath = path.startsWith('/') ? path : `/${path}`;
+        // Ensure r2Base doesn't have trailing slash
+        const cleanBase = r2Base.replace(/\/$/, '');
+        return `${cleanBase}${cleanPath}`;
+    }
+
+    return path;
+}
+
+
+/**
  * Get responsive image sizes for srcSet
  */
 export function getResponsiveSizes(baseWidth: number): string {
