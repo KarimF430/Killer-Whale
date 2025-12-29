@@ -14,7 +14,7 @@ import PageSection from '@/components/common/PageSection'
 import CarCard from '@/components/home/CarCard'
 import ComparisonYouTube from '@/components/comparison/ComparisonYouTube'
 import { FloatingAIBot } from '@/components/FloatingAIBot'
-import { KillerWhaleSpinner } from '@/components/common/KillerWhaleLoader'
+
 
 interface Variant {
   id: string
@@ -458,7 +458,7 @@ export default function ComparePageClient({
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <KillerWhaleSpinner size={80} />
+        <div className="w-16 h-16 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin mx-auto"></div>
       </div>
     )
   }

@@ -16,7 +16,7 @@ import CarCard from '../home/CarCard'
 import UpcomingCars from '../home/UpcomingCars'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
 import UpcomingCarCard from '../home/UpcomingCarCard'
-import { KillerWhaleSpinner } from '../common/KillerWhaleLoader'
+
 import ImageGalleryModal from '../common/ImageGalleryModal'
 
 interface VariantData {
@@ -2692,7 +2692,7 @@ export default function VariantPage({
               <div className="space-y-4">
                 {loading ? (
                   <div className="text-center py-8">
-                    <KillerWhaleSpinner size={60} />
+                    <div className="w-12 h-12 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin mx-auto"></div>
                     <p className="text-gray-500 mt-4">Loading variants...</p>
                   </div>
                 ) : filteredVariants.length > 0 ? (

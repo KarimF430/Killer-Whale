@@ -12,7 +12,7 @@ import Ad3DCarousel from '../ads/Ad3DCarousel'
 import Footer from '../Footer'
 import VariantCard from '../car-model/VariantCard'
 import CarCard from '../home/CarCard'
-import { KillerWhaleSpinner } from '../common/KillerWhaleLoader'
+
 
 // Helper function to format price in Indian numbering system
 const formatIndianPrice = (price: number): string => {
@@ -1171,7 +1171,7 @@ export default function PriceBreakupPage({
           <div className="space-y-4">
             {loadingVariants ? (
               <div className="text-center py-8">
-                <KillerWhaleSpinner size={60} />
+                <div className="w-12 h-12 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin mx-auto"></div>
                 <p className="text-gray-500 mt-4">Loading variants...</p>
               </div>
             ) : filteredVariants.length > 0 ? (
