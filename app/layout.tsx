@@ -31,11 +31,11 @@ export const metadata: Metadata = {
     telephone: false,
   },
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
     googleBot: {
-      index: false,
-      follow: false,
+      index: true,
+      follow: true,
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     canonical: 'https://gadizone.com',
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: 'LFtjPhYM1moenJzbsp_pbaHepFH24i14Qwf6h5Z5-as',
   },
 }
 

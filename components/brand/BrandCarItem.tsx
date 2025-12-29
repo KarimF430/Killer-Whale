@@ -77,12 +77,12 @@ export default function BrandCarItem({ car, brandSlug }: BrandCarItemProps) {
                     </h3>
 
                     {/* Rating */}
-                    {car.rating && (
+                    {car.rating && car.reviewCount && car.reviewCount > 0 ? (
                         <div className="flex items-center gap-3 mb-2">
                             <div className="flex items-center gap-1">
                                 <Star className="h-4 w-4 text-green-600 fill-current" />
                                 <span className="text-sm font-semibold text-gray-900">{car.rating}/5</span>
-                                <span className="text-sm text-gray-500">({car.reviewCount || 1247})</span>
+                                <span className="text-sm text-gray-500">({car.reviewCount} Ratings)</span>
                             </div>
                             <Link
                                 href={rateReviewUrl}
@@ -91,7 +91,7 @@ export default function BrandCarItem({ car, brandSlug }: BrandCarItemProps) {
                                 Rate & Review
                             </Link>
                         </div>
-                    )}
+                    ) : null}
 
                     {/* Variant Count */}
                     {car.variantCount !== undefined && car.variantCount > 0 && (

@@ -607,8 +607,8 @@ export default function VariantPage({
     engine: variant.engineName || (variant as any).engineCapacity || variantData?.engine,
     power: (variant as any).maxPower || variant.enginePower || variantData?.power,
     torque: (variant as any).torque || variant.engineTorque || variantData?.torque,
-    rating: 4.2, // Default or from reviews
-    reviewCount: 1234, // Default or from reviews
+    rating: (variant as any).rating || 0,
+    reviewCount: (variant as any).reviewCount || 0,
     launchYear: 2024, // Default or from model data
     description: variant.headerSummary || variant.description || variant.keyFeatures || variantData?.description,
     images: variant.highlightImages?.map((img: any) => `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${img.url}`) ||
@@ -625,8 +625,8 @@ export default function VariantPage({
     fullName: `${displayBrandName || brandName || 'Loading'} ${displayModelName || modelName || 'Loading'} ${displayVariantName || variantName || 'Loading'}`,
     description: 'Loading variant details...',
     price: 0,
-    rating: 4.2,
-    reviewCount: 1234,
+    rating: 0,
+    reviewCount: 0,
     fuelType: 'Loading...',
     transmission: 'Loading...',
     power: 'Loading...',
@@ -879,11 +879,13 @@ export default function VariantPage({
                   {showSkeleton ? (
                     <div className="bg-gray-200 animate-pulse h-8 w-24 rounded"></div>
                   ) : (
-                    <div className="flex items-center bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded">
-                      <Star className="w-4 h-4 mr-1 fill-current" />
-                      <span className="font-semibold">{currentVariantData?.rating || 4.2}</span>
-                      <span className="ml-1">({currentVariantData?.reviewCount || 1234})</span>
-                    </div>
+                    currentVariantData?.reviewCount > 0 ? (
+                      <div className="flex items-center bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded">
+                        <Star className="w-4 h-4 mr-1 fill-current" />
+                        <span className="font-semibold">{currentVariantData?.rating}</span>
+                        <span className="ml-1">({currentVariantData?.reviewCount})</span>
+                      </div>
+                    ) : null
                   )}
                   <Link
                     href={`/${displayBrandName?.toLowerCase().replace(/\s+/g, '-')}-cars/${displayModelName?.toLowerCase().replace(/\s+/g, '-')}/rate-review`}

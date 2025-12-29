@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import VariantPage from '@/components/variant/VariantPage'
 import { generateVariantSEO } from '@/lib/seo'
 import { FloatingAIBot } from '@/components/FloatingAIBot'
+import { generateCarProductSchema } from '@/lib/structured-data'
 
 interface PageProps {
   params: Promise<{
@@ -151,8 +152,22 @@ export default async function VariantDetailPage({ params }: PageProps) {
       similarCars
     }
 
+    // Generate structured data for the variant
+    const productSchema = generateCarProductSchema({
+      name: `${brandName} ${modelName} ${variantName}`,
+      brand: brandName,
+      image: variant.image || model.image || '',
+      description: `Check out ${brandName} ${modelName} ${variantName} price, specifications, features and mileage.`,
+      lowPrice: variant.price,
+      highPrice: variant.price
+    })
+
     return (
       <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+        />
         <VariantPage
           brandName={brandName}
           modelName={modelName}

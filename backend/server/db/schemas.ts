@@ -766,31 +766,36 @@ const reviewSchema = new mongoose.Schema({
   // Driving Experience
   drivingExperience: {
     type: String,
-    enum: ['not_driven', 'short_drive', 'under_500km', 'over_500km'],
+    enum: ['not_driven', 'short_drive', 'under_500km', 'over_500km', 'Owner'], // Added Owner
     required: true
   },
 
-  // Emoji Ratings (1-5)
+  // Emoji Ratings (Deprecated / Optional)
   emojiRatings: {
-    mileage: { type: Number, min: 1, max: 5, required: true },
-    maintenanceCost: { type: Number, min: 1, max: 5, required: true },
-    safety: { type: Number, min: 1, max: 5, required: true },
-    featuresAndStyling: { type: Number, min: 1, max: 5, required: true },
-    comfort: { type: Number, min: 1, max: 5, required: true },
-    performance: { type: Number, min: 1, max: 5, required: true }
+    mileage: { type: Number, min: 1, max: 5 },
+    maintenanceCost: { type: Number, min: 1, max: 5 },
+    safety: { type: Number, min: 1, max: 5 },
+    featuresAndStyling: { type: Number, min: 1, max: 5 },
+    comfort: { type: Number, min: 1, max: 5 },
+    performance: { type: Number, min: 1, max: 5 }
   },
 
-  // Star Ratings (1-5)
+  // Star Ratings (Updated to match frontend)
   starRatings: {
-    designAndStyling: { type: Number, min: 1, max: 5, required: true },
-    performance: { type: Number, min: 1, max: 5, required: true },
     valueForMoney: { type: Number, min: 1, max: 5, required: true },
-    featuresAndTechnology: { type: Number, min: 1, max: 5, required: true }
+    drivingComfort: { type: Number, min: 1, max: 5, required: true },
+    enginePerformance: { type: Number, min: 1, max: 5, required: true },
+    maintenanceService: { type: Number, min: 1, max: 5, required: true },
+    buildQuality: { type: Number, min: 1, max: 5, required: true },
+    featuresTechnology: { type: Number, min: 1, max: 5, required: true }
   },
 
   // Review Content
   reviewTitle: { type: String, required: true, minlength: 10 },
   reviewText: { type: String, required: true, minlength: 300 },
+
+  // Calculated Overall Rating (Average of star ratings)
+  overallRating: { type: Number, default: 0, index: true },
 
   // Image URLs (max 5)
   images: [{ type: String }],
@@ -803,8 +808,7 @@ const reviewSchema = new mongoose.Schema({
   likedBy: [{ type: String }], // User emails
   dislikedBy: [{ type: String }],
 
-  // Overall Rating (calculated from emoji + star ratings)
-  overallRating: { type: Number, min: 1, max: 5 },
+
 
   // Moderation
   isApproved: { type: Boolean, default: false },
@@ -816,23 +820,20 @@ const reviewSchema = new mongoose.Schema({
 
 // Calculate overall rating before save
 reviewSchema.pre('save', function () {
-  const emojiAvg = (
-    (this.emojiRatings?.mileage || 0) +
-    (this.emojiRatings?.maintenanceCost || 0) +
-    (this.emojiRatings?.safety || 0) +
-    (this.emojiRatings?.featuresAndStyling || 0) +
-    (this.emojiRatings?.comfort || 0) +
-    (this.emojiRatings?.performance || 0)
-  ) / 6;
-
-  const starAvg = (
-    (this.starRatings?.designAndStyling || 0) +
-    (this.starRatings?.performance || 0) +
-    (this.starRatings?.valueForMoney || 0) +
-    (this.starRatings?.featuresAndTechnology || 0)
-  ) / 4;
-
-  this.overallRating = Math.round(((emojiAvg + starAvg) / 2) * 10) / 10;
+  const ratings = this.starRatings;
+  if (ratings) {
+    const sum = (
+      (ratings.valueForMoney || 0) +
+      (ratings.drivingComfort || 0) +
+      (ratings.enginePerformance || 0) +
+      (ratings.maintenanceService || 0) +
+      (ratings.buildQuality || 0) +
+      (ratings.featuresTechnology || 0)
+    );
+    this.overallRating = Math.round((sum / 6) * 10) / 10;
+  } else {
+    this.overallRating = 0;
+  }
 });
 
 reviewSchema.index({ id: 1 }, { unique: true });

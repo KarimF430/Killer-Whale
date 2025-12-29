@@ -1,9 +1,13 @@
-# Strict Robots.txt to PREVENT INDEXING
-# Updated to protect test data from crawling
-
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /debug-env
+Disallow: /test-honda
 
-# Only allow sitemap for debugging tools if strictly necessary, 
-# but generally you want to block everything for now.
-# Sitemap: https://gadizone.com/sitemap.xml
+Sitemap: https://gadizone.com/sitemap.xml

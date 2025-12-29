@@ -3,6 +3,7 @@ import CarModelPage from '@/components/car-model/CarModelPage'
 import { notFound } from 'next/navigation'
 import { generateModelSEO } from '@/lib/seo'
 import BrandNews from '@/components/brand/BrandNews'
+import { generateCarProductSchema, generateFAQSchema } from '@/lib/structured-data'
 
 interface ModelPageProps {
   params: Promise<{
@@ -263,7 +264,7 @@ async function getModelData(brandSlug: string, modelSlug: string) {
 
     // Step 3: PARALLEL FETCH - Get detailed model data, variants, and similar cars data simultaneously
     // ✅ OPTIMIZED: Only fetch 8 variants (visible on page) + removed 200-variant fetch
-    const [detailedModelData, variantsData, similarModelsRes] = await Promise.all([
+    const [detailedModelData, variantsData, similarModelsRes, reviewsRes] = await Promise.all([
       fetch(`${backendUrl}/api/models/${modelData.id}`, { next: { revalidate: 3600 } })
         .then(res => res.ok ? res.json() : null)
         .catch(err => {
@@ -281,7 +282,14 @@ async function getModelData(brandSlug: string, modelSlug: string) {
       // ✅ OPTIMIZATION: Increased limit to 20 to allow filtering of inactive brands
       fetch(`${backendUrl}/api/models-with-pricing?limit=20`, { next: { revalidate: 3600 } })
         .then(res => res.ok ? res.json() : { data: [] })
-        .catch(() => ({ data: [] }))
+        .catch(() => ({ data: [] })),
+      // ✅ Fetch approved reviews for SSR
+      fetch(`${backendUrl}/api/reviews/${modelSlug}?limit=50`, { next: { revalidate: 3600 } })
+        .then(res => res.ok ? res.json() : { success: false, data: { reviews: [], total: 0, overallRating: 0 } })
+        .catch(err => {
+          console.log('❌ Error fetching reviews:', err)
+          return { success: false, data: { reviews: [], total: 0, overallRating: 0 } }
+        })
     ])
 
     const similarModelsData = similarModelsRes?.data || similarModelsRes || []
@@ -452,6 +460,9 @@ async function getModelData(brandSlug: string, modelSlug: string) {
         }
       ]
 
+    // Process reviews data
+    const reviewsData = reviewsRes?.success ? reviewsRes.data : { reviews: [], total: 0, overallRating: 0 }
+
     const enhancedModelData = {
       isUpcomingCar: false,
       id: modelData.id,
@@ -461,8 +472,9 @@ async function getModelData(brandSlug: string, modelSlug: string) {
       name: modelData.name,
       heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : modelData.image),
       gallery: galleryImages,
-      rating: modelData.rating,
-      reviewCount: modelData.reviews,
+      rating: reviewsData.overallRating || modelData.rating || 0,
+      reviewCount: reviewsData.total || modelData.reviews || 0,
+      reviews: reviewsData.reviews || [], // Pass SSR reviews
       seoDescription: detailedModelData?.headerSeo || `${modelData.brandName} ${modelData.name} is a premium vehicle that offers excellent performance, modern features, and great value for money. Starting at ${(lowestPrice / 100000).toFixed(2)} Lakh.`,
       startingPrice: lowestPrice,
       endingPrice: highestPrice,
@@ -554,8 +566,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
       name: fallbackModel,
       heroImage: 'https://images.unsplash.com/photo-1549399084-d56e05c50b8d?w=800&h=600&fit=crop',
       gallery: ['https://images.unsplash.com/photo-1549399084-d56e05c50b8d?w=800&h=600&fit=crop'],
-      rating: 4.5,
-      reviewCount: 1250,
+      rating: 0,
+      reviewCount: 0,
       seoDescription: `${fallbackBrand} ${fallbackModel} - Premium vehicle with excellent features.`,
       startingPrice: 500000,
       endingPrice: 800000,
@@ -587,10 +599,11 @@ async function getModelData(brandSlug: string, modelSlug: string) {
       engineSummaries: [],
       mileageData: [],
       faqs: [],
+      // Fallback highlights for compatibility
       highlights: {
-        keyFeatures: [],
-        spaceComfort: [],
-        storageConvenience: []
+        keyFeatures: [] as any[],
+        spaceComfort: [] as any[],
+        storageConvenience: [] as any[]
       },
       colors: [],
       summary: `The ${fallbackBrand} ${fallbackModel} is a well-rounded vehicle.`,
@@ -624,8 +637,37 @@ export default async function ModelPage({ params }: ModelPageProps) {
     notFound()
   }
 
+  // Generate structured data
+  const productSchema = generateCarProductSchema({
+    name: `${modelData.brand} ${modelData.name}`,
+    brand: modelData.brand,
+    image: modelData.heroImage,
+    description: modelData.summary,
+    lowPrice: modelData.startingPrice,
+    highPrice: modelData.endingPrice
+  })
+
+  // Format FAQs for schema if they exist
+  // Handles both array of objects or simple strings if that was the case (checking structure)
+  const formattedFaqs = modelData.faqs?.map((faq: any) => ({
+    question: faq.question || faq.q || '',
+    answer: faq.answer || faq.a || ''
+  })).filter((f: any) => f.question && f.answer) || []
+
+  const faqSchema = formattedFaqs.length > 0 ? generateFAQSchema(formattedFaqs) : null
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       <CarModelPage
         model={modelData as any}
         initialVariants={modelData.variants}

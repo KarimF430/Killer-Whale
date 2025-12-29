@@ -18,6 +18,7 @@ import PageHeader from '@/components/common/PageHeader'
 import CarComparison from '@/components/common/CarComparison'
 import { FloatingAIBot } from '@/components/FloatingAIBot'
 import { generateBrandSEO } from '@/lib/seo'
+import { generateBreadcrumbSchema } from '@/lib/structured-data'
 
 // Enable ISR with 1-hour revalidation
 export const revalidate = 3600
@@ -374,8 +375,17 @@ export default async function BrandPage({ params }: BrandPageProps) {
       { label: brand.name }
     ]
 
+    const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs.map(b => ({
+      name: b.label,
+      item: b.href || ''
+    })))
+
     return (
       <div className="min-h-screen bg-gray-50">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
         <main>
           {/* Section 1: Brand Hero Section - Pass all data as props */}
           <SafeComponent name="BrandHeroSection">

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Download, Users, UserCheck, UserX, Mail, Calendar, TrendingUp, ArrowLeft } from 'lucide-react'
+import { Download, Users, UserCheck, UserX, Mail, Calendar, TrendingUp, ArrowLeft, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 
 interface UserStats {
@@ -137,6 +137,21 @@ export default function AdminPanel() {
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Admin Navigation */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    <Link href="/admin/reviews" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all group">
+                        <div className="flex items-center space-x-4">
+                            <div className="p-3 bg-orange-50 rounded-lg group-hover:bg-orange-100 transition-colors">
+                                <MessageSquare className="h-6 w-6 text-orange-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">Reviews Management</h3>
+                                <p className="text-sm text-gray-500">Approve, reject & delete reviews</p>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+
                 {/* Statistics Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                     {/* Total Users */}

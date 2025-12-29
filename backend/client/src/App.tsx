@@ -28,6 +28,7 @@ import PopularComparisons from "@/pages/PopularComparisons";
 import News from "@/pages/News";
 import NewsForm from "@/pages/NewsForm";
 import Users from "@/pages/Users";
+import Reviews from "@/pages/Reviews";
 import NotFound from "@/pages/not-found";
 import UpcomingCarList from "@/pages/UpcomingCarList";
 import UpcomingCarFormPage1 from "@/pages/UpcomingCarFormPage1";
@@ -231,6 +232,11 @@ function Router() {
       <Route path="/users">
         <ProtectedRoute>
           <Users />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/reviews">
+        <ProtectedRoute>
+          <Reviews />
         </ProtectedRoute>
       </Route>
       <Route component={NotFound} />

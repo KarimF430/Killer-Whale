@@ -205,6 +205,15 @@ router.post('/', upload.array('images', 5), async (req: Request, res: Response) 
             });
         }
 
+        // Helper to calculate overall rating
+        const calculateOverallRating = (starRatings: any): number => {
+            if (!starRatings) return 0;
+            const values = Object.values(starRatings).filter(val => typeof val === 'number') as number[];
+            if (values.length === 0) return 0;
+            const sum = values.reduce((a, b) => a + b, 0);
+            return Number((sum / values.length).toFixed(1));
+        };
+
         // Upload images
         const imageUrls: string[] = [];
         const files = req.files as Express.Multer.File[];
@@ -233,6 +242,7 @@ router.post('/', upload.array('images', 5), async (req: Request, res: Response) 
             drivingExperience,
             emojiRatings: parsedEmojiRatings,
             starRatings: parsedStarRatings,
+            overallRating: calculateOverallRating(parsedStarRatings),
             reviewTitle,
             reviewText,
             images: imageUrls,
@@ -241,7 +251,9 @@ router.post('/', upload.array('images', 5), async (req: Request, res: Response) 
             likedBy: [],
             dislikedBy: [],
             isApproved: false, // Requires admin approval
-            isVerified: false
+            isVerified: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
         });
 
         await review.save();

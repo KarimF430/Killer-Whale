@@ -3,6 +3,7 @@ import express from "express";
 import type { IStorage } from "./storage";
 import type { BackupService } from "./backup-service";
 import { insertBrandSchema, insertModelSchema } from "./validation/schemas";
+import { Review } from "./db/schemas";
 import {
   comparePassword,
   generateAccessToken,
@@ -1644,8 +1645,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           slug: `${brandSlug}-${modelSlug}`,
           isNew: car.isNew || false,
           isPopular: car.isPopular || false,
-          rating: 4.5,
-          reviews: 1247,
+          rating: 0,
+          reviews: 0,
           variants: car.variantCount || 0
         };
       });
@@ -2634,24 +2635,50 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
           return res.status(404).json({ error: "Brand not found" });
         }
 
+        // Fetch aggregated ratings for this brand's models
+        const ratingsAggregation = await Review.aggregate([
+          { $match: { brandSlug: brand.name.toLowerCase().replace(/\s+/g, '-'), isApproved: true } },
+          {
+            $group: {
+              _id: '$modelSlug',
+              avgRating: { $avg: '$overallRating' },
+              count: { $sum: 1 }
+            }
+          }
+        ]);
+
+        const ratingsMap = ratingsAggregation.reduce((acc, curr) => {
+          acc[curr._id] = {
+            rating: Number(curr.avgRating.toFixed(1)),
+            count: curr.count
+          };
+          return acc;
+        }, {} as Record<string, { rating: number, count: number }>);
+
         // Transform models for frontend display
-        const frontendModels = models.map(model => ({
-          id: model.id,
-          name: model.name,
-          price: "₹7.71", // Will be calculated later
-          rating: 4.5, // Will be from reviews later
-          reviews: 1247, // Will be from reviews later
-          power: "89 bhp", // Will be from engine data
-          image: model.heroImage || '/cars/default-car.jpg',
-          isNew: model.isNew || false,
-          seating: "5 seater", // Will be from specifications
-          fuelType: model.fuelTypes?.join('-') || 'Petrol',
-          transmission: model.transmissions?.join('-') || 'Manual',
-          mileage: "18.3 kmpl", // Will be from mileage data
-          variants: 16, // Will be calculated from variants
-          slug: model.name.toLowerCase().replace(/\s+/g, '-'),
-          brandName: brand.name
-        }));
+        const frontendModels = models.map(model => {
+          const slug = model.name.toLowerCase().replace(/\s+/g, '-');
+          const ratingData = ratingsMap[slug] || { rating: 0, count: 0 };
+
+          return {
+            id: model.id,
+            name: model.name,
+            price: "₹7.71", // Will be calculated later
+            rating: ratingData.rating,
+            reviews: ratingData.count,
+            reviewCount: ratingData.count, // Added for frontend compatibility
+            power: "89 bhp", // Will be from engine data
+            image: model.heroImage || '/cars/default-car.jpg',
+            isNew: model.isNew || false,
+            seating: "5 seater", // Will be from specifications
+            fuelType: model.fuelTypes?.join('-') || 'Petrol',
+            transmission: model.transmissions?.join('-') || 'Manual',
+            mileage: "18.3 kmpl", // Will be from mileage data
+            variants: 16, // Will be calculated from variants
+            slug: slug,
+            brandName: brand.name
+          };
+        });
 
         console.log('✅ Frontend: Returning', frontendModels.length, 'models for brand', brand.name);
         res.json({
