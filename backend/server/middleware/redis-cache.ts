@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { getCacheRedisClient } from '../config/redis-config';
 import type Redis from 'ioredis';
+import { gzip, gunzip } from 'zlib';
+import { promisify } from 'util';
+
+const compress = promisify(gzip);
+const decompress = promisify(gunzip);
 
 /**
  * CarWale-Style Redis Cache Middleware
@@ -15,6 +20,9 @@ if (redis) {
 } else {
   console.log('ℹ️  Redis not configured. Caching disabled.');
 }
+
+export const CACHE_VERSION = 'v4-gzip';
+
 
 
 /**
@@ -34,19 +42,29 @@ export function redisCacheMiddleware(ttl: number = 300, staleTime: number = 60) 
     }
 
     // Generate hierarchical cache key with version
-    const CACHE_VERSION = 'v3'; // Increment to invalidate all caches
     const namespace = req.path.split('/')[2] || 'api'; // e.g., 'brands', 'models'
     const cacheKey = `cache:${CACHE_VERSION}:${namespace}:${req.path}:${JSON.stringify(req.query)}`;
 
     try {
-      // Try to get from cache
+      // Try to get from cache (buffer for decompression)
       const [cachedData, cacheTTL] = await Promise.all([
-        redis.get(cacheKey),
+        redis.getBuffer(cacheKey), // Get as Buffer
         redis.ttl(cacheKey)
       ]);
 
       if (cachedData) {
-        const data = JSON.parse(cachedData);
+        // Decompress
+        // Try/catch for backward compatibility or corrupt data
+        let jsonStr: string;
+        try {
+          const buffer = await decompress(cachedData);
+          jsonStr = buffer.toString();
+        } catch (e) {
+          // Fallback: try treating as plain text if decompression fails (for transition)
+          jsonStr = cachedData.toString();
+        }
+
+        const data = JSON.parse(jsonStr);
 
         // Check if stale (TTL < staleTime seconds)
         if (cacheTTL > 0 && cacheTTL < staleTime) {
@@ -116,9 +134,15 @@ async function handleCacheMissWithStampedePrevention(
       res.json = function (data: any) {
         // Cache the response
         if (redis) {
-          redis.setex(cacheKey, ttl, JSON.stringify(data))
+          // Compress before storing
+          const jsonStr = JSON.stringify(data);
+
+          compress(Buffer.from(jsonStr))
+            .then(compressed => {
+              return redis.setex(cacheKey, ttl, compressed);
+            })
             .then(() => {
-              console.log(`💾 Cached: ${cacheKey}`);
+              console.log(`💾 Cached (compressed): ${cacheKey}`);
               // Release lock
               if (redis) return redis.del(lockKey);
               return Promise.resolve(0);
@@ -352,22 +376,27 @@ export async function warmUpCache(storage: any) {
 
     // Cache brands
     const brands = await storage.getBrands();
+    const compressedBrands = await compress(Buffer.from(JSON.stringify(brands)));
+    // Key format: cache:VERSION:NAMESPACE:PATH:QUERY
+    const brandsKey = `cache:${CACHE_VERSION}:brands:/api/brands:{}`;
     await redis.setex(
-      'cache:brands:/api/brands:{}',
+      brandsKey,
       CacheTTL.BRANDS,
-      JSON.stringify(brands)
+      compressedBrands
     );
-    console.log(`✅ Cached ${brands.length} brands`);
+    console.log(`✅ Cached ${brands.length} brands (compressed)`);
 
     // Cache popular models
     const models = await storage.getModels();
     const popularModels = models.filter((m: any) => m.isPopular);
+    const compressedModels = await compress(Buffer.from(JSON.stringify(popularModels)));
+    const modelsKey = `cache:${CACHE_VERSION}:models:/api/models:{"popular":"true"}`;
     await redis.setex(
-      'cache:models:/api/models:{"popular":"true"}',
+      modelsKey,
       CacheTTL.MODELS,
-      JSON.stringify(popularModels)
+      compressedModels
     );
-    console.log(`✅ Cached ${popularModels.length} popular models`);
+    console.log(`✅ Cached ${popularModels.length} popular models (compressed)`);
 
     // Cache top 10 models as hashes
     const topModels = models.slice(0, 10);
