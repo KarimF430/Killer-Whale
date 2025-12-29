@@ -4,11 +4,11 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 
 const CAR_COLORS = [
-    '/images/ads/sierra-white.png',
-    '/images/ads/sierra-silver.png',
-    '/images/ads/sierra-red.png',
-    '/images/ads/sierra-beige.png',
-    '/images/ads/sierra-olive.png',
+    '/images/showcase/sierra-white.png',
+    '/images/showcase/sierra-silver.png',
+    '/images/showcase/sierra-red.png',
+    '/images/showcase/sierra-beige.png',
+    '/images/showcase/sierra-olive.png',
 ]
 
 export default function TataSierraAdBanner() {
@@ -61,10 +61,10 @@ export default function TataSierraAdBanner() {
 
                 {/* Cards */}
                 <div className="grid grid-cols-4 gap-3 sm:gap-4">
-                    <PillCard title="Premium Cockpit" image="/images/ads/tata-sierra-dash.png" />
-                    <PillCard title="Luxury Seating" image="/images/ads/tata-sierra-seat.png" />
-                    <PillCard title="Spacious Boot" image="/images/ads/tata-sierra-trunk.png" />
-                    <PillCard title="Book Now" image="/images/ads/tata-sierra-ext.png" />
+                    <PillCard title="Premium Cockpit" image="/images/showcase/tata-sierra-dash.png" />
+                    <PillCard title="Luxury Seating" image="/images/showcase/tata-sierra-seat.png" />
+                    <PillCard title="Spacious Boot" image="/images/showcase/tata-sierra-trunk.png" />
+                    <PillCard title="Book Now" image="/images/showcase/tata-sierra-ext.png" />
                 </div>
 
             </div>

@@ -7,6 +7,7 @@ import TataSierraAdBanner from '@/components/ads/TataSierraAdBanner'
 import PageSection from '@/components/common/PageSection'
 import Card from '@/components/common/Card'
 import { staticPageSEO } from '@/lib/seo'
+import { generateOrganizationSchema, generateWebSiteSchema } from '@/lib/structured-data'
 
 // Lazy load below-fold components for better performance
 const CarsYouMightLike = dynamic(() => import('@/components/home/CarsYouMightLike'), {
@@ -374,6 +375,14 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-white relative">
       <main className="relative z-[2]">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(generateOrganizationSchema()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(generateWebSiteSchema()) }}
+        />
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
           <Ad3DCarousel className="my-3 sm:my-4" />
         </div>
