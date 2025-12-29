@@ -1,5 +1,6 @@
 import express, { Router } from 'express';
 import { getRedisClient } from '../middleware/redis-cache';
+import { getRedisStatus } from '../config/redis-config';
 
 const router = Router();
 
@@ -81,6 +82,32 @@ router.get('/', async (req, res) => {
     };
 
     res.json(diagnostics);
+});
+
+/**
+ * Redis Failover Status
+ * GET /api/diagnostics/redis
+ */
+router.get('/redis', async (req, res) => {
+    const status = getRedisStatus();
+
+    // Try to ping active connection
+    let pingResult = 'failed';
+    try {
+        const client = getRedisClient();
+        if (client) {
+            const pong = await client.ping();
+            pingResult = pong === 'PONG' ? 'success' : 'failed';
+        }
+    } catch (e) {
+        pingResult = 'error: ' + (e as Error).message;
+    }
+
+    res.json({
+        ...status,
+        ping: pingResult,
+        timestamp: new Date().toISOString(),
+    });
 });
 
 /**

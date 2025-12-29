@@ -421,11 +421,24 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
       console.warn('Cache warmup skipped:', e instanceof Error ? e.message : e);
     }
 
-    // Initialize backup service
+    // Initialize backup service (JSON file backup)
     if (isProd) {
       const backupService = createBackupService(storage);
       backupService.startAutoBackup(30);
     }
+
+    // Initialize MongoDB backup sync service (secondary database sync)
+    try {
+      const { mongoDBBackupSync } = await import('./services/mongodb-backup-sync');
+      await mongoDBBackupSync.initialize();
+    } catch (error) {
+      console.warn('⚠️  MongoDB backup sync initialization skipped:', error instanceof Error ? error.message : error);
+    }
+
+    // Register backup sync routes
+    const backupSyncRoutes = (await import('./routes/backup-sync')).default;
+    app.use('/api/admin/backup', backupSyncRoutes);
+    console.log('✅ Backup sync routes registered at /api/admin/backup');
 
     // Register monitoring routes (no auth required)
     app.use('/api/monitoring', monitoringRoutes);

@@ -1,190 +1,296 @@
 import Redis from 'ioredis';
 
 /**
- * Unified Redis Configuration
- * Single Redis client instance for both sessions and caching
- * Provides robust error handling and reconnection strategies
+ * Redis Failover Configuration
+ * Supports primary + backup Redis with automatic failover
+ * When primary fails, automatically switches to backup Redis
  */
 
-// Redis client instance (singleton)
-let redisClient: Redis | null = null;
+// Redis client instances
+let primaryClient: Redis | null = null;
+let backupClient: Redis | null = null;
+let activeClient: Redis | null = null;
+let isUsingBackup = false;
 let isConnecting = false;
-let connectionAttempts = 0;
-const MAX_CONNECTION_ATTEMPTS = 5;
+let healthCheckInterval: NodeJS.Timeout | null = null;
+
+const MAX_CONNECTION_ATTEMPTS = 3;
+const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
+const FAILOVER_ENABLED = process.env.REDIS_FAILOVER_ENABLED === 'true';
 
 /**
- * Create and configure Redis client
+ * Common Redis options
  */
-function createRedisClient(): Redis | null {
-    const useUrl = !!process.env.REDIS_URL;
-    const hasHost = !!process.env.REDIS_HOST;
-
-    if (!useUrl && !hasHost) {
-        console.log('ℹ️  Redis not configured (set REDIS_URL or REDIS_HOST). Running without Redis.');
-        return null;
-    }
-
-    // Common configuration options
-    const commonOpts = {
+function getCommonOptions(label: string) {
+    return {
         maxRetriesPerRequest: 3,
         enableOfflineQueue: false,
-        lazyConnect: true, // Don't crash server if Redis fails on startup
+        lazyConnect: true,
         showFriendlyErrorStack: true,
-        keepAlive: 30000, // Keep connection alive with 30s ping
-        family: 4, // Use IPv4 (Render + Upstash compatibility)
-
-        // Exponential backoff retry strategy
+        keepAlive: 30000,
+        family: 4,
         retryStrategy: (times: number) => {
             if (times > MAX_CONNECTION_ATTEMPTS) {
-                console.error(`❌ Redis connection failed after ${MAX_CONNECTION_ATTEMPTS} attempts. Giving up.`);
-                return null; // Stop retrying
+                console.error(`❌ ${label} Redis failed after ${MAX_CONNECTION_ATTEMPTS} attempts`);
+                return null;
             }
-            const delay = Math.min(times * 100, 3000); // Max 3s delay
-            console.log(`⏳ Redis retry attempt ${times} in ${delay}ms...`);
-            return delay;
+            return Math.min(times * 100, 3000);
         },
-
-        // Reconnect on specific errors
         reconnectOnError: (err: Error) => {
-            const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT', 'EPIPE'];
-            const shouldReconnect = targetErrors.some(errType =>
-                err.message.includes(errType)
-            );
-
-            if (shouldReconnect) {
-                console.log(`🔄 Reconnecting due to error: ${err.message}`);
-                return true;
-            }
-            return false;
+            const retryErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT', 'EPIPE'];
+            return retryErrors.some(e => err.message.includes(e));
         },
     };
+}
 
-    // TLS configuration for production
-    const tlsOpt = process.env.REDIS_TLS === 'true' ? {
-        tls: {
-            rejectUnauthorized: false, // Required for Upstash and some cloud providers
-            minVersion: 'TLSv1.2' as const,
-        }
+/**
+ * Get TLS options if enabled
+ */
+function getTlsOptions() {
+    return process.env.REDIS_TLS === 'true' ? {
+        tls: { rejectUnauthorized: false, minVersion: 'TLSv1.2' as const }
     } : {};
+}
 
+/**
+ * Create Redis client from URL
+ */
+function createClientFromUrl(url: string, label: string): Redis | null {
     try {
-        const client = useUrl
-            ? new Redis(process.env.REDIS_URL as string, {
-                ...commonOpts,
-                ...tlsOpt,
-            })
-            : new Redis({
-                host: process.env.REDIS_HOST as string,
-                port: parseInt(process.env.REDIS_PORT || '6379'),
-                password: process.env.REDIS_PASSWORD,
-                ...commonOpts,
-                ...tlsOpt,
-            });
+        const client = new Redis(url, {
+            ...getCommonOptions(label),
+            ...getTlsOptions(),
+        });
 
-        // Setup event handlers
-        setupEventHandlers(client);
+        client.on('connect', () => console.log(`🔌 ${label} Redis connecting...`));
+        client.on('ready', () => console.log(`✅ ${label} Redis ready`));
+        client.on('error', (err) => console.warn(`⚠️ ${label} Redis error:`, err.message));
+        client.on('close', () => console.log(`🔌 ${label} Redis closed`));
 
         return client;
     } catch (error) {
-        console.error('❌ Failed to create Redis client:', error);
+        console.error(`❌ Failed to create ${label} Redis:`, error);
         return null;
     }
 }
 
 /**
- * Setup Redis event handlers for connection lifecycle
+ * Initialize Redis with failover support
  */
-function setupEventHandlers(client: Redis) {
-    client.on('connect', () => {
-        console.log('🔌 Redis connecting...');
-        connectionAttempts = 0; // Reset on successful connection
-    });
+async function initializeRedis(): Promise<Redis | null> {
+    const primaryUrl = process.env.REDIS_URL;
+    const backupUrl = process.env.REDIS_BACKUP_URL;
+    const hasHost = !!process.env.REDIS_HOST;
 
-    client.on('ready', () => {
-        console.log('✅ Redis connected and ready');
-        isConnecting = false;
-    });
+    // No Redis configured
+    if (!primaryUrl && !hasHost) {
+        console.log('ℹ️  Redis not configured. Running without Redis.');
+        return null;
+    }
 
-    client.on('error', (err) => {
-        // Filter out common non-critical errors
-        const isCritical = !err.message.includes('ECONNREFUSED') &&
-            !err.message.includes('ETIMEDOUT');
+    // Create primary client
+    if (primaryUrl) {
+        primaryClient = createClientFromUrl(primaryUrl, 'PRIMARY');
+    } else if (hasHost) {
+        // Legacy host-based config
+        primaryClient = new Redis({
+            host: process.env.REDIS_HOST!,
+            port: parseInt(process.env.REDIS_PORT || '6379'),
+            password: process.env.REDIS_PASSWORD,
+            ...getCommonOptions('PRIMARY'),
+            ...getTlsOptions(),
+        });
+    }
 
-        if (isCritical) {
-            console.error('❌ Redis error:', err.message);
-        } else {
-            console.warn('⚠️  Redis connection issue:', err.message);
-        }
-    });
+    // Create backup client if failover enabled
+    if (FAILOVER_ENABLED && backupUrl) {
+        backupClient = createClientFromUrl(backupUrl, 'BACKUP');
+        console.log('🔄 Redis failover: ENABLED');
+    }
 
-    client.on('close', () => {
-        console.log('🔌 Redis connection closed');
-    });
+    // Try connecting to primary first
+    if (primaryClient) {
+        try {
+            await primaryClient.connect();
+            activeClient = primaryClient;
+            isUsingBackup = false;
+            console.log('✅ Using PRIMARY Redis');
 
-    client.on('reconnecting', (delay: number) => {
-        connectionAttempts++;
-        console.log(`🔄 Redis reconnecting in ${delay}ms (attempt ${connectionAttempts})...`);
-    });
+            // Start health check if failover enabled
+            if (FAILOVER_ENABLED && backupClient) {
+                startHealthCheck();
+            }
 
-    client.on('end', () => {
-        console.log('🔚 Redis connection ended');
-        isConnecting = false;
-    });
-}
+            return activeClient;
+        } catch (err) {
+            console.error('❌ Primary Redis connection failed:', (err as Error).message);
 
-/**
- * Get Redis client instance (singleton pattern)
- */
-export function getRedisClient(): Redis | null {
-    if (!redisClient && !isConnecting) {
-        isConnecting = true;
-        redisClient = createRedisClient();
-
-        if (redisClient) {
-            // Connect in background - don't block server startup
-            redisClient.connect().catch(err => {
-                console.error('❌ Redis initial connection failed:', err.message);
-                console.warn('⚠️  Continuing without Redis. Sessions will use memory store.');
-                redisClient = null;
-                isConnecting = false;
-            });
-        } else {
-            isConnecting = false;
+            // Try backup if available
+            if (backupClient) {
+                return await switchToBackup();
+            }
         }
     }
 
-    return redisClient;
+    return null;
+}
+
+/**
+ * Switch to backup Redis
+ */
+async function switchToBackup(): Promise<Redis | null> {
+    if (!backupClient || isUsingBackup) return activeClient;
+
+    console.log('🔄 Switching to BACKUP Redis...');
+
+    try {
+        if (backupClient.status !== 'ready') {
+            await backupClient.connect();
+        }
+        activeClient = backupClient;
+        isUsingBackup = true;
+        console.log('✅ Now using BACKUP Redis');
+        return activeClient;
+    } catch (err) {
+        console.error('❌ Backup Redis also failed:', (err as Error).message);
+        return null;
+    }
+}
+
+/**
+ * Switch back to primary Redis
+ */
+async function switchToPrimary(): Promise<Redis | null> {
+    if (!primaryClient || !isUsingBackup) return activeClient;
+
+    console.log('🔄 Attempting to switch back to PRIMARY Redis...');
+
+    try {
+        if (primaryClient.status !== 'ready') {
+            await primaryClient.connect();
+        }
+        activeClient = primaryClient;
+        isUsingBackup = false;
+        console.log('✅ Restored to PRIMARY Redis');
+        return activeClient;
+    } catch (err) {
+        console.log('⚠️ Primary still unavailable, staying on BACKUP');
+        return activeClient;
+    }
+}
+
+/**
+ * Health check - monitors primary and switches if needed
+ */
+function startHealthCheck() {
+    if (healthCheckInterval) return;
+
+    console.log(`⏰ Redis health check started (every ${HEALTH_CHECK_INTERVAL / 1000}s)`);
+
+    healthCheckInterval = setInterval(async () => {
+        try {
+            // Check current active client
+            if (activeClient) {
+                const pong = await activeClient.ping();
+                if (pong !== 'PONG') throw new Error('Ping failed');
+            }
+
+            // If using backup, try to restore primary
+            if (isUsingBackup && primaryClient) {
+                try {
+                    const primaryPong = await primaryClient.ping();
+                    if (primaryPong === 'PONG') {
+                        await switchToPrimary();
+                    }
+                } catch {
+                    // Primary still down, stay on backup
+                }
+            }
+        } catch (err) {
+            console.warn('⚠️ Active Redis health check failed:', (err as Error).message);
+
+            // Active client failed - try failover
+            if (isUsingBackup) {
+                // Backup failed, try primary
+                await switchToPrimary();
+            } else {
+                // Primary failed, try backup
+                await switchToBackup();
+            }
+        }
+    }, HEALTH_CHECK_INTERVAL);
+}
+
+/**
+ * Get Redis client instance (singleton with failover)
+ */
+export function getRedisClient(): Redis | null {
+    if (!activeClient && !isConnecting) {
+        isConnecting = true;
+        initializeRedis()
+            .then(client => {
+                activeClient = client;
+                isConnecting = false;
+            })
+            .catch(err => {
+                console.error('Redis init error:', err);
+                isConnecting = false;
+            });
+    }
+    return activeClient;
 }
 
 /**
  * Check if Redis is connected and ready
  */
 export function isRedisReady(): boolean {
-    return redisClient?.status === 'ready';
+    return activeClient?.status === 'ready';
 }
 
 /**
- * Gracefully close Redis connection
+ * Get current Redis status
+ */
+export function getRedisStatus() {
+    return {
+        active: isUsingBackup ? 'backup' : 'primary',
+        primaryStatus: primaryClient?.status || 'not-configured',
+        backupStatus: backupClient?.status || 'not-configured',
+        failoverEnabled: FAILOVER_ENABLED,
+        isReady: activeClient?.status === 'ready',
+    };
+}
+
+/**
+ * Gracefully close Redis connections
  */
 export async function closeRedisConnection(): Promise<void> {
-    if (redisClient) {
-        try {
-            await redisClient.quit();
-            console.log('✅ Redis connection closed gracefully');
-        } catch (error) {
-            console.error('❌ Error closing Redis connection:', error);
-            // Force disconnect if graceful quit fails
-            redisClient.disconnect();
-        } finally {
-            redisClient = null;
-            isConnecting = false;
-        }
+    if (healthCheckInterval) {
+        clearInterval(healthCheckInterval);
+        healthCheckInterval = null;
     }
+
+    const closeClient = async (client: Redis | null, label: string) => {
+        if (client) {
+            try {
+                await client.quit();
+                console.log(`✅ ${label} Redis closed`);
+            } catch {
+                client.disconnect();
+            }
+        }
+    };
+
+    await closeClient(primaryClient, 'PRIMARY');
+    await closeClient(backupClient, 'BACKUP');
+
+    primaryClient = null;
+    backupClient = null;
+    activeClient = null;
+    isConnecting = false;
 }
 
 /**
- * Get Redis client for session store (compatible with connect-redis)
- * Returns a client that can be used with RedisStore
+ * Get Redis client for session store
  */
 export function getSessionRedisClient(): Redis | null {
     return getRedisClient();
