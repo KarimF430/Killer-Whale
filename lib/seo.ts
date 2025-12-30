@@ -17,7 +17,7 @@ export function generateSEO({
 }: SEOConfig): Metadata {
   const siteName = 'gadizone'
   const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://gadizone.com'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.gadizone.com'
 
   return {
     title: fullTitle,

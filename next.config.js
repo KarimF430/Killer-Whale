@@ -87,6 +87,7 @@ const nextConfig = {
       // Added Clarity and Amplitude domains (including wildcards)
       `script-src 'self' 'unsafe-inline'${unsafeEval} 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net https://www.clarity.ms https://c.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://static.cloudflareinsights.com`,
       "style-src 'self' 'unsafe-inline'",
+      "worker-src 'self' blob:;",
       // Added Clarity image domains
       "img-src 'self' data: https: http: blob: https://c.clarity.ms https://*.clarity.ms",
       "font-src 'self' data:",

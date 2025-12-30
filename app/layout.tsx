@@ -18,7 +18,7 @@ export const viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://gadizone.com'),
+  metadataBase: new URL('https://www.gadizone.com'),
   title: 'gadizone - New Cars in India | Latest Prices, Reviews & Comparisons',
   description: 'Discover new cars in India with AI-powered search. Compare latest prices, detailed specifications, expert reviews, and get the best deals from authorized dealers across India.',
   keywords: 'new cars India, car prices 2024, car specifications, car reviews, car comparison, EMI calculator, car deals, Maruti Suzuki, Hyundai, Tata, Mahindra',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://gadizone.com',
+    url: 'https://www.gadizone.com',
     siteName: 'gadizone',
     title: 'gadizone - New Cars in India | Latest Prices & Reviews',
     description: 'Discover new cars in India with AI-powered search. Compare latest prices, detailed specifications, and expert reviews from authorized dealers.',
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     images: ['/og-image.jpg'],
   },
   alternates: {
-    canonical: 'https://gadizone.com',
+    canonical: 'https://www.gadizone.com',
   },
   verification: {
     google: 'LFtjPhYM1moenJzbsp_pbaHepFH24i14Qwf6h5Z5-as',

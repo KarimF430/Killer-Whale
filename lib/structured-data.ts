@@ -1,5 +1,5 @@
 
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://gadizone.com'
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.gadizone.com'
 
 export function generateOrganizationSchema() {
     return {

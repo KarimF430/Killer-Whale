@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next'
 export const revalidate = 3600 // Revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://gadizone.com'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.gadizone.com'
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
 
     // Helper for URL slugs
