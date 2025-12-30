@@ -37,35 +37,76 @@ Deliver the most comprehensive, fast, and intuitive platform for Indian car buye
 
 # 🏗️ Technology Stack
 
-## **Frontend**
+## 🌐 Frontend (User Interface)
+The client-side application is built for high-performance, SEO, and interactivity.
 
-* **Next.js 15 (App Router)** — SSR, SSG, ISR
-* **TypeScript** — Type safety across entire codebase
-* **Tailwind CSS** — Utility-first styling
-* **Framer Motion** — Smooth micro-interactions
-* **Lucide React** — Icon system
-* **Sentry** — Error monitoring & session replay
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | **Next.js 15** | The core React framework using the modern App Router architecture. |
+| **Language** | **TypeScript** | Ensures type safety and cleaner code across the entire app. |
+| **Styling** | **Tailwind CSS 3.3** | Utility-first CSS framework for rapid UI development. |
+| **Animations** | **Framer Motion** | Smooth transitions and complex animations. |
+| **Icons** | **Lucide React** | Lightweight, consistent SVG icons. |
+| **Graphics** | **Lottie Files** | Detailed, scalable vector animations (e.g., loading states). |
+| **State/Utils** | `clsx`, `tailwind-merge` | Utilities for dynamic class name conditional logic. |
+| **Analytics** | **Vercel Analytics** | Real-time traffic and performance monitoring. |
+| **Tracking** | **Amplitude** | User behavior tracking and product analytics. |
+| **Error Tracking** | **Sentry** | Frontend error logging and performance tracing. |
 
-## **Backend**
+## ⚙️ Backend (API & Logic)
+A robust Node.js server handling data, AI processing, and authentication.
 
-* **Node.js 22+**
-* **Express.js REST API**
-* **MongoDB + Mongoose ODM**
-* **Redis (95% hit rate)** for caching
-* **JWT + Bcrypt** for authentication
-* **Passport.js (Google OAuth)**
-* **Multer + Sharp** — Image uploads + WebP optimization
-* **Node-Cron** — Scheduled tasks
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Runtime** | **Node.js** | JavaScript runtime environment. |
+| **Framework** | **Express.js** | Fast, unopinionated web framework for APIs. |
+| **Language** | **TypeScript** | Executed using `tsx` for modern ESM support. |
+| **Database (Primary)** | **MongoDB** | NoSQL database for flexible car data and user logs (via `mongoose`). |
+| **Database (Relational)**| **PostgreSQL** | *Migrated/Hybrid usage* (connected via `drizzle-orm`). |
+| **Caching** | **Redis** | High-performance in-memory caching (via `ioredis`). |
+| **Authentication** | **Passport.js** | Handles Google OAuth and Local (Email/Pass) login strategies. |
+| **Security** | `helmet`, `bcryptjs`, `cors` | Headers security, password hashing, and cross-origin policies. |
+| **Validation** | **Zod** | TypeScript-first schema validation for API inputs. |
+| **File Uploads** | `multer`, `sharp` | Handling multipart form data and image processing/optimization. |
 
-## **Infrastructure**
+## 🤖 Artificial Intelligence (AI)
+The "Killer Whale" brain powering the intelligent features.
 
-* **Frontend** — Vercel (Global Edge Network)
-* **Backend** — Render Web Services
-* **Database** — MongoDB Atlas with 27 indexes
-* **CDN/Storage** — Cloudflare R2
-* **PM2** — Cluster mode for scaling
-* **Sentry** — Error & performance monitoring
-* **CI/CD** — GitHub Actions + Auto tests
+| Technology | Purpose |
+| :--- | :--- |
+| **Groq SDK** | Ultra-fast inference for LLM queries (Llama 3 models). |
+| **HuggingFace Inference**| Access to open-source models for specific tasks. |
+| **MCP SDK** | Model Context Protocol for agentic workflows and tool use. |
+| **RAG System** | Custom Retrieval-Augmented Generation for accurate car answers. |
+
+## ☁️ Infrastructure & DevOps
+Tools used to deploy, host, and monitor the application.
+
+| Category | Technology | Usage |
+| :--- | :--- | :--- |
+| **Frontend Host** | **Vercel** | Hosting Next.js app, Edge Functions, and Image Optimization. |
+| **Backend Host** | **Render** | Hosting the Node.js API and Background Workers. |
+| **Storage** | **Cloudflare R2** | (AWS S3 Compatible) Object storage for car images. |
+| **CDN/DNS** | **Cloudflare** | DNS management, caching, and DDoS protection. |
+| **Containerization**| **Docker** | Containerizing the backend for consistent deployment. |
+| **Monitoring** | **Grafana & Prometheus** | Real-time metrics visualization and alerting (Self-hosted). |
+
+## 🧪 Testing & Quality Assurance
+Ensuring reliability before every release.
+
+| Technology | Purpose |
+| :--- | :--- |
+| **Jest** | Unit testing framework for logic and API routes. |
+| **Playwright** | End-to-End (E2E) browser testing for user flows. |
+| **K6** | Load testing tool to simulate high traffic volume. |
+| **Google Lighthouse** | Performance, Accessibility, and BEST PRACTICES auditing. |
+
+## 📈 SEO & Growth tools
+| Technology | Output |
+| :--- | :--- |
+| **Sitemap.xml** | Dynamic, automatically generated map of all 50,000+ car pages. |
+| **Schema.org** | JSON-LD Structured data for Rich Snippets (Product, Breadcrumb). |
+| **Robots.txt** | Directives for Googlebot crawling behavior. |
 
 ---
 
@@ -180,88 +221,131 @@ Deliver the most comprehensive, fast, and intuitive platform for Indian car buye
 
 ---
 
-# 🌐 SEO + Page Structure
+# 🛠️ Installation & Setup
 
-## Public Pages (100% SSR)
+Follow these steps to get the project running locally.
 
-* `/` Homepage
-* `/brand-cars`
-* `/brand-cars/model`
-* `/brand-cars/model/variant`
-* `/compare/[slug]`
-* `/cars-by-budget/[range]`
-* `/news/[id]`
+### Prerequisites
 
-## SEO Practices
+*   **Node.js 20+**
+*   **MongoDB** (Local or Atlas)
+*   **Redis** (Local or Cloud)
+*   **Git**
 
-* SSR for all SEO pages
-* Dynamic metadata + JSON-LD
-* Canonical URLs
-* Sitemap + robots.txt
-* OG + Twitter Cards
-* ISR for news & homepage
+### 1. Clone the Repository
 
----
-
-# 🔄 Data Flow
-
-```
-Next.js → API Routes → Express Backend → MongoDB
-                      ↓
-                Redis Cache (95% hit rate)
+```bash
+git clone https://github.com/KarimF430/Killer-Whale.git
+cd Killer-Whale
 ```
 
-### Rendering Strategy
+### 2. Backend Setup
 
-* **SSR:** Brand/Model/Budget
-* **ISR:** Homepage, News
-* **Hybrid:** Variant pages
-* **CSR:** Admin dashboard & AI
+The backend runs on port `5001`.
+
+```bash
+cd backend
+npm install
+
+# Create .env file
+cp .env.example .env
+
+# Start Development Server
+npm run dev
+```
+
+**Required Backend Environment Variables (.env):**
+```env
+PORT=5001
+MONGODB_URI=mongodb://localhost:27017/gadizone
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=your_jwt_secret
+CLIENT_URL=http://localhost:3000
+```
+
+### 3. Frontend Setup
+
+The frontend runs on port `3000`.
+
+```bash
+# In the root directory
+npm install
+
+# Create .env.local file
+cp .env.example .env.local
+
+# Start Development Server
+npm run dev
+```
+
+**Required Frontend Environment Variables (.env.local):**
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5001
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5001
+GOOGLE_MAPS_API_KEY=your_key (Optional for maps)
+```
+
+### 4. Verify Installation
+
+*   **Frontend:** Visit `http://localhost:3000`
+*   **Backend Health Check:** Visit `http://localhost:5001/health`
+*   **Admin Panel:** Visit `http://localhost:3000/admin/login`
 
 ---
 
-# 📈 Scalability
+# 🗺️ Project Sitemap & Routes
 
-### Horizontal Scaling
+The application is structured into several key domains:
 
-* PM2 cluster mode
-* Stateless API
-* Redis session store
+### 🏠 Core Pages
+*   `/` - **Homepage** (ISR)
+*   `/login`, `/signup` - **Authentication**
+*   `/about-us`, `/contact-us` - **Static Pages**
+*   `/privacy-policy`, `/terms-and-conditions` - **Legal**
 
-### Vertical Optimizations
+### 🚗 Car Discovery
+*   `/[brand-cars]` - **Brand Page** (e.g., `/tata-cars`)
+*   `/[brand-cars]/[model]` - **Model Page** (e.g., `/tata-cars/nexon`)
+*   `/[brand-cars]/[model]/[variant]` - **Variant Details**
+*   `/search` - **Global Search**
+*   `/compare/[car1-vs-car2]` - **Comparisons**
+*   `/emi-calculator` - **Financial Tools**
+*   `/fuel-cost-calculator` - **Utility Tools**
+*   `/location/dealers` - **Dealer Locator**
 
-* Pre-indexed queries
-* Aggressive caching strategy
-* WebP optimized images
+### 🔍 Specialized SEO Landing Pages
+*   `/best-cars-under-[price]` - **Budget Pages** (8L, 10L, 20L, etc.)
+*   `/electric-cars` - **EV Hub**
+*   `/upcoming-cars-in-india` - **Launches**
+*   `/new-car-launches-in-india` - **Latest News**
+*   `/popular-cars-in-india` - **Trending**
+*   `/top-selling-cars-in-india` - **Sales Data**
 
-### Monitoring
-
-* Sentry
-* Custom health checks
-* Performance dashboard
-* Automated daily backups
+### 🛡️ Admin & Dashboard
+*   `/admin` - **Dashboard Home**
+*   `/admin/brands` - **Manage Brands**
+*   `/admin/models` - **Manage Models**
+*   `/admin/reviews` - **User Reviews Moderation**
+*   `/admin/news` - **Content Management System**
 
 ---
 
-# 🚀 Deployment
+# 🚀 Deployment Guide
 
 ### Frontend (Vercel)
+1.  Push code to GitHub.
+2.  Import project into **Vercel**.
+3.  Set "Framework Preset" to **Next.js**.
+4.  Add Environment Variables from `.env.local`.
+5.  Deploy.
 
-* Atomic deploys
-* Global edge caching
-* Instant rollbacks
-
-### Backend (Render)
-
-* Autoscaling
-* Environment variable manager
-* Persistent connections
-
-### Database (MongoDB Atlas)
-
-* M10+ cluster
-* Backups + snapshot recovery
-* Low-latency global access
+### Backend (Render / Railway)
+1.  Create a new Web Service.
+2.  Connect GitHub Repository.
+3.  Set **Root Directory** to `backend`.
+4.  Set **Build Command:** `npm install && npm run build`.
+5.  Set **Start Command:** `npm start`.
+6.  Add Environment Variables.
 
 ---
 
