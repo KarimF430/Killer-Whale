@@ -5,7 +5,7 @@ const extraImageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS || '')
   .map(h => h.trim())
   .filter(Boolean)
 // Support either a hostname or a full URL in env and extract just the hostname
-const rawR2 = process.env.R2_PUBLIC_BASE_HOST || process.env.R2_PUBLIC_BASE_URL || ''
+const rawR2 = process.env.R2_PUBLIC_BASE_URL || process.env.R2_PUBLIC_BASE_HOST || ''
 let r2Host = ''
 try {
   if (rawR2) {
