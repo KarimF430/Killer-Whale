@@ -36,7 +36,6 @@ const BODY_TYPES = [
     { id: 'Sedan', label: 'Sedan' },
     { id: 'Hatchback', label: 'Hatchback' },
     { id: 'MPV', label: 'MPV' },
-    { id: 'Coupe', label: 'Coupe' },
 ]
 
 // Compact Car Card with Ranking Badge (no fuel/transmission)
@@ -146,16 +145,15 @@ export default function TopCarsByBodyType({ initialCars = [] }: { initialCars?: 
             ? [...initialCars]
             : initialCars.filter(car => car.bodyType === selectedBodyType)
 
-        const carsWithTopRank = filtered.filter(car => car.topRank && car.topRank >= 1 && car.topRank <= 10)
+        // Get cars with explicit topRank (1-10)
+        const carsWithTopRank = filtered
+            .filter(car => car.topRank && car.topRank >= 1 && car.topRank <= 10)
+            .sort((a, b) => (a.topRank || 999) - (b.topRank || 999))
 
-        if (carsWithTopRank.length > 0) {
-            return carsWithTopRank
-                .sort((a, b) => (a.topRank || 999) - (b.topRank || 999))
-                .slice(0, 10)
-                .map((car, index) => ({ ...car, displayRank: car.topRank || index + 1 }))
-        }
-
-        return filtered
+        // Get remaining cars sorted by popularity for filling slots
+        const topRankIds = new Set(carsWithTopRank.map(c => c.id))
+        const remainingCars = filtered
+            .filter(car => !topRankIds.has(car.id))
             .sort((a, b) => {
                 if (a.isPopular && !b.isPopular) return -1
                 if (!a.isPopular && b.isPopular) return 1
@@ -164,8 +162,14 @@ export default function TopCarsByBodyType({ initialCars = [] }: { initialCars?: 
                 if (!a.popularRank && b.popularRank) return 1
                 return (b.startingPrice || 0) - (a.startingPrice || 0)
             })
-            .slice(0, 10)
-            .map((car, index) => ({ ...car, displayRank: index + 1 }))
+
+        // Combine: topRank cars first, then fill with popular cars up to 10
+        const combined = [...carsWithTopRank, ...remainingCars].slice(0, 10)
+
+        return combined.map((car, index) => ({
+            ...car,
+            displayRank: car.topRank || index + 1
+        }))
     }, [initialCars, selectedBodyType])
 
     const scrollContainer = (direction: 'left' | 'right') => {
