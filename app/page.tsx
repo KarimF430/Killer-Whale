@@ -258,7 +258,7 @@ async function getHomeData() {
           name: model.name,
           brand: model.brandId,
           brandName: brandName,
-          image: model.heroImage ? resolveAssetUrl(model.heroImage, backendUrl) : '/car-placeholder.jpg',
+          image: model.heroImage ? resolveAssetUrl(model.heroImage, backendUrl) : '/placeholder-car.svg',
           startingPrice: model.lowestPrice || 0,
           fuelTypes: (model.fuelTypes || ['Petrol']).map(normalizeFuelType),
           transmissions: (model.transmissions || ['Manual']).map(normalizeTransmission),

@@ -646,12 +646,12 @@ export default async function ModelPage({ params }: ModelPageProps) {
     return null as any
   }
 
-  // Try fetching as upcoming car first
-  let modelData = await getUpcomingCarData(resolvedParams['brand-cars'], resolvedParams.model)
+  // Try fetching as regular model first (most common case)
+  let modelData = await getModelData(resolvedParams['brand-cars'], resolvedParams.model)
 
-  // If not found as upcoming car, try as regular model
+  // If not found as regular model, try as upcoming car
   if (!modelData) {
-    modelData = await getModelData(resolvedParams['brand-cars'], resolvedParams.model)
+    modelData = await getUpcomingCarData(resolvedParams['brand-cars'], resolvedParams.model)
   }
 
   if (!modelData) {

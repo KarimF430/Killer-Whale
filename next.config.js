@@ -85,17 +85,17 @@ const nextConfig = {
       // Allow unsafe-eval only in development for Next/Webpack dev tooling
       // Added unpkg.com and lottie hosts for Killer Whale loading animation
       // Added Clarity and Amplitude domains (including wildcards)
-      `script-src 'self' 'unsafe-inline'${unsafeEval} 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net https://www.clarity.ms https://c.clarity.ms https://scripts.clarity.ms https://*.clarity.ms`,
+      `script-src 'self' 'unsafe-inline'${unsafeEval} 'wasm-unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net https://www.clarity.ms https://c.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://static.cloudflareinsights.com`,
       "style-src 'self' 'unsafe-inline'",
       // Added Clarity image domains
       "img-src 'self' data: https: http: blob: https://c.clarity.ms https://*.clarity.ms",
       "font-src 'self' data:",
       // Added lottie.host, unpkg.com, cdn.jsdelivr.net for Killer Whale animation
       // Added Amplitude and Clarity connect domains
-      `connect-src 'self' ${connectSrc} https://www.google-analytics.com https://*.sentry.io https://images.unsplash.com https://www.googleapis.com https://lottie.host https://unpkg.com https://cdn.jsdelivr.net https://*.amplitude.com https://api.amplitude.com https://api2.amplitude.com https://*.clarity.ms https://c.clarity.ms`,
+      `connect-src 'self' ${connectSrc} https://www.google-analytics.com https://*.sentry.io https://images.unsplash.com https://www.googleapis.com https://lottie.host https://unpkg.com https://cdn.jsdelivr.net https://*.amplitude.com https://api.amplitude.com https://api2.amplitude.com https://*.clarity.ms https://c.clarity.ms https://static.cloudflareinsights.com`,
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
       // Added wasm-unsafe-eval for Lottie WASM player
-      "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms",
+      "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://cdn.jsdelivr.net https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://static.cloudflareinsights.com",
     ].join('; ')
 
     return [
