@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import CarCard from './CarCard'
 
@@ -23,25 +23,30 @@ interface Car {
 // Budget range IDs
 type BudgetRangeId = 'under-10' | 'under-15' | 'under-20' | 'under-25' | 'under-30' | 'under-40' | 'under-50' | 'under-60' | 'under-80' | 'under-100' | 'above-100'
 
+interface BudgetRange {
+  id: BudgetRangeId
+  label: string
+  min: number
+  max: number
+  urlSlug: string
+}
+
 interface CarsByBudgetProps {
   allCars: Car[]
 }
 
 /**
- * ✅ PERFORMANCE OPTIMIZED: Cars by Budget Section
+ * ✅ DYNAMIC BUDGET FILTERS: Cars by Budget Section
  * 
- * Performance Strategy:
- * 1. All data is pre-fetched on server-side (SSR/ISR) - no client-side API calls
- * 2. ISR caches the page for 1 hour - subsequent requests serve cached HTML
- * 3. Backend uses Redis caching - reduces database load
+ * Features:
+ * 1. Only shows budget ranges that have cars in the database
+ * 2. Automatically selects the first available budget range
+ * 3. Dynamically updates when new cars are added
  * 4. Full SEO support - all content is server-rendered
- * 
- * Client-side filtering from allCars data - no additional API calls needed.
  */
 export default function CarsByBudget({ allCars }: CarsByBudgetProps) {
-  const [selectedBudget, setSelectedBudget] = useState<BudgetRangeId>('under-10')
-
-  const budgetRanges: { id: BudgetRangeId; label: string; min: number; max: number; urlSlug: string }[] = [
+  // All possible budget ranges
+  const allBudgetRanges: BudgetRange[] = [
     { id: 'under-10', label: 'Under ₹10 Lakh', min: 0, max: 1000000, urlSlug: '10' },
     { id: 'under-15', label: '₹10-15 Lakh', min: 1000001, max: 1500000, urlSlug: '15' },
     { id: 'under-20', label: '₹15-20 Lakh', min: 1500001, max: 2000000, urlSlug: '20' },
@@ -55,8 +60,33 @@ export default function CarsByBudget({ allCars }: CarsByBudgetProps) {
     { id: 'above-100', label: 'Above ₹1 Crore', min: 10000001, max: Infinity, urlSlug: 'above-1-crore' },
   ]
 
+  // Calculate which budget ranges have cars (memoized for performance)
+  const availableBudgetRanges = useMemo(() => {
+    return allBudgetRanges.filter(range => {
+      // Count cars in this range
+      const carsInRange = allCars.filter(car => {
+        const price = car.startingPrice
+        return price >= range.min && price <= range.max
+      })
+      return carsInRange.length > 0
+    })
+  }, [allCars])
+
+  // Get the first available range or default to 'under-10'
+  const defaultRange = availableBudgetRanges.length > 0 ? availableBudgetRanges[0].id : 'under-10'
+
+  const [selectedBudget, setSelectedBudget] = useState<BudgetRangeId>(defaultRange)
+
+  // Update selected budget if it becomes unavailable (e.g., after data refresh)
+  useEffect(() => {
+    const isSelectedAvailable = availableBudgetRanges.some(r => r.id === selectedBudget)
+    if (!isSelectedAvailable && availableBudgetRanges.length > 0) {
+      setSelectedBudget(availableBudgetRanges[0].id)
+    }
+  }, [availableBudgetRanges, selectedBudget])
+
   // Filter cars based on selected budget range
-  const selectedRange = budgetRanges.find(b => b.id === selectedBudget)
+  const selectedRange = allBudgetRanges.find(b => b.id === selectedBudget)
   const currentCars = allCars.filter(car => {
     const price = car.startingPrice
     if (!selectedRange) return false
@@ -117,7 +147,7 @@ export default function CarsByBudget({ allCars }: CarsByBudgetProps) {
           className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {budgetRanges.map((budget) => (
+          {availableBudgetRanges.map((budget) => (
             <button
               key={budget.id}
               onClick={() => setSelectedBudget(budget.id)}

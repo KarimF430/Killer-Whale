@@ -28,7 +28,7 @@ const BLUR_DATA_URL = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA
 export const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(({
     src,
     alt,
-    fallbackSrc = '/placeholder-car.jpg',
+    fallbackSrc = '/placeholder-car.svg',
     enableBlur = true,
     priority = false,
     quality = 85,
@@ -67,12 +67,16 @@ export const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
                 onError={handleError}
                 onLoad={handleLoad}
                 fill={fill}
-                className={className}
+                className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
                 {...props}
             />
-            {isLoading && (
-                <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-            )}
+            {/* Loading skeleton with fade-out transition */}
+            <div
+                className={`absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 transition-opacity duration-300 ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            >
+                {/* Shimmer animation */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+            </div>
         </div>
     )
 })

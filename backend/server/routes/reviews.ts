@@ -68,6 +68,7 @@ async function uploadToR2(filePath: string, filename: string): Promise<string | 
             Key: key,
             Body: body,
             ContentType: 'image/jpeg',
+            CacheControl: 'public, max-age=31536000, immutable',
         }));
 
         const publicBase = process.env.R2_PUBLIC_BASE_URL || `${endpoint}/${bucket}`;

@@ -98,8 +98,8 @@ async function getBudgetCarsData() {
 
         const allCars = budgetData.data || []
         const cars = allCars.filter((car: any) => {
-            const price = car.startingPrice || 0
-            return price >= BUDGET_INFO.min && price <= BUDGET_INFO.max && activeBrandIds.has(car.brandId || car.brand)
+            // Only filter by active brand - backend already filters by budget
+            return activeBrandIds.has(car.brandId || car.brand)
         })
 
         const processedCars = models

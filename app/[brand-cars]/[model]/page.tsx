@@ -13,6 +13,22 @@ interface ModelPageProps {
 }
 
 // Enable ISR with 1-hour revalidation (matches home page pattern)
+const resolveAssetUrl = (path: string, backendUrl: string) => {
+  if (!path) return ''
+  const r2Url = process.env.R2_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || ''
+  const legacyR2 = 'https://pub-a4a4bb84fc2d41cba103f4e2a8b5d185.r2.dev'
+
+  if (path.includes(legacyR2) && r2Url) {
+    return path.replace(legacyR2, r2Url)
+  }
+
+  if (path.startsWith('http')) return path
+
+  if (path.startsWith('/uploads/') && r2Url) return `${r2Url}${path}`
+  if (path.startsWith('/uploads/')) return `${backendUrl}${path}`
+  return path
+}
+
 export const revalidate = 3600
 
 
@@ -101,13 +117,13 @@ async function getUpcomingCarData(brandSlug: string, modelSlug: string) {
     const galleryImages: string[] = []
     const heroImageUrl = upcomingCarData.heroImage
     if (heroImageUrl) {
-      galleryImages.push(heroImageUrl.startsWith('/uploads/') ? `${backendUrl}${heroImageUrl}` : heroImageUrl)
+      galleryImages.push(resolveAssetUrl(heroImageUrl, backendUrl))
     }
 
     if (upcomingCarData.galleryImages && Array.isArray(upcomingCarData.galleryImages)) {
       upcomingCarData.galleryImages.forEach((img: any) => {
         if (img?.url) {
-          const fullUrl = img.url.startsWith('/uploads/') ? `${backendUrl}${img.url}` : img.url
+          const fullUrl = resolveAssetUrl(img.url, backendUrl)
           if (!galleryImages.includes(fullUrl)) {
             galleryImages.push(fullUrl)
           }
@@ -337,9 +353,7 @@ async function getModelData(brandSlug: string, modelSlug: string) {
           ? m.transmissions
           : ['Manual']
 
-        const heroImage = m.heroImage
-          ? (m.heroImage.startsWith('http') ? m.heroImage : `${backendUrl}${m.heroImage}`)
-          : ''
+        const heroImage = resolveAssetUrl(m.heroImage, backendUrl)
 
         return {
           id: m.id,
@@ -374,14 +388,14 @@ async function getModelData(brandSlug: string, modelSlug: string) {
     // Add hero image first
     const heroImageUrl = detailedModelData?.heroImage || modelData.image
     if (heroImageUrl) {
-      galleryImages.push(heroImageUrl.startsWith('/uploads/') ? `${backendUrl}${heroImageUrl}` : heroImageUrl)
+      galleryImages.push(resolveAssetUrl(heroImageUrl, backendUrl))
     }
 
     // Add gallery images from backend
     if (detailedModelData?.galleryImages && Array.isArray(detailedModelData.galleryImages)) {
       detailedModelData.galleryImages.forEach((img: any) => {
         if (img?.url) {
-          const fullUrl = img.url.startsWith('/uploads/') ? `${backendUrl}${img.url}` : img.url
+          const fullUrl = resolveAssetUrl(img.url, backendUrl)
           if (!galleryImages.includes(fullUrl)) {
             galleryImages.push(fullUrl)
           }
@@ -470,7 +484,7 @@ async function getModelData(brandSlug: string, modelSlug: string) {
       brandSlug: brandSlug.replace('-cars', ''),
       brand: modelData.brandName,
       name: modelData.name,
-      heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : modelData.image),
+      heroImage: galleryImages[0] || resolveAssetUrl(modelData.image, backendUrl),
       gallery: galleryImages,
       rating: reviewsData.overallRating || modelData.rating || 0,
       reviewCount: reviewsData.total || modelData.reviews || 0,

@@ -45,13 +45,24 @@ export function getOptimizedImageUrl(
 export function resolveR2Url(path: string | null | undefined): string {
     if (!path) return '/api/placeholder/800/600';
 
-    // If already absolute URL, return as is
+    // If already absolute URL, check if it's the old R2 URL and rewrite it
     if (path.startsWith('http://') || path.startsWith('https://')) {
+        const r2Base = process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ||
+            process.env.R2_PUBLIC_BASE_URL ||
+            process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_HOST;
+
+        // Legacy R2 dev URL to replace
+        const legacyR2 = 'https://pub-a4a4bb84fc2d41cba103f4e2a8b5d185.r2.dev';
+
+        if (path.includes(legacyR2) && r2Base) {
+            return path.replace(legacyR2, r2Base);
+        }
         return path;
     }
 
     // Get R2 Base URL from env
     const r2Base = process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ||
+        process.env.R2_PUBLIC_BASE_URL ||
         process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_HOST;
 
     if (r2Base && path.startsWith('/uploads/')) {

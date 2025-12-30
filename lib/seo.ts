@@ -18,7 +18,7 @@ export function generateSEO({
   const siteName = 'gadizone'
   const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://gadizone.com'
-  
+
   return {
     title: fullTitle,
     description,
@@ -110,53 +110,53 @@ export function generateVariantSEO(brandName: string, modelName: string, variant
 export const staticPageSEO = {
   home: generateSEO({
     title: 'New Cars in India - Latest Prices, Reviews & Comparisons',
-    description: 'Discover new cars in India with AI-powered search. Compare latest prices, detailed specifications, expert reviews, and get the best deals from authorized dealers across India.',
+    description: 'Find new cars in India with AI-powered search. Compare prices, specs, reviews and get best deals from authorized dealers.',
     keywords: 'new cars India, car prices 2024, car specifications, car reviews, car comparison, EMI calculator, car deals, Maruti Suzuki, Hyundai, Tata, Mahindra',
     canonical: '/',
   }),
-  
+
   emiCalculator: generateSEO({
     title: 'Car EMI Calculator - Calculate Monthly Car Loan EMI',
     description: 'Calculate your car loan EMI with our advanced EMI calculator. Get instant results with detailed amortization schedule, interest breakdown, and compare different loan options.',
     keywords: 'car EMI calculator, car loan calculator, EMI calculation, car finance, auto loan calculator, monthly EMI',
     canonical: '/emi-calculator',
   }),
-  
+
   priceBreakup: generateSEO({
     title: 'Car Price Breakup - On-Road Price Calculator',
     description: 'Calculate on-road price of any car with detailed price breakup including ex-showroom price, RTO charges, road tax, insurance, and accessories. Get accurate pricing for your city.',
     keywords: 'car price breakup, on-road price calculator, car price calculator, RTO charges, road tax calculator, car insurance',
     canonical: '/price-breakup',
   }),
-  
+
   compare: generateSEO({
     title: 'Compare Cars - Side by Side Car Comparison',
     description: 'Compare cars side by side with detailed specifications, features, prices, and expert reviews. Make an informed decision with our comprehensive car comparison tool.',
     keywords: 'compare cars, car comparison, side by side comparison, car specs comparison, car features comparison',
     canonical: '/compare',
   }),
-  
+
   news: generateSEO({
     title: 'Car News - Latest Automotive News & Updates',
     description: 'Stay updated with latest car news, launches, reviews, and automotive industry updates. Get expert insights and analysis on new cars, technology, and trends.',
     keywords: 'car news, automotive news, car launches, car reviews, auto industry news, latest cars',
     canonical: '/news',
   }),
-  
+
   offers: generateSEO({
     title: 'Car Offers & Deals - Best Car Discounts in India',
     description: 'Discover the best car offers, discounts, and deals in India. Get exclusive offers on new cars, exchange bonuses, and festive discounts from authorized dealers.',
     keywords: 'car offers, car discounts, car deals, car exchange offers, festive car offers, car promotions',
     canonical: '/offers',
   }),
-  
+
   location: generateSEO({
     title: 'Select Your City - Car Prices by City',
     description: 'Select your city to get accurate on-road car prices, dealer information, and local offers. We cover all major cities across India.',
     keywords: 'car prices by city, on-road price, city-wise car prices, car dealers by city',
     canonical: '/location',
   }),
-  
+
   search: generateSEO({
     title: 'Search Cars - Find Your Perfect Car',
     description: 'Search and find your perfect car from thousands of models. Filter by price, brand, fuel type, body type, and more. Get detailed information and compare cars.',

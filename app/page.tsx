@@ -118,6 +118,22 @@ const normalizeFuelType = (fuel: string): string => {
   return fuel.charAt(0).toUpperCase() + fuel.slice(1).toLowerCase()
 }
 
+const resolveAssetUrl = (path: string, backendUrl: string) => {
+  if (!path) return ''
+  const r2Url = process.env.R2_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || ''
+  const legacyR2 = 'https://pub-a4a4bb84fc2d41cba103f4e2a8b5d185.r2.dev'
+
+  if (path.includes(legacyR2) && r2Url) {
+    return path.replace(legacyR2, r2Url)
+  }
+
+  if (path.startsWith('http')) return path
+
+  if (path.startsWith('/uploads/') && r2Url) return `${r2Url}${path}`
+  if (path.startsWith('/uploads/')) return `${backendUrl}${path}`
+  return path
+}
+
 // Helper function to normalize transmission types
 const normalizeTransmission = (transmission: string): string => {
   const lower = transmission.toLowerCase()
@@ -217,7 +233,7 @@ async function getHomeData() {
         name: car.name,
         brand: car.brandId,
         brandName: car.brandName,
-        image: car.image ? (car.image.startsWith('http') ? car.image : `${backendUrl}${car.image}`) : '',
+        image: car.image ? resolveAssetUrl(car.image, backendUrl) : '',
         startingPrice: car.startingPrice,
         popularRank: (car as any).popularRank ?? null,
         newRank: (car as any).newRank ?? null,
@@ -242,7 +258,7 @@ async function getHomeData() {
           name: model.name,
           brand: model.brandId,
           brandName: brandName,
-          image: model.heroImage ? (model.heroImage.startsWith('http') ? model.heroImage : `${backendUrl}${model.heroImage}`) : '/car-placeholder.jpg',
+          image: model.heroImage ? resolveAssetUrl(model.heroImage, backendUrl) : '/car-placeholder.jpg',
           startingPrice: model.lowestPrice || 0,
           fuelTypes: (model.fuelTypes || ['Petrol']).map(normalizeFuelType),
           transmissions: (model.transmissions || ['Manual']).map(normalizeTransmission),
@@ -300,7 +316,7 @@ async function getHomeData() {
       name: car.name,
       brandId: car.brandId,
       brandName: brandMap[car.brandId] || 'Unknown',
-      image: car.heroImage ? (car.heroImage.startsWith('http') ? car.heroImage : `${backendUrl}${car.heroImage}`) : '',
+      image: car.heroImage ? resolveAssetUrl(car.heroImage, backendUrl) : '',
       expectedPriceMin: car.expectedPriceMin,
       expectedPriceMax: car.expectedPriceMax,
       fuelTypes: (car.fuelTypes || ['Petrol']).map(normalizeFuelType),

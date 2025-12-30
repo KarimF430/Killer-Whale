@@ -98,13 +98,14 @@ router.post('/upload', upload.single('file'), imageProcessingConfigs.news, async
 
         const now = new Date()
         const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')
-        const key = `uploads/news/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`
+        const key = `uploads/news/${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`
         const body = await fs.readFile(req.file.path)
         await client.send(new PutObjectCommand({
           Bucket: bucket,
           Key: key,
           Body: body,
           ContentType: req.file.mimetype || 'application/octet-stream',
+          CacheControl: 'public, max-age=31536000, immutable',
         }))
         const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '')
         if (publicBase) {
@@ -160,9 +161,9 @@ router.post('/upload-multiple', upload.array('files', 10), imageProcessingConfig
           try {
             const now = new Date()
             const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')
-            const key = `uploads/news/${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`
+            const key = `uploads/news/${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}/${randomUUID()}-${safeName.replace(/\.(jpg|jpeg|png)$/i, '.webp')}`
             const body = await fs.readFile(file.path)
-            await client.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: file.mimetype || 'application/octet-stream' }))
+            await client.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: file.mimetype || 'application/octet-stream', CacheControl: 'public, max-age=31536000, immutable' }))
             const publicBase = process.env.R2_PUBLIC_BASE_URL || (endpoint ? `${endpoint}/${bucket}` : '')
             if (publicBase) fileUrl = `${publicBase}/${key}`
           } catch (e) {

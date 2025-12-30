@@ -812,6 +812,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             Key: key,
             Body: body,
             ContentType: 'image/webp',
+            CacheControl: 'public, max-age=31536000, immutable',
             Metadata: metadata
           }));
 
@@ -922,6 +923,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
             Key: key,
             Body: body,
             ContentType: req.file.mimetype || 'image/webp',
+            CacheControl: 'public, max-age=31536000, immutable',
             Metadata: {
               'original-name': req.file.originalname,
               'upload-date': new Date().toISOString(),
@@ -1277,7 +1279,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       const brandId = req.query.brandId as string | undefined;
       const page = parseInt(req.query.page as string) || 1;
-      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 250);
       const skip = (page - 1) * limit;
 
       // Use optimized MongoDB aggregation with $lookup sub-pipeline
