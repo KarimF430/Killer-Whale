@@ -10,4 +10,4 @@ Disallow: /verify-email
 Disallow: /debug-env
 Disallow: /test-honda
 
-Sitemap: https://gadizone.com/sitemap.xml
+Sitemap: https://www.gadizone.com/sitemap.xml
