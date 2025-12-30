@@ -193,16 +193,82 @@ export default function createYouTubeRoutes(storage: IStorage): Router {
                 }
             }
 
-            // For general videos, use scheduled cache from persistent storage
+            // For general videos, use Redis cache first (persistent across deployments)
+            try {
+                const { getCacheRedisClient } = await import('../config/redis-config');
+                const redis = getCacheRedisClient();
+
+                if (redis) {
+                    const cacheKey = 'youtube:general';
+                    const cachedData = await redis.get(cacheKey);
+
+                    if (cachedData) {
+                        const parsed = JSON.parse(cachedData);
+                        const cacheAge = Date.now() - parsed.timestamp;
+                        const minutesOld = Math.floor(cacheAge / 1000 / 60);
+
+                        console.log(`✅ YouTube general cache hit from Redis (age: ${minutesOld} minutes)`);
+                        return res.json({
+                            ...parsed.data,
+                            cached: true,
+                            cacheAge: minutesOld,
+                            source: 'redis'
+                        });
+                    }
+                }
+            } catch (redisError) {
+                console.warn('⚠️ Redis cache check failed for general videos:', redisError);
+            }
+
+            // Fallback to file storage
             const cache = await storage.getYouTubeCache();
 
             if (!cache) {
-                console.log('📺 YouTube cache is empty - waiting for scheduled fetch');
+                console.log('📺 YouTube cache is empty - attempting immediate fallback fetch');
+
+                // Fallback to live fetch
+                const { fetchAndCacheYouTubeVideos } = await import('../scheduled-youtube-fetch');
+                await fetchAndCacheYouTubeVideos(storage);
+
+                // Try getting cache again
+                const freshCache = await storage.getYouTubeCache();
+
+                if (freshCache) {
+                    // Update Redis with fresh data
+                    try {
+                        const { getCacheRedisClient } = await import('../config/redis-config');
+                        const redis = getCacheRedisClient();
+                        if (redis) {
+                            // Cache for 24 hours in Redis
+                            await redis.setex('youtube:general', 24 * 60 * 60, JSON.stringify(freshCache));
+                            console.log('💾 Cached fresh YouTube data to Redis');
+                        }
+                    } catch (e) {
+                        console.warn('Failed to update Redis cache:', e);
+                    }
+
+                    return res.json({
+                        ...freshCache.data,
+                        cached: false,
+                        cacheAge: 0,
+                        isStale: false
+                    });
+                }
+
                 return res.status(503).json({
                     error: 'No videos available',
                     message: 'Fresh content will be available soon'
                 });
             }
+
+            // If we found file cache, let's also sync it to Redis for next time
+            try {
+                const { getCacheRedisClient } = await import('../config/redis-config');
+                const redis = getCacheRedisClient();
+                if (redis) {
+                    await redis.setex('youtube:general', 24 * 60 * 60, JSON.stringify(cache));
+                }
+            } catch (e) { }
 
             // Check if cache is still valid (within 24 hours)
             const cacheAge = Date.now() - cache.timestamp;
