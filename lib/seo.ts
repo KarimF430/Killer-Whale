@@ -82,7 +82,7 @@ export function generateBrandSEO(brandName: string): Metadata {
     title: `${brandName} Cars Price, Models & Reviews in India`,
     description: `Explore ${brandName} cars in India. Get latest prices, detailed specifications, expert reviews, and compare all ${brandName} models. Find the best ${brandName} car for you.`,
     keywords: `${brandName} cars, ${brandName} price, ${brandName} models, ${brandName} reviews, ${brandName} specifications, ${brandName} India`,
-    canonical: `/brands/${brandName.toLowerCase().replace(/\s+/g, '-')}`,
+    canonical: `/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars`,
   })
 }
 
