@@ -37,7 +37,7 @@ export default function VariantCard({ variant, onClick, onGetPrice, onCompare }:
           <div className="flex items-center space-x-4 text-sm text-gray-600">
             <span>{variant.fuel}</span>
             <span>{variant.transmission}</span>
-            <span>{variant.power}</span>
+            <span>{variant.power.split('@')[0].trim()}</span>
           </div>
         </div>
         <div className="text-right">
