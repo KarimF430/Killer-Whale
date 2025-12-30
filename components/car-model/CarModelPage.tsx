@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Star, Heart, Share2, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowRight, Calendar, Fuel, Users, Settings, IndianRupee, MapPin, Phone, MessageCircle, Zap, Shield, Award, TrendingUp, Clock, CheckCircle, AlertCircle, Info, X, Plus, Minus, Eye, ExternalLink, Play, ThumbsUp, ThumbsDown, Wrench, DollarSign, User, Car, Camera } from 'lucide-react'
+import { Star, Heart, Share2, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowRight, Calendar, Fuel, Users, Settings, IndianRupee, MapPin, Phone, MessageCircle, Zap, Shield, Award, TrendingUp, Clock, CheckCircle, AlertCircle, Info, X, Plus, Minus, Eye, ExternalLink, Play, ThumbsUp, ThumbsDown, Wrench, DollarSign, User, Car, Camera, Landmark } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -1314,11 +1314,12 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">K</span>
+                    {/* Generic Bank Icon */}
+                    <Landmark className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">kotak</h3>
-                    <p className="text-sm text-gray-600">Mahindra Bank</p>
+                    <h3 className="text-lg font-bold text-gray-900">Bank</h3>
+                    <p className="text-sm text-gray-600">Partner</p>
                   </div>
                 </div>
                 <div className="text-right">

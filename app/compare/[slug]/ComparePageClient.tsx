@@ -630,11 +630,11 @@ export default function ComparePageClient({
           {/* Bank Info */}
           <div className="flex items-center gap-2 mb-3">
             <div className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-base font-bold">K</span>
+              <Landmark className="h-5 w-5 text-white" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-bold text-gray-900">kotak</h3>
-              <p className="text-xs text-gray-600">Mahindra Bank</p>
+              <h3 className="text-sm font-bold text-gray-900">Bank</h3>
+              <p className="text-xs text-gray-600">Partner</p>
             </div>
           </div>
 

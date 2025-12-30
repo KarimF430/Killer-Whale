@@ -1,6 +1,6 @@
 'use client'
 
-import { Calculator, ChevronRight, Shield, TrendingUp } from 'lucide-react'
+import { Calculator, ChevronRight, Shield, TrendingUp, Landmark } from 'lucide-react'
 
 interface CarEMISectionProps {
   startingPrice: number
@@ -12,8 +12,8 @@ export default function CarEMISection({ startingPrice, carName }: CarEMISectionP
   const calculateEMI = (principal: number, rate: number = 8.5, tenure: number = 5) => {
     const monthlyRate = rate / (12 * 100)
     const months = tenure * 12
-    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
-                (Math.pow(1 + monthlyRate, months) - 1)
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+      (Math.pow(1 + monthlyRate, months) - 1)
     return Math.round(emi)
   }
 
@@ -29,11 +29,12 @@ export default function CarEMISection({ startingPrice, carName }: CarEMISectionP
                 {/* Kotak Mahindra Bank Logo */}
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-red-600 text-lg font-bold">K</span>
+                    {/* Generic Bank Icon */}
+                    <Landmark className="h-6 w-6 text-red-600" />
                   </div>
                   <div className="text-white">
-                    <div className="font-bold text-lg">kotak</div>
-                    <div className="text-sm opacity-90">Mahindra Bank</div>
+                    <div className="font-bold text-lg">Bank</div>
+                    <div className="text-sm opacity-90">Partner</div>
                   </div>
                 </div>
 
@@ -63,7 +64,7 @@ export default function CarEMISection({ startingPrice, carName }: CarEMISectionP
                   <div className="text-xs text-green-600">Within 30 minutes</div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                 <TrendingUp className="h-5 w-5 text-blue-600" />
                 <div>
@@ -71,7 +72,7 @@ export default function CarEMISection({ startingPrice, carName }: CarEMISectionP
                   <div className="text-xs text-blue-600">Starting 8.5% p.a.</div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
                 <Calculator className="h-5 w-5 text-purple-600" />
                 <div>

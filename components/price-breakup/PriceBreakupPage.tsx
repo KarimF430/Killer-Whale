@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronDown, ChevronUp, Share2, Heart, Calendar, Fuel, Users } from 'lucide-react'
+import { ChevronDown, ChevronUp, Share2, Heart, Calendar, Fuel, Users, Landmark } from 'lucide-react'
 import { formatPrice } from '@/utils/priceFormatter'
 import { calculateOnRoadPrice, OnRoadPriceBreakup } from '@/lib/rto-data-optimized'
 import PageSection from '../common/PageSection'
@@ -1113,11 +1113,11 @@ export default function PriceBreakupPage({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">K</span>
+                  <Landmark className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">kotak</h3>
-                  <p className="text-sm text-gray-600">Mahindra Bank</p>
+                  <h3 className="text-lg font-bold text-gray-900">Bank</h3>
+                  <p className="text-sm text-gray-600">Partner</p>
                 </div>
               </div>
               <div className="text-right">
