@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, Check, X, Trash2, Eye, Star, Search, Filter, MessageSquare, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
 
@@ -48,6 +48,9 @@ export default function AdminReviewsPage() {
     const [limit] = useState(10)
     const [totalPages, setTotalPages] = useState(1)
 
+    // Race condition prevention
+    const abortControllerRef = useRef<AbortController | null>(null)
+
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
     useEffect(() => {
@@ -57,10 +60,23 @@ export default function AdminReviewsPage() {
     useEffect(() => {
         fetchReviews()
         fetchStats()
+
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+        }
     }, [page, filter]) // Re-fetch on page/filter change. Search is handled via Enter key or debounce, but useEffect dep simplifies for now.
 
     const fetchReviews = async () => {
         try {
+            // Cancel previous request
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+            abortControllerRef.current = new AbortController()
+            const signal = abortControllerRef.current.signal
+
             setLoading(true)
             const params = new URLSearchParams()
             if (filter === 'approved') params.set('isApproved', 'true')
@@ -72,16 +88,23 @@ export default function AdminReviewsPage() {
             params.set('offset', ((page - 1) * limit).toString())
 
             const response = await fetch(`${API_URL}/api/admin/reviews?${params.toString()}`, {
-                credentials: 'include'
+                credentials: 'include',
+                signal
             })
             const data = await response.json()
             if (data.success) {
                 setReviews(data.data.reviews || [])
                 setTotalPages(Math.ceil((data.data.total || 0) / limit))
             }
-        } catch (error) {
-            console.error('Error fetching reviews:', error)
+        } catch (error: any) {
+            if (error.name !== 'AbortError') {
+                console.error('Error fetching reviews:', error)
+            }
         } finally {
+            // Only turn off loading if this request wasn't aborted (or rather, we can't easily check 'this' request without closures, but AbortError handling above prevents setting state on aborted)
+            // Actually 'finally' runs even on abort. We should only setLoading(false) if not aborted?
+            // Safer: logic inside try/catch handles the sets.
+            if (abortControllerRef.current?.signal.aborted) return
             setLoading(false)
         }
     }
