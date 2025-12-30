@@ -23,13 +23,13 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://gadizone.com"
+        "item": "https://www.gadizone.com"
       },
       ...items.map((item, index) => ({
         "@type": "ListItem",
         "position": index + 2,
         "name": item.label,
-        ...(item.href && { "item": `https://gadizone.com${item.href}` })
+        ...(item.href && { "item": `https://www.gadizone.com${item.href}` })
       }))
     ]
   }
@@ -41,27 +41,27 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      
+
       {/* Visual breadcrumbs */}
-      <nav 
-        aria-label="Breadcrumb" 
+      <nav
+        aria-label="Breadcrumb"
         className={`flex items-center space-x-2 text-sm ${className}`}
       >
         {/* Home link */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="flex items-center text-gray-500 hover:text-gray-900 transition-colors"
           aria-label="Home"
         >
           <Home className="h-4 w-4" />
         </Link>
-        
+
         <ChevronRight className="h-4 w-4 text-gray-400" />
-        
+
         {/* Breadcrumb items */}
         {items.map((item, index) => {
           const isLast = index === items.length - 1
-          
+
           return (
             <div key={index} className="flex items-center space-x-2">
               {item.href && !isLast ? (
@@ -72,16 +72,15 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
                   {item.label}
                 </Link>
               ) : (
-                <span 
-                  className={`truncate max-w-[200px] ${
-                    isLast ? 'text-gray-900 font-medium' : 'text-gray-500'
-                  }`}
+                <span
+                  className={`truncate max-w-[200px] ${isLast ? 'text-gray-900 font-medium' : 'text-gray-500'
+                    }`}
                   aria-current={isLast ? 'page' : undefined}
                 >
                   {item.label}
                 </span>
               )}
-              
+
               {!isLast && <ChevronRight className="h-4 w-4 text-gray-400" />}
             </div>
           )

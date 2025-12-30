@@ -78,7 +78,7 @@ export const generatePriceBreakupUrl = (car: CarUrlData, city?: string): string 
   const brandSlug = generateSlug(car.brand)
   const modelSlug = generateSlug(car.model)
   const citySlug = city ? generateSlug(city.split(',')[0]) : 'mumbai' // Extract city name before comma
-  
+
   return `/${brandSlug}-cars/${modelSlug}/price-in-${citySlug}`
 }
 
@@ -90,7 +90,7 @@ export const parseCarFromUrl = (brandSlug: string, modelSlug: string): { brand: 
   // Convert slug back to readable format
   const brand = brandSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
   const model = modelSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-  
+
   return { brand, model }
 }
 
@@ -100,14 +100,14 @@ export const parseCarFromUrl = (brandSlug: string, modelSlug: string): { brand: 
 export const validateCarUrl = (brandSlug: string, modelSlug: string, expectedCar: CarUrlData): boolean => {
   const expectedBrandSlug = generateSlug(expectedCar.brand)
   const expectedModelSlug = generateSlug(expectedCar.model)
-  
+
   return brandSlug === expectedBrandSlug && modelSlug === expectedModelSlug
 }
 
 /**
  * Generate canonical URL for SEO
  */
-export const generateCanonicalUrl = (car: CarUrlData, baseUrl: string = 'https://gadizone.com'): string => {
+export const generateCanonicalUrl = (car: CarUrlData, baseUrl: string = 'https://www.gadizone.com'): string => {
   const modelUrl = generateCarModelUrl(car)
   return `${baseUrl}${modelUrl}`
 }

@@ -150,11 +150,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "gadizone",
-              "url": "https://gadizone.com",
+              "url": "https://www.gadizone.com",
               "description": "New cars in India - Latest prices, reviews & comparisons",
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://gadizone.com/search?q={search_term_string}",
+                "target": "https://www.gadizone.com/search?q={search_term_string}",
                 "query-input": "required name=search_term_string"
               }
             })

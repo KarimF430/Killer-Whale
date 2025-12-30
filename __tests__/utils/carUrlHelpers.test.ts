@@ -192,7 +192,7 @@ describe('Car URL Helpers', () => {
     describe('generateCanonicalUrl', () => {
         it('should generate canonical URL with default baseURL', () => {
             const car: CarUrlData = { brand: 'Maruti', model: 'Swift' }
-            expect(generateCanonicalUrl(car)).toBe('https://gadizone.com/cars/maruti/swift')
+            expect(generateCanonicalUrl(car)).toBe('https://www.gadizone.com/cars/maruti/swift')
         })
 
         it('should use custom baseURL', () => {
