@@ -283,54 +283,91 @@ router.post('/:id/vote', async (req: Request, res: Response) => {
             });
         }
 
-        const review = await Review.findOne({ id });
-        if (!review) {
-            return res.status(404).json({ success: false, error: 'Review not found' });
-        }
-
-        // Check if user already voted
-        const hasLiked = review.likedBy.includes(userEmail);
-        const hasDisliked = review.dislikedBy.includes(userEmail);
+        // We use atomic updates to prevent race conditions on counters
+        let updatedReview;
 
         if (type === 'like') {
-            if (hasLiked) {
-                // Remove like
-                review.likedBy = review.likedBy.filter(e => e !== userEmail);
-                review.likes = Math.max(0, review.likes - 1);
-            } else {
-                // Add like, remove dislike if exists
-                if (hasDisliked) {
-                    review.dislikedBy = review.dislikedBy.filter(e => e !== userEmail);
-                    review.dislikes = Math.max(0, review.dislikes - 1);
-                }
-                review.likedBy.push(userEmail);
-                review.likes += 1;
+            // 1. Try to un-like (toggle off) if user already liked
+            updatedReview = await Review.findOneAndUpdate(
+                { id, likedBy: userEmail },
+                {
+                    $pull: { likedBy: userEmail },
+                    $inc: { likes: -1 }
+                },
+                { new: true }
+            );
+
+            // If we didn't toggle off (user hadn't liked yet), then add like
+            if (!updatedReview) {
+                // Remove dislike if it exists (atomic)
+                await Review.findOneAndUpdate(
+                    { id, dislikedBy: userEmail },
+                    {
+                        $pull: { dislikedBy: userEmail },
+                        $inc: { dislikes: -1 }
+                    }
+                );
+
+                // Add like (atomic, ensures we don't double count if race occurs)
+                updatedReview = await Review.findOneAndUpdate(
+                    { id, likedBy: { $ne: userEmail } },
+                    {
+                        $addToSet: { likedBy: userEmail },
+                        $inc: { likes: 1 }
+                    },
+                    { new: true }
+                );
             }
         } else if (type === 'dislike') {
-            if (hasDisliked) {
-                // Remove dislike
-                review.dislikedBy = review.dislikedBy.filter(e => e !== userEmail);
-                review.dislikes = Math.max(0, review.dislikes - 1);
-            } else {
-                // Add dislike, remove like if exists
-                if (hasLiked) {
-                    review.likedBy = review.likedBy.filter(e => e !== userEmail);
-                    review.likes = Math.max(0, review.likes - 1);
-                }
-                review.dislikedBy.push(userEmail);
-                review.dislikes += 1;
+            // 1. Try to un-dislike (toggle off)
+            updatedReview = await Review.findOneAndUpdate(
+                { id, dislikedBy: userEmail },
+                {
+                    $pull: { dislikedBy: userEmail },
+                    $inc: { dislikes: -1 }
+                },
+                { new: true }
+            );
+
+            // If we didn't toggle off, add dislike
+            if (!updatedReview) {
+                // Remove like if it exists
+                await Review.findOneAndUpdate(
+                    { id, likedBy: userEmail },
+                    {
+                        $pull: { likedBy: userEmail },
+                        $inc: { likes: -1 }
+                    }
+                );
+
+                // Add dislike
+                updatedReview = await Review.findOneAndUpdate(
+                    { id, dislikedBy: { $ne: userEmail } },
+                    {
+                        $addToSet: { dislikedBy: userEmail },
+                        $inc: { dislikes: 1 }
+                    },
+                    { new: true }
+                );
             }
         }
 
-        await review.save();
+        // If updatedReview is still null (e.g. race condition prevented add), fetch current state
+        if (!updatedReview) {
+            updatedReview = await Review.findOne({ id });
+        }
+
+        if (!updatedReview) {
+            return res.status(404).json({ success: false, error: 'Review not found' });
+        }
 
         res.json({
             success: true,
             data: {
-                likes: review.likes,
-                dislikes: review.dislikes,
-                userVote: review.likedBy.includes(userEmail) ? 'like' :
-                    review.dislikedBy.includes(userEmail) ? 'dislike' : null
+                likes: updatedReview.likes,
+                dislikes: updatedReview.dislikes,
+                userVote: updatedReview.likedBy.includes(userEmail) ? 'like' :
+                    updatedReview.dislikedBy.includes(userEmail) ? 'dislike' : null
             }
         });
     } catch (error) {
