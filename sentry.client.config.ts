@@ -8,38 +8,29 @@ import * as Sentry from "@sentry/nextjs";
 Sentry.init({
   // DSN will be set in environment variable
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN || "",
-  
+
   // Performance Monitoring
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-  
+
   // Session Replay
   replaysSessionSampleRate: 0.1, // 10% of sessions
   replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
-  
+
   // Release tracking
   release: process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0",
-  
+
   // Environment
   environment: process.env.NODE_ENV || "development",
-  
+
   // Integrations
   integrations: [
-    new Sentry.BrowserTracing({
-      // Performance monitoring for navigation
-      routingInstrumentation: Sentry.nextRouterInstrumentation,
-      // Trace fetch requests
-      traceFetch: true,
-      // Trace XHR requests
-      traceXHR: true,
-    }),
-    new Sentry.Replay({
-      // Mask all text content for privacy
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration({
       maskAllText: true,
-      // Block all media for privacy
       blockAllMedia: true,
     }),
   ],
-  
+
   // Filtering
   beforeSend(event, hint) {
     // Filter out non-error events in development
@@ -47,10 +38,10 @@ Sentry.init({
       console.log("Sentry Event:", event);
       return null; // Don't send to Sentry in dev
     }
-    
+
     // Filter out specific errors
     if (event.exception) {
-      const error = hint.originalException;
+      const error = hint.originalException as any;
       // Filter out network errors
       if (error?.message?.includes("Network request failed")) {
         return null;
@@ -60,10 +51,10 @@ Sentry.init({
         return null;
       }
     }
-    
+
     return event;
   },
-  
+
   // Ignore specific errors
   ignoreErrors: [
     // Browser extensions
@@ -77,7 +68,7 @@ Sentry.init({
     "NetworkError",
     "Failed to fetch",
   ],
-  
+
   // Allowed URLs for error tracking
   allowUrls: [
     /https?:\/\/(www\.)?gadizone\.com/,

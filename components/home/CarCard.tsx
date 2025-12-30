@@ -119,6 +119,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
             e.stopPropagation()
             toggleFavourite(car)
           }}
+          aria-label={isFav ? "Remove from wishlist" : "Add to wishlist"}
           className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-2 sm:p-2.5 rounded-full shadow-md transition-all duration-200 z-10 ${isFav
             ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
             : 'bg-white hover:bg-red-50 active:bg-red-100'

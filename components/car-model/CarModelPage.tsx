@@ -1563,237 +1563,240 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
         </PageSection>
 
         {/* Section 3: Model Price Details & Variants */}
-        <PageSection background="white" maxWidth="7xl">
-          <div id="variants" className="space-y-8">
-            {/* Model Price Header */}
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">{model?.brand || 'Car'} {model?.name || 'Model'} Price</h2>
+        <div id="variants">
+          {allVariants.length > 0 && (
+            <PageSection background="white" maxWidth="7xl">
+              <div className="space-y-8">
+                {/* Model Price Header */}
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">{model?.brand || 'Car'} {model?.name || 'Model'} Price</h2>
 
-              {/* SEO Content */}
-              <div className="text-gray-700 leading-relaxed">
-                <p>
-                  {model?.brand || 'Car'} {model?.name || 'Model'} price for the base model starts at {formatPrice(displayStartPrice / 100000)} and the top model price goes upto {formatPrice(displayEndPrice / 100000)} ({priceLabel}). {model?.name || 'Model'} price for {model?.variants?.length || 0} variants is listed below.
-                </p>
-              </div>
-            </div>
-
-            {/* Variants Section */}
-            <div className="space-y-6">
-              <h3 className="text-xl font-bold text-gray-900">Variants</h3>
-
-              {/* Filter Options - Dynamic based on available variants */}
-              <div className="flex flex-wrap gap-3">
-                {availableFilters.map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => handleFilterToggle(filter)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${selectedFilters.includes(filter)
-                      ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-
-              {/* Variant Cards - Dynamic (Show only 8) */}
-              <div className="space-y-4">
-                {loadingVariants ? (
-                  <div className="text-center py-8">
-                    <div className="w-12 h-12 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin mx-auto"></div>
-                    <p className="text-gray-500 mt-4">Loading variants...</p>
+                  {/* SEO Content */}
+                  <div className="text-gray-700 leading-relaxed">
+                    <p>
+                      {model?.brand || 'Car'} {model?.name || 'Model'} price for the base model starts at {formatPrice(displayStartPrice / 100000)} and the top model price goes upto {formatPrice(displayEndPrice / 100000)} ({priceLabel}). {model?.name || 'Model'} price for {model?.variants?.length || 0} variants is listed below.
+                    </p>
                   </div>
-                ) : filteredVariants.length > 0 ? (
-                  filteredVariants.slice(0, 8).map((variant) => (
-                    <VariantCard
-                      key={variant.id}
-                      variant={variant}
-                      onClick={() => handleVariantClick(variant)}
-                      onGetPrice={(e) => {
-                        e.stopPropagation()
-                        const brandSlug = model.brand.toLowerCase().replace(/\s+/g, '-')
-                        const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-')
-                        const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
-                        router.push(`/${brandSlug}-cars/${modelSlug}/price-in-mumbai?variant=${variantSlug}`)
-                      }}
-                      onCompare={(e) => e.stopPropagation()}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">No variants found for the selected filter.</p>
-                  </div>
-                )}
-              </div>
-
-              {/* View All Variants Button - Only show if more than 8 variants */}
-              {!loadingVariants && allVariants.length > 8 && (
-                <div className="text-center pt-4">
-                  <button
-                    className="text-red-600 hover:text-orange-600 font-medium text-lg"
-                    onClick={() => {
-                      const brandSlug = model?.brand?.toLowerCase().replace(/\s+/g, '-')
-                      const modelSlug = model?.name?.toLowerCase().replace(/\s+/g, '-')
-                      router.push(`/${brandSlug}-cars/${modelSlug}/variants`)
-                    }}
-                  >
-                    View All {allVariants.length} Variants
-                  </button>
                 </div>
-              )}
-            </div>
-          </div>
-        </PageSection>
+
+                {/* Variants Section */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold text-gray-900">Variants</h3>
+
+                  {/* Filter Options - Dynamic based on available variants */}
+                  <div className="flex flex-wrap gap-3">
+                    {availableFilters.map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => handleFilterToggle(filter)}
+                        className={`px-4 py-2 rounded-lg transition-colors ${selectedFilters.includes(filter)
+                          ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Variant Cards - Dynamic (Show only 8) */}
+                  <div className="space-y-4">
+                    {loadingVariants ? (
+                      <div className="text-center py-8">
+                        <div className="w-12 h-12 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin mx-auto"></div>
+                        <p className="text-gray-500 mt-4">Loading variants...</p>
+                      </div>
+                    ) : filteredVariants.length > 0 ? (
+                      filteredVariants.slice(0, 8).map((variant) => (
+                        <VariantCard
+                          key={variant.id}
+                          variant={variant}
+                          onClick={() => handleVariantClick(variant)}
+                          onGetPrice={(e) => {
+                            e.stopPropagation()
+                            const brandSlug = model.brand.toLowerCase().replace(/\s+/g, '-')
+                            const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-')
+                            const variantSlug = variant.name.toLowerCase().replace(/\s+/g, '-')
+                            router.push(`/${brandSlug}-cars/${modelSlug}/price-in-mumbai?variant=${variantSlug}`)
+                          }}
+                          onCompare={(e) => e.stopPropagation()}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">No variants found for the selected filter.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* View All Variants Button - Only show if more than 8 variants */}
+                  {!loadingVariants && allVariants.length > 8 && (
+                    <div className="text-center pt-4">
+                      <button
+                        className="text-red-600 hover:text-orange-600 font-medium text-lg"
+                        onClick={() => {
+                          const brandSlug = model?.brand?.toLowerCase().replace(/\s+/g, '-')
+                          const modelSlug = model?.name?.toLowerCase().replace(/\s+/g, '-')
+                          router.push(`/${brandSlug}-cars/${modelSlug}/variants`)
+                        }}
+                      >
+                        View All {allVariants.length} Variants
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </PageSection>
+          )}
+        </div>
 
         {/* Section 4: AD Banner + Color Options */}
-        <PageSection background="white" maxWidth="7xl">
-          <div id="colors" className="space-y-8">
-            {/* Ad Banner */}
-            <Ad3DCarousel className="mb-6" />
+        {(model?.colorImages?.length > 0 || (model?.colors && model.colors.length > 0)) && (
+          <PageSection background="white" maxWidth="7xl">
+            <div id="colors" className="space-y-8">
+              {/* Ad Banner */}
+              <Ad3DCarousel className="mb-6" />
 
-            {/* Color Options Section */}
-            <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Colours</h2>
+              {/* Color Options Section */}
+              <div className="space-y-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Colours</h2>
 
-              {/* Check if backend colorImages exist */}
-              {model?.colorImages && model.colorImages.length > 0 ? (
-                <>
-                  {/* Main Car Image Display - Clickable */}
-                  <div
-                    className="relative bg-gray-50 rounded-2xl p-8 cursor-pointer"
-                    onClick={() => {
-                      // Build color gallery images
-                      const colorGalleryImgs = model.colorImages?.map((c, idx) => ({
-                        src: (() => {
-                          if (!c.url) return '';
-                          if (c.url.startsWith('http://') || c.url.startsWith('https://')) return c.url;
-                          if (c.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${c.url}`;
-                          return c.url;
-                        })(),
-                        alt: `${model?.brand || 'Car'} ${model?.name || 'Model'} in ${c.caption}`,
-                        caption: c.caption
-                      })) || [];
-                      // Find current selected index
-                      const currentIdx = model.colorImages?.findIndex(c => c.caption === selectedColor) ?? 0;
-                      openGalleryModal(colorGalleryImgs, currentIdx >= 0 ? currentIdx : 0);
-                    }}
-                  >
-                    <div className="flex items-center justify-center">
-                      <div className="relative max-w-2xl w-full">
-                        <img
-                          src={(() => {
-                            const imageUrl = model.colorImages.find(c => c.caption === selectedColor)?.url || model.colorImages[0]?.url;
-                            if (!imageUrl) return '';
-                            if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) return imageUrl;
-                            if (imageUrl.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${imageUrl}`;
-                            return imageUrl;
-                          })()}
-                          alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${selectedColor || 'default color'}`}
-                          className="w-full h-auto object-contain hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                          decoding="async"
-                        />
+                {/* Check if backend colorImages exist */}
+                {model?.colorImages && model.colorImages.length > 0 ? (
+                  <>
+                    {/* Main Car Image Display - Clickable */}
+                    <div
+                      className="relative bg-gray-50 rounded-2xl p-8 cursor-pointer"
+                      onClick={() => {
+                        // Build color gallery images
+                        const colorGalleryImgs = model.colorImages?.map((c, idx) => ({
+                          src: (() => {
+                            if (!c.url) return '';
+                            if (c.url.startsWith('http://') || c.url.startsWith('https://')) return c.url;
+                            if (c.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${c.url}`;
+                            return c.url;
+                          })(),
+                          alt: `${model?.brand || 'Car'} ${model?.name || 'Model'} in ${c.caption}`,
+                          caption: c.caption
+                        })) || [];
+                        // Find current selected index
+                        const currentIdx = model.colorImages?.findIndex(c => c.caption === selectedColor) ?? 0;
+                        openGalleryModal(colorGalleryImgs, currentIdx >= 0 ? currentIdx : 0);
+                      }}
+                    >
+                      <div className="flex items-center justify-center">
+                        <div className="relative max-w-2xl w-full">
+                          <img
+                            src={(() => {
+                              const imageUrl = model.colorImages.find(c => c.caption === selectedColor)?.url || model.colorImages[0]?.url;
+                              if (!imageUrl) return '';
+                              if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) return imageUrl;
+                              if (imageUrl.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${imageUrl}`;
+                              return imageUrl;
+                            })()}
+                            alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${selectedColor || 'default color'}`}
+                            className="w-full h-auto object-contain hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Color Name Display */}
+                      <div className="text-center mt-6">
+                        <h3 className="text-xl font-bold text-gray-900">{truncateCaption(selectedColor || 'Default Color', 30)}</h3>
+                        <p className="text-sm text-gray-500 mt-1">Click to view fullscreen</p>
                       </div>
                     </div>
 
-                    {/* Color Name Display */}
-                    <div className="text-center mt-6">
-                      <h3 className="text-xl font-bold text-gray-900">{truncateCaption(selectedColor || 'Default Color', 30)}</h3>
-                      <p className="text-sm text-gray-500 mt-1">Click to view fullscreen</p>
-                    </div>
-                  </div>
+                    {/* Color Selector - Horizontal Scroll */}
+                    <div className="relative group">
+                      {/* Left Scroll Arrow */}
+                      <button
+                        onClick={() => {
+                          const container = document.getElementById('model-color-scroll')
+                          container?.scrollBy({ left: -280, behavior: 'smooth' })
+                        }}
+                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -ml-5"
+                        aria-label="Scroll left"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const container = document.getElementById('model-color-scroll')
+                          container?.scrollBy({ left: 280, behavior: 'smooth' })
+                        }}
+                        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -mr-5"
+                        aria-label="Scroll right"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                      <div id="model-color-scroll" className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        {model.colorImages.map((color, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSelectedColor(color.caption)}
+                            className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${selectedColor === color.caption
+                              ? 'ring-4 ring-red-500 shadow-lg scale-105'
+                              : 'hover:shadow-md hover:scale-102'
+                              }`}
+                          >
+                            <div className="w-32 h-24 bg-gray-100">
+                              <img
+                                src={(() => {
+                                  if (!color.url) return '';
+                                  if (color.url.startsWith('http://') || color.url.startsWith('https://')) return color.url;
+                                  if (color.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${color.url}`;
+                                  return color.url;
+                                })()}
+                                alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${color.caption}`}
+                                className="w-full h-full object-cover rounded-lg"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            </div>
 
-                  {/* Color Selector - Horizontal Scroll */}
-                  <div className="relative group">
-                    {/* Left Scroll Arrow */}
-                    <button
-                      onClick={() => {
-                        const container = document.getElementById('model-color-scroll')
-                        container?.scrollBy({ left: -280, behavior: 'smooth' })
-                      }}
-                      className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -ml-5"
-                      aria-label="Scroll left"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        const container = document.getElementById('model-color-scroll')
-                        container?.scrollBy({ left: 280, behavior: 'smooth' })
-                      }}
-                      className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -mr-5"
-                      aria-label="Scroll right"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    <div id="model-color-scroll" className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                      {model.colorImages.map((color, index) => (
+                            {/* Color name overlay */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-xs p-2 text-center">
+                              {truncateCaption(color.caption, 15)}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : model?.colors && model.colors.length > 0 ? (
+                  /* Fallback to legacy colors structure using model.colors */
+                  <>
+                    {/* Main Car Image Display */}
+                    <div className="relative bg-gray-50 rounded-2xl p-8">
+                      <div className="flex items-center justify-center">
+                        <div className="relative max-w-2xl w-full">
+                          <img
+                            src={model.colors.find(color => color.name === selectedColor)?.image || model.colors[0].image}
+                            alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${selectedColor || 'default color'}`}
+                            className="w-full h-auto object-contain"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Color Name Display */}
+                      <div className="text-center mt-6">
+                        <h3 className="text-xl font-bold text-gray-900">{selectedColor || 'Default Color'}</h3>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                      {model.colors.map((color, index) => (
                         <button
                           key={index}
-                          onClick={() => setSelectedColor(color.caption)}
-                          className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${selectedColor === color.caption
-                            ? 'ring-4 ring-red-500 shadow-lg scale-105'
-                            : 'hover:shadow-md hover:scale-102'
-                            }`}
-                        >
-                          <div className="w-32 h-24 bg-gray-100">
-                            <img
-                              src={(() => {
-                                if (!color.url) return '';
-                                if (color.url.startsWith('http://') || color.url.startsWith('https://')) return color.url;
-                                if (color.url.startsWith('/uploads/')) return `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'}${color.url}`;
-                                return color.url;
-                              })()}
-                              alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${color.caption}`}
-                              className="w-full h-full object-cover rounded-lg"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          </div>
-
-                          {/* Color name overlay */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-xs p-2 text-center">
-                            {truncateCaption(color.caption, 15)}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                /* Fallback to legacy colors structure */
-                <>
-                  {/* Main Car Image Display */}
-                  <div className="relative bg-gray-50 rounded-2xl p-8">
-                    <div className="flex items-center justify-center">
-                      <div className="relative max-w-2xl w-full">
-                        <img
-                          src={carColors.find(color => color.name === selectedColor)?.image || carColors[0].image}
-                          alt={`${model?.brand || 'Car'} ${model?.name || 'Model'} in ${selectedColor || 'default color'}`}
-                          className="w-full h-auto object-contain"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Color Name Display */}
-                    <div className="text-center mt-6">
-                      <h3 className="text-xl font-bold text-gray-900">{selectedColor || 'Default Color'}</h3>
-                    </div>
-                  </div>
-
-                  {/* Color Selector - Horizontal Scroll */}
-                  <div className="relative">
-                    <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                      {carColors.map((color) => (
-                        <button
-                          key={color.id}
                           onClick={() => setSelectedColor(color.name)}
                           className={`flex-shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 ${selectedColor === color.name
                             ? 'ring-4 ring-red-500 shadow-lg scale-105'
@@ -1814,7 +1817,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                           <div className="absolute bottom-2 left-2">
                             <div
                               className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
-                              style={{ backgroundColor: color.hexCode }}
+                              style={{ backgroundColor: color.code }}
                             ></div>
                           </div>
 
@@ -1825,12 +1828,12 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                         </button>
                       ))}
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </PageSection>
+          </PageSection>
+        )}
 
         {/* Section 5: Pros & Cons + Model Summary */}
         <PageSection background="white" maxWidth="7xl">
@@ -2243,223 +2246,225 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
         }
 
         {/* Section 8: Similar Cars */}
-        <PageSection background="white" maxWidth="7xl">
-          <div id="similar-cars" className="space-y-8">
-            {/* Similar Cars Section - Exact copy from CarsByBudget */}
-            <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
-                Similar Cars To {model?.name || 'model'}
-              </h2>
+        {similarCars.length > 0 && (
+          <PageSection background="white" maxWidth="7xl">
+            <div id="similar-cars" className="space-y-8">
+              {/* Similar Cars Section - Exact copy from CarsByBudget */}
+              <div className="space-y-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
+                  Similar Cars To {model?.name || 'model'}
+                </h2>
 
-              {/* Cars Horizontal Scroll - Exact copy from home page */}
-              <div className="relative">
-                {loadingSimilarCars ? (
-                  <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div className="h-48 bg-gray-200 animate-pulse"></div>
-                        <div className="p-5 space-y-3">
-                          <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-                          <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
+                {/* Cars Horizontal Scroll - Exact copy from home page */}
+                <div className="relative">
+                  {loadingSimilarCars ? (
+                    <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                          <div className="h-48 bg-gray-200 animate-pulse"></div>
+                          <div className="p-5 space-y-3">
+                            <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+                            <div className="h-8 bg-gray-200 animate-pulse rounded w-1/2"></div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : similarCars.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <p>No similar cars found</p>
-                  </div>
-                ) : (
-                  <div className="relative group">
-                    {/* Left Scroll Arrow */}
-                    <button
-                      onClick={() => {
-                        const container = document.getElementById('model-similar-cars-scroll')
-                        container?.scrollBy({ left: -300, behavior: 'smooth' })
-                      }}
-                      className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -ml-5"
-                      aria-label="Scroll left"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        const container = document.getElementById('model-similar-cars-scroll')
-                        container?.scrollBy({ left: 300, behavior: 'smooth' })
-                      }}
-                      className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -mr-5"
-                      aria-label="Scroll right"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    <div
-                      id="model-similar-cars-scroll"
-                      className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
-                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                    >
-                      {similarCars.map((car) => (
-                        <CarCard
-                          key={car.id}
-                          car={car}
-                          onClick={() => {
-                            const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                            const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                            window.location.href = `/${brandSlug}-cars/${modelSlug}`
-                          }}
-                        />
                       ))}
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Compare With Similar Cars Section - Dynamic with body type matching */}
-            <div className="space-y-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare With Similar Cars</h2>
-
-              {/* Comparison Cards - Horizontal Scroll */}
-              <div className="relative">
-                {loadingSimilarCars ? (
-                  <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl border border-gray-200 p-4">
-                        <div className="h-32 bg-gray-200 animate-pulse rounded"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : similarCars.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No cars available for comparison</p>
-                  </div>
-                ) : (
-                  <div className="relative group">
-                    {/* Left Scroll Arrow */}
-                    <button
-                      onClick={() => {
-                        const container = document.getElementById('model-compare-scroll')
-                        container?.scrollBy({ left: -340, behavior: 'smooth' })
-                      }}
-                      className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -ml-5"
-                      aria-label="Scroll left"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        const container = document.getElementById('model-compare-scroll')
-                        container?.scrollBy({ left: 340, behavior: 'smooth' })
-                      }}
-                      className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -mr-5"
-                      aria-label="Scroll right"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    <div
-                      id="model-compare-scroll"
-                      className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4 scroll-smooth"
-                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                    >
-                      {similarCars.map((car, index) => {
-                        // Calculate on-road prices using the same logic as CarsByBudget
-                        const currentModelOnRoad = getOnRoadPrice(model?.startingPrice || 0, 'Petrol')
-                        const compareCarOnRoad = getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol')
-
-                        return (
-                          <div key={car.id} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
-                            {/* Side by Side Layout with VS Badge */}
-                            <div className="flex items-start gap-2 mb-3">
-                              {/* Current Model */}
-                              <div className="flex-1">
-                                <div className="relative mb-2">
-                                  <img
-                                    src={model?.heroImage || ''}
-                                    alt={`${model?.brand} ${model?.name}`}
-                                    className="w-full h-20 object-contain"
-                                    loading="lazy"
-                                    decoding="async"
-                                    onError={(e) => {
-                                      e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
-                                    }}
-                                  />
-                                </div>
-                                <div className="text-left">
-                                  <div className="text-xs text-gray-500">{model?.brand}</div>
-                                  <div className="font-bold text-sm text-gray-900 mb-1">{model?.name}</div>
-                                  <div className="text-red-600 font-bold text-sm">
-                                    ₹ {(currentModelOnRoad / 100000).toFixed(2)} Lakh
-                                  </div>
-                                  <div className="text-xs text-gray-500">On-Road Price</div>
-                                </div>
-                              </div>
-
-                              {/* VS Badge - Positioned between cards */}
-                              <div className="flex items-center justify-center" style={{ marginTop: '30px' }}>
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center shadow-md">
-                                  <span className="text-white text-xs font-bold">VS</span>
-                                </div>
-                              </div>
-
-                              {/* Similar Car */}
-                              <div className="flex-1">
-                                <div className="relative mb-2">
-                                  <img
-                                    src={car.image || '/placeholder-car.png'}
-                                    alt={`${car.brand} ${car.name}`}
-                                    className="w-full h-20 object-contain"
-                                    loading="lazy"
-                                    decoding="async"
-                                    onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                                      e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
-                                    }}
-                                  />
-                                </div>
-                                <div className="text-left">
-                                  <div className="text-xs text-gray-500">{car.brandName}</div>
-                                  <div className="font-bold text-sm text-gray-900 mb-1">{car.name}</div>
-                                  <div className="text-red-600 font-bold text-sm">
-                                    ₹ {(compareCarOnRoad / 100000).toFixed(2)} Lakh
-                                  </div>
-                                  <div className="text-xs text-gray-500">On-Road Price</div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={() => {
-                                const currentModelSlug = `${model?.brand.toLowerCase().replace(/\s+/g, '-')}-${model?.name.toLowerCase().replace(/\s+/g, '-')}`
-                                const compareModelSlug = `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
-                                router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
-                              }}
-                              className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm"
-                            >
-                              Compare Now
-                            </button>
-                          </div>
-                        )
-                      })}
+                  ) : similarCars.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <p>No similar cars found</p>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="relative group">
+                      {/* Left Scroll Arrow */}
+                      <button
+                        onClick={() => {
+                          const container = document.getElementById('model-similar-cars-scroll')
+                          container?.scrollBy({ left: -300, behavior: 'smooth' })
+                        }}
+                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -ml-5"
+                        aria-label="Scroll left"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const container = document.getElementById('model-similar-cars-scroll')
+                          container?.scrollBy({ left: 300, behavior: 'smooth' })
+                        }}
+                        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -mr-5"
+                        aria-label="Scroll right"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                      <div
+                        id="model-similar-cars-scroll"
+                        className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                      >
+                        {similarCars.map((car) => (
+                          <CarCard
+                            key={car.id}
+                            car={car}
+                            onClick={() => {
+                              const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
+                              const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
+                              window.location.href = `/${brandSlug}-cars/${modelSlug}`
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Compare Cars of Your Choice Button */}
-              <div className="text-center">
-                <button className="w-full max-w-md bg-white border-2 border-red-600 text-red-600 hover:bg-red-50 py-3 rounded-lg transition-all duration-200 font-medium">
-                  Compare Cars of Your Choice
-                </button>
+              {/* Compare With Similar Cars Section - Dynamic with body type matching */}
+              <div className="space-y-4">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare With Similar Cars</h2>
+
+                {/* Comparison Cards - Horizontal Scroll */}
+                <div className="relative">
+                  {loadingSimilarCars ? (
+                    <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex-shrink-0 w-80 bg-white rounded-xl border border-gray-200 p-4">
+                          <div className="h-32 bg-gray-200 animate-pulse rounded"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : similarCars.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No cars available for comparison</p>
+                    </div>
+                  ) : (
+                    <div className="relative group">
+                      {/* Left Scroll Arrow */}
+                      <button
+                        onClick={() => {
+                          const container = document.getElementById('model-compare-scroll')
+                          container?.scrollBy({ left: -340, behavior: 'smooth' })
+                        }}
+                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -ml-5"
+                        aria-label="Scroll left"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const container = document.getElementById('model-compare-scroll')
+                          container?.scrollBy({ left: 340, behavior: 'smooth' })
+                        }}
+                        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white shadow-lg rounded-full items-center justify-center text-gray-700 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 -mr-5"
+                        aria-label="Scroll right"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                      <div
+                        id="model-compare-scroll"
+                        className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4 scroll-smooth"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                      >
+                        {similarCars.map((car, index) => {
+                          // Calculate on-road prices using the same logic as CarsByBudget
+                          const currentModelOnRoad = getOnRoadPrice(model?.startingPrice || 0, 'Petrol')
+                          const compareCarOnRoad = getOnRoadPrice(car.startingPrice, car.fuelTypes?.[0] || 'Petrol')
+
+                          return (
+                            <div key={car.id} className="flex-shrink-0 w-[320px] bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300">
+                              {/* Side by Side Layout with VS Badge */}
+                              <div className="flex items-start gap-2 mb-3">
+                                {/* Current Model */}
+                                <div className="flex-1">
+                                  <div className="relative mb-2">
+                                    <img
+                                      src={model?.heroImage || ''}
+                                      alt={`${model?.brand} ${model?.name}`}
+                                      className="w-full h-20 object-contain"
+                                      loading="lazy"
+                                      decoding="async"
+                                      onError={(e) => {
+                                        e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="text-left">
+                                    <div className="text-xs text-gray-500">{model?.brand}</div>
+                                    <div className="font-bold text-sm text-gray-900 mb-1">{model?.name}</div>
+                                    <div className="text-red-600 font-bold text-sm">
+                                      ₹ {(currentModelOnRoad / 100000).toFixed(2)} Lakh
+                                    </div>
+                                    <div className="text-xs text-gray-500">On-Road Price</div>
+                                  </div>
+                                </div>
+
+                                {/* VS Badge - Positioned between cards */}
+                                <div className="flex items-center justify-center" style={{ marginTop: '30px' }}>
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center shadow-md">
+                                    <span className="text-white text-xs font-bold">VS</span>
+                                  </div>
+                                </div>
+
+                                {/* Similar Car */}
+                                <div className="flex-1">
+                                  <div className="relative mb-2">
+                                    <img
+                                      src={car.image || '/placeholder-car.png'}
+                                      alt={`${car.brand} ${car.name}`}
+                                      className="w-full h-20 object-contain"
+                                      loading="lazy"
+                                      decoding="async"
+                                      onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                                        e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' fill='%23374151'%3E%3Cpath d='M50 200h300c5.5 0 10-4.5 10-10v-80c0-16.6-13.4-30-30-30H70c-16.6 0-30 13.4-30 30v80c0 5.5 4.5 10 10 10z'/%3E%3Ccircle cx='100' cy='220' r='25' fill='%23111827'/%3E%3Ccircle cx='300' cy='220' r='25' fill='%23111827'/%3E%3Cpath d='M80 110h240l-20-30H100z' fill='%236B7280'/%3E%3C/svg%3E"
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="text-left">
+                                    <div className="text-xs text-gray-500">{car.brandName}</div>
+                                    <div className="font-bold text-sm text-gray-900 mb-1">{car.name}</div>
+                                    <div className="text-red-600 font-bold text-sm">
+                                      ₹ {(compareCarOnRoad / 100000).toFixed(2)} Lakh
+                                    </div>
+                                    <div className="text-xs text-gray-500">On-Road Price</div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => {
+                                  const currentModelSlug = `${model?.brand.toLowerCase().replace(/\s+/g, '-')}-${model?.name.toLowerCase().replace(/\s+/g, '-')}`
+                                  const compareModelSlug = `${car.brandName.toLowerCase().replace(/\s+/g, '-')}-${car.name.toLowerCase().replace(/\s+/g, '-')}`
+                                  router.push(`/compare/${currentModelSlug}-vs-${compareModelSlug}`)
+                                }}
+                                className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2 rounded-lg transition-all duration-200 text-sm font-semibold shadow-sm"
+                              >
+                                Compare Now
+                              </button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Compare Cars of Your Choice Button */}
+                <div className="text-center">
+                  <button className="w-full max-w-md bg-white border-2 border-red-600 text-red-600 hover:bg-red-50 py-3 rounded-lg transition-all duration-200 font-medium">
+                    Compare Cars of Your Choice
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </PageSection>
+          </PageSection>
+        )}
 
         {/* Section 9: Model News & Videos */}
         <PageSection background="white" maxWidth="7xl">
@@ -2483,11 +2488,13 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
         <PageSection background="white" maxWidth="7xl">
           <div id="faq-reviews" className="space-y-12">
             {/* Model FAQ Section - Standalone Component */}
-            <ModelFAQ
-              brandName={model?.brand}
-              modelName={model?.name}
-              faqs={model?.faqs || []}
-            />
+            {model?.faqs && model.faqs.length > 0 && (
+              <ModelFAQ
+                brandName={model?.brand}
+                modelName={model?.name}
+                faqs={model.faqs}
+              />
+            )}
 
             {/* Model Owner Reviews Section - Dynamic from API */}
             <ModelOwnerReviews

@@ -35,9 +35,9 @@ export default function TataSierraAdBanner() {
                 <div className="relative mb-0 min-h-[120px] sm:min-h-[140px]">
                     {/* Title - Moved Down */}
                     <div className="relative z-10 w-[40%] pt-4">
-                        <h1 className="text-3xl sm:text-4xl font-black text-[#FF9800] leading-[0.75] tracking-tight mb-1.5">
+                        <h2 className="text-3xl sm:text-4xl font-black text-[#FF9800] leading-[0.75] tracking-tight mb-1.5">
                             Tata<br />Sierra
-                        </h1>
+                        </h2>
                         <div className="flex items-baseline gap-1 text-xs sm:text-sm">
                             <span className="text-[#FF9800] font-bold">Powered by</span>
                             <span className="text-[#1976D2] font-black italic text-sm sm:text-base">TATA</span>

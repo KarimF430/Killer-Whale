@@ -408,7 +408,7 @@ export default async function HomePage() {
           <CarsByBudget allCars={allCars} />
         </PageSection>
 
-        <CarsYouMightLike allCars={allCars} />
+        {allCars.length > 0 && <CarsYouMightLike allCars={allCars} />}
 
         <ExploreElectricCars allCars={allCars} />
 
@@ -420,21 +420,27 @@ export default async function HomePage() {
           <TataSierraAdBanner />
         </div>
 
-        <PageSection background="white">
-          <PopularCars initialCars={popularCars} />
-        </PageSection>
+        {popularCars.length > 0 && (
+          <PageSection background="white">
+            <PopularCars initialCars={popularCars} />
+          </PageSection>
+        )}
 
         <PageSection background="gray">
           <DecemberOffersSection initialCars={allCars} initialBrands={brands} />
         </PageSection>
 
-        <PageSection background="white">
-          <BrandSection initialBrands={brands} />
-        </PageSection>
+        {brands.length > 0 && (
+          <PageSection background="white">
+            <BrandSection initialBrands={brands} />
+          </PageSection>
+        )}
 
-        <PageSection background="white">
-          <UpcomingCars initialCars={upcomingCars} />
-        </PageSection>
+        {upcomingCars.length > 0 && (
+          <PageSection background="white">
+            <UpcomingCars initialCars={upcomingCars} />
+          </PageSection>
+        )}
 
         <PageSection background="white">
           <FavouriteCars />
@@ -446,17 +452,23 @@ export default async function HomePage() {
           </div>
         </PageSection>
 
-        <PageSection background="white">
-          <NewLaunchedCars initialCars={newLaunchedCars} />
-        </PageSection>
+        {newLaunchedCars.length > 0 && (
+          <PageSection background="white">
+            <NewLaunchedCars initialCars={newLaunchedCars} />
+          </PageSection>
+        )}
 
-        <PageSection background="white">
-          <PopularComparisons initialComparisons={comparisons} />
-        </PageSection>
+        {comparisons.length > 0 && (
+          <PageSection background="white">
+            <PopularComparisons initialComparisons={comparisons} />
+          </PageSection>
+        )}
 
-        <PageSection background="white">
-          <LatestCarNews initialNews={news} />
-        </PageSection>
+        {news.length > 0 && (
+          <PageSection background="white">
+            <LatestCarNews initialNews={news} />
+          </PageSection>
+        )}
 
         <PageSection background="white">
           <YouTubeVideoPlayer />

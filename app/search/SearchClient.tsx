@@ -167,7 +167,7 @@ export default function SearchClient({ popularSearches, initialQuery = '' }: Sea
                         <div className="w-16 h-16 bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <Search className="h-7 w-7 text-red-600" />
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900 mb-2">Search for Cars</h2>
+                        <h1 className="text-xl font-bold text-gray-900 mb-2">Search for Cars</h1>
                         <p className="text-sm text-gray-500 mb-6">Find cars by name, brand, or model</p>
 
                         {/* Popular Searches - Compact */}
@@ -201,6 +201,7 @@ export default function SearchClient({ popularSearches, initialQuery = '' }: Sea
                 ) : (
                     <div>
                         <div className="mb-3 text-xs text-gray-500 font-medium">
+                            <h1 className="sr-only">Search Results for {searchQuery}</h1>
                             {searchResults.length} {searchResults.length === 1 ? 'result' : 'results'}
                         </div>
                         <div className="space-y-2">
