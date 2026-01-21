@@ -40,17 +40,23 @@ function generateDynamicDescription(cars: any[], lakhValue: string, topCarName: 
     return JSON.stringify({ short: shortDesc, extended: extendedDesc })
 }
 
-export const metadata: Metadata = {
-    title: `${BUDGET_INFO.title} in India - Prices, Specs & Reviews | gadizone`,
-    description: `Find the best cars ${BUDGET_INFO.label.toLowerCase()} in India. Compare prices, specifications, features, and expert reviews.`,
-    keywords: `cars ${BUDGET_INFO.label.toLowerCase()}, budget cars, best cars under ${BUDGET_INFO.lakhValue}, car prices India`,
-    openGraph: {
-        title: `${BUDGET_INFO.title} in India`,
-        description: `Find the best cars ${BUDGET_INFO.label.toLowerCase()} in India.`,
-        type: 'website'
-    },
-    alternates: {
-        canonical: `/best-cars-under-15-lakh`
+export async function generateMetadata(): Promise<Metadata> {
+    const { cars } = await getBudgetCarsData()
+    const carCount = cars.length
+    const currentMonthYear = new Date().toLocaleString('en-US', { month: 'short', year: 'numeric' })
+
+    return {
+        title: `${BUDGET_INFO.title} in India (${currentMonthYear}) - ${carCount} Models | gadizone`,
+        description: `Explore ${carCount}+ best cars ${BUDGET_INFO.label.toLowerCase()} in India. Compare price range, mileage, and features of top models in this segment.`,
+        keywords: `cars ${BUDGET_INFO.label.toLowerCase()}, budget cars, best cars under ${BUDGET_INFO.lakhValue}, car prices India`,
+        openGraph: {
+            title: `${BUDGET_INFO.title} in India - ${carCount} Models`,
+            description: `Find the best cars ${BUDGET_INFO.label.toLowerCase()} in India with prices and features.`,
+            type: 'website'
+        },
+        alternates: {
+            canonical: `/best-cars-under-15-lakh`
+        }
     }
 }
 

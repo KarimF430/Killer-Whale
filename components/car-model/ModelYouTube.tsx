@@ -17,6 +17,10 @@ interface YouTubeVideo {
 interface ModelYouTubeProps {
     brandName: string
     modelName: string
+    initialData?: {
+        featuredVideo: YouTubeVideo
+        relatedVideos: YouTubeVideo[]
+    }
 }
 
 // Helper function to format view count
@@ -59,13 +63,15 @@ function parseDuration(duration: string): string {
     return `${minutes || '0'}:${seconds.padStart(2, '0')}`
 }
 
-export default function ModelYouTube({ brandName, modelName }: ModelYouTubeProps) {
-    const [featuredVideo, setFeaturedVideo] = useState<YouTubeVideo | null>(null)
-    const [relatedVideos, setRelatedVideos] = useState<YouTubeVideo[]>([])
-    const [loading, setLoading] = useState(true)
+export default function ModelYouTube({ brandName, modelName, initialData }: ModelYouTubeProps) {
+    const [featuredVideo, setFeaturedVideo] = useState<YouTubeVideo | null>(initialData?.featuredVideo || null)
+    const [relatedVideos, setRelatedVideos] = useState<YouTubeVideo[]>(initialData?.relatedVideos || [])
+    const [loading, setLoading] = useState(!initialData)
     const [playingVideo, setPlayingVideo] = useState<string | null>(null)
 
     useEffect(() => {
+        if (initialData) return // Skip if already have data from server
+
         const fetchModelVideos = async () => {
             try {
                 setLoading(true)

@@ -105,6 +105,7 @@ async function fetchYouTubeVideos(apiKey: string, channelId: string, searchQuery
         views: formatViewCount(parseInt(item.statistics.viewCount)),
         likes: formatViewCount(parseInt(item.statistics.likeCount || '0')),
         publishedAt: formatPublishedDate(item.snippet.publishedAt),
+        rawPublishedAt: item.snippet.publishedAt,
         channelName: item.snippet.channelTitle
     }))
 
