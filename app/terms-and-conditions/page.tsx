@@ -24,16 +24,16 @@ export default function TermsAndConditionsPage() {
 
                         <div className="prose prose-gray max-w-none">
                             <p className="text-gray-700 leading-relaxed mb-6">
-                                These Terms and Conditions ("Terms") govern your use of the gadizone website and services.
+                                These Terms and Conditions (&quot;Terms&quot;) govern your use of the gadizone website and services.
                                 By accessing or using gadizone, you agree to be bound by these Terms.
                             </p>
 
                             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">1. Definitions</h2>
                             <ul className="list-disc pl-6 text-gray-700 space-y-2 mb-4">
-                                <li><strong>"gadizone"</strong> refers to the website, its owners, and operators</li>
-                                <li><strong>"User"</strong> refers to any person who accesses or uses our website</li>
-                                <li><strong>"Services"</strong> refers to all features and content provided by gadizone</li>
-                                <li><strong>"Content"</strong> refers to all information, data, text, images, and materials on the website</li>
+                                <li><strong>&quot;gadizone&quot;</strong> refers to the website, its owners, and operators</li>
+                                <li><strong>&quot;User&quot;</strong> refers to any person who accesses or uses our website</li>
+                                <li><strong>&quot;Services&quot;</strong> refers to all features and content provided by gadizone</li>
+                                <li><strong>&quot;Content&quot;</strong> refers to all information, data, text, images, and materials on the website</li>
                             </ul>
 
                             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">2. Services Description</h2>

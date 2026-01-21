@@ -190,7 +190,7 @@ export default function SearchClient({ popularSearches, initialQuery = '' }: Sea
                     <div className="text-center py-12">
                         <div className="text-5xl mb-4">🔍</div>
                         <h2 className="text-lg font-bold text-gray-900 mb-2">No cars found</h2>
-                        <p className="text-sm text-gray-500 mb-4">No results for <span className="font-semibold">"{searchQuery}"</span></p>
+                        <p className="text-sm text-gray-500 mb-4">No results for <span className="font-semibold">&quot;{searchQuery}&quot;</span></p>
                         <button
                             onClick={() => setSearchQuery('')}
                             className="px-5 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"

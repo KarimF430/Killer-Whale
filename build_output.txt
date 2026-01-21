@@ -1,0 +1,459 @@
+
+> gadizone-web@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.9
+   - Experiments (use with caution):
+     · clientTraceMetadata
+
+   Creating an optimized production build ...
+[@sentry/nextjs] It appears you've configured a `sentry.server.config.ts` file. Please ensure to put this file's content into the `register()` function of a Next.js instrumentation file instead. To ensure correct functionality of the SDK, `Sentry.init` must be called inside of an instrumentation file. Learn more about setting up an instrumentation file in Next.js: https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation. You can safely delete the `sentry.server.config.ts` file afterward.
+[@sentry/nextjs] Could not find a Next.js instrumentation file. This indicates an incomplete configuration of the Sentry SDK. An instrumentation file is required for the Sentry SDK to be initialized on the server: https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/#create-initialization-config-files (you can suppress this warning by setting SENTRY_SUPPRESS_INSTRUMENTATION_FILE_WARNING=1 as environment variable)
+[@sentry/nextjs] It seems like you don't have a global error handler set up. It is recommended that you add a 'global-error.js' file with Sentry instrumentation so that React rendering errors are reported to Sentry. Read more: https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/#react-render-errors-in-app-router (you can suppress this warning by setting SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING=1 as environment variable)
+[@sentry/nextjs] It appears you've configured a `sentry.edge.config.ts` file. Please ensure to put this file's content into the `register()` function of a Next.js instrumentation file instead. To ensure correct functionality of the SDK, `Sentry.init` must be called inside of an instrumentation file. Learn more about setting up an instrumentation file in Next.js: https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation. You can safely delete the `sentry.edge.config.ts` file afterward.
+[@sentry/nextjs] DEPRECATION WARNING: It is recommended renaming your `sentry.client.config.ts` file, or moving its content to `instrumentation-client.ts`. When using Turbopack `sentry.client.config.ts` will no longer work. Read more about the `instrumentation-client.ts` file: https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client
+ ✓ Compiled successfully in 20.8s
+   Skipping validation of types
+   Linting ...
+
+./app/[brand-cars]/[model]/rate-review/RateReviewClient.tsx
+345:53  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+435:37  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/admin/page.tsx
+42:8  Warning: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/admin/popular-comparisons/page.tsx
+36:6  Warning: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/admin/reviews/page.tsx
+69:8  Warning: React Hook useEffect has missing dependencies: 'fetchReviews' and 'fetchStats'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+524:45  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/ai-chat/page.tsx
+73:8  Warning: React Hook useEffect has a missing dependency: 'handleSend'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/cars-by-budget/[budget]/BudgetCarCard.tsx
+48:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/compare/CompareSelectionClient.tsx
+79:41  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+104:41  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+175:41  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/compare/[slug]/ComparePageClient.tsx
+566:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+763:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+790:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1022:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/electric-cars/ElectricCarCard.tsx
+69:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/layout.tsx
+99:9  Warning: Prefer `next/script` component when using the inline script for Google Analytics. See: https://nextjs.org/docs/messages/next-script-for-ga  @next/next/next-script-for-ga
+
+./app/new-car-launches-in-india/NewLaunchesClient.tsx
+57:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/news/[id]/page.tsx
+159:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/popular-cars-in-india/PopularCarsClient.tsx
+57:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/search/SearchClient.tsx
+49:8  Warning: React Hook useEffect has a missing dependency: 'searchQuery'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+218:49  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/top-cars/[bodyType]/TopCarCard.tsx
+47:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/top-selling-cars-in-india/TopSellingCarsClient.tsx
+60:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/upcoming-cars-in-india/UpcomingCarsClient.tsx
+44:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/ads/Ad3DCarousel.tsx
+239:45  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/ads/MovingAdBanner.tsx
+104:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+153:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+206:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/ads/VideoAd.tsx
+42:49  Warning: The ref value 'containerRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'containerRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+
+./components/ai-chat/AIChatModal.tsx
+55:8  Warning: React Hook useEffect has a missing dependency: 'messages.length'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+197:49  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/brand/AlternativeBrands.tsx
+57:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/brand/BrandCarItem.tsx
+66:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/brand/BrandCarListing.tsx
+146:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/brand/BrandCarsList.tsx
+49:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/brand/BrandCompareBox.tsx
+51:6  Warning: React Hook useEffect has a missing dependency: 'fetchComparisons'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+247:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+276:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/brand/BrandNews.tsx
+120:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/AllVariantsClient.tsx
+73:63  Warning: React Hook useMemo has a missing dependency: 'getDynamicFilters'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/car-model/CarComparisonSection.tsx
+90:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+166:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/CarHeroSection.tsx
+44:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/CarModelPage.tsx
+633:63  Warning: React Hook useMemo has a missing dependency: 'getDynamicFilters'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+1070:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1084:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1438:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1466:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1490:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1514:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1538:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1690:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1751:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1781:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1808:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2388:37  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+2419:37  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/CarNews.tsx
+113:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+165:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/CarVideos.tsx
+100:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+146:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/ColorOptions.tsx
+62:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/ColorSection.tsx
+73:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/CompareCars.tsx
+196:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+266:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/ModelHighlights.tsx
+122:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+148:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/ModelOwnerReviews.tsx
+293:57  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/SimilarCars.tsx
+107:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/car-model/UserReviewsSection.tsx
+290:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+393:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/common/CarComparison.tsx
+106:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/common/ImageGalleryModal.tsx
+87:8  Warning: React Hook useEffect has missing dependencies: 'goToNext', 'goToPrevious', and 'onClose'. Either include them or remove the dependency array. If 'onClose' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+347:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+394:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/compare/ComparePageClient_backup.tsx
+73:6  Warning: React Hook useEffect has a missing dependency: 'fetchComparisonData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+600:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+793:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+820:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+982:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/BrandSection.tsx
+55:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/ColorSection.tsx
+73:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/ComparisonBox.tsx
+124:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+146:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/DecemberOffersSection.tsx
+147:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/ElectricCarCard.tsx
+90:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/LatestCarNews.tsx
+151:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/OfferCarCard.tsx
+103:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/PopularBrands.tsx
+65:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/PopularComparisons.tsx
+125:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+158:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/TopCarsByBodyType.tsx
+101:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/home/UpcomingCarCard.tsx
+131:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/news/ArticleRenderer.tsx
+93:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/news/NewsListing.tsx
+227:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/price-breakup/PriceBreakupPage.tsx
+919:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/variant/VariantPage.tsx
+794:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+812:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1147:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1175:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1194:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+1213:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+3180:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+3208:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+ ⚠ Using edge runtime on a page currently disables static generation for that page
+   Generating static pages (0/59) ...
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-20-lakh/page.js:2:9407)
+    at async s (.next/server/app/best-cars-under-20-lakh/page.js:2:12180) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-25-lakh/page.js:1:1722)
+    at async s (.next/server/app/best-cars-under-25-lakh/page.js:1:4495) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-30-lakh/page.js:1:2544)
+    at async s (.next/server/app/best-cars-under-30-lakh/page.js:1:5317) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-40-lakh/page.js:1:1595)
+    at async s (.next/server/app/best-cars-under-40-lakh/page.js:1:4368) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-50-lakh/page.js:1:2229)
+    at async s (.next/server/app/best-cars-under-50-lakh/page.js:1:5002) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-60-lakh/page.js:1:1498)
+    at async s (.next/server/app/best-cars-under-60-lakh/page.js:1:4271) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-80-lakh/page.js:2:9155)
+    at async s (.next/server/app/best-cars-under-80-lakh/page.js:2:11928) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-8-lakh/page.js:1:2859)
+    at async s (.next/server/app/best-cars-under-8-lakh/page.js:1:5714) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+[Sitemap] Error generating sitemap: TypeError: fetch failed
+    at async x (.next/server/app/sitemap.xml/route.js:16:2050)
+    at async A (.next/server/app/sitemap.xml/route.js:16:3558) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-1-crore-lakh/page.js:1:1639)
+    at async s (.next/server/app/best-cars-under-1-crore-lakh/page.js:1:4412) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-10-lakh/page.js:2:9386)
+    at async s (.next/server/app/best-cars-under-10-lakh/page.js:2:12159) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-15-lakh/page.js:2:9065)
+    at async s (.next/server/app/best-cars-under-15-lakh/page.js:2:11838) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching new launches data: TypeError: fetch failed
+    at async q (.next/server/app/new-car-launches-in-india/page.js:2:8556)
+    at async r (.next/server/app/new-car-launches-in-india/page.js:2:10739) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching home data: TypeError: fetch failed
+    at async K (.next/server/app/page.js:2:11714)
+    at async L (.next/server/app/page.js:2:15327) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching new launches data: TypeError: fetch failed
+    at async q (.next/server/app/new-car-launches-in-india/page.js:2:8556)
+    at async r (.next/server/app/new-car-launches-in-india/page.js:2:10739) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching popular cars data: TypeError: fetch failed
+    at async q (.next/server/app/popular-cars-in-india/page.js:1:7551)
+    at async r (.next/server/app/popular-cars-in-india/page.js:1:9896) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching popular cars data: TypeError: fetch failed
+    at async q (.next/server/app/popular-cars-in-india/page.js:1:7551)
+    at async r (.next/server/app/popular-cars-in-india/page.js:1:9896) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+   Generating static pages (14/59)
+   Generating static pages (29/59)
+Error fetching top selling cars data: TypeError: fetch failed
+    at async q (.next/server/app/top-selling-cars-in-india/page.js:1:3292)
+    at async r (.next/server/app/top-selling-cars-in-india/page.js:1:6185) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching top selling cars data: TypeError: fetch failed
+    at async q (.next/server/app/top-selling-cars-in-india/page.js:1:3292)
+    at async r (.next/server/app/top-selling-cars-in-india/page.js:1:6185) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching upcoming cars data: TypeError: fetch failed
+    at async q (.next/server/app/upcoming-cars-in-india/page.js:2:23676)
+    at async r (.next/server/app/upcoming-cars-in-india/page.js:2:25528) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching upcoming cars data: TypeError: fetch failed
+    at async q (.next/server/app/upcoming-cars-in-india/page.js:2:23676)
+    at async r (.next/server/app/upcoming-cars-in-india/page.js:2:25528) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+   Generating static pages (44/59)
+Error fetching budget cars data: TypeError: fetch failed
+    at async r (.next/server/app/best-cars-under-above-1-crore-lakh/page.js:1:3204)
+    at async s (.next/server/app/best-cars-under-above-1-crore-lakh/page.js:1:5942) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching cars: TypeError: fetch failed
+    at async k (.next/server/app/compare/page.js:1:7241)
+    at async l (.next/server/app/compare/page.js:1:7813) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Error fetching electric cars data: TypeError: fetch failed
+    at async q (.next/server/app/electric-cars/page.js:1:2395)
+    at async r (.next/server/app/electric-cars/page.js:1:4830) {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+ ✓ Generating static pages (59/59)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                     Size  First Load JS  Revalidate  Expire
+┌ ○ /                                        16.6 kB         371 kB          1h      1y
+├ ○ /_not-found                                365 B         222 kB
+├ ƒ /[brand-cars]                            1.52 kB         396 kB
+├ ƒ /[brand-cars]/[model]                    1.53 kB         416 kB
+├ ƒ /[brand-cars]/[model]/[variant]          1.52 kB         412 kB
+├ ƒ /[brand-cars]/[model]/get-price          1.52 kB         406 kB
+├ ƒ /[brand-cars]/[model]/images             3.44 kB         340 kB
+├ ƒ /[brand-cars]/[model]/price-in/[city]    1.52 kB         406 kB
+├ ƒ /[brand-cars]/[model]/rate-review          317 B         336 kB
+├ ƒ /[brand-cars]/[model]/variant/[variant]  1.52 kB         412 kB
+├ ƒ /[brand-cars]/[model]/variants            2.8 kB         344 kB
+├ ƒ /[brand-cars]/write-review                 317 B         336 kB
+├ ○ /about-us                                  366 B         224 kB
+├ ○ /admin                                   2.75 kB         334 kB
+├ ○ /admin/popular-comparisons               1.76 kB         331 kB
+├ ○ /admin/reviews                           4.34 kB         335 kB
+├ ○ /ai-chat                                 2.29 kB         332 kB
+├ ○ /ai-search                               2.63 kB         334 kB
+├ ƒ /api/ai-chat                               365 B         222 kB
+├ ƒ /api/brands                                365 B         222 kB
+├ ƒ /api/brands/[id]                           365 B         222 kB
+├ ƒ /api/models                                363 B         222 kB
+├ ƒ /api/models/[id]                           365 B         222 kB
+├ ƒ /api/popular-comparisons                   365 B         222 kB
+├ ƒ /api/upload/image                          364 B         222 kB
+├ ƒ /api/upload/logo                           365 B         222 kB
+├ ƒ /api/youtube/videos                        364 B         222 kB
+├ ○ /best-cars-under-1-crore-lakh              326 B         358 kB          1h      1y
+├ ○ /best-cars-under-10-lakh                   325 B         358 kB          1h      1y
+├ ○ /best-cars-under-15-lakh                   325 B         358 kB          1h      1y
+├ ○ /best-cars-under-20-lakh                   326 B         358 kB          1h      1y
+├ ○ /best-cars-under-25-lakh                   325 B         358 kB          1h      1y
+├ ○ /best-cars-under-30-lakh                   325 B         358 kB          1h      1y
+├ ○ /best-cars-under-40-lakh                   326 B         358 kB          1h      1y
+├ ○ /best-cars-under-50-lakh                   325 B         358 kB          1h      1y
+├ ○ /best-cars-under-60-lakh                   325 B         358 kB          1h      1y
+├ ○ /best-cars-under-8-lakh                    326 B         358 kB          1h      1y
+├ ○ /best-cars-under-80-lakh                   325 B         358 kB          1h      1y
+├ ○ /best-cars-under-above-1-crore-lakh        325 B         358 kB          1h      1y
+├ ƒ /brands/[brand]                          2.97 kB         359 kB
+├ ƒ /cars-by-budget/[budget]                   325 B         358 kB
+├ ƒ /cars/[brand]                            3.84 kB         335 kB
+├ ƒ /cars/[brand]/[model]                      474 B         377 kB
+├ ○ /compare                                 5.38 kB         386 kB          1h      1y
+├ ƒ /compare/[slug]                          12.1 kB         405 kB
+├ ○ /contact-us                              2.37 kB         333 kB
+├ ○ /debug-env                                 365 B         222 kB
+├ ○ /electric-cars                           3.55 kB         358 kB          1h      1y
+├ ○ /emi-calculator                          5.68 kB         337 kB
+├ ○ /feedback                                 2.4 kB         333 kB
+├ ○ /forgot-password                          1.9 kB         333 kB
+├ ○ /fuel-cost-calculator                    2.48 kB         334 kB
+├ ○ /google-terms                              365 B         222 kB
+├ ○ /insurance                                 365 B         222 kB
+├ ○ /location                                4.45 kB         334 kB
+├ ○ /login                                   3.83 kB         335 kB
+├ ƒ /models/[slug]                             464 B         376 kB
+├ ○ /new-car-launches-in-india               5.43 kB         348 kB          1h      1y
+├ ○ /new-cars                                 5.3 kB         340 kB
+├ ○ /news                                     2.8 kB         334 kB
+├ ƒ /news/[id]                               2.78 kB         334 kB
+├ ○ /popular-cars-in-india                   5.42 kB         348 kB          1h      1y
+├ ○ /price-breakup                             466 B         367 kB
+├ ○ /privacy-policy                            367 B         224 kB
+├ ○ /reset-password                          2.37 kB         333 kB
+├ ○ /robots.txt                                366 B         222 kB
+├ ƒ /search                                  2.83 kB         334 kB
+├ ○ /sell-car                                  363 B         222 kB
+├ ○ /service                                   363 B         222 kB
+├ ○ /signup                                  3.44 kB         334 kB
+├ ○ /sitemap.xml                               365 B         222 kB          1h      1y
+├ ○ /terms-and-conditions                      366 B         224 kB
+├ ○ /test-honda                              3.12 kB         334 kB
+├ ƒ /top-cars/[bodyType]                     2.54 kB         357 kB
+├ ○ /top-selling-cars-in-india               2.94 kB         357 kB          1h      1y
+├ ○ /upcoming-cars-in-india                  4.55 kB         336 kB          1h      1y
+├ ƒ /variants/[slug]                           465 B         373 kB
+├ ○ /verify-email                            1.79 kB         331 kB
+└ ○ /visitor-agreement                         366 B         224 kB
++ First Load JS shared by all                 222 kB
+  ├ chunks/4bd1b696-66b1b846e058c532.js      54.4 kB
+  ├ chunks/52774a7f-cd539c703352d6f5.js      38.2 kB
+  ├ chunks/9764-6bb6a7e7bb9432b9.js           126 kB
+  └ other shared chunks (total)              3.74 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

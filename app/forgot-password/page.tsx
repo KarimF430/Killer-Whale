@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
                     </div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-3">Check Your Email</h1>
                     <p className="text-gray-600 text-lg mb-4">
-                        If an account exists for <strong>{email}</strong>, you'll receive a password reset link shortly.
+                        If an account exists for <strong>{email}</strong>, you&apos;ll receive a password reset link shortly.
                     </p>
                     <p className="text-sm text-gray-500 mb-6">
                         Please check your inbox and spam folder.
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
             {/* Header */}
             <div className="pt-8 sm:pt-12 pb-6 sm:pb-8 px-4 sm:px-6">
                 <h1 className="text-3xl sm:text-4xl font-bold text-white text-center">Forgot Password</h1>
-                <p className="text-red-50 text-center mt-2">We'll help you reset it</p>
+                <p className="text-red-50 text-center mt-2">We&apos;ll help you reset it</p>
             </div>
 
             {/* Form Container */}
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
 
                     <div className="mb-6">
                         <p className="text-gray-700 text-lg">
-                            Enter your email address and we'll send you a link to reset your password.
+                            Enter your email address and we&apos;ll send you a link to reset your password.
                         </p>
                     </div>
 

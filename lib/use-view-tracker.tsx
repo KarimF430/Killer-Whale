@@ -99,7 +99,7 @@ export function useViewTracker(car: Car | null) {
 
         // Track view on mount
         trackView()
-    }, [car?.id]) // Only re-run if car ID changes
+    }, [car, addFavourite, isFavourite]) // Re-run if car or context functions change
 
     return null
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 interface User {
     id: string
@@ -51,26 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
-    // Check for existing session on mount and after OAuth redirect
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search)
-        const isOAuthReturn = urlParams.get('login') === 'success'
-
-        if (isOAuthReturn) {
-            console.log('🔄 OAuth redirect detected, verifying session...')
-            // Wait for cookie to be processed before checking
-            setTimeout(() => {
-                checkAuth()
-                // Clean up URL
-                window.history.replaceState({}, '', window.location.pathname)
-            }, 500)
-        } else {
-            // Normal page load, check immediately
-            checkAuth()
-        }
-    }, [])
-
-    const checkAuth = async () => {
+    const checkAuth = useCallback(async () => {
         try {
             console.log('🔍 Checking authentication status...')
             const response = await fetch(`${backendUrl}/api/user/me`, {
@@ -91,7 +72,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [backendUrl])
+
+    // Check for existing session on mount and after OAuth redirect
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const isOAuthReturn = urlParams.get('login') === 'success'
+
+        if (isOAuthReturn) {
+            console.log('🔄 OAuth redirect detected, verifying session...')
+            // Wait for cookie to be processed before checking
+            const timeoutId = setTimeout(() => {
+                checkAuth()
+                // Clean up URL
+                window.history.replaceState({}, '', window.location.pathname)
+            }, 500)
+            return () => clearTimeout(timeoutId)
+        } else {
+            // Normal page load, check immediately
+            checkAuth()
+        }
+    }, [checkAuth])
 
     const login = async (email: string, password: string, rememberMe: boolean) => {
         const response = await fetch(`${backendUrl}/api/user/login`, {

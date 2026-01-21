@@ -17,7 +17,7 @@ export default function PopularBrands({ brands }: PopularBrandsProps) {
             Popular Car Brands
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explore new cars from India's most trusted automotive brands
+            Explore new cars from India&apos;s most trusted automotive brands
           </p>
         </div>
 
@@ -49,7 +49,7 @@ export default function PopularBrands({ brands }: PopularBrandsProps) {
                     Maruti Suzuki
                   </h3>
                   <p className="text-xs text-gray-500">
-                    India's most trusted car brand
+                    India&apos;s most trusted car brand
                   </p>
                 </div>
               </div>

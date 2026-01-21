@@ -44,22 +44,22 @@ interface CarsByBudgetProps {
  * 3. Dynamically updates when new cars are added
  * 4. Full SEO support - all content is server-rendered
  */
-export default function CarsByBudget({ allCars }: CarsByBudgetProps) {
-  // All possible budget ranges
-  const allBudgetRanges: BudgetRange[] = [
-    { id: 'under-10', label: 'Under ₹10 Lakh', min: 0, max: 1000000, urlSlug: '10' },
-    { id: 'under-15', label: '₹10-15 Lakh', min: 1000001, max: 1500000, urlSlug: '15' },
-    { id: 'under-20', label: '₹15-20 Lakh', min: 1500001, max: 2000000, urlSlug: '20' },
-    { id: 'under-25', label: '₹20-25 Lakh', min: 2000001, max: 2500000, urlSlug: '25' },
-    { id: 'under-30', label: '₹25-30 Lakh', min: 2500001, max: 3000000, urlSlug: '30' },
-    { id: 'under-40', label: '₹30-40 Lakh', min: 3000001, max: 4000000, urlSlug: '40' },
-    { id: 'under-50', label: '₹40-50 Lakh', min: 4000001, max: 5000000, urlSlug: '50' },
-    { id: 'under-60', label: '₹50-60 Lakh', min: 5000001, max: 6000000, urlSlug: '60' },
-    { id: 'under-80', label: '₹60-80 Lakh', min: 6000001, max: 8000000, urlSlug: '80' },
-    { id: 'under-100', label: '₹80L-1 Cr', min: 8000001, max: 10000000, urlSlug: '1-crore' },
-    { id: 'above-100', label: 'Above ₹1 Crore', min: 10000001, max: Infinity, urlSlug: 'above-1-crore' },
-  ]
+// All possible budget ranges
+const allBudgetRanges: BudgetRange[] = [
+  { id: 'under-10', label: 'Under ₹10 Lakh', min: 0, max: 1000000, urlSlug: '10' },
+  { id: 'under-15', label: '₹10-15 Lakh', min: 1000001, max: 1500000, urlSlug: '15' },
+  { id: 'under-20', label: '₹15-20 Lakh', min: 1500001, max: 2000000, urlSlug: '20' },
+  { id: 'under-25', label: '₹20-25 Lakh', min: 2000001, max: 2500000, urlSlug: '25' },
+  { id: 'under-30', label: '₹25-30 Lakh', min: 2500001, max: 3000000, urlSlug: '30' },
+  { id: 'under-40', label: '₹30-40 Lakh', min: 3000001, max: 4000000, urlSlug: '40' },
+  { id: 'under-50', label: '₹40-50 Lakh', min: 4000001, max: 5000000, urlSlug: '50' },
+  { id: 'under-60', label: '₹50-60 Lakh', min: 5000001, max: 6000000, urlSlug: '60' },
+  { id: 'under-80', label: '₹60-80 Lakh', min: 6000001, max: 8000000, urlSlug: '80' },
+  { id: 'under-100', label: '₹80L-1 Cr', min: 8000001, max: 10000000, urlSlug: '1-crore' },
+  { id: 'above-100', label: 'Above ₹1 Crore', min: 10000001, max: Infinity, urlSlug: 'above-1-crore' },
+]
 
+export default function CarsByBudget({ allCars }: CarsByBudgetProps) {
   // Calculate which budget ranges have cars (memoized for performance)
   const availableBudgetRanges = useMemo(() => {
     return allBudgetRanges.filter(range => {

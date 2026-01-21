@@ -57,7 +57,7 @@ export default function FeaturedOffers() {
             Featured Offers & Deals
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Don't miss out on the best deals and offers available on new cars. Save big on your dream car!
+            Don&apos;t miss out on the best deals and offers available on new cars. Save big on your dream car!
           </p>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, Plus, Share2, X, TrendingUp, TrendingDown, Award } from 'lucide-react'
+import { ChevronDown, Plus, Share2, X, TrendingUp, TrendingDown, Award, Landmark } from 'lucide-react'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 import Footer from '@/components/Footer'
 import PopularComparisons from '@/components/home/PopularComparisons'
@@ -1043,7 +1043,7 @@ export default function ComparePageClient({
                 return fullName.includes(searchQuery.toLowerCase()) && !comparisonItems.filter((item): item is ComparisonItem => item !== null).some(item => item.model.id === m.id)
               }).length === 0 && (
                   <div className="text-center py-8 text-gray-500">
-                    No cars found matching "{searchQuery}"
+                    No cars found matching &quot;{searchQuery}&quot;
                   </div>
                 )}
             </div>

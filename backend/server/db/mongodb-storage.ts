@@ -130,19 +130,26 @@ function mapVariant(doc: any): Variant {
     airbagsLocation: doc.airbagsLocation || null,
     adasLevel: doc.adasLevel || null,
     adasFeatures: doc.adasFeatures || null,
-    reverseCamera: doc.reverseCamera || null,
+    reverseCamera: doc.reverseCamera || doc.parkingCamera || null,
     reverseCameraGuidelines: doc.reverseCameraGuidelines || null,
     tyrePressureMonitor: doc.tyrePressureMonitor || null,
-    hillHoldAssist: doc.hillHoldAssist || null,
+    hillHoldAssist: doc.hillHoldAssist || doc.hillAssist || null,
     hillDescentControl: doc.hillDescentControl || null,
     rollOverMitigation: doc.rollOverMitigation || null,
-    parkingSensor: doc.parkingSensor || null,
+    parkingSensor: doc.parkingSensor || doc.parkingSensors || null,
+    parkingSensors: doc.parkingSensors || doc.parkingSensor || null,
+    parkingCamera: doc.parkingCamera || doc.reverseCamera || null,
+    blindSpotMonitor: doc.blindSpotMonitor || null,
     discBrakes: doc.discBrakes || null,
     electronicStabilityProgram: doc.electronicStabilityProgram || null,
+    esc: doc.esc || doc.electronicStabilityProgram || null,
+    tractionControl: doc.tractionControl || null,
+    hillAssist: doc.hillAssist || doc.hillHoldAssist || null,
     abs: doc.abs || null,
     ebd: doc.ebd || null,
     brakeAssist: doc.brakeAssist || null,
-    isofixMounts: doc.isofixMounts || null,
+    isofixMounts: doc.isofixMounts || doc.isofix || null,
+    isofix: doc.isofix || doc.isofixMounts || null,
     seatbeltWarning: doc.seatbeltWarning || null,
     speedAlertSystem: doc.speedAlertSystem || null,
     speedSensingDoorLocks: doc.speedSensingDoorLocks || null,
@@ -150,10 +157,16 @@ function mapVariant(doc: any): Variant {
 
     // Entertainment & Connectivity
     touchScreenInfotainment: doc.touchScreenInfotainment || null,
-    androidAppleCarplay: doc.androidAppleCarplay || null,
+    androidAppleCarplay: doc.androidAppleCarplay || (doc.androidAuto && doc.appleCarPlay ? "Yes" : null),
+    androidAuto: doc.androidAuto || null,
+    appleCarPlay: doc.appleCarPlay || null,
     speakers: doc.speakers || null,
     tweeters: doc.tweeters || null,
     subwoofers: doc.subwoofers || null,
+    infotainmentScreen: doc.infotainmentScreen || null,
+    bluetooth: doc.bluetooth || null,
+    usb: doc.usb || null,
+    aux: doc.aux || null,
     usbCChargingPorts: doc.usbCChargingPorts || null,
     usbAChargingPorts: doc.usbAChargingPorts || null,
     twelvevChargingPorts: doc.twelvevChargingPorts || null,
@@ -170,11 +183,15 @@ function mapVariant(doc: any): Variant {
     automaticHeadlamp: doc.automaticHeadlamp || null,
     followMeHomeHeadlights: doc.followMeHomeHeadlights || null,
     keylessEntry: doc.keylessEntry || null,
-    ignition: doc.ignition || null,
+    ignition: doc.ignition || doc.pushButtonStart || null,
+    pushButtonStart: doc.pushButtonStart || doc.ignition || null,
+    powerWindows: doc.powerWindows || null,
+    powerSteering: doc.powerSteering || null,
     ambientLighting: doc.ambientLighting || null,
     steeringAdjustment: doc.steeringAdjustment || null,
     airConditioning: doc.airConditioning || null,
     climateZones: doc.climateZones || null,
+    climateControl: doc.climateControl || null,
     rearACVents: doc.rearACVents || null,
     frontArmrest: doc.frontArmrest || null,
     rearArmrest: doc.rearArmrest || null,
@@ -192,13 +209,19 @@ function mapVariant(doc: any): Variant {
     enginePower: doc.enginePower || null,
     engineTorque: doc.engineTorque || null,
     engineSpeed: doc.engineSpeed || null,
+    engineType: doc.engineType || null,
+    displacement: doc.displacement || null,
+    driveType: doc.driveType || null,
     torque: doc.torque || doc.engineTorque || null,
 
     // Mileage
     mileageEngineName: doc.mileageEngineName || null,
     mileageCompanyClaimed: doc.mileageCompanyClaimed || null,
-    mileageCityRealWorld: doc.mileageCityRealWorld || null,
-    mileageHighwayRealWorld: doc.mileageHighwayRealWorld || null,
+    mileageCityRealWorld: doc.mileageCityRealWorld || doc.mileageCity || null,
+    mileageHighwayRealWorld: doc.mileageHighwayRealWorld || doc.mileageHighway || null,
+    mileageCity: doc.mileageCity || doc.mileageCityRealWorld || null,
+    mileageHighway: doc.mileageHighway || doc.mileageHighwayRealWorld || null,
+    emissionStandard: doc.emissionStandard || null,
 
     // Page 4 - Engine & Transmission (Additional fields)
     engineNamePage4: doc.engineNamePage4 || null,
@@ -221,6 +244,7 @@ function mapVariant(doc: any): Variant {
     offRoadModes: doc.offRoadModes || null,
     differentialLock: doc.differentialLock || null,
     limitedSlipDifferential: doc.limitedSlipDifferential || null,
+    acceleration: doc.acceleration || doc.zeroTo100KmphTime || null,
 
     // Page 4 - Seating Comfort
     seatUpholstery: doc.seatUpholstery || null,
@@ -238,9 +262,15 @@ function mapVariant(doc: any): Variant {
     roofRails: doc.roofRails || null,
     radioAntenna: doc.radioAntenna || null,
     outsideRearViewMirror: doc.outsideRearViewMirror || null,
-    daytimeRunningLights: doc.daytimeRunningLights || null,
+    daytimeRunningLights: doc.daytimeRunningLights || doc.drl || null,
+    drl: doc.drl || doc.daytimeRunningLights || null,
     sideIndicator: doc.sideIndicator || null,
     rearWindshieldWiper: doc.rearWindshieldWiper || null,
+    headlights: doc.headlights || doc.headLights || null,
+    fogLights: doc.fogLights || doc.frontFogLights || null,
+    tailLights: doc.tailLights || doc.tailLight || null,
+    orvm: doc.orvm || doc.outsideRearViewMirror || null,
+    alloyWheels: doc.alloyWheels || null,
 
     // Page 5 - Dimensions
     groundClearance: doc.groundClearance || null,
@@ -258,18 +288,26 @@ function mapVariant(doc: any): Variant {
     spareWheelType: doc.spareWheelType || null,
     frontSuspension: doc.frontSuspension || null,
     rearSuspension: doc.rearSuspension || null,
+    frontBrake: doc.frontBrake || null,
+    rearBrake: doc.rearBrake || null,
+    wheelSize: doc.wheelSize || null,
+    tyreSize: doc.tyreSize || null,
+    spareTyre: doc.spareTyre || null,
 
     // Page 5 - Storage
     cupholders: doc.cupholders || null,
     fuelTankCapacity: doc.fuelTankCapacity || null,
     bootSpace: doc.bootSpace || null,
     bootSpaceAfterFoldingRearRowSeats: doc.bootSpaceAfterFoldingRearRowSeats || null,
+    seatingCapacity: doc.seatingCapacity || null,
+    doors: doc.doors || null,
 
     // Other
     keyFeatures: doc.keyFeatures || null,
     headerSummary: doc.headerSummary || null,
     isValueForMoney: doc.isValueForMoney || false,
     highlightImages: doc.highlightImages || [],
+    warranty: doc.warranty || null,
     createdAt: doc.createdAt
   };
 }
@@ -725,7 +763,7 @@ export class MongoDBStorage implements IStorage {
 
       // Try to find model in regular models
       console.log(`🔍 Looking up model: ${variant.modelId}`);
-      let model = await MongoModel.findOne({ id: variant.modelId }).lean();
+      let model: any = await MongoModel.findOne({ id: variant.modelId }).lean();
       let isUpcoming = false;
 
       // If not found, try upcoming cars
@@ -758,7 +796,7 @@ export class MongoDBStorage implements IStorage {
 
       // Ensure unique ID by appending random string if needed, or just standard format
       // For upcoming cars, we might want to distinguish the ID, but the format seems generic enough
-      const id = `variant-brand-${brandSlug}-model-${brandSlug}-${modelSlug}-${variantSlug}`;
+      const id = `variant-brand-${brandSlug}-model-${modelSlug}-${variantSlug}`;
 
       // Check if variant with this ID already exists
       const existing = await MongoVariant.findOne({ id }).lean();

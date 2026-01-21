@@ -131,8 +131,8 @@ export default function FeedbackPage() {
                     <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-3">Your Voice Matters</h2>
                         <p className="text-sm text-gray-600">
-                            At gadizone, we're constantly working to improve our platform based on user feedback.
-                            Whether it's a bug you've encountered, a feature you'd like to see, or general thoughts about your experience -
+                            At gadizone, we&apos;re constantly working to improve our platform based on user feedback.
+                            Whether it&apos;s a bug you&apos;ve encountered, a feature you&apos;d like to see, or general thoughts about your experience -
                             your input helps shape the future of gadizone. Every piece of feedback is read and considered by our team.
                         </p>
                     </div>
