@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export const runtime = 'nodejs'
 
 export default function NotFound() {
@@ -9,21 +11,21 @@ export default function NotFound() {
             <span className="text-4xl font-bold text-red-600">404</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Page Not Found</h1>
-          <p className="text-gray-600 mb-8">Sorry, we couldn't find the page you're looking for.</p>
+          <p className="text-gray-600 mb-8">Sorry, we couldn&apos;t find the page you&apos;re looking for.</p>
         </div>
         <div className="space-y-4">
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center w-full px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
           >
             Go to Homepage
-          </a>
-          <a
+          </Link>
+          <Link
             href="/"
             className="inline-flex items-center justify-center w-full px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
           >
             Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -157,16 +157,6 @@ export default function EMICalculatorTool() {
   }
 
   useEffect(() => {
-    if (selectedCar) {
-      const calculatedDownPayment = downPayment || Math.round(selectedCar.onRoadPrice * 0.2) // Default 20%
-      const calculatedLoanAmount = loanAmount || (selectedCar.onRoadPrice - calculatedDownPayment)
-      
-      setDownPayment(calculatedDownPayment)
-      setLoanAmount(calculatedLoanAmount)
-    }
-  }, [selectedCar])
-
-  useEffect(() => {
     if (loanAmount > 0 && interestRate > 0 && tenure > 0) {
       const emi = calculateEMI(loanAmount, interestRate, tenure)
       const totalAmount = emi * tenure * 12

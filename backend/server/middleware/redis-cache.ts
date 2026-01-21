@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { getCacheRedisClient } from '../config/redis-config';
 import type Redis from 'ioredis';
+import axios from 'axios';
 import { gzip, gunzip } from 'zlib';
 import { promisify } from 'util';
 
@@ -44,6 +45,11 @@ export function redisCacheMiddleware(ttl: number = 300, staleTime: number = 60) 
     // Generate hierarchical cache key with version
     const namespace = req.path.split('/')[2] || 'api'; // e.g., 'brands', 'models'
     const cacheKey = `cache:${CACHE_VERSION}:${namespace}:${req.path}:${JSON.stringify(req.query)}`;
+
+    // Skip cache if internal refresh request
+    if (req.headers['x-skip-cache'] === 'true') {
+      return handleCacheMissWithStampedePrevention(req, res, next, cacheKey, ttl);
+    }
 
     try {
       // Try to get from cache (buffer for decompression)
@@ -187,12 +193,28 @@ async function handleCacheMissWithStampedePrevention(
 async function refreshCacheInBackground(req: Request, cacheKey: string, ttl: number) {
   if (!redis) return;
 
-  // Simulate fetching fresh data by making internal request
-  // In production, you'd call the actual data fetching function
-  console.log(`🔄 Background refresh started: ${cacheKey}`);
+  // Determine internal URL
+  const port = process.env.PORT || 5001;
+  const protocol = req.protocol || 'http';
+  // Use 127.0.0.1 instead of localhost for reliability in some environments
+  const url = `${protocol}://127.0.0.1:${port}${req.originalUrl || req.url}`;
 
-  // Note: This is a placeholder. In real implementation,
-  // you'd call the actual data fetching function here
+  console.log(`🔄 Background refresh started: ${url}`);
+
+  try {
+    // Perform internal request to trigger cache refresh
+    await axios.get(url, {
+      headers: {
+        'x-skip-cache': 'true',
+        'user-agent': 'KillerWhale-Cache-Refresher'
+      },
+      timeout: 30000 // 30s timeout for complex aggregations
+    });
+    console.log(`✅ Background refresh completed: ${cacheKey}`);
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error(`❌ Background refresh failed for ${cacheKey}:`, errMsg);
+  }
 }
 
 /**

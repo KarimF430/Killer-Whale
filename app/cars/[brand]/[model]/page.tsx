@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
 import CarModelPage from '@/components/car-model/CarModelPage'
 import { generateCarStructuredData, parseCarFromUrl, generateCanonicalUrl } from '@/utils/carUrlHelpers'
 
@@ -115,10 +116,10 @@ export default async function ModelPage({ params }: PageProps) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Model Not Found</h1>
-          <p className="text-gray-600 mb-8">The car model you're looking for doesn't exist.</p>
-          <a href="/" className="bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-3 rounded-lg hover:from-red-700 hover:to-orange-600 transition-all">
+          <p className="text-gray-600 mb-8">The car model you&apos;re looking for doesn&apos;t exist.</p>
+          <Link href="/" className="bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-3 rounded-lg hover:from-red-700 hover:to-orange-600 transition-all">
             Go to Homepage
-          </a>
+          </Link>
         </div>
       </div>
     )

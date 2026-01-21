@@ -288,13 +288,13 @@ export default function LocationSelector({ popularCities }: LocationSelectorProp
                     <div className="text-center py-12">
                         <Loader2 className="h-10 w-10 text-orange-600 mx-auto mb-4 animate-spin" />
                         <h2 className="text-lg font-bold text-gray-900 mb-2">Searching...</h2>
-                        <p className="text-sm text-gray-500">Finding <span className="font-semibold">"{searchQuery}"</span></p>
+                        <p className="text-sm text-gray-500">Finding <span className="font-semibold">&quot;{searchQuery}&quot;</span></p>
                     </div>
                 ) : googleResults.length === 0 && searchResults.length === 0 ? (
                     <div className="text-center py-12">
                         <div className="text-5xl mb-4">📍</div>
                         <h2 className="text-lg font-bold text-gray-900 mb-2">No cities found</h2>
-                        <p className="text-sm text-gray-500">No results for <span className="font-semibold">"{searchQuery}"</span></p>
+                        <p className="text-sm text-gray-500">No results for <span className="font-semibold">&quot;{searchQuery}&quot;</span></p>
                     </div>
                 ) : (
                     <div>

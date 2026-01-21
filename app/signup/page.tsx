@@ -328,7 +328,7 @@ export default function SignUpPage() {
 
                             {/* Resend OTP */}
                             <p className="text-center text-gray-600 text-xs sm:text-sm">
-                                Didn't receive the code?{' '}
+                                Didn&apos;t receive the code?{' '}
                                 {resendCountdown > 0 ? (
                                     <span className="text-gray-400">Resend in {resendCountdown}s</span>
                                 ) : (

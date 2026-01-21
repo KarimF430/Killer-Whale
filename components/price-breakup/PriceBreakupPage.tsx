@@ -63,6 +63,19 @@ interface PriceBreakupPageProps {
   initialVariants?: any[]
 }
 
+const SECTIONS = [
+  { id: 'overview', name: 'Overview' },
+  { id: 'price-breakup', name: 'Price Breakup' },
+  { id: 'emi', name: 'EMI' },
+  { id: 'variants', name: 'Variants' },
+  { id: 'similar-cars', name: 'Similar Cars' },
+  { id: 'popular-cars', name: 'Popular Cars' },
+  { id: 'reviews', name: 'Reviews' },
+  { id: 'faq', name: 'FAQ' },
+  { id: 'dealers', name: 'Dealers' },
+  { id: 'feedback', name: 'Feedback' }
+]
+
 export default function PriceBreakupPage({
   brandSlug,
   modelSlug,
@@ -77,21 +90,21 @@ export default function PriceBreakupPage({
   const variantDropdownRef = useRef<HTMLDivElement>(null)
 
   // Get URL parameters - support both new slug-based URLs and old query params
-  const getBrandName = () => {
+  const brandName = useMemo(() => {
     if (brandSlug) {
       // Convert slug to display name: "honda" -> "Honda"
       return brandSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }
     return searchParams.get('brand') || 'Honda'
-  }
+  }, [brandSlug, searchParams])
 
-  const getModelName = () => {
+  const modelName = useMemo(() => {
     if (modelSlug) {
       // Convert slug to display name: "elevate" -> "Elevate"
       return modelSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }
     return searchParams.get('model') || 'Elevate'
-  }
+  }, [modelSlug, searchParams])
 
   const getCityName = () => {
     if (citySlug) {
@@ -113,8 +126,6 @@ export default function PriceBreakupPage({
     return searchParams.get('city') || 'Mumbai, Maharashtra'
   }
 
-  const brandName = getBrandName()
-  const modelName = getModelName()
   const variantParam = searchParams.get('variant')
   const [selectedCity, setSelectedCity] = useState(() => getCityName())
 
@@ -143,20 +154,6 @@ export default function PriceBreakupPage({
   })
   const [activeSection, setActiveSection] = useState('overview')
 
-  // Section navigation data
-  const sections = [
-    { id: 'overview', name: 'Overview' },
-    { id: 'price-breakup', name: 'Price Breakup' },
-    { id: 'emi', name: 'EMI' },
-    { id: 'variants', name: 'Variants' },
-    { id: 'similar-cars', name: 'Similar Cars' },
-    { id: 'popular-cars', name: 'Popular Cars' },
-    { id: 'reviews', name: 'Reviews' },
-    { id: 'faq', name: 'FAQ' },
-    { id: 'dealers', name: 'Dealers' },
-    { id: 'feedback', name: 'Feedback' }
-  ]
-
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -180,12 +177,12 @@ export default function PriceBreakupPage({
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 100 // Offset for better UX
 
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = document.getElementById(sections[i].id)
+      for (let i = SECTIONS.length - 1; i >= 0; i--) {
+        const section = document.getElementById(SECTIONS[i].id)
         if (section) {
           const sectionTop = section.offsetTop
           if (scrollPosition >= sectionTop) {
-            setActiveSection(sections[i].id)
+            setActiveSection(SECTIONS[i].id)
             break
           }
         }
@@ -744,7 +741,7 @@ export default function PriceBreakupPage({
     return () => {
       window.removeEventListener('storage', handleStorageChange)
     }
-  }, [])
+  }, [brandName, modelName, router, selectedCity])
 
   // Calculate On-Road Price when variant or city changes
   useEffect(() => {
@@ -860,7 +857,7 @@ export default function PriceBreakupPage({
       <div className="bg-white border-b sticky top-0 z-40 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
-            {sections.map((section) => (
+            {SECTIONS.map((section) => (
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}

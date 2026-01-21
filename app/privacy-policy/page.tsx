@@ -118,7 +118,7 @@ export default function PrivacyPolicyPage() {
                                 privacy practices of these external sites. We encourage you to read their privacy policies.
                             </p>
 
-                            <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">8. Children's Privacy</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">8. Children&apos;s Privacy</h2>
                             <p className="text-gray-700 leading-relaxed mb-4">
                                 gadizone is not intended for children under 18 years of age. We do not knowingly collect
                                 personal information from children.

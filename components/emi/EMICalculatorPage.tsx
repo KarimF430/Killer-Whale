@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { ChevronDown, Info, X, Pencil, Search, ArrowLeft } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import PageContainer, { PageSection } from '../layout/PageContainer'
@@ -564,7 +565,7 @@ export default function EMICalculatorPage() {
                 Get Eligible Loan Offers
               </button>
               <p className="text-xs text-gray-500 text-center mt-3 leading-relaxed">
-                By proceeding ahead you agree to gadizone <a href="/visitor-agreement" className="text-orange-600 hover:underline">Visitor Agreement</a>, <a href="/privacy-policy" className="text-orange-600 hover:underline">Privacy Policy</a> and <a href="/terms-and-conditions" className="text-orange-600 hover:underline">Terms and Conditions</a>. This site is protected by reCAPTCHA and Google <a href="/google-terms" className="text-orange-600 hover:underline">terms of service</a> apply.
+                By proceeding ahead you agree to gadizone <Link href="/visitor-agreement" className="text-orange-600 hover:underline">Visitor Agreement</Link>, <Link href="/privacy-policy" className="text-orange-600 hover:underline">Privacy Policy</Link> and <Link href="/terms-and-conditions" className="text-orange-600 hover:underline">Terms and Conditions</Link>. This site is protected by reCAPTCHA and Google <Link href="/google-terms" className="text-orange-600 hover:underline">terms of service</Link> apply.
               </p>
             </div>
           </div>

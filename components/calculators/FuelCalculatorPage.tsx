@@ -155,13 +155,13 @@ export default function FuelCalculatorPage() {
                         <h2 className="text-lg font-bold text-gray-900 mb-4">How to Use the Fuel Calculator</h2>
                         <p className="text-sm text-gray-600 mb-4">
                             Planning a road trip or daily commute? Our fuel calculator helps you estimate fuel costs before you hit the road.
-                            Simply enter the distance you plan to travel, your vehicle's mileage, and the current fuel price to get an instant estimate.
+                            Simply enter the distance you plan to travel, your vehicle&apos;s mileage, and the current fuel price to get an instant estimate.
                         </p>
 
                         <h3 className="text-base font-semibold text-gray-900 mb-2">Understanding Fuel Efficiency</h3>
                         <p className="text-sm text-gray-600 mb-4">
                             Fuel efficiency varies based on driving conditions, vehicle type, and maintenance. Highway driving typically
-                            gives better mileage than city driving. Regular servicing and proper tire pressure can improve your vehicle's fuel economy.
+                            gives better mileage than city driving. Regular servicing and proper tire pressure can improve your vehicle&apos;s fuel economy.
                         </p>
 
                         <h3 className="text-base font-semibold text-gray-900 mb-2">Current Fuel Prices in India</h3>

@@ -55,27 +55,28 @@ const getCurrentMonth = () => {
     return months[new Date().getMonth()]
 }
 
+const TARGET_BRANDS = ['hyundai', 'maruti', 'suzuki', 'mahindra', 'tata', 'toyota', 'kia']
+
 export default function DecemberOffersSection({ initialCars = [], initialBrands = [] }: DecemberOffersSectionProps) {
-    // Define the 6 brands to show
-    const targetBrands = ['hyundai', 'maruti', 'suzuki', 'mahindra', 'tata', 'toyota', 'kia']
-
     // Find matching brands from the backend data
-    const filteredBrands = initialBrands.filter(brand => {
-        const brandSlug = brand.slug || brand.name.toLowerCase().replace(/\s+/g, '-')
-        return targetBrands.some(target =>
-            brandSlug.includes(target) || brand.name.toLowerCase().includes(target)
-        )
-    }).slice(0, 6)
+    const brands = useMemo(() => {
+        const filteredBrands = initialBrands.filter(brand => {
+            const brandSlug = brand.slug || brand.name.toLowerCase().replace(/\s+/g, '-')
+            return TARGET_BRANDS.some(target =>
+                brandSlug.includes(target) || brand.name.toLowerCase().includes(target)
+            )
+        }).slice(0, 6)
 
-    // If no brands from backend, use fallback
-    const brands = filteredBrands.length > 0 ? filteredBrands : [
-        { id: 'hyundai', name: 'Hyundai', slug: 'hyundai', logo: '' },
-        { id: 'maruti-suzuki', name: 'Maruti Suzuki', slug: 'maruti-suzuki', logo: '' },
-        { id: 'mahindra', name: 'Mahindra', slug: 'mahindra', logo: '' },
-        { id: 'tata', name: 'Tata', slug: 'tata', logo: '' },
-        { id: 'toyota', name: 'Toyota', slug: 'toyota', logo: '' },
-        { id: 'kia', name: 'Kia', slug: 'kia', logo: '' },
-    ]
+        // If no brands from backend, use fallback
+        return filteredBrands.length > 0 ? filteredBrands : [
+            { id: 'hyundai', name: 'Hyundai', slug: 'hyundai', logo: '' },
+            { id: 'maruti-suzuki', name: 'Maruti Suzuki', slug: 'maruti-suzuki', logo: '' },
+            { id: 'mahindra', name: 'Mahindra', slug: 'mahindra', logo: '' },
+            { id: 'tata', name: 'Tata', slug: 'tata', logo: '' },
+            { id: 'toyota', name: 'Toyota', slug: 'toyota', logo: '' },
+            { id: 'kia', name: 'Kia', slug: 'kia', logo: '' },
+        ]
+    }, [initialBrands])
 
     const [selectedBrand, setSelectedBrand] = useState(brands[0]?.id || 'hyundai')
 

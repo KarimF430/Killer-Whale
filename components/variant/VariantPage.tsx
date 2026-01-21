@@ -69,13 +69,14 @@ interface VariantPageProps {
 
 // Mock variant data removed - using real data from backend
 
-const navigationSections = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'highlights', label: 'Key & Features' },
-  { id: 'specifications', label: 'Specifications' },
-  { id: 'variants', label: 'Variants' },
-  { id: 'offers', label: 'Offers' },
-  { id: 'expert-review', label: 'Expert Review' }
+const NAV_SECTIONS = [
+  { id: 'overview', name: 'Overview' },
+  { id: 'highlights', name: 'EMI & Highlights' },
+  { id: 'specifications', name: 'Specifications' },
+  { id: 'more-variants', name: 'Variants' },
+  { id: 'engine-mileage', name: 'Engine & Mileage' },
+  { id: 'price-across-india', name: 'Price' },
+  { id: 'similar-cars', name: 'Similar Cars' }
 ]
 
 export default function VariantPage({
@@ -102,20 +103,8 @@ export default function VariantPage({
   const router = useRouter()
   const [expandedSpecs, setExpandedSpecs] = useState<Record<string, boolean>>({})
   const [activeSection, setActiveSection] = useState('overview')
-  const [isSticky, setIsSticky] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
   const navRef = useRef<HTMLDivElement>(null)
-
-  // Navigation sections for sticky ribbon
-  const navSections = [
-    { id: 'overview', name: 'Overview' },
-    { id: 'highlights', name: 'EMI & Highlights' },
-    { id: 'specifications', name: 'Specifications' },
-    { id: 'more-variants', name: 'Variants' },
-    { id: 'engine-mileage', name: 'Engine & Mileage' },
-    { id: 'price-across-india', name: 'Price' },
-    { id: 'similar-cars', name: 'Similar Cars' }
-  ]
 
   // Backend data fetching states
   const [variant, setVariant] = useState<any>(null)
@@ -325,7 +314,7 @@ export default function VariantPage({
 
   // Intersection Observer for sticky navigation highlighting
   useEffect(() => {
-    const sectionIds = navSections.map(s => s.id)
+    const sectionIds = NAV_SECTIONS.map(s => s.id)
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -560,7 +549,7 @@ export default function VariantPage({
     }
 
     fetchData()
-  }, [brandName, modelName, variantName])
+  }, [brandName, modelName, variantName, initialBrand, initialModel, initialVariant, initialAllVariants])
 
 
 
@@ -760,7 +749,7 @@ export default function VariantPage({
       <div className="variant-nav-ribbon bg-white border-b sticky top-0 z-40 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div ref={navRef} className="flex space-x-1 overflow-x-auto scrollbar-hide">
-            {navSections.map((section) => (
+            {NAV_SECTIONS.map((section) => (
               <button
                 key={section.id}
                 data-section={section.id}

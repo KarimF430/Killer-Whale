@@ -173,7 +173,7 @@ export default function CitySelector({ isOpen, onClose, selectedCity, onCitySele
 
           {searchQuery && filteredCities.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-gray-500">No cities found matching "{searchQuery}"</p>
+              <p className="text-gray-500">No cities found matching &quot;{searchQuery}&quot;</p>
             </div>
           )}
         </div>

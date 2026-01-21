@@ -1003,7 +1003,7 @@ export default function ComparePage({ params }: { params: Promise<{ slug: string
                 return fullName.includes(searchQuery.toLowerCase()) && !comparisonItems.filter((item): item is ComparisonItem => item !== null).some(item => item.model.id === m.id)
               }).length === 0 && (
                   <div className="text-center py-8 text-gray-500">
-                    No cars found matching "{searchQuery}"
+                    No cars found matching &quot;{searchQuery}&quot;
                   </div>
                 )}
             </div>

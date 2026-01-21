@@ -35,7 +35,7 @@ export default function ContactUsPage() {
                         </Link>
 
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Contact Us</h1>
-                        <p className="text-gray-600 mb-8">Have questions or feedback? We're here to help.</p>
+                        <p className="text-gray-600 mb-8">Have questions or feedback? We&apos;re here to help.</p>
 
                         {submitted ? (
                             <div className="text-center py-12">
@@ -45,7 +45,7 @@ export default function ContactUsPage() {
                                     </svg>
                                 </div>
                                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Message Sent!</h3>
-                                <p className="text-gray-600 mb-6">Thank you for reaching out. We'll get back to you within 24 hours.</p>
+                                <p className="text-gray-600 mb-6">Thank you for reaching out. We&apos;ll get back to you within 24 hours.</p>
                                 <button onClick={() => { setSubmitted(false); setFormData({ name: '', email: '', phone: '', subject: '', message: '' }) }} className="text-orange-600 hover:text-orange-700 font-medium">
                                     Send another message
                                 </button>
