@@ -53,7 +53,14 @@ const GOOD_BOTS = [
     'duckduckbot',
     'slurp', // Yahoo
     'facebot',
-    'twitterbot'
+    'twitterbot',
+    'gptbot',
+    'chatgpt-user',
+    'google-extended',
+    'claude-bot',
+    'perplexitybot',
+    'ai-agent',
+    'ai-crawler'
 ];
 
 export const botDetector = (req: Request, res: Response, next: NextFunction) => {
