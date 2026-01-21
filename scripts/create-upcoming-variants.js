@@ -1,7 +1,8 @@
 const fetch = require('node-fetch');
+require('dotenv').config();
 
 const API_BASE = 'http://localhost:5001';
-const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluLTE3NjE4MTcwODgyMTMiLCJlbWFpbCI6ImFkbWluQG1vdG9yb2N0YW5lLmNvbSIsIm5hbWUiOiJBZG1pbiIsInJvbGUiOiJzdXBlcl9hZG1pbiIsImlhdCI6MTc2NDMwOTE0MCwiZXhwIjoxNzY0Mzk1NTQwfQ.1CtT-6Jk1ZWAV3nwe3aNluPvT3WK-nWDr17PUcxuaSc';
+const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 // Helper to generate default comprehensive data
 function getDefaultVariantData(baseData) {
