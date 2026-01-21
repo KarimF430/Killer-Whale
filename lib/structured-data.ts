@@ -54,6 +54,28 @@ export function generateBreadcrumbSchema(items: { name: string; item: string }[]
     }
 }
 
+export function generateVideoSchema(video: {
+    name: string
+    description: string
+    thumbnailUrl: string
+    uploadDate: string
+    duration?: string
+    contentUrl: string
+    embedUrl?: string
+}) {
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: video.name,
+        description: video.description,
+        thumbnailUrl: video.thumbnailUrl,
+        uploadDate: video.uploadDate,
+        duration: video.duration,
+        contentUrl: video.contentUrl,
+        embedUrl: video.embedUrl || video.contentUrl
+    }
+}
+
 export function generateCarProductSchema(car: {
     name: string
     brand: string

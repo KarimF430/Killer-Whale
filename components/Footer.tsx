@@ -68,6 +68,28 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Search by Budget & Body Type */}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Cars by Budget</h3>
+              <ul className="grid grid-cols-2 gap-2 text-sm">
+                <li><Link href="/best-cars-under-5-lakh" className="text-gray-300 hover:text-red-400 transition-colors">Under 5 Lakh</Link></li>
+                <li><Link href="/best-cars-under-10-lakh" className="text-gray-300 hover:text-red-400 transition-colors">Under 10 Lakh</Link></li>
+                <li><Link href="/best-cars-under-15-lakh" className="text-gray-300 hover:text-red-400 transition-colors">Under 15 Lakh</Link></li>
+                <li><Link href="/best-cars-under-20-lakh" className="text-gray-300 hover:text-red-400 transition-colors">Under 20 Lakh</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Cars by Body Type</h3>
+              <ul className="grid grid-cols-2 gap-2 text-sm">
+                <li><Link href="/top-cars/suv" className="text-gray-300 hover:text-orange-400 transition-colors">SUV</Link></li>
+                <li><Link href="/top-cars/hatchback" className="text-gray-300 hover:text-orange-400 transition-colors">Hatchback</Link></li>
+                <li><Link href="/top-cars/sedan" className="text-gray-300 hover:text-orange-400 transition-colors">Sedan</Link></li>
+                <li><Link href="/top-cars/muv" className="text-gray-300 hover:text-orange-400 transition-colors">MUV</Link></li>
+              </ul>
+            </div>
+          </div>
+
           {/* Popular Brands */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Popular Brands</h3>

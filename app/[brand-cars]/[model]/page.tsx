@@ -3,7 +3,7 @@ import CarModelPage from '@/components/car-model/CarModelPage'
 import { notFound } from 'next/navigation'
 import { generateModelSEO } from '@/lib/seo'
 import BrandNews from '@/components/brand/BrandNews'
-import { generateCarProductSchema, generateFAQSchema } from '@/lib/structured-data'
+import { generateCarProductSchema, generateFAQSchema, generateVideoSchema } from '@/lib/structured-data'
 
 interface ModelPageProps {
   params: Promise<{
@@ -658,6 +658,18 @@ export default async function ModelPage({ params }: ModelPageProps) {
     notFound()
   }
 
+  // Fetch YouTube videos for SEO and initial render
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+  let youtubeData = null
+  try {
+    const youtubeRes = await fetch(`${backendUrl}/api/youtube/videos?search=${encodeURIComponent(`${modelData.brand} ${modelData.name}`)}`, { next: { revalidate: 86400 } })
+    if (youtubeRes.ok) {
+      youtubeData = await youtubeRes.json()
+    }
+  } catch (err) {
+    console.error('Error fetching YouTube videos for schema:', err)
+  }
+
   // Generate structured data
   const productSchema = generateCarProductSchema({
     name: `${modelData.brand} ${modelData.name}`,
@@ -669,13 +681,24 @@ export default async function ModelPage({ params }: ModelPageProps) {
   })
 
   // Format FAQs for schema if they exist
-  // Handles both array of objects or simple strings if that was the case (checking structure)
   const formattedFaqs = modelData.faqs?.map((faq: any) => ({
     question: faq.question || faq.q || '',
     answer: faq.answer || faq.a || ''
   })).filter((f: any) => f.question && f.answer) || []
 
   const faqSchema = formattedFaqs.length > 0 ? generateFAQSchema(formattedFaqs) : null
+
+  // Generate Video Schema if videos exist
+  const videoSchemas = youtubeData?.featuredVideo ? [
+    generateVideoSchema({
+      name: youtubeData.featuredVideo.title,
+      description: `${modelData.brand} ${modelData.name} video review and features.`,
+      thumbnailUrl: youtubeData.featuredVideo.thumbnail,
+      uploadDate: youtubeData.featuredVideo.rawPublishedAt || new Date().toISOString(),
+      contentUrl: `https://www.youtube.com/watch?v=${youtubeData.featuredVideo.id}`,
+      embedUrl: `https://www.youtube.com/embed/${youtubeData.featuredVideo.id}`
+    })
+  ] : []
 
   return (
     <>
@@ -689,9 +712,17 @@ export default async function ModelPage({ params }: ModelPageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
+      {videoSchemas.map((vSchema, idx) => (
+        <script
+          key={idx}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(vSchema) }}
+        />
+      ))}
       <CarModelPage
         model={modelData as any}
         initialVariants={modelData.variants}
+        initialVideos={youtubeData}
         newsSlot={<BrandNews brandSlug={modelData.slug} brandName={modelData.name} />}
       />
       <FloatingAIBot type="model" id={modelData.id} name={modelData.name} />

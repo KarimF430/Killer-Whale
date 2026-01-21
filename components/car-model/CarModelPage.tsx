@@ -21,7 +21,7 @@ import ImageGalleryModal from '../common/ImageGalleryModal'
 // Lazy-load heavy components for faster initial page load (CarWale-style optimization)
 const ModelYouTube = dynamic(() => import('./ModelYouTube'), {
   loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />,
-  ssr: false
+  ssr: true
 })
 const ModelFAQ = dynamic(() => import('./ModelFAQ'), {
   loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />,
@@ -125,6 +125,7 @@ interface ModelData {
 interface CarModelPageProps {
   model: ModelData
   initialVariants?: any[] // ✅ Server-rendered variants for AllVariantsClient
+  initialVideos?: any // ✅ Server-rendered videos
   newsSlot?: React.ReactNode
 }
 
@@ -278,7 +279,7 @@ const navigationSections = [
   { id: 'reviews', label: 'Reviews' }
 ]
 
-export default function CarModelPage({ model, initialVariants = [], newsSlot }: CarModelPageProps) {
+export default function CarModelPage({ model, initialVariants = [], initialVideos, newsSlot }: CarModelPageProps) {
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState('All')
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
@@ -2481,7 +2482,11 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
             <Ad3DCarousel className="mb-6" />
 
             {/* Model Videos Section */}
-            <ModelYouTube brandName={model?.brand || ''} modelName={model?.name || ''} />
+            <ModelYouTube
+              brandName={model?.brand || ''}
+              modelName={model?.name || ''}
+              initialData={initialVideos}
+            />
           </div>
         </PageSection>
 
