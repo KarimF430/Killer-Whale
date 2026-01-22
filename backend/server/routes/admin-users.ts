@@ -1,7 +1,12 @@
 import express, { Router } from 'express';
 import { User } from '../db/schemas';
+import { authenticateToken, authorizeRole } from '../auth';
 
 const router = Router();
+
+// Apply authentication and admin authorization to all admin user routes
+router.use(authenticateToken);
+router.use(authorizeRole('admin', 'super_admin'));
 
 /**
  * Export Users as CSV

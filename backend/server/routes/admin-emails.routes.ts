@@ -1,13 +1,15 @@
 import { Router } from 'express';
 import { emailScheduler } from '../services/email-scheduler.service';
 import { User } from '../db/schemas';
+import { authenticateToken } from '../auth';
 
 const router = Router();
 
 /**
  * Admin routes for email management
- * TODO: Add authentication middleware to protect these routes
  */
+router.use(authenticateToken);
+router.use(authorizeRole('admin', 'super_admin'));
 
 /**
  * Manually trigger weekly digest for all users or specific user
