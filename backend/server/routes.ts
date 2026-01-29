@@ -1422,7 +1422,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
 
       // Optimized search with regex (case-insensitive)
-      // SECURITY: Escape special characters and handle whitespace to prevent regex injection and ReDoS
+      // SECURITY: Sanitize query to prevent regex injection and ReDoS
       const sanitizedQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       if (!sanitizedQuery) {
         return res.json({ results: [], count: 0, took: 0, source: 'none' });
