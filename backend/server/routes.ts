@@ -1422,9 +1422,12 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
 
       // Optimized search with regex (case-insensitive)
-      // SECURITY: Escape special characters to prevent regex injection
-      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const searchRegex = new RegExp(escapedQuery.split(' ').join('.*'), 'i');
+      // SECURITY: Escape special characters and handle whitespace to prevent regex injection and ReDoS
+      const sanitizedQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (!sanitizedQuery) {
+        return res.json({ results: [], count: 0, took: 0, source: 'none' });
+      }
+      const searchRegex = new RegExp(sanitizedQuery.split(/\s+/).join('.*'), 'i');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([

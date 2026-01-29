@@ -81,6 +81,7 @@ jspm_packages/
 .history/
 *.env.bak
 *.env.local
+cookies.txt
 
 # Output of 'npm pack'
 *.tgz
