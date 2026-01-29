@@ -31,7 +31,7 @@ const ModelFAQ = dynamic(() => import('./ModelFAQ'), {
 
 import ModelOwnerReviews from './ModelOwnerReviews'
 
-interface ModelData {
+export interface ModelData {
   isUpcomingCar?: boolean
   id: string
   slug: string

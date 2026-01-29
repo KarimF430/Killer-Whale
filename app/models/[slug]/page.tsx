@@ -1,4 +1,4 @@
-import CarModelPage from '@/components/car-model/CarModelPage'
+import CarModelPage, { ModelData } from '@/components/car-model/CarModelPage'
 import { notFound } from 'next/navigation'
 
 // Enable ISR with 1-hour revalidation for better performance
@@ -98,8 +98,8 @@ async function getModelData(slug: string) {
     const formatHighlightImages = (images: any[] | undefined) => {
       if (!images || !Array.isArray(images)) return []
       return images.map((img: any) => ({
-        url: formatImageUrl(img.url),
-        caption: img.caption || ''
+        url: formatImageUrl(img.url) || '',
+        caption: String(img.caption || '')
       })).filter((img: any) => img.url)
     }
 
@@ -107,8 +107,8 @@ async function getModelData(slug: string) {
     const formatColorImages = (images: any[] | undefined) => {
       if (!images || !Array.isArray(images)) return []
       return images.map((img: any) => ({
-        url: formatImageUrl(img.url),
-        caption: img.caption || ''
+        url: formatImageUrl(img.url) || '',
+        caption: String(img.caption || '')
       })).filter((img: any) => img.url)
     }
 
@@ -121,9 +121,10 @@ async function getModelData(slug: string) {
       colorImages: formatColorImages(detailedModelData?.colorImages)
     })
 
-    const enhancedModelData = {
+    const enhancedModelData: ModelData = {
       id: modelData.id,
       slug: modelData.slug,
+      brandSlug: brandData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       brand: modelData.brandName,
       name: modelData.name,
       heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : modelData.image),
