@@ -77,6 +77,11 @@ jspm_packages/
 # Optional REPL history
 .node_repl_history
 
+# Security: Sensitive backup and local history files
+.history/
+*.env.bak
+*.env.local
+
 # Output of 'npm pack'
 *.tgz
 
