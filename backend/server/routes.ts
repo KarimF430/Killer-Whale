@@ -1421,8 +1421,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      // Optimized search with regex (case-insensitive) - escape user input to prevent ReDoS
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(escapedQuery.split(' ').join('.*'), 'i');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
