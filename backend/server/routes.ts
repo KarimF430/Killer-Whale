@@ -1424,6 +1424,12 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       // Optimized search with regex (case-insensitive) - sanitize user input to prevent ReDoS
       const sanitizedQuery = sanitizeForRegExp(query);
+
+      // If query is empty after sanitization, return no results (prevents matching everything)
+      if (!sanitizedQuery) {
+        return res.json({ results: [], count: 0, took: 0, query, source: 'none' });
+      }
+
       // Use string-based regex pattern
       const searchRegexPattern = sanitizedQuery.replace(/\s+/g, '.*');
 

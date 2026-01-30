@@ -114,9 +114,10 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
                 brand = await Brand.findById(id)
             } else {
                 const searchName = id.replace(/^brand-/, '').replace(/-/g, ' ')
-                brand = await Brand.findOne({
-                    name: { $regex: sanitizeForRegExp(searchName), $options: 'i' }
-                })
+                const sanitized = sanitizeForRegExp(searchName)
+                brand = sanitized ? await Brand.findOne({
+                    name: { $regex: sanitized, $options: 'i' }
+                }) : null
             }
 
             if (!brand) {
@@ -141,7 +142,8 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
             // Fallback search if not found by ID
             if (!model) {
                 const searchName = id.replace(/-/g, ' ')
-                model = await Model.findOne({ name: { $regex: sanitizeForRegExp(searchName), $options: 'i' } })
+                const sanitized = sanitizeForRegExp(searchName)
+                model = sanitized ? await Model.findOne({ name: { $regex: sanitized, $options: 'i' } }) : null
             }
 
             if (!model) {
@@ -181,7 +183,8 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
             if (!variant) {
                 // Fallback search
                 const searchName = id.replace(/-/g, ' ')
-                variant = await Variant.findOne({ name: { $regex: sanitizeForRegExp(searchName), $options: 'i' } })
+                const sanitized = sanitizeForRegExp(searchName)
+                variant = sanitized ? await Variant.findOne({ name: { $regex: sanitized, $options: 'i' } }) : null
             }
 
             if (!variant) {
@@ -220,7 +223,8 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
 
             if (!variant) {
                 const searchName = id.replace(/-/g, ' ')
-                variant = await Variant.findOne({ name: { $regex: sanitizeForRegExp(searchName), $options: 'i' } })
+                const sanitized = sanitizeForRegExp(searchName)
+                variant = sanitized ? await Variant.findOne({ name: { $regex: sanitized, $options: 'i' } }) : null
             }
 
             if (variant) {
@@ -250,7 +254,8 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
                 }
                 if (!model) {
                     const searchName = id.replace(/-/g, ' ')
-                    model = await Model.findOne({ name: { $regex: sanitizeForRegExp(searchName), $options: 'i' } })
+                    const sanitized = sanitizeForRegExp(searchName)
+                    model = sanitized ? await Model.findOne({ name: { $regex: sanitized, $options: 'i' } }) : null
                 }
 
                 if (model) {

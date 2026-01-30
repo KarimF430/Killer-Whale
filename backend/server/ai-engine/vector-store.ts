@@ -515,11 +515,14 @@ export async function hybridCarSearch(
     // Build keyword query - exclude EV models if not an EV query
     const baseQuery: any = {
         status: 'active',
-        $or: keywords.flatMap(kw => [
-            { name: { $regex: kw, $options: 'i' } },
-            { summary: { $regex: kw, $options: 'i' } },
-            { pros: { $regex: kw, $options: 'i' } }
-        ])
+        $or: keywords.flatMap(kw => {
+            const escapedKw = escapeRegExp(kw);
+            return [
+                { name: { $regex: escapedKw, $options: 'i' } },
+                { summary: { $regex: escapedKw, $options: 'i' } },
+                { pros: { $regex: escapedKw, $options: 'i' } }
+            ];
+        })
     }
 
     // Exclude EV models if user didn't ask for EV
