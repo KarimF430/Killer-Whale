@@ -416,8 +416,9 @@ export async function exactNameSearch(
     // Build regex patterns for each car name
     const namePatterns = carNames.map(name => {
         const escapedName = escapeRegExp(name)
+        // Match name at start, end or surrounded by spaces
         return {
-            name: { $regex: new RegExp(`^${escapedName}$|^${escapedName}\\s|\\s${escapedName}$|\\s${escapedName}\\s`, 'i') }
+            name: { $regex: `(^|\\s)${escapedName}($|\\s)`, $options: 'i' }
         }
     })
 

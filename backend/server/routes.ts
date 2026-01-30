@@ -52,7 +52,7 @@ import adminEmailRoutes from "./routes/admin-emails.routes";
 import priceHistoryRoutes from "./routes/price-history.routes";
 import adminHumanizeRoutes from "./routes/admin-humanize";
 import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
-import { escapeRegExp } from "./utils/security";
+import { sanitizeForRegExp } from "./utils/security";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -1422,9 +1422,11 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Optimized search with regex (case-insensitive) - escape user input to prevent ReDoS
-      const escapedQuery = escapeRegExp(query);
-      const searchRegex = new RegExp(escapedQuery.split(' ').join('.*'), 'i');
+      // Optimized search with regex (case-insensitive) - sanitize user input to prevent ReDoS
+      const sanitizedQuery = sanitizeForRegExp(query);
+      // Use string-based regex with safe delimiters
+      const searchRegexPattern = sanitizedQuery.replace(/\s+/g, '.*');
+      const searchRegex = new RegExp(searchRegexPattern, 'i');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([

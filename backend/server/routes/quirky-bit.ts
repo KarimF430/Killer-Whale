@@ -3,7 +3,7 @@ import Groq from 'groq-sdk'
 import { Brand, Model, Variant } from '../db/schemas'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
-import { escapeRegExp } from '../utils/security'
+import { sanitizeForRegExp } from '../utils/security'
 
 const router = Router()
 
@@ -115,7 +115,7 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
             } else {
                 const searchName = id.replace(/^brand-/, '').replace(/-/g, ' ')
                 brand = await Brand.findOne({
-                    name: { $regex: new RegExp(escapeRegExp(searchName), 'i') }
+                    name: { $regex: sanitizeForRegExp(searchName), $options: 'i' }
                 })
             }
 
@@ -141,7 +141,7 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
             // Fallback search if not found by ID
             if (!model) {
                 const searchName = id.replace(/-/g, ' ')
-                model = await Model.findOne({ name: { $regex: new RegExp(escapeRegExp(searchName), 'i') } })
+                model = await Model.findOne({ name: { $regex: sanitizeForRegExp(searchName), $options: 'i' } })
             }
 
             if (!model) {
@@ -181,7 +181,7 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
             if (!variant) {
                 // Fallback search
                 const searchName = id.replace(/-/g, ' ')
-                variant = await Variant.findOne({ name: { $regex: new RegExp(escapeRegExp(searchName), 'i') } })
+                variant = await Variant.findOne({ name: { $regex: sanitizeForRegExp(searchName), $options: 'i' } })
             }
 
             if (!variant) {
@@ -220,7 +220,7 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
 
             if (!variant) {
                 const searchName = id.replace(/-/g, ' ')
-                variant = await Variant.findOne({ name: { $regex: new RegExp(escapeRegExp(searchName), 'i') } })
+                variant = await Variant.findOne({ name: { $regex: sanitizeForRegExp(searchName), $options: 'i' } })
             }
 
             if (variant) {
@@ -250,7 +250,7 @@ router.get('/:type/:id', async (req: Request, res: Response) => {
                 }
                 if (!model) {
                     const searchName = id.replace(/-/g, ' ')
-                    model = await Model.findOne({ name: { $regex: new RegExp(escapeRegExp(searchName), 'i') } })
+                    model = await Model.findOne({ name: { $regex: sanitizeForRegExp(searchName), $options: 'i' } })
                 }
 
                 if (model) {
