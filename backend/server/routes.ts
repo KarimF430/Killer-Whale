@@ -1424,16 +1424,15 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       // Optimized search with regex (case-insensitive) - sanitize user input to prevent ReDoS
       const sanitizedQuery = sanitizeForRegExp(query);
-      // Use string-based regex with safe delimiters
+      // Use string-based regex pattern
       const searchRegexPattern = sanitizedQuery.replace(/\s+/g, '.*');
-      const searchRegex = new RegExp(searchRegexPattern, 'i');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
         db.collection('models').find({
           $or: [
-            { name: searchRegex },
-            { brandId: searchRegex }
+            { name: { $regex: searchRegexPattern, $options: 'i' } },
+            { brandId: { $regex: searchRegexPattern, $options: 'i' } }
           ],
           status: 'active'
         }, {
