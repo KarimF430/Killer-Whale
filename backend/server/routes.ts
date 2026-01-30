@@ -52,6 +52,7 @@ import adminEmailRoutes from "./routes/admin-emails.routes";
 import priceHistoryRoutes from "./routes/price-history.routes";
 import adminHumanizeRoutes from "./routes/admin-humanize";
 import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
+import { escapeRegExp } from "./utils/security";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -1422,7 +1423,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
 
       // Optimized search with regex (case-insensitive) - escape user input to prevent ReDoS
-      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escapedQuery = escapeRegExp(query);
       const searchRegex = new RegExp(escapedQuery.split(' ').join('.*'), 'i');
 
       // Search in both models and brands collections
