@@ -9,6 +9,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   authenticateToken,
+  authorizeRole,
   isValidEmail,
   isStrongPassword,
   sanitizeUser,
@@ -52,6 +53,7 @@ import adminEmailRoutes from "./routes/admin-emails.routes";
 import priceHistoryRoutes from "./routes/price-history.routes";
 import adminHumanizeRoutes from "./routes/admin-humanize";
 import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
+import { escapeRegExp } from "./utils/security";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -1423,15 +1425,15 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      // Optimized search with string-based regex (case-insensitive) to prevent ReDoS
+      const searchPattern = query.split(' ').map(s => escapeRegExp(s)).join('.*');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
         db.collection('models').find({
           $or: [
-            { name: searchRegex },
-            { brandId: searchRegex }
+            { name: { $regex: searchPattern, $options: 'i' } },
+            { brandId: { $regex: searchPattern, $options: 'i' } }
           ],
           status: 'active'
         }, {
@@ -2537,11 +2539,10 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       res.status(201).json(variant);
     } catch (error) {
       console.error('❌ Variant creation error:', error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message, stack: error.stack });
-      } else {
-        res.status(400).json({ error: "Invalid variant data" });
-      }
+      res.status(400).json({
+        error: "Invalid variant data",
+        message: error instanceof Error ? error.message : "An unexpected error occurred"
+      });
     }
   });
 
@@ -2805,20 +2806,20 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
 
   // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
-  app.use('/api/admin/articles', adminArticlesRoutes);
-  app.use('/api/admin/categories', adminCategoriesRoutes);
-  app.use('/api/admin/tags', adminTagsRoutes);
-  app.use('/api/admin/authors', adminAuthorsRoutes);
-  app.use('/api/admin/media', adminMediaRoutes);
-  app.use('/api/admin/reviews', adminReviewsRoutes);
-  app.use('/api/admin/emails', adminEmailRoutes);
+  app.use('/api/admin/articles', authenticateToken, authorizeRole('admin', 'super_admin'), adminArticlesRoutes);
+  app.use('/api/admin/categories', authenticateToken, authorizeRole('admin', 'super_admin'), adminCategoriesRoutes);
+  app.use('/api/admin/tags', authenticateToken, authorizeRole('admin', 'super_admin'), adminTagsRoutes);
+  app.use('/api/admin/authors', authenticateToken, authorizeRole('admin', 'super_admin'), adminAuthorsRoutes);
+  app.use('/api/admin/media', authenticateToken, authorizeRole('admin', 'super_admin'), adminMediaRoutes);
+  app.use('/api/admin/reviews', authenticateToken, authorizeRole('admin', 'super_admin'), adminReviewsRoutes);
+  app.use('/api/admin/emails', authenticateToken, authorizeRole('admin', 'super_admin'), adminEmailRoutes);
 
   // Price history routes (public)
   app.use('/api/price-history', publicLimiter, priceHistoryRoutes);
 
   // Public reviews routes
   app.use('/api/reviews', publicLimiter, reviewsRoutes);
-  app.use('/api/admin/analytics', adminAnalyticsRoutes);
+  app.use('/api/admin/analytics', authenticateToken, authorizeRole('admin', 'super_admin'), adminAnalyticsRoutes);
 
   // Admin authentication routes (with rate limiting) - MUST come AFTER specific routes
   app.use('/api/admin', authLimiter, adminAuthRoutes);
@@ -2906,7 +2907,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Humanize AI Content Routes
-  app.use('/api/admin/humanize', adminHumanizeRoutes);
+  app.use('/api/admin/humanize', authenticateToken, authorizeRole('admin', 'super_admin'), adminHumanizeRoutes);
 }
 
 

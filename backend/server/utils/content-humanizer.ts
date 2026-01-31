@@ -162,27 +162,37 @@ function getRandomItem<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// Pre-compile combined regexes for better performance and to satisfy SonarCloud security requirements (no dynamic RegExp)
+const POSITIVE_WORDS = Object.keys(POSITIVE_REPLACEMENTS).sort((a, b) => b.length - a.length);
+const POSITIVE_COMBINED_REGEX = new RegExp(
+    `\\b(${POSITIVE_WORDS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`,
+    'gi'
+);
+
+const CASUAL_PHRASES = Object.keys(CASUAL_REPLACEMENTS).sort((a, b) => b.length - a.length);
+const CASUAL_COMBINED_REGEX = new RegExp(
+    `(${CASUAL_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`,
+    'g'
+);
+
 function neutralizePositiveLanguage(text: string): string {
-    let result = text;
-
-    for (const [positive, neutralOptions] of Object.entries(POSITIVE_REPLACEMENTS)) {
-        const regex = new RegExp(`\\b${positive}\\b`, 'gi');
-        result = result.replace(regex, () => getRandomItem(neutralOptions));
-    }
-
-    return result;
+    return text.replace(POSITIVE_COMBINED_REGEX, (matched) => {
+        const replacement = POSITIVE_REPLACEMENTS[matched.toLowerCase()];
+        return replacement ? getRandomItem(replacement) : matched;
+    });
 }
 
 function addContractions(text: string): string {
-    let result = text;
+    return text.replace(CASUAL_COMBINED_REGEX, (matched) => {
+        // Find the exact key (case-sensitive or normalized)
+        const key = Object.keys(CASUAL_REPLACEMENTS).find(k => k === matched) ||
+                    Object.keys(CASUAL_REPLACEMENTS).find(k => k.toLowerCase() === matched.toLowerCase());
 
-    for (const [formal, casualOptions] of Object.entries(CASUAL_REPLACEMENTS)) {
-        // Use case-sensitive replacement
-        const regex = new RegExp(formal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-        result = result.replace(regex, () => getRandomItem(casualOptions));
-    }
-
-    return result;
+        if (key) {
+            return getRandomItem(CASUAL_REPLACEMENTS[key]);
+        }
+        return matched;
+    });
 }
 
 function varySentenceStarters(text: string): string {

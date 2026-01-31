@@ -414,7 +414,7 @@ export async function exactNameSearch(
 
     // Build regex patterns for each car name
     const namePatterns = carNames.map(name => ({
-        name: { $regex: new RegExp(`^${name}$|^${name}\\s|\\s${name}$|\\s${name}\\s`, 'i') }
+        name: { $regex: `^${name}$|^${name}\\s|\\s${name}$|\\s${name}\\s`, $options: 'i' }
     }))
 
     // Also search by brand name

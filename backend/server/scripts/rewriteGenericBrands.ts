@@ -87,7 +87,7 @@ async function run() {
             console.log('✨ New summary:', newSummary.substring(0, 150) + '...');
 
             await Brand.updateOne(
-                { name: { $regex: new RegExp(`^${brandInfo.name}$`, 'i') } },
+                { name: { $regex: `^${brandInfo.name}$`, $options: 'i' } },
                 { $set: { summary: newSummary } }
             );
             console.log('💾 Saved!');

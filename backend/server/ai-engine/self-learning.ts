@@ -129,6 +129,19 @@ export function classifyQuery(query: string): string {
     return 'general'
 }
 
+// Pre-compiled regex for common car names to normalize
+const CAR_NAMES_PATTERN = new RegExp(
+    '\\b(' + [
+        'creta', 'seltos', 'nexon', 'brezza', 'venue', 'sonet', 'punch',
+        'swift', 'baleno', 'i20', 'altroz', 'tiago', 'glanza',
+        'city', 'verna', 'ciaz', 'amaze', 'dzire',
+        'xuv700', 'xuv400', 'hector', 'harrier', 'safari', 'thar',
+        'fortuner', 'innova', 'ertiga', 'carens', 'alcazar',
+        'hyundai', 'tata', 'maruti', 'mahindra', 'kia', 'honda', 'toyota', 'mg'
+    ].map(car => car.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
+    'gi'
+);
+
 /**
  * Extract normalized pattern from query
  * Removes specific car names and numbers to get generalizable pattern
@@ -136,20 +149,8 @@ export function classifyQuery(query: string): string {
 function extractPatternKey(query: string): string {
     let pattern = query.toLowerCase()
 
-    // Common car names to normalize
-    const carPatterns = [
-        'creta', 'seltos', 'nexon', 'brezza', 'venue', 'sonet', 'punch',
-        'swift', 'baleno', 'i20', 'altroz', 'tiago', 'glanza',
-        'city', 'verna', 'ciaz', 'amaze', 'dzire',
-        'xuv700', 'xuv400', 'hector', 'harrier', 'safari', 'thar',
-        'fortuner', 'innova', 'ertiga', 'carens', 'alcazar',
-        'hyundai', 'tata', 'maruti', 'mahindra', 'kia', 'honda', 'toyota', 'mg'
-    ]
-
-    // Replace car names with placeholder
-    for (const car of carPatterns) {
-        pattern = pattern.replace(new RegExp(`\\b${car}\\b`, 'gi'), '{CAR}')
-    }
+    // Replace car names with placeholder using pre-compiled regex to prevent ReDoS
+    pattern = pattern.replace(CAR_NAMES_PATTERN, '{CAR}')
 
     // Replace numbers and prices
     pattern = pattern.replace(/₹?\s*\d+\.?\d*\s*(lakh|lakhs|l|k|cr)?/gi, '{PRICE}')
