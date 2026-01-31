@@ -32,6 +32,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# SECURITY: Credentials and IDE history
+.history/
+*.env.bak
+*.env.local
+cookies.txt
+
 # IDE
 .vscode/
 .idea/
