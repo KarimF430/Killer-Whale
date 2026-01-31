@@ -11,6 +11,7 @@ import type { IStorage } from "./storage";
 import { createBackupService } from "./backup-service";
 import { newsStorage } from "./db/news-storage";
 import monitoringRoutes from "./routes/monitoring";
+import { authenticateToken, authorizeRole } from "./auth";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import { apiLimiter } from "./middleware/rateLimiter";
@@ -435,32 +436,33 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
       console.warn('⚠️  MongoDB backup sync initialization skipped:', error instanceof Error ? error.message : error);
     }
 
-    // Register backup sync routes
+    // Register backup sync routes (auth required)
     const backupSyncRoutes = (await import('./routes/backup-sync')).default;
-    app.use('/api/admin/backup', backupSyncRoutes);
-    console.log('✅ Backup sync routes registered at /api/admin/backup');
+    app.use('/api/admin/backup', authenticateToken, authorizeRole('admin', 'super_admin'), backupSyncRoutes);
+    console.log('✅ Backup sync routes registered at /api/admin/backup (protected)');
 
-    // Register monitoring routes (no auth required)
+    // Register monitoring routes (no auth required for health checks)
     app.use('/api/monitoring', monitoringRoutes);
 
-    // Register cache management routes
+    // Register cache management routes (auth required)
     const cacheRoutes = (await import('./routes/cache')).default;
-    app.use('/api/cache', cacheRoutes);
+    app.use('/api/cache', authenticateToken, authorizeRole('admin', 'super_admin'), cacheRoutes);
+    console.log('✅ Cache routes registered at /api/cache (protected)');
 
     // Register user authentication routes (public)
     const userAuthRoutes = (await import('./routes/user-auth')).default;
     app.use('/api/user', userAuthRoutes);
     console.log('✅ User authentication routes registered at /api/user');
 
-    // Register admin user management routes
+    // Register admin user management routes (auth required)
     const adminUsersRoutes = (await import('./routes/admin-users')).default;
-    app.use('/api/admin/users', adminUsersRoutes);
-    console.log('✅ Admin users routes registered at /api/admin/users');
+    app.use('/api/admin/users', authenticateToken, authorizeRole('admin', 'super_admin'), adminUsersRoutes);
+    console.log('✅ Admin users routes registered at /api/admin/users (protected)');
 
-    // Register diagnostics route
+    // Register diagnostics route (auth required)
     const diagnosticsRoutes = (await import('./routes/diagnostics')).default;
-    app.use('/api/diagnostics', diagnosticsRoutes);
-    console.log('✅ Diagnostics routes registered at /api/diagnostics');
+    app.use('/api/diagnostics', authenticateToken, authorizeRole('admin', 'super_admin'), diagnosticsRoutes);
+    console.log('✅ Diagnostics routes registered at /api/diagnostics (protected)');
 
     // Register recommendations routes (personalized car suggestions)
     const recommendationsRoutes = (await import('./routes/recommendations')).default;
