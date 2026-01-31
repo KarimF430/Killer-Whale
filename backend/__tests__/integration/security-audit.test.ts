@@ -14,6 +14,14 @@ jest.mock('../../server/routes/admin-media', () => {
     }
 })
 
+// Mock search index to avoid async leaks during tests
+jest.mock('../../server/services/search-index', () => ({
+    buildSearchIndex: jest.fn(),
+    searchFromIndex: jest.fn(),
+    invalidateSearchIndex: jest.fn(),
+    getSearchIndexStats: jest.fn()
+}))
+
 // Mock storage interface
 const mockStorage = {
     getVariants: jest.fn().mockResolvedValue([]),

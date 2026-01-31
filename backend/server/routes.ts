@@ -1380,11 +1380,13 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
   // ZERO-DB SEARCH API - Uses Redis/Memory index, no MongoDB queries
   // Build search index on startup (called after routes are registered)
-  setTimeout(() => {
-    buildSearchIndex().catch(err =>
-      console.error('❌ Failed to build initial search index:', err)
-    );
-  }, 5000); // Wait 5s for DB connection
+  if (process.env.NODE_ENV !== 'test') {
+    setTimeout(() => {
+      buildSearchIndex().catch(err =>
+        console.error('❌ Failed to build initial search index:', err)
+      );
+    }, 5000); // Wait 5s for DB connection
+  }
 
   app.get("/api/search", publicLimiter, async (req, res) => {
     try {
