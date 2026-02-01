@@ -9,6 +9,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   authenticateToken,
+  authorizeRole,
   isValidEmail,
   isStrongPassword,
   sanitizeUser,
@@ -2509,7 +2510,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(variant);
   });
 
-  app.post("/api/variants", async (req, res) => {
+  app.post("/api/variants", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
 
@@ -2536,14 +2537,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('❌ Variant creation error:', error);
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message, stack: error.stack });
+        res.status(400).json({ error: error.message });
       } else {
         res.status(400).json({ error: "Invalid variant data" });
       }
     }
   });
 
-  app.patch("/api/variants/:id", async (req, res) => {
+  app.patch("/api/variants/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2599,7 +2600,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/variants/:id", async (req, res) => {
+  app.delete("/api/variants/:id", authenticateToken, modifyLimiter, async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
 
@@ -2763,7 +2764,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.post("/api/popular-comparisons", async (req, res) => {
+  app.post("/api/popular-comparisons", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       const comparisons = req.body;
 
@@ -2803,20 +2804,20 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
 
   // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
-  app.use('/api/admin/articles', adminArticlesRoutes);
-  app.use('/api/admin/categories', adminCategoriesRoutes);
-  app.use('/api/admin/tags', adminTagsRoutes);
-  app.use('/api/admin/authors', adminAuthorsRoutes);
-  app.use('/api/admin/media', adminMediaRoutes);
-  app.use('/api/admin/reviews', adminReviewsRoutes);
-  app.use('/api/admin/emails', adminEmailRoutes);
+  app.use('/api/admin/articles', authenticateToken, authorizeRole('admin', 'super_admin'), adminArticlesRoutes);
+  app.use('/api/admin/categories', authenticateToken, authorizeRole('admin', 'super_admin'), adminCategoriesRoutes);
+  app.use('/api/admin/tags', authenticateToken, authorizeRole('admin', 'super_admin'), adminTagsRoutes);
+  app.use('/api/admin/authors', authenticateToken, authorizeRole('admin', 'super_admin'), adminAuthorsRoutes);
+  app.use('/api/admin/media', authenticateToken, authorizeRole('admin', 'super_admin'), adminMediaRoutes);
+  app.use('/api/admin/reviews', authenticateToken, authorizeRole('admin', 'super_admin'), adminReviewsRoutes);
+  app.use('/api/admin/emails', authenticateToken, authorizeRole('admin', 'super_admin'), adminEmailRoutes);
 
   // Price history routes (public)
   app.use('/api/price-history', publicLimiter, priceHistoryRoutes);
 
   // Public reviews routes
   app.use('/api/reviews', publicLimiter, reviewsRoutes);
-  app.use('/api/admin/analytics', adminAnalyticsRoutes);
+  app.use('/api/admin/analytics', authenticateToken, authorizeRole('admin', 'super_admin'), adminAnalyticsRoutes);
 
   // Admin authentication routes (with rate limiting) - MUST come AFTER specific routes
   app.use('/api/admin', authLimiter, adminAuthRoutes);
@@ -2904,7 +2905,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Humanize AI Content Routes
-  app.use('/api/admin/humanize', adminHumanizeRoutes);
+  app.use('/api/admin/humanize', authenticateToken, authorizeRole('admin', 'super_admin'), adminHumanizeRoutes);
 }
 
 
