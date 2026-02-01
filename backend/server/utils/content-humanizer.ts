@@ -162,12 +162,22 @@ function getRandomItem<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// Pre-compiled regexes for performance and security
+const POSITIVE_REGEXES = Object.keys(POSITIVE_REPLACEMENTS).map(word => ({
+    word,
+    regex: new RegExp(`\\b${word}\\b`, 'gi')
+}));
+
+const CASUAL_REGEXES = Object.keys(CASUAL_REPLACEMENTS).map(phrase => ({
+    phrase,
+    regex: new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
+}));
+
 function neutralizePositiveLanguage(text: string): string {
     let result = text;
 
-    for (const [positive, neutralOptions] of Object.entries(POSITIVE_REPLACEMENTS)) {
-        const regex = new RegExp(`\\b${positive}\\b`, 'gi');
-        result = result.replace(regex, () => getRandomItem(neutralOptions));
+    for (const { regex, word } of POSITIVE_REGEXES) {
+        result = result.replace(regex, () => getRandomItem(POSITIVE_REPLACEMENTS[word]));
     }
 
     return result;
@@ -176,10 +186,8 @@ function neutralizePositiveLanguage(text: string): string {
 function addContractions(text: string): string {
     let result = text;
 
-    for (const [formal, casualOptions] of Object.entries(CASUAL_REPLACEMENTS)) {
-        // Use case-sensitive replacement
-        const regex = new RegExp(formal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-        result = result.replace(regex, () => getRandomItem(casualOptions));
+    for (const { regex, phrase } of CASUAL_REGEXES) {
+        result = result.replace(regex, () => getRandomItem(CASUAL_REPLACEMENTS[phrase]));
     }
 
     return result;

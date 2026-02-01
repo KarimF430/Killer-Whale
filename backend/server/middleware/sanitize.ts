@@ -13,15 +13,12 @@ function sanitizeString(input: string): string {
   if (typeof input !== 'string') return input;
   
   return input
-    // Remove script tags and content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    // Remove event handlers
-    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-    .replace(/on\w+\s*=\s*[^\s>]*/gi, '')
-    // Remove javascript: protocol
-    .replace(/javascript:/gi, '')
-    // Remove data: protocol (can be used for XSS)
-    .replace(/data:text\/html/gi, '')
+    // SECURITY: Use more restrictive, ReDoS-safe patterns for script tag removal
+    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
+    // Remove common event handlers
+    .replace(/\bon\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi, '')
+    // Remove dangerous protocols
+    .replace(/(javascript|data|vbscript):/gi, '')
     // Trim whitespace
     .trim();
 }
