@@ -5,7 +5,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { registerRoutes } from "./routes";
-import { authenticateToken, authorizeRole } from "./auth";
 import { setupVite, serveStatic, log } from "./vite";
 import { MongoDBStorage } from "./db/mongodb-storage";
 import type { IStorage } from "./storage";
@@ -438,7 +437,7 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
 
     // Register backup sync routes
     const backupSyncRoutes = (await import('./routes/backup-sync')).default;
-    app.use('/api/admin/backup', authenticateToken, authorizeRole('admin', 'super_admin'), backupSyncRoutes);
+    app.use('/api/admin/backup', backupSyncRoutes);
     console.log('✅ Backup sync routes registered at /api/admin/backup');
 
     // Register monitoring routes (no auth required)
@@ -446,7 +445,7 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
 
     // Register cache management routes
     const cacheRoutes = (await import('./routes/cache')).default;
-    app.use('/api/cache', authenticateToken, authorizeRole('admin', 'super_admin'), cacheRoutes);
+    app.use('/api/cache', cacheRoutes);
 
     // Register user authentication routes (public)
     const userAuthRoutes = (await import('./routes/user-auth')).default;
@@ -455,12 +454,12 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
 
     // Register admin user management routes
     const adminUsersRoutes = (await import('./routes/admin-users')).default;
-    app.use('/api/admin/users', authenticateToken, authorizeRole('admin', 'super_admin'), adminUsersRoutes);
+    app.use('/api/admin/users', adminUsersRoutes);
     console.log('✅ Admin users routes registered at /api/admin/users');
 
     // Register diagnostics route
     const diagnosticsRoutes = (await import('./routes/diagnostics')).default;
-    app.use('/api/diagnostics', authenticateToken, authorizeRole('admin', 'super_admin'), diagnosticsRoutes);
+    app.use('/api/diagnostics', diagnosticsRoutes);
     console.log('✅ Diagnostics routes registered at /api/diagnostics');
 
     // Register recommendations routes (personalized car suggestions)

@@ -9,7 +9,6 @@ import {
   generateAccessToken,
   generateRefreshToken,
   authenticateToken,
-  authorizeRole,
   isValidEmail,
   isStrongPassword,
   sanitizeUser,
@@ -53,7 +52,7 @@ import adminEmailRoutes from "./routes/admin-emails.routes";
 import priceHistoryRoutes from "./routes/price-history.routes";
 import adminHumanizeRoutes from "./routes/admin-humanize";
 import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
-import { escapeRegExp, sanitizeForRegExp } from "./utils/security";
+import { escapeRegExp } from "./utils/security";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -376,7 +375,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Bulk import brands endpoint - with strict bulk rate limiting + IP whitelist
-  app.post("/api/bulk/brands", ipWhitelist, bulkLimiter, authenticateToken, authorizeRole('admin', 'super_admin'), async (req: Request, res: Response) => {
+  app.post("/api/bulk/brands", ipWhitelist, bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
     try {
       console.log('📦 Starting bulk brand import...');
       const { brands } = req.body;
@@ -419,7 +418,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Bulk import variants endpoint - with strict bulk rate limiting + IP whitelist
-  app.post("/api/bulk/variants", ipWhitelist, bulkLimiter, authenticateToken, authorizeRole('admin', 'super_admin'), async (req: Request, res: Response) => {
+  app.post("/api/bulk/variants", ipWhitelist, bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
     try {
       console.log('📦 Starting bulk variant import...');
       const { variants } = req.body;
@@ -461,7 +460,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Bulk import models endpoint - with strict bulk rate limiting + IP whitelist
-  app.post("/api/bulk/models", ipWhitelist, bulkLimiter, authenticateToken, authorizeRole('admin', 'super_admin'), async (req: Request, res: Response) => {
+  app.post("/api/bulk/models", ipWhitelist, bulkLimiter, authenticateToken, async (req: Request, res: Response) => {
     try {
       console.log('📦 Starting bulk model import...');
       const { models } = req.body;
@@ -504,7 +503,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Clear models only endpoint
-  app.post("/api/cleanup/clear-models", ipWhitelist, authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req: Request, res: Response) => {
+  app.post("/api/cleanup/clear-models", ipWhitelist, authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting models cleanup...');
 
@@ -539,7 +538,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Clear all data endpoint
-  app.post("/api/cleanup/clear-all", ipWhitelist, authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req: Request, res: Response) => {
+  app.post("/api/cleanup/clear-all", ipWhitelist, authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting complete database cleanup...');
 
@@ -585,7 +584,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Cleanup orphaned data endpoint
-  app.post("/api/cleanup/orphaned-data", ipWhitelist, authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req: Request, res: Response) => {
+  app.post("/api/cleanup/orphaned-data", ipWhitelist, authenticateToken, modifyLimiter, async (req: Request, res: Response) => {
     try {
       console.log('🧹 Starting orphaned data cleanup...');
 
@@ -746,7 +745,6 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   // File upload endpoint for logos with WebP conversion and R2 support
   app.post("/api/upload/logo",
     authenticateToken,
-    authorizeRole('admin', 'super_admin'),
     modifyLimiter,
     upload.single('logo'),
     validateFileUpload,
@@ -877,7 +875,6 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   // Generic image upload endpoint for model images with WebP conversion and R2 support
   app.post("/api/upload/image",
     authenticateToken,
-    authorizeRole('admin', 'super_admin'),
     modifyLimiter,
     upload.single('image'),
     validateFileUpload,
@@ -981,7 +978,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.use('/uploads', express.static(uploadDir));
 
   // Presigned upload (R2/S3) - secure direct uploads
-  app.post('/api/uploads/presign', authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
+  app.post('/api/uploads/presign', authenticateToken, modifyLimiter, async (req, res) => {
     try {
       const { filename, contentType } = req.body as { filename?: string; contentType?: string };
       if (!filename || !contentType) {
@@ -1028,7 +1025,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Delete object from R2/S3
-  app.delete('/api/uploads/object', authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
+  app.delete('/api/uploads/object', authenticateToken, modifyLimiter, async (req, res) => {
     try {
       const { key, url } = req.body as { key?: string; url?: string };
       if (!key && !url) {
@@ -1141,7 +1138,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     });
   });
 
-  app.post("/api/brands", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.post("/api/brands", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('Received brand data:', JSON.stringify(req.body, null, 2));
       const validatedData = insertBrandSchema.parse(req.body);
@@ -1166,7 +1163,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.patch("/api/brands/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.patch("/api/brands/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       const brandId = req.params.id;
       const updateData = req.body;
@@ -1228,7 +1225,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/brands/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
+  app.delete("/api/brands/:id", authenticateToken, modifyLimiter, async (req, res) => {
     try {
       console.log(`🗑️ DELETE request for brand: ${req.params.id}`);
       const success = await storage.deleteBrand(req.params.id);
@@ -1425,9 +1422,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Optimized search with regex (case-insensitive)
-      // SECURITY: Sanitize each word to prevent Regex Injection (ReDoS)
-      const searchRegex = new RegExp(query.split(' ').map(escapeRegExp).join('.*'), 'i');
+      // Optimized search with regex (case-insensitive) - Sanitized to prevent ReDoS
+      const sanitizedQuery = escapeRegExp(query);
+      const searchRegex = new RegExp(sanitizedQuery.split(' ').join('.*'), 'i');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
@@ -1929,7 +1926,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   );
 
-  app.post("/api/models", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.post("/api/models", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('Received model data:', JSON.stringify(req.body, null, 2));
       const validatedData = insertModelSchema.parse(req.body);
@@ -1974,7 +1971,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // PUT route for model updates (used by progressive saving)
-  app.put("/api/models/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.put("/api/models/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 PUT - Updating model:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2001,7 +1998,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.patch("/api/models/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.patch("/api/models/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 PATCH - Updating model:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2037,7 +2034,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/models/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
+  app.delete("/api/models/:id", authenticateToken, modifyLimiter, async (req, res) => {
     try {
       console.log(`🗑️ DELETE request for model: ${req.params.id}`);
       const success = await storage.deleteModel(req.params.id);
@@ -2093,7 +2090,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   );
 
   // Create upcoming car (authenticated)
-  app.post("/api/upcoming-cars", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.post("/api/upcoming-cars", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('Received upcoming car data:', JSON.stringify(req.body, null, 2));
       const { insertUpcomingCarSchema } = await import('./validation/schemas');
@@ -2117,7 +2114,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // PUT route for upcoming car updates (used by progressive saving)
-  app.put("/api/upcoming-cars/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.put("/api/upcoming-cars/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 PUT - Updating upcoming car:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2141,7 +2138,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // PATCH route for partial upcoming car updates
-  app.patch("/api/upcoming-cars/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.patch("/api/upcoming-cars/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 PATCH - Updating upcoming car:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2165,7 +2162,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Delete upcoming car (authenticated)
-  app.delete("/api/upcoming-cars/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
+  app.delete("/api/upcoming-cars/:id", authenticateToken, modifyLimiter, async (req, res) => {
     try {
       console.log(`🗑️ DELETE request for upcoming car: ${req.params.id}`);
       const success = await storage.deleteUpcomingCar(req.params.id);
@@ -2514,7 +2511,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(variant);
   });
 
-  app.post("/api/variants", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.post("/api/variants", async (req, res) => {
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
 
@@ -2541,14 +2538,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('❌ Variant creation error:', error);
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: error.message, stack: error.stack });
       } else {
         res.status(400).json({ error: "Invalid variant data" });
       }
     }
   });
 
-  app.patch("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.patch("/api/variants/:id", async (req, res) => {
     try {
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2604,7 +2601,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
+  app.delete("/api/variants/:id", async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
 
@@ -2768,7 +2765,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.post("/api/popular-comparisons", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
+  app.post("/api/popular-comparisons", async (req, res) => {
     try {
       const comparisons = req.body;
 
@@ -2808,20 +2805,20 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
 
   // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
-  app.use('/api/admin/articles', authenticateToken, authorizeRole('admin', 'super_admin'), adminArticlesRoutes);
-  app.use('/api/admin/categories', authenticateToken, authorizeRole('admin', 'super_admin'), adminCategoriesRoutes);
-  app.use('/api/admin/tags', authenticateToken, authorizeRole('admin', 'super_admin'), adminTagsRoutes);
-  app.use('/api/admin/authors', authenticateToken, authorizeRole('admin', 'super_admin'), adminAuthorsRoutes);
-  app.use('/api/admin/media', authenticateToken, authorizeRole('admin', 'super_admin'), adminMediaRoutes);
-  app.use('/api/admin/reviews', authenticateToken, authorizeRole('admin', 'super_admin'), adminReviewsRoutes);
-  app.use('/api/admin/emails', authenticateToken, authorizeRole('admin', 'super_admin'), adminEmailRoutes);
+  app.use('/api/admin/articles', adminArticlesRoutes);
+  app.use('/api/admin/categories', adminCategoriesRoutes);
+  app.use('/api/admin/tags', adminTagsRoutes);
+  app.use('/api/admin/authors', adminAuthorsRoutes);
+  app.use('/api/admin/media', adminMediaRoutes);
+  app.use('/api/admin/reviews', adminReviewsRoutes);
+  app.use('/api/admin/emails', adminEmailRoutes);
 
   // Price history routes (public)
   app.use('/api/price-history', publicLimiter, priceHistoryRoutes);
 
   // Public reviews routes
   app.use('/api/reviews', publicLimiter, reviewsRoutes);
-  app.use('/api/admin/analytics', authenticateToken, authorizeRole('admin', 'super_admin'), adminAnalyticsRoutes);
+  app.use('/api/admin/analytics', adminAnalyticsRoutes);
 
   // Admin authentication routes (with rate limiting) - MUST come AFTER specific routes
   app.use('/api/admin', authLimiter, adminAuthRoutes);
@@ -2909,7 +2906,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Humanize AI Content Routes
-  app.use('/api/admin/humanize', authenticateToken, authorizeRole('admin', 'super_admin'), adminHumanizeRoutes);
+  app.use('/api/admin/humanize', adminHumanizeRoutes);
 }
 
 

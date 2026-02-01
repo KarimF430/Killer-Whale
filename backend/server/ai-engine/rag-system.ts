@@ -6,7 +6,6 @@
 import mongoose from 'mongoose'
 import { HfInference } from '@huggingface/inference'
 import { Variant, Model, Brand } from '../db/schemas'
-import { escapeRegExp } from '../utils/security'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 
@@ -43,8 +42,7 @@ export async function retrieveCarData(query: string, filters?: any): Promise<any
         }
 
         if (filters?.fuelType) {
-            // SECURITY: Sanitize user input for RegExp
-            searchQuery.fuelType = new RegExp(escapeRegExp(filters.fuelType), 'i')
+            searchQuery.fuelType = new RegExp(filters.fuelType, 'i')
         }
 
         const Car = mongoose.model('Car')
@@ -54,17 +52,14 @@ export async function retrieveCarData(query: string, filters?: any): Promise<any
         if (query && query.length > 2) {
             const brands = extractBrands(query)
             if (brands.length > 0) {
-                // brands are from a whitelist, so RegExp is safe here, but escaping for consistency
-                searchQuery.brandName = { $in: brands.map(b => new RegExp(escapeRegExp(b), 'i')) }
+                searchQuery.brandName = { $in: brands.map(b => new RegExp(b, 'i')) }
             }
 
             // Simple regex search on name/model if brand not found
             if (brands.length === 0) {
-                // SECURITY: Sanitize user input for RegExp
-                const safeQuery = escapeRegExp(query)
                 searchQuery.$or = [
-                    { modelName: new RegExp(safeQuery, 'i') },
-                    { name: new RegExp(safeQuery, 'i') }
+                    { modelName: new RegExp(query, 'i') },
+                    { name: new RegExp(query, 'i') }
                 ]
             }
         }
