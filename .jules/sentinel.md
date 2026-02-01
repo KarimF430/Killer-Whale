@@ -1,6 +1,11 @@
 # SENTINEL'S JOURNAL - CRITICAL SECURITY LEARNINGS
 
-## 2025-05-15 - [Regex Injection in AI/Search Systems]
-**Vulnerability:** User-controlled input was being passed directly into the `new RegExp()` constructor without sanitization. In a fuzzy search context (e.g., `query.split(' ').join('.*')`), this allowed attackers to inject regex meta-characters like `(a+)+$` which trigger catastrophic backtracking (ReDoS).
-**Learning:** Even simple search queries can be weaponized if they are dynamically converted to regular expressions. Standard `string.includes()` is safer, but if `RegExp` is required for fuzzy matching, escaping is mandatory.
-**Prevention:** Always use a centralized `escapeRegExp` utility before constructing dynamic patterns from user input. For MongoDB, prefer string-based `$regex` queries over `RegExp` objects where possible.
+## 2025-05-15 - [Regex Injection & ReDoS]
+**Vulnerability:** User-controlled input was being passed directly into `new RegExp()` and MongoDB `$regex` without sanitization. Also, a complex regex for script tag removal in `sanitizeString` was vulnerable to catastrophic backtracking (ReDoS).
+**Learning:** SonarCloud heavily flags dynamic regular expressions. Even when using MongoDB's `$regex`, it is safer to use string-based patterns with separate options and mandatory escaping of user-provided segments.
+**Prevention:** Use a robust escaping utility like `replace(/[.*+?^${}()|[\]\\]/g, '\\$&')` for any user input entering a regex. Simplify sanitization regexes to use non-greedy, non-overlapping matches like `[\s\S]*?`.
+
+## 2025-05-15 - [Information Leakage in Production]
+**Vulnerability:** Error responses in the `/api/variants` endpoint were returning `error.stack`, exposing internal system paths and logic to potential attackers.
+**Learning:** Stack traces should only be logged server-side and never returned to the client in production.
+**Prevention:** Explicitly remove `stack` properties from error objects before sending them in JSON responses.
