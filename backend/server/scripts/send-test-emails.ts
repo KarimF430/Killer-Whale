@@ -101,8 +101,7 @@ async function sendAllEmailsToUsers() {
             // 2. Send New Launch Alert (if sample model exists and has a price from variant)
             if (sampleModel && sampleVariant) {
                 try {
-                    try {
-                        const price = sampleVariant.price || 0;
+                    const price = sampleVariant.price || 0;
                         // brandName is already resolved correctly above
 
                         await sendEmail(
@@ -119,13 +118,13 @@ async function sendAllEmailsToUsers() {
                         );
                         console.log('  ✅ New Launch Alert sent');
                         sentCount++;
-                    } catch (error: any) {
-                        console.log(`  ❌ New Launch Alert failed: ${error.message}`);
-                        errorCount++;
-                    }
-
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                } catch (error: any) {
+                    console.log(`  ❌ New Launch Alert failed: ${error.message}`);
+                    errorCount++;
                 }
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
 
             // 3. Send Price Drop Alert (if sample variant exists)
             if (sampleVariant && sampleModel) {

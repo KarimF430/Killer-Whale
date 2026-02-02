@@ -1224,7 +1224,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/brands/:id", authenticateToken, modifyLimiter, async (req, res) => {
+  app.delete("/api/brands/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log(`🗑️ DELETE request for brand: ${req.params.id}`);
       const success = await storage.deleteBrand(req.params.id);
