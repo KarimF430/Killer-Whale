@@ -6,13 +6,11 @@ import cookieParser from 'cookie-parser'
 import { registerRoutes } from '../../server/routes'
 
 // Mock admin-media to avoid import.meta.url errors
-jest.mock('../../server/routes/admin-media', () => {
-    const express = require('express')
-    return {
-        __esModule: true,
-        default: express.Router()
-    }
-})
+// Returning a simple middleware function to satisfy app.use()
+jest.mock('../../server/routes/admin-media', () => ({
+    __esModule: true,
+    default: (req: any, res: any, next: any) => next()
+}))
 
 // Mock storage interface
 const mockStorage = {
