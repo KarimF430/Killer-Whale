@@ -7,19 +7,10 @@ import { registerRoutes } from '../../server/routes'
 
 // Mock admin-media to avoid import.meta.url errors
 jest.mock('../../server/routes/admin-media', () => {
+    const express = require('express')
     return {
         __esModule: true,
-        default: {
-            stack: [],
-            params: {},
-            path: '',
-            get: () => { },
-            post: () => { },
-            put: () => { },
-            patch: () => { },
-            delete: () => { },
-            use: () => { }
-        }
+        default: express.Router()
     }
 })
 
