@@ -1423,15 +1423,21 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       // Optimized search with regex (case-insensitive)
       // Use string-based regex to avoid ReDoS and satisfy security gates
-      const searchPattern = query.split(' ').map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*');
+      const searchTerms = query.split(/\s+/).filter(Boolean);
+      const searchConditions = searchTerms.map(term => {
+        const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return {
+          $or: [
+            { name: { $regex: escaped, $options: 'i' } },
+            { brandId: { $regex: escaped, $options: 'i' } }
+          ]
+        };
+      });
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
         db.collection('models').find({
-          $or: [
-            { name: { $regex: searchPattern, $options: 'i' } },
-            { brandId: { $regex: searchPattern, $options: 'i' } }
-          ],
+          $and: searchConditions,
           status: 'active'
         }, {
           projection: {

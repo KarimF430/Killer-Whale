@@ -26,14 +26,18 @@ interface UserDoc {
 async function sendWeeklyDigest(user: UserDoc): Promise<boolean> {
     try {
         const recommendations = await getPersonalizedRecommendations(user.id);
-        const formattedRecs = Array.from(recommendations || []).map((rec: any) => ({
-            name: rec.name,
-            brand: rec.brandName,
-            price: `₹${(rec.price / 100000).toFixed(2)} Lakh`,
-            image: rec.heroImage || '',
-            url: `${process.env.FRONTEND_URL}/${rec.brandName?.toLowerCase().replace(/\s+/g, '-')}-cars/${rec.name?.toLowerCase().replace(/\s+/g, '-')}`,
-            matchReason: rec.matchReasons?.[0] || 'Recommended for you'
-        }));
+        const formattedRecs = Array.from(recommendations || []).map((rec: any) => {
+            const brandSlug = rec.brandName?.toLowerCase().replace(/\s+/g, '-') || 'unknown';
+            const modelSlug = rec.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown';
+            return {
+                name: rec.name,
+                brand: rec.brandName,
+                price: `₹${(rec.price / 100000).toFixed(2)} Lakh`,
+                image: rec.heroImage || '',
+                url: `${process.env.FRONTEND_URL}/${brandSlug}-cars/${modelSlug}`,
+                matchReason: rec.matchReasons?.[0] || 'Recommended for you'
+            };
+        });
 
         if (formattedRecs.length > 0) {
             await sendEmail(user.email, 'weeklyDigest', {
@@ -112,14 +116,16 @@ async function sendAllEmailsToUsers() {
         let sentCount = 0;
 
         for (const user of users) {
+            const userId = (user as any).id || (user as any)._id;
+            const userEmail = (user as any).email;
             const userDoc: UserDoc = {
-                id: (user as any).id || (user as any)._id,
-                email: (user as any).email,
+                id: userId,
+                email: userEmail,
                 firstName: (user as any).firstName,
                 name: (user as any).name
             };
 
-            console.log(`\n📨 Sending emails to: ${userDoc.email}`);
+            console.log(`\n📨 Sending emails to: ${userEmail}`);
 
             if (await sendWeeklyDigest(userDoc)) sentCount++;
             await new Promise(resolve => setTimeout(resolve, 500));
