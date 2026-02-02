@@ -267,18 +267,18 @@ describe('Auth API Integration Tests', () => {
     })
 
     describe('Security: Protected Routes', () => {
-        const protectedRoutes = [
+        const protectedRoutes: Array<{ method: string; path: string; data?: any }> = [
             { method: 'post', path: '/api/variants', data: {} },
             { method: 'patch', path: '/api/variants/123', data: {} },
             { method: 'delete', path: '/api/variants/123' },
             { method: 'post', path: '/api/popular-comparisons', data: [] },
             { method: 'delete', path: '/api/brands/123' },
-        ] as const;
+        ];
 
         protectedRoutes.forEach(({ method, path, data }) => {
             it(`should return 401 for ${method.toUpperCase()} ${path} without token`, async () => {
                 const req = (request(app) as any)[method](path);
-                if (data) req.send(data);
+                if (data !== undefined) req.send(data);
                 await req.expect(401);
             });
         });
