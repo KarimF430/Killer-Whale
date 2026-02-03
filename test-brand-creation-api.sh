@@ -18,9 +18,12 @@ echo ""
 
 # Step 1: Login
 echo -e "${YELLOW}Step 1: Logging in...${NC}"
+# SECURITY: Use environment variables for test credentials
+ADMIN_EMAIL="${ADMIN_EMAIL:-admin@motoroctane.com}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-Admin@123}"
 LOGIN_RESPONSE=$(curl -s -X POST http://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@motoroctane.com","password":"Admin@123"}')
+  -d "{\"email\":\"$ADMIN_EMAIL\",\"password\":\"$ADMIN_PASSWORD\"}")
 
 TOKEN=$(echo "$LOGIN_RESPONSE" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
 

@@ -40,7 +40,8 @@ declare global {
  * Hash password using bcrypt
  */
 export async function hashPassword(password: string): Promise<string> {
-  const salt = await bcrypt.genSalt(12);
+  // SECURITY: Increased from 12 to 14 rounds for better resistance against brute force
+  const salt = await bcrypt.genSalt(14);
   return bcrypt.hash(password, salt);
 }
 

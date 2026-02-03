@@ -77,6 +77,12 @@ jspm_packages/
 # Optional REPL history
 .node_repl_history
 
+# Local IDE and backup files
+.history/
+*.env.bak
+*.env.local
+cookies.txt
+
 # Output of 'npm pack'
 *.tgz
 

@@ -59,8 +59,9 @@ class Logger {
 
   error(message: string, error?: Error | LogContext): void {
     if (this.shouldLog('error')) {
+      // SECURITY: Don't leak stack traces in production console
       const errorData = error instanceof Error 
-        ? { message: error.message, stack: error.stack }
+        ? { message: error.message, stack: isProduction ? undefined : error.stack }
         : error
       
       console.error(this.formatMessage('error', message, errorData))
