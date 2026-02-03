@@ -1,16 +1,9 @@
-# Sentinel Journal
+## 2025-05-14 - [Critical Secret Leakage in IDE History]
+**Vulnerability:** Numerous `.env` files and configuration backups containing production MongoDB URIs, JWT secrets, Cloudflare R2 credentials, and Sentry DSNs were leaked within the `.history/` directory and `.env.bak` files.
+**Learning:** Local IDE history extensions (like VS Code's Local History) can automatically save copies of sensitive files, bypassing standard `.gitignore` rules if the history directory itself isn't explicitly ignored.
+**Prevention:** Proactively add `.history/`, `*.bak`, and other common temporary/backup patterns to the root `.gitignore` and perform regular audits of hidden directories.
 
-## 2025-11-27 - Hardened Admin Routes and Cleaned Leaked Secrets
-**Vulnerability:** Numerous administrative and data-modifying routes were public. Production credentials were leaked in Git history and backup files.
-**Learning:** Even if files are in .gitignore, they might have been committed previously. Always audit Git history for sensitive files like .env.bak.
-**Prevention:** Use pre-commit hooks to scan for secrets and ensure .gitignore blocks common backup patterns (*.bak, .history).
-
-## 2025-11-27 - Regex Injection (ReDoS) Mitigations
-**Vulnerability:** Dynamic RegExp constructors using user input in search and AI components.
-**Learning:** Using `new RegExp()` with unsanitized user input allows attackers to craft patterns that cause exponential backtracking, leading to Denial of Service.
-**Prevention:** Always escape user input using a utility like `escapeRegExp` or use string-based `$regex` operators in MongoDB queries which are generally safer against ReDoS.
-
-## 2025-11-27 - Weak OTP and predictable filenames
-**Vulnerability:** `Math.random()` was used for generating OTPs and unique suffixes for filenames.
-**Learning:** `Math.random()` is PRNG (Pseudo-Random Number Generator) and is predictable. It should never be used for security-sensitive values like OTPs.
-**Prevention:** Use `crypto.randomInt` for OTPs and `crypto.randomUUID` for unique identifiers to ensure cryptographic strength and unpredictability.
+## 2025-05-14 - [Regex Injection (ReDoS) in Search and AI Engines]
+**Vulnerability:** The application used `new RegExp()` with unsanitized user input in several critical paths, including the search endpoint and AI self-learning system, creating a risk of Denial of Service (ReDoS) via catastrophic backtracking.
+**Learning:** Even with basic escaping, dynamic regex constructors are a high-risk pattern. MongoDB's string-based `$regex` is a safer alternative for database queries as it offloads the safety to the database engine's optimized implementation.
+**Prevention:** Use a centralized `escapeRegExp` utility and prefer non-regex string operations or native database regex operators over the JavaScript `RegExp` constructor for user-provided strings.

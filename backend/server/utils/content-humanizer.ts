@@ -1,3 +1,5 @@
+import { escapeRegExp } from "./security";
+
 /**
  * Content Humanizer Utility
  * 
@@ -165,12 +167,12 @@ function getRandomItem<T>(arr: T[]): T {
 // Pre-compile regexes for performance and security
 const POSITIVE_REGEXES = Object.keys(POSITIVE_REPLACEMENTS).map(positive => ({
     positive,
-    regex: new RegExp(`\\b${positive}\\b`, 'gi')
+    regex: new RegExp(`\\b${escapeRegExp(positive)}\\b`, 'gi')
 }));
 
 const CASUAL_REGEXES = Object.keys(CASUAL_REPLACEMENTS).map(formal => ({
     formal,
-    regex: new RegExp(formal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
+    regex: new RegExp(escapeRegExp(formal), 'g')
 }));
 
 function neutralizePositiveLanguage(text: string): string {
