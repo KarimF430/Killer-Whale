@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { IStorage } from '../storage';
+import { authenticateToken, authorizeRole } from '../auth';
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
@@ -301,7 +302,7 @@ export default function createYouTubeRoutes(storage: IStorage): Router {
     });
 
     // Manual refresh endpoint (for production when Shell is not available)
-    router.post('/force-refresh', async (req, res) => {
+    router.post('/force-refresh', authenticateToken, authorizeRole('admin', 'super_admin'), async (req, res) => {
         try {
             console.log('🔄 Manual YouTube fetch triggered via API');
             const { fetchAndCacheYouTubeVideos } = await import('../scheduled-youtube-fetch');
@@ -321,7 +322,7 @@ export default function createYouTubeRoutes(storage: IStorage): Router {
     });
 
     // GET version for easy browser access
-    router.get('/force-refresh', async (req, res) => {
+    router.get('/force-refresh', authenticateToken, authorizeRole('admin', 'super_admin'), async (req, res) => {
         try {
             console.log('🔄 Manual YouTube fetch triggered via browser');
             const { fetchAndCacheYouTubeVideos } = await import('../scheduled-youtube-fetch');

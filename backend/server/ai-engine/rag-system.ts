@@ -8,6 +8,7 @@ import { HfInference } from '@huggingface/inference'
 import { Variant, Model, Brand } from '../db/schemas'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
+import { sanitizeForRegExp } from '../utils/security'
 
 const hf = new HfInference(process.env.HF_API_KEY)
 const MODEL_NAME = 'meta-llama/Meta-Llama-3.1-70B-Instruct'
@@ -42,7 +43,7 @@ export async function retrieveCarData(query: string, filters?: any): Promise<any
         }
 
         if (filters?.fuelType) {
-            searchQuery.fuelType = new RegExp(filters.fuelType, 'i')
+            searchQuery.fuelType = { $regex: sanitizeForRegExp(filters.fuelType), $options: 'i' }
         }
 
         const Car = mongoose.model('Car')
@@ -51,15 +52,16 @@ export async function retrieveCarData(query: string, filters?: any): Promise<any
         let cars = []
         if (query && query.length > 2) {
             const brands = extractBrands(query)
+            const sanitizedQuery = sanitizeForRegExp(query)
             if (brands.length > 0) {
-                searchQuery.brandName = { $in: brands.map(b => new RegExp(b, 'i')) }
+                searchQuery.brandName = { $in: brands.map(b => ({ $regex: sanitizeForRegExp(b), $options: 'i' })) }
             }
 
             // Simple regex search on name/model if brand not found
             if (brands.length === 0) {
                 searchQuery.$or = [
-                    { modelName: new RegExp(query, 'i') },
-                    { name: new RegExp(query, 'i') }
+                    { modelName: { $regex: sanitizedQuery, $options: 'i' } },
+                    { name: { $regex: sanitizedQuery, $options: 'i' } }
                 ]
             }
         }

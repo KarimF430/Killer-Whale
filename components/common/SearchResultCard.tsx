@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Star, Fuel, Users, ArrowRight, TrendingUp } from 'lucide-react'
 import { OptimizedImage } from '@/components/common/OptimizedImage'
+import { escapeRegExp } from '@/utils/security'
 
 interface SearchCarData {
   id: number
@@ -39,7 +40,7 @@ export default function SearchResultCard({ car, searchTerm, className = '' }: Se
   const highlightText = (text: string, term?: string) => {
     if (!term) return text
 
-    const regex = new RegExp(`(${term})`, 'gi')
+    const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi')
     const parts = text.split(regex)
 
     return parts.map((part, index) =>

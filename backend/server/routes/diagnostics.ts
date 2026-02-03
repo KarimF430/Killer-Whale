@@ -57,11 +57,11 @@ router.get('/', async (req, res) => {
         },
         session: {
             status: sessionStatus,
-            id: sessionID,
+            // SECURITY: Never expose session ID in diagnostics
             cookieConfig: req.session?.cookie,
             hasUser: !!(req.session as any)?.userId,
             userId: (req.session as any)?.userId || null,
-            userEmail: (req.session as any)?.userEmail || null
+            userEmail: (req.session as any)?.userEmail ? `${(req.session as any).userEmail.substring(0, 3)}***` : null
         },
         // We can't access `isProd` directly from index.ts but we can check the cookie property to guess
         actualCookieSettings: {
