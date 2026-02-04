@@ -1156,6 +1156,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('Brand creation error:', error);
       if (error instanceof Error) {
+        // SECURITY: Remove stack trace to prevent information leakage
         res.status(400).json({ error: error.message });
       } else {
         res.status(400).json({ error: "Invalid brand data" });
@@ -2537,7 +2538,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('❌ Variant creation error:', error);
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message, stack: error.stack });
+        // SECURITY: Remove stack trace to prevent information leakage
+        res.status(400).json({ error: error.message });
       } else {
         res.status(400).json({ error: "Invalid variant data" });
       }
