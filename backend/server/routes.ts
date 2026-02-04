@@ -9,6 +9,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   authenticateToken,
+  authorizeRole,
   isValidEmail,
   isStrongPassword,
   sanitizeUser,
@@ -2509,7 +2510,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(variant);
   });
 
-  app.post("/api/variants", async (req, res) => {
+  app.post("/api/variants", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
 
@@ -2543,7 +2544,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.patch("/api/variants/:id", async (req, res) => {
+  app.patch("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2599,7 +2600,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/variants/:id", async (req, res) => {
+  app.delete("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
 
@@ -2763,7 +2764,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.post("/api/popular-comparisons", async (req, res) => {
+  app.post("/api/popular-comparisons", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       const comparisons = req.body;
 
