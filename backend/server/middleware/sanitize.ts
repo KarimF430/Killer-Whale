@@ -14,7 +14,8 @@ function sanitizeString(input: string): string {
   
   return input
     // Remove script tags and content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // SECURITY: Use a non-recursive regex to avoid ReDoS
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
     // Remove event handlers
     .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
     .replace(/on\w+\s*=\s*[^\s>]*/gi, '')
