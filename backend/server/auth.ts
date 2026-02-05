@@ -37,10 +37,10 @@ declare global {
 }
 
 /**
- * Hash password using bcrypt
+ * Hash password using bcrypt with 14 rounds for enhanced security
  */
 export async function hashPassword(password: string): Promise<string> {
-  const salt = await bcrypt.genSalt(12);
+  const salt = await bcrypt.genSalt(14);
   return bcrypt.hash(password, salt);
 }
 
