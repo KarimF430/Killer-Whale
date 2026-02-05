@@ -9,6 +9,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   authenticateToken,
+  authorizeRole,
   isValidEmail,
   isStrongPassword,
   sanitizeUser,
@@ -1487,7 +1488,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Search index stats endpoint (for debugging)
-  app.get("/api/search/stats", async (req, res) => {
+  app.get("/api/search/stats", authenticateToken, authorizeRole('admin', 'super_admin'), async (req, res) => {
     const stats = getSearchIndexStats();
     res.json(stats);
   });
@@ -2509,7 +2510,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(variant);
   });
 
-  app.post("/api/variants", async (req, res) => {
+  app.post("/api/variants", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
 
@@ -2536,14 +2537,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('❌ Variant creation error:', error);
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message, stack: error.stack });
+        res.status(400).json({ error: error.message });
       } else {
         res.status(400).json({ error: "Invalid variant data" });
       }
     }
   });
 
-  app.patch("/api/variants/:id", async (req, res) => {
+  app.patch("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2599,7 +2600,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/variants/:id", async (req, res) => {
+  app.delete("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
 
@@ -2763,7 +2764,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.post("/api/popular-comparisons", async (req, res) => {
+  app.post("/api/popular-comparisons", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       const comparisons = req.body;
 
