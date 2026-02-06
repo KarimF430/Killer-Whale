@@ -69,6 +69,16 @@ export const metadata: Metadata = {
   verification: {
     google: 'LFtjPhYM1moenJzbsp_pbaHepFH24i14Qwf6h5Z5-as',
   },
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 }
 
 export default function RootLayout({
@@ -82,8 +92,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#dc2626" />
 
         {/* Preconnect to external domains for faster loading */}

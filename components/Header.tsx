@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Script from 'next/script'
 import { Search, Menu, X, MapPin, LogOut, User as UserIcon, ChevronDown, ChevronUp } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
@@ -138,33 +139,15 @@ export default function Header() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center group">
-              <div className="w-12 h-12 flex items-center justify-center relative">
-                <svg width="48" height="32" viewBox="0 0 600 350" fill="none" xmlns="http://www.w3.org/2000/svg" className="overflow-visible">
-                  <g transform={`translate(0, 20) ${isRevving ? 'translate(1, -1)' : ''}`}>
-                    {isRevving && (
-                      <g transform="translate(430, 250)">
-                        <circle cx="0" cy="0" r="20" fill="#9CA3AF" className="smoke-particle" style={{ animationDelay: '0s' }} />
-                        <circle cx="15" cy="8" r="15" fill="#D1D5DB" className="smoke-particle" style={{ animationDelay: '0.1s' }} />
-                        <circle cx="-8" cy="15" r="25" fill="#9CA3AF" className="smoke-particle" style={{ animationDelay: '0.2s' }} />
-                      </g>
-                    )}
-                    <path d="M60 250 L60 190 Q60 160 100 160 L160 150 L230 90 L450 90 L510 160 L520 190 L520 250 L480 250 Q480 195 430 195 Q380 195 380 250 L220 250 Q220 195 170 195 Q120 195 120 250 L60 250 Z" fill="#14B8A6" />
-                    <path d="M240 105 L440 105 L490 160 L260 160 Z" fill="#0D9488" opacity="0.3" />
-                    <path d="M230 110 L180 160 L250 160 L250 110 Z" fill="#0D9488" opacity="0.3" />
-                    <g className={isRevving ? "origin-[170px_250px] animate-[spin_0.1s_linear_infinite]" : ""}>
-                      <circle cx="170" cy="250" r="48" fill="black" stroke="white" strokeWidth="8" />
-                      <circle cx="170" cy="250" r="18" fill="#374151" />
-                      <rect x="150" y="248" width="40" height="4" fill="#374151" rx="2" className={isRevving ? "opacity-50" : "opacity-0"} />
-                      <rect x="168" y="230" width="4" height="40" fill="#374151" rx="2" className={isRevving ? "opacity-50" : "opacity-0"} />
-                    </g>
-                    <g className={isRevving ? "origin-[430px_250px] animate-[spin_0.1s_linear_infinite]" : ""}>
-                      <circle cx="430" cy="250" r="48" fill="black" stroke="white" strokeWidth="8" />
-                      <circle cx="430" cy="250" r="18" fill="#374151" />
-                      <rect x="410" y="248" width="40" height="4" fill="#374151" rx="2" className={isRevving ? "opacity-50" : "opacity-0"} />
-                      <rect x="428" y="230" width="4" height="40" fill="#374151" rx="2" className={isRevving ? "opacity-50" : "opacity-0"} />
-                    </g>
-                  </g>
-                </svg>
+              <div className="w-10 h-7 flex items-center justify-center relative mr-1 translate-y-[1px]">
+                <Image
+                  src="/IMG_0456.jpg"
+                  alt="Gadizone Logo"
+                  width={40}
+                  height={28}
+                  className="object-contain"
+                  priority
+                />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent group-hover:from-red-700 group-hover:to-orange-600 transition-all">gadizone</span>
             </Link>
