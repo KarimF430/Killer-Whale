@@ -2600,7 +2600,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, async (req, res) => {
+  app.delete("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
 
