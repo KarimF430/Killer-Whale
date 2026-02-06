@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, Plus, Share2, X, TrendingUp, TrendingDown, Award } from 'lucide-react'
+import { ChevronDown, Plus, Share2, X, TrendingUp, TrendingDown, Award, Landmark } from 'lucide-react'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 import Footer from '@/components/Footer'
 import PopularComparisons from '@/components/home/PopularComparisons'
