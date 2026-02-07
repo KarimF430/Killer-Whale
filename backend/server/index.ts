@@ -164,7 +164,8 @@ app.get('/uploads/*', (req, res, next) => {
     const absPath = path.normalize(path.join(process.cwd(), reqPath));
 
     // SECURITY: Ensure the normalized path still resides within the uploads directory
-    if (!absPath.startsWith(uploadsStaticPath)) {
+    // We add path.sep to prevent matching directories like "uploads_secret"
+    if (!absPath.startsWith(uploadsStaticPath + path.sep) && absPath !== uploadsStaticPath) {
       console.warn(`🚨 Security: Blocked potential path traversal attempt: ${reqPath}`);
       return res.status(403).json({ error: 'Access denied' });
     }
