@@ -12,6 +12,7 @@ import Ad3DCarousel from '../ads/Ad3DCarousel'
 import Footer from '../Footer'
 import VariantCard from '../car-model/VariantCard'
 import CarCard from '../home/CarCard'
+import ModelOwnerReviews from '../car-model/ModelOwnerReviews'
 
 
 // Helper function to format price in Indian numbering system
@@ -882,16 +883,81 @@ export default function PriceBreakupPage({
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              {modelName} Price in {selectedCity.split(',')[0]}
+              {brandName} {modelName} Price in {selectedCity.split(',')[0]}
             </h1>
             <div className="relative">
               <div className={`text-gray-600 leading-relaxed transition-all duration-300 ${!isTextExpanded ? 'line-clamp-2' : ''}`}>
-                <p>
-                  The on road price of the {modelName} in {selectedCity.split(',')[0]} ranges from Rs. {formatIndianPrice(priceBreakup ? priceBreakup.totalOnRoadPrice : (modelVariants[0]?.price || 0))} to Rs. {formatIndianPrice(Math.max(...(modelVariants.map(v => v.price) || [0])))}. The ex-showroom price is between Rs. {formatIndianPrice(Math.min(...(modelVariants.map(v => v.price) || [0])))} and Rs. {formatIndianPrice(Math.max(...(modelVariants.map(v => v.price) || [0])))}.
-                </p>
-                <p className="mt-2">
-                  {modelName} On-Road Price in {selectedCity.split(',')[0]} starts at ₹{((modelVariants[0]?.price || 0) / 100000).toFixed(2)} Lakh. Check RTO charges, insurance cost, and EMI options.
-                </p>
+                {/* Dynamic SEO Content based on variant data */}
+                {(() => {
+                  const cityName = selectedCity.split(',')[0]
+                  const minPrice = Math.min(...(modelVariants.map(v => v.price) || [0]))
+                  const maxPrice = Math.max(...(modelVariants.map(v => v.price) || [0]))
+                  const minPriceLakh = (minPrice / 100000).toFixed(2)
+                  const maxPriceLakh = (maxPrice / 100000).toFixed(2)
+                  const totalVariants = modelVariants.length
+
+                  // Get fuel-wise pricing data
+                  const petrolVariants = modelVariants.filter(v => v.fuel?.toLowerCase() === 'petrol')
+                  const dieselVariants = modelVariants.filter(v => v.fuel?.toLowerCase() === 'diesel')
+                  const cngVariants = modelVariants.filter(v => v.fuel?.toLowerCase() === 'cng')
+                  const electricVariants = modelVariants.filter(v => v.fuel?.toLowerCase() === 'electric')
+
+                  // Get transmission-wise pricing
+                  const automaticVariants = modelVariants.filter(v =>
+                    v.transmission?.toLowerCase().includes('automatic') ||
+                    v.transmission?.toLowerCase().includes('cvt') ||
+                    v.transmission?.toLowerCase().includes('amt') ||
+                    v.transmission?.toLowerCase().includes('dct')
+                  )
+                  const manualVariants = modelVariants.filter(v =>
+                    v.transmission?.toLowerCase().includes('manual') ||
+                    v.transmission?.toLowerCase() === 'mt'
+                  )
+
+                  // Calculate on-road starting price
+                  const onRoadStartPrice = priceBreakup?.totalOnRoadPrice || (minPrice * 1.15) // Approx 15% markup
+                  const onRoadStartLakh = (onRoadStartPrice / 100000).toFixed(2)
+
+                  // Calculate starting EMI (20% down, 7 years, 8.5% interest)
+                  const loanAmount = onRoadStartPrice * 0.8
+                  const monthlyRate = 8.5 / 12 / 100
+                  const months = 84
+                  const startingEMI = Math.round((loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1))
+
+                  const bodyType = model?.bodyType || 'Car'
+
+                  return (
+                    <>
+                      <p>
+                        The {brandName} {modelName} on road price in {cityName} starts at Rs. {formatIndianPrice(Math.round(onRoadStartPrice))} (₹{onRoadStartLakh} Lakh).
+                        {maxPrice > minPrice && ` ${modelName} top model price is Rs. ${formatIndianPrice(maxPrice)} (₹${maxPriceLakh} Lakh).`}
+                        {automaticVariants.length > 0 && ` ${modelName} automatic price starts from Rs. ${formatIndianPrice(Math.min(...automaticVariants.map(v => v.price)))} and goes up to Rs. ${formatIndianPrice(Math.max(...automaticVariants.map(v => v.price)))}.`}
+                        {dieselVariants.length > 0 && ` ${modelName} diesel price starts from Rs. ${formatIndianPrice(Math.min(...dieselVariants.map(v => v.price)))} and goes up to Rs. ${formatIndianPrice(Math.max(...dieselVariants.map(v => v.price)))}.`}
+                      </p>
+                      <p className="mt-2">
+                        {brandName} {modelName} is available in {totalVariants} variants
+                        {petrolVariants.length > 0 && dieselVariants.length > 0
+                          ? ` with ${petrolVariants.length} Petrol and ${dieselVariants.length} Diesel options`
+                          : petrolVariants.length > 0
+                            ? ` with Petrol engine`
+                            : electricVariants.length > 0
+                              ? ` with Electric powertrain`
+                              : ''
+                        }
+                        {cngVariants.length > 0 && ` including ${cngVariants.length} CNG variant${cngVariants.length > 1 ? 's' : ''}`}.
+                        {manualVariants.length > 0 && automaticVariants.length > 0
+                          ? ` Both Manual and Automatic transmission options are available.`
+                          : ''
+                        }
+                      </p>
+                      <p className="mt-2">
+                        {modelName} EMI starts at ₹{formatIndianPrice(startingEMI)}/month (for 7 years, 20% down payment).
+                        Check the detailed on-road price breakup including RTO charges ({selectedCity.includes('Maharashtra') ? 'Maharashtra' : selectedCity.includes('Delhi') ? 'Delhi NCR' : selectedCity.includes('Karnataka') ? 'Karnataka' : 'your state'}),
+                        insurance cost (comprehensive 1-year), and road tax below. Compare all {modelName} variant prices and get the best deal on your new {bodyType.toLowerCase()}.
+                      </p>
+                    </>
+                  )
+                })()}
               </div>
               <button
                 onClick={() => setIsTextExpanded(!isTextExpanded)}
@@ -909,7 +975,6 @@ export default function PriceBreakupPage({
               </button>
             </div>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left: Hero Image */}
             <div>
@@ -1099,12 +1164,12 @@ export default function PriceBreakupPage({
               </div>
             </div>
           </div>
-        </div >
-      </PageSection >
+        </div>
+      </PageSection>
 
       {/* Section 2: AD Banner & EMI Calculator */}
-      < PageSection background="gray" maxWidth="7xl" >
-        <div className="py-8 space-y-8">
+      <PageSection background="gray" maxWidth="7xl">
+        <div className="py-4 space-y-6">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
 
@@ -1142,10 +1207,10 @@ export default function PriceBreakupPage({
             </Link>
           </div>
         </div>
-      </PageSection >
+      </PageSection>
 
       {/* Section 3: More Variants */}
-      < PageSection background="white" maxWidth="7xl" >
+      <PageSection background="white" maxWidth="7xl">
         <div id="variants" className="space-y-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
             More {brandName} {modelName} Variants
@@ -1218,11 +1283,11 @@ export default function PriceBreakupPage({
             </div>
           )}
         </div>
-      </PageSection >
+      </PageSection>
 
       {/* Section 4: AD Banner, Similar Cars & Popular Cars */}
-      < PageSection background="white" maxWidth="7xl" >
-        <div id="similar-cars" className="space-y-12">
+      <PageSection background="white" maxWidth="7xl">
+        <div id="similar-cars" className="space-y-6">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
 
@@ -1390,241 +1455,27 @@ export default function PriceBreakupPage({
             </div>
           </div>
         </div>
-      </PageSection >
+      </PageSection>
 
       {/* Section 5: AD Banner & Owner Reviews */}
-      < PageSection background="white" maxWidth="7xl" >
-        <div id="reviews" className="py-8 space-y-12">
+      <PageSection background="white" maxWidth="7xl">
+        <div id="reviews" className="py-4 space-y-6">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
 
-          {/* Owner Reviews Section */}
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} Owner Reviews</h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Rating Summary */}
-              <div className="lg:col-span-1">
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="flex items-center">
-                      {[1, 2, 3, 4].map((star) => (
-                        <svg key={star} className="h-6 w-6 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                      <svg className="h-6 w-6 text-gray-300" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    </div>
-                    <span className="ml-2 text-2xl font-bold text-gray-900">4.2</span>
-                    <span className="ml-2 text-gray-500">(1,543 reviews)</span>
-                  </div>
-
-                  <div className="space-y-2 mb-6">
-                    <h3 className="font-semibold text-gray-900 mb-3">Rating Breakdown</h3>
-
-                    {/* 5 Star */}
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-600 w-8">5★</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-orange-400 h-2 rounded-full" style={{ width: '55%' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-12 text-right">856</span>
-                    </div>
-
-                    {/* 4 Star */}
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-600 w-8">4★</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-orange-400 h-2 rounded-full" style={{ width: '21%' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-12 text-right">324</span>
-                    </div>
-
-                    {/* 3 Star */}
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-600 w-8">3★</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-orange-400 h-2 rounded-full" style={{ width: '12%' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-12 text-right">189</span>
-                    </div>
-
-                    {/* 2 Star */}
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-600 w-8">2★</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-gray-300 h-2 rounded-full" style={{ width: '2%' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-12 text-right">26</span>
-                    </div>
-
-                    {/* 1 Star */}
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-600 w-8">1★</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-gray-300 h-2 rounded-full" style={{ width: '1%' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-12 text-right">13</span>
-                    </div>
-                  </div>
-
-                  {/* Filter Options */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Filter by rating:</label>
-                      <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option>All Ratings</option>
-                        <option>5 Stars</option>
-                        <option>4 Stars</option>
-                        <option>3 Stars</option>
-                        <option>2 Stars</option>
-                        <option>1 Star</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Sort by:</label>
-                      <select className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option>Most Recent</option>
-                        <option>Most Helpful</option>
-                        <option>Highest Rating</option>
-                        <option>Lowest Rating</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Reviews List */}
-              <div className="lg:col-span-2">
-                {/* Individual Reviews */}
-                <div className="space-y-6">
-                  {/* Review 1 */}
-                  <div className="border-b border-gray-200 pb-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
-                        <span className="text-orange-600 font-semibold text-sm">R</span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <h4 className="font-semibold text-gray-900 flex items-center">
-                              Rajesh Kumar
-                              <svg className="h-4 w-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                            </h4>
-                            <p className="text-sm text-gray-500">15/01/2024</p>
-                          </div>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <svg key={star} className="h-4 w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                            ))}
-                          </div>
-                        </div>
-                        <h5 className="font-semibold text-gray-900 mb-2">Excellent car with great mileage</h5>
-                        <p className="text-gray-700 mb-3">
-                          I have been using this car for 6 months now. The mileage is excellent in city conditions. Build quality is good and maintenance cost is reasonable.
-                        </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <button className="flex items-center hover:text-gray-700">
-                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                            </svg>
-                            24
-                          </button>
-                          <button className="flex items-center hover:text-gray-700">
-                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
-                            </svg>
-                            2
-                          </button>
-                          <span>Helpful</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Review 2 */}
-                  <div className="border-b border-gray-200 pb-6">
-                    <div className="flex items-start">
-                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
-                        <span className="text-orange-600 font-semibold text-sm">P</span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <h4 className="font-semibold text-gray-900 flex items-center">
-                              Priya Sharma
-                              <svg className="h-4 w-4 text-green-500 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                            </h4>
-                            <p className="text-sm text-gray-500">10/01/2024</p>
-                          </div>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4].map((star) => (
-                              <svg key={star} className="h-4 w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                            ))}
-                            <svg className="h-4 w-4 text-gray-300" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          </div>
-                        </div>
-                        <h5 className="font-semibold text-gray-900 mb-2">Good family car</h5>
-                        <p className="text-gray-700 mb-3">
-                          Perfect for family use. Spacious interior and comfortable seats. Only issue is the road noise at high speeds.
-                        </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <button className="flex items-center hover:text-gray-700">
-                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                            </svg>
-                            18
-                          </button>
-                          <button className="flex items-center hover:text-gray-700">
-                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.737 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
-                            </svg>
-                            1
-                          </button>
-                          <span>Helpful</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Read More Button */}
-                <div className="text-center mt-6">
-                  <button className="text-red-600 hover:text-orange-600 font-medium transition-colors">Read More</button>
-                </div>
-
-                {/* Write Review CTA */}
-                <div className="bg-gray-50 rounded-lg p-6 mt-6 text-center">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Own a {brandName} {modelName}? Share your experience!</h3>
-                  <p className="text-gray-600 mb-4">
-                    Help other buyers make informed decisions by sharing your honest review
-                  </p>
-                  <button className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-md">
-                    Write a Review
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Owner Reviews Section - Dynamic from API */}
+          <ModelOwnerReviews
+            brandName={brandName}
+            modelName={modelName}
+            modelSlug={modelName.toLowerCase().replace(/\s+/g, '-')}
+            brandSlug={brandName.toLowerCase().replace(/\s+/g, '-')}
+          />
         </div>
-      </PageSection >
+      </PageSection>
 
       {/* Section 6: AD Banner, FAQ & Brand Dealers */}
-      < PageSection background="white" maxWidth="7xl" >
-        <div id="faq" className="py-8 space-y-12">
+      <PageSection background="white" maxWidth="7xl">
+        <div id="faq" className="py-4 space-y-6">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
 
@@ -1660,51 +1511,12 @@ export default function PriceBreakupPage({
               ))}
             </div>
           </div>
-
-          {/* Brand Dealers Section */}
-          <div id="dealers">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} Dealers in {selectedCity.split(',')[0]}</h2>
-            <p className="text-gray-600 mb-8">
-              Planning to Buy {modelName}? Here are a few showrooms/dealers in {selectedCity.split(',')[0]}
-            </p>
-
-            <div className="space-y-8">
-              {dealers.map((dealer, index) => (
-                <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-start">
-                    {/* Dealer Icon */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </div>
-
-                    {/* Dealer Info */}
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">{dealer.name}</h3>
-                      <p className="text-sm text-gray-600 mb-1">
-                        <span className="font-medium">Address:</span> {dealer.address}
-                      </p>
-                      <p className="text-sm text-gray-600">{dealer.city}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* View All Dealers Button */}
-            <div className="text-center mt-8">
-              <button className="w-full max-w-md bg-white border-2 border-gray-300 hover:border-red-600 text-gray-900 hover:text-red-600 px-6 py-3 rounded-lg font-semibold transition-all duration-200">
-                View All Dealers in {selectedCity.split(',')[0]}
-              </button>
-            </div>
-          </div>
         </div>
-      </PageSection >
+      </PageSection>
 
       {/* Section 7: Price across India, AD Banner & Share Feedback */}
-      < PageSection background="white" maxWidth="7xl" >
-        <div className="py-8 space-y-12">
+      <PageSection background="white" maxWidth="7xl">
+        <div className="py-4 space-y-6">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
 
@@ -1773,10 +1585,10 @@ export default function PriceBreakupPage({
             </div>
           </div>
         </div>
-      </PageSection >
+      </PageSection>
 
       {/* Footer */}
       < Footer />
-    </div >
+    </div>
   )
 }
