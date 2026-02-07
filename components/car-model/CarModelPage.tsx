@@ -1349,7 +1349,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
             {/* Model Highlights */}
             <div className="space-y-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Highlights</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Key Features & Highlights</h2>
 
               {/* Tab Navigation - Clickable Headers */}
               <div className="flex space-x-4 sm:space-x-8 border-b border-gray-200 overflow-x-auto scrollbar-hide">
@@ -1570,7 +1570,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
               <div className="space-y-8">
                 {/* Model Price Header */}
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">{model?.brand || 'Car'} {model?.name || 'Model'} Price</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">{model?.brand || 'Car'} {model?.name || 'Model'} Price in India {new Date().getFullYear()}</h2>
 
                   {/* SEO Content */}
                   <div className="text-gray-700 leading-relaxed">
@@ -1660,7 +1660,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
               {/* Color Options Section */}
               <div className="space-y-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Colours</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Colors - All Available Options</h2>
 
                 {/* Check if backend colorImages exist */}
                 {model?.colorImages && model.colorImages.length > 0 ? (
@@ -1842,7 +1842,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
             {/* Pros & Cons Section - Only show if backend data exists */}
             {(model?.pros || model?.cons) && (
               <div className="space-y-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Pros & Cons</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Pros and Cons - Should You Buy?</h2>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Pros Column */}
@@ -1911,7 +1911,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
             {/* Model Summary Section - Only show if any summary data exists */}
             {(model?.description || model?.exteriorDesign || model?.comfortConvenience) && (
               <div className="space-y-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Summary</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Review - Expert Summary</h2>
 
                 <div className="space-y-6">
                   {/* Description - Only show if backend data exists */}
@@ -2325,7 +2325,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
               {/* Compare With Similar Cars Section - Dynamic with body type matching */}
               <div className="space-y-4">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare With Similar Cars</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare {model?.brand || 'Car'} {model?.name || 'Model'} with Similar Cars</h2>
 
                 {/* Comparison Cards - Horizontal Scroll */}
                 <div className="relative">
@@ -2517,7 +2517,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
             {/* Feedback Section */}
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Share Your Feedback</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Rate & Review {model?.brand || 'Car'} {model?.name || 'Model'}</h2>
                 <p className="text-gray-600">Help us improve by sharing your thoughts about this page</p>
               </div>
 

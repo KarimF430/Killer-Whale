@@ -481,10 +481,10 @@ export default function ComparePageClient({
         <div className="flex items-start justify-between mb-6">
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              {comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}
+              {comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')} - Comparison {new Date().getFullYear()}
             </h1>
             <p className="text-base text-gray-600 leading-relaxed">
-              Detailed comparison of {comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}. Compare prices, specifications, mileage, safety rating, and features to choose the best car for you.
+              Detailed comparison of {comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ')}. Compare on-road prices, specifications, mileage, safety rating, and features to choose the best car for you.
             </p>
           </div>
           <button
@@ -662,7 +662,7 @@ export default function ComparePageClient({
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Specifications</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Specifications Comparison</h2>
               <div className="h-1 w-32 bg-gradient-to-r from-orange-600 to-red-600 rounded-full mt-2"></div>
             </div>
             <label className="flex items-center gap-2 cursor-pointer bg-orange-50 px-4 py-2 rounded-lg hover:bg-orange-100 transition-colors">
@@ -728,7 +728,7 @@ export default function ComparePageClient({
 
         {/* Compare With Similar Cars */}
         <div className="mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Compare With Similar Cars</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">More Car Comparisons You May Like</h2>
 
           {loadingSimilarCars ? (
             <div className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4">
@@ -838,7 +838,7 @@ export default function ComparePageClient({
         <div className="mb-6">
           <div className="space-y-6">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Similar Cars You May Like
+              Popular Cars in India {new Date().getFullYear()}
             </h2>
 
             {/* Cars Horizontal Scroll */}

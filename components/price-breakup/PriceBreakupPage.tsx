@@ -883,7 +883,7 @@ export default function PriceBreakupPage({
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              {brandName} {modelName} Price in {selectedCity.split(',')[0]}
+              {brandName} {modelName} On-Road Price in {selectedCity.split(',')[0]} {new Date().getFullYear()}
             </h1>
             <div className="relative">
               <div className={`text-gray-600 leading-relaxed transition-all duration-300 ${!isTextExpanded ? 'line-clamp-2' : ''}`}>
@@ -1213,7 +1213,7 @@ export default function PriceBreakupPage({
       <PageSection background="white" maxWidth="7xl">
         <div id="variants" className="space-y-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
-            More {brandName} {modelName} Variants
+            All {brandName} {modelName} Variants with Prices
           </h2>
 
           {/* Filter Options - Dynamic based on available variants */}
@@ -1294,7 +1294,7 @@ export default function PriceBreakupPage({
           {/* Similar Cars Section - Exact copy from VariantPage */}
           <div className="space-y-6">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">
-              Similar Cars To {modelName}
+              Compare {brandName} {modelName} with Similar Cars
             </h2>
 
             {/* Cars Horizontal Scroll - Exact copy from VariantPage */}
@@ -1386,7 +1386,7 @@ export default function PriceBreakupPage({
 
           {/* Popular Cars Section - Exact styling from VariantPage */}
           <div id="popular-cars" className="space-y-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Popular Cars</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">Popular Cars in India {new Date().getFullYear()}</h2>
 
             {/* Cars Horizontal Scroll - Exact copy from VariantPage */}
             <div className="relative">
@@ -1481,7 +1481,7 @@ export default function PriceBreakupPage({
 
           {/* FAQ Section */}
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} FAQ</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} Frequently Asked Questions</h2>
 
             <div className="space-y-4 max-w-4xl mx-auto">
               {faqs.map((faq, index) => (
@@ -1523,7 +1523,7 @@ export default function PriceBreakupPage({
           {/* Share Your Feedback */}
           <div id="feedback" className="max-w-2xl mx-auto">
             <div className="bg-white border border-gray-200 rounded-xl p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">Share Your Feedback</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">Rate & Review {brandName} {modelName}</h2>
               <p className="text-gray-600 text-center mb-8">
                 Help us improve by sharing your thoughts about this page
               </p>
