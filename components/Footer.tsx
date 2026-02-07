@@ -111,21 +111,20 @@ export default function Footer() {
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-red-400" />
-                <a href="mailto:info@gadizone.com" className="text-gray-300 hover:text-red-400 transition-colors">
-                  info@gadizone.com
+                <a href="mailto:Karim0beldaar@gmail.com" className="text-gray-300 hover:text-red-400 transition-colors">
+                  Karim0beldaar@gmail.com
                 </a>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4 text-orange-400" />
-                <a href="tel:+919876543210" className="text-gray-300 hover:text-orange-400 transition-colors">
-                  +91 98765 43210
+                <a href="tel:+919945210466" className="text-gray-300 hover:text-orange-400 transition-colors">
+                  +91 99452 10466
                 </a>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="h-4 w-4 text-red-400 mt-0.5" />
                 <span className="text-gray-300">
-                  gadizone Technologies Pvt. Ltd.<br />
-                  Cyber City, Gurgaon, Haryana 122002
+                  Mumbai, India
                 </span>
               </div>
             </div>
