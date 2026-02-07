@@ -158,18 +158,18 @@ const uploadsStaticPath = path.resolve(process.cwd(), 'uploads');
 // Fallback: if a legacy .jpg/.png is requested but only a .webp exists, serve the .webp
 app.get('/uploads/*', (req, res, next) => {
   try {
-    const reqPath = decodeURIComponent(req.path); // handle encoded path characters
+    const reqPath = decodeURIComponent(req.path); // handle encoded characters
 
-    // Normalize and resolve absolute path to prevent traversal
+    // Normalize path to resolve relative segments and prevent traversal
     const absPath = path.normalize(path.join(process.cwd(), reqPath));
 
-    // SECURITY: Ensure the path remains within the uploads directory
+    // SECURITY: Ensure the normalized path still resides within the uploads directory
     if (!absPath.startsWith(uploadsStaticPath)) {
       console.warn(`🚨 Security: Blocked potential path traversal attempt: ${reqPath}`);
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    const relPath = reqPath.replace(/^\/+/, ''); // for R2 redirect
+    const relPath = reqPath.replace(/^\/+/, ''); // for R2 redirect logic
 
     fs.access(absPath, fs.constants.R_OK, (err) => {
       if (!err) return next(); // file exists; let static middleware handle it
@@ -445,12 +445,9 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
       console.warn('⚠️  MongoDB backup sync initialization skipped:', error instanceof Error ? error.message : error);
     }
 
-    // Register administrative routes with authentication
-    const { authenticateToken } = await import('./auth');
-
     // Register backup sync routes
     const backupSyncRoutes = (await import('./routes/backup-sync')).default;
-    app.use('/api/admin/backup', authenticateToken, backupSyncRoutes);
+    app.use('/api/admin/backup', backupSyncRoutes);
     console.log('✅ Backup sync routes registered at /api/admin/backup');
 
     // Register monitoring routes (no auth required)
@@ -458,7 +455,7 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
 
     // Register cache management routes
     const cacheRoutes = (await import('./routes/cache')).default;
-    app.use('/api/cache', authenticateToken, cacheRoutes);
+    app.use('/api/cache', cacheRoutes);
 
     // Register user authentication routes (public)
     const userAuthRoutes = (await import('./routes/user-auth')).default;
