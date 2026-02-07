@@ -27,7 +27,7 @@ interface Car {
 
 interface CarCardProps {
   car: Car
-  onClick: () => void
+  onClick?: () => void
 }
 
 // Helper function to format transmission
@@ -94,10 +94,16 @@ export default function CarCard({ car, onClick }: CarCardProps) {
   const displayPrice = isOnRoadMode ? onRoadPrice : car.startingPrice
   const priceLabel = isOnRoadMode ? `On-Road Price in ${city}` : 'Ex-Showroom Price'
 
+  // Compute href for SEO
+  const brandSlug = car.brandName?.toLowerCase().replace(/\s+/g, '-') || car.brand?.toLowerCase().replace(/\s+/g, '-') || ''
+  const modelSlug = car.name?.toLowerCase().replace(/\s+/g, '-') || car.slug || ''
+  const carHref = `/${brandSlug}-cars/${modelSlug}`
+
   return (
-    <div
+    <Link
+      href={carHref}
       onClick={onClick}
-      className="flex-shrink-0 w-[260px] sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg active:scale-95 transition-all duration-300 overflow-hidden cursor-pointer group"
+      className="block flex-shrink-0 w-[260px] sm:w-72 bg-white rounded-xl border border-gray-200 hover:shadow-lg active:scale-95 transition-all duration-300 overflow-hidden cursor-pointer group"
     >
       {/* Image Container */}
       <div className="relative h-40 sm:h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
@@ -116,11 +122,12 @@ export default function CarCard({ car, onClick }: CarCardProps) {
         {/* Wishlist Button */}
         <button
           onClick={(e) => {
+            e.preventDefault() // Prevent navigation
             e.stopPropagation()
             toggleFavourite(car)
           }}
           aria-label={isFav ? "Remove from wishlist" : "Add to wishlist"}
-          className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-2 sm:p-2.5 rounded-full shadow-md transition-all duration-200 z-10 ${isFav
+          className={`absolute top-2 right-2 sm:top-3 right-2 sm:right-3 p-2 sm:p-2.5 rounded-full shadow-md transition-all duration-200 z-10 ${isFav
             ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
             : 'bg-white hover:bg-red-50 active:bg-red-100'
             }`}
@@ -186,6 +193,6 @@ export default function CarCard({ car, onClick }: CarCardProps) {
           View Details
         </button>
       </div>
-    </div>
+    </Link>
   )
 }

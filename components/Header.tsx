@@ -244,13 +244,13 @@ export default function Header() {
               <div className="border-t border-gray-200 my-2"></div>
 
               <Link href="/news" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Latest News</Link>
-              <Link href="/compare" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Compare Cars</Link>
+              <Link href="/compare" rel="nofollow" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Compare Cars</Link>
 
               <div className="border-t border-gray-200 my-2"></div>
 
-              <Link href="/fuel-cost-calculator" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Fuel Calculator</Link>
-              <Link href="/emi-calculator" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>EMI Calculator</Link>
-              <Link href="/location" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Know On-Road Price</Link>
+              <Link href="/fuel-cost-calculator" rel="nofollow" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Fuel Calculator</Link>
+              <Link href="/emi-calculator" rel="nofollow" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>EMI Calculator</Link>
+              <Link href="/location" rel="nofollow" className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium py-2.5 px-4 rounded-lg" onClick={closeMenu}>Know On-Road Price</Link>
 
               {/* View More Dropdown */}
               <div>

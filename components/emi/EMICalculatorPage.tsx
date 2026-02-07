@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useRef } from 'react'
+import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ChevronDown, Info, X, Pencil, Search, ArrowLeft } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -564,12 +565,129 @@ export default function EMICalculatorPage() {
                 Get Eligible Loan Offers
               </button>
               <p className="text-xs text-gray-500 text-center mt-3 leading-relaxed">
-                By proceeding ahead you agree to gadizone <a href="/visitor-agreement" className="text-orange-600 hover:underline">Visitor Agreement</a>, <a href="/privacy-policy" className="text-orange-600 hover:underline">Privacy Policy</a> and <a href="/terms-and-conditions" className="text-orange-600 hover:underline">Terms and Conditions</a>. This site is protected by reCAPTCHA and Google <a href="/google-terms" className="text-orange-600 hover:underline">terms of service</a> apply.
+                By proceeding ahead you agree to gadizone <Link href="/visitor-agreement" className="text-orange-600 hover:underline">Visitor Agreement</Link>, <Link href="/privacy-policy" className="text-orange-600 hover:underline">Privacy Policy</Link> and <Link href="/terms-and-conditions" className="text-orange-600 hover:underline">Terms and Conditions</Link>. This site is protected by reCAPTCHA and Google <Link href="/google-terms" className="text-orange-600 hover:underline">terms of service</Link> apply.
               </p>
+            </div>
+
+            {/* SEO Content */}
+            <div className="mt-8 border-t border-gray-200 p-6 md:p-8 bg-gray-50/50">
+              <section className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Complete Guide to Car Loan EMI Calculation</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  Buying a new car is an exciting milestone, but financial planning is key to a stress-free ownership experience.
+                  The gadizone Car Loan EMI Calculator is designed to help you plan your finances effectively.
+                  By estimating your monthly Equated Monthly Installment (EMI), you can choose a loan amount and tenure that fits your budget comfortably.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  Our advanced calculator considers key factors like the car's on-road price, your down payment, interest rate, and loan tenure to give you an accurate EMI figure.
+                  It also provides a detailed amortization schedule, showing you exactly how much interest you'll pay over the life of the loan.
+                </p>
+              </section>
+
+              <section className="mb-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Key Factors Affecting Your Car Loan EMI</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    <h4 className="font-semibold text-gray-900 mb-2">1. Loan Amount (Principal)</h4>
+                    <p className="text-sm text-gray-600">The total amount you borrow from the bank. A higher down payment reduces the principal, thereby lowering your EMI and total interest outgo.</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    <h4 className="font-semibold text-gray-900 mb-2">2. Interest Rate</h4>
+                    <p className="text-sm text-gray-600">The rate at which the bank lends you money. Even a small difference of 0.5% can significantly impact your total repayment amount over a long tenure.</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    <h4 className="font-semibold text-gray-900 mb-2">3. Loan Tenure</h4>
+                    <p className="text-sm text-gray-600">The duration of your loan. Longer tenure (e.g., 7 years) means lower monthly EMIs but higher total interest payment. Shorter tenure means higher EMIs but you become debt-free sooner.</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    <h4 className="font-semibold text-gray-900 mb-2">4. Credit Score</h4>
+                    <p className="text-sm text-gray-600">A high credit score (750+) can help you negotiate better interest rates with lenders, directly reducing your EMI burden.</p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="mb-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Benefits of Using an EMI Calculator</h3>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <div className="min-w-1.5 h-1.5 rounded-full bg-orange-500 mt-2"></div>
+                    <p><strong className="text-gray-900">Financial Planning:</strong> Gives you a clear picture of your monthly outflow, helping you budget for other expenses.</p>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="min-w-1.5 h-1.5 rounded-full bg-orange-500 mt-2"></div>
+                    <p><strong className="text-gray-900">Compare Options:</strong> You can experiment with different loan amounts, tenures, and interest rates to find the combination that works best for you.</p>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="min-w-1.5 h-1.5 rounded-full bg-orange-500 mt-2"></div>
+                    <p><strong className="text-gray-900">Negotiation Tool:</strong> Knowing the exact EMI and interest breakdown helps you negotiate better terms with car dealers and banks.</p>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="min-w-1.5 h-1.5 rounded-full bg-orange-500 mt-2"></div>
+                    <p><strong className="text-gray-900">Avoid Payment Shocks:</strong> Helps you ensure you don't commit to an EMI that strains your monthly finances.</p>
+                  </li>
+                </ul>
+              </section>
+
+              <section className="mb-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h3>
+                <div className="space-y-4">
+                  <details className="group border-b border-gray-200 pb-4">
+                    <summary className="flex justify-between items-center font-medium cursor-pointer list-none text-gray-800 hover:text-orange-600">
+                      <span>How is car loan EMI calculated?</span>
+                      <span className="transition group-open:rotate-180">
+                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                      </span>
+                    </summary>
+                    <p className="text-gray-600 mt-3 text-sm">The formula used is: <strong>E = [P x R x (1+R)^N] / [(1+R)^N-1]</strong><br />Where E is EMI, P is Principal Loan Amount, R is monthly interest rate, and N is loan tenure in months.</p>
+                  </details>
+                  <details className="group border-b border-gray-200 pb-4">
+                    <summary className="flex justify-between items-center font-medium cursor-pointer list-none text-gray-800 hover:text-orange-600">
+                      <span>Can I pay off my car loan early?</span>
+                      <span className="transition group-open:rotate-180">
+                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                      </span>
+                    </summary>
+                    <p className="text-gray-600 mt-3 text-sm">Yes, most banks allow prepayment or foreclosure of car loans. However, many lenders charge a foreclosure fee (usually 3-5% of the outstanding principal) if you close the loan before the tenure ends. Some banks offer zero foreclosure charges after a specific period (e.g., 2 years).</p>
+                  </details>
+                  <details className="group border-b border-gray-200 pb-4">
+                    <summary className="flex justify-between items-center font-medium cursor-pointer list-none text-gray-800 hover:text-orange-600">
+                      <span>Is a down payment mandatory?</span>
+                      <span className="transition group-open:rotate-180">
+                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                      </span>
+                    </summary>
+                    <p className="text-gray-600 mt-3 text-sm">While some banks offer 100% financing on the ex-showroom price for eligible customers, you typically still need to pay for registration, insurance, and accessories as a down payment. Making a larger down payment (20% or more) is recommended to reduce your interest burden.</p>
+                  </details>
+                  <details className="group border-b border-gray-200 pb-4">
+                    <summary className="flex justify-between items-center font-medium cursor-pointer list-none text-gray-800 hover:text-orange-600">
+                      <span>Fixed vs Floating Interest Rate: Which is better?</span>
+                      <span className="transition group-open:rotate-180">
+                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                      </span>
+                    </summary>
+                    <p className="text-gray-600 mt-3 text-sm">Most car loans in India come with fixed interest rates, meaning your EMI remains constant throughout the tenure. This safeguards you from market fluctuations and makes budgeting easier. Floating rates are rarer for auto loans.</p>
+                  </details>
+                </div>
+              </section>
+
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">Explore More Tools</h3>
+                <div className="flex flex-wrap gap-4">
+                  <Link href="/fuel-cost-calculator" className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                    Fuel Cost Calculator <ArrowLeft className="w-3 h-3 rotate-180" />
+                  </Link>
+                  <Link href="/compare" className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                    Compare Cars <ArrowLeft className="w-3 h-3 rotate-180" />
+                  </Link>
+                  <Link href="/location" className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                    Check On-Road Price <ArrowLeft className="w-3 h-3 rotate-180" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </PageSection>
       </PageContainer>
-    </div>
+    </div >
   )
 }

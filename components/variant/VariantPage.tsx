@@ -12,6 +12,8 @@ import PageSection from '../common/PageSection'
 import AdBanner from '../home/AdBanner'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import VariantCard from '../car-model/VariantCard'
+import ExpertReviewSection from '../car-model/ExpertReviewSection'
+import { generateExpertReview } from '@/lib/expert-review-logic'
 import CarCard from '../home/CarCard'
 import UpcomingCars from '../home/UpcomingCars'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
@@ -100,6 +102,7 @@ export default function VariantPage({
   initialAllVariants?: any[]
 }) {
   const router = useRouter()
+  const [isMounted, setIsMounted] = useState(false)
   const [expandedSpecs, setExpandedSpecs] = useState<Record<string, boolean>>({})
   const [activeSection, setActiveSection] = useState('overview')
   const [isSticky, setIsSticky] = useState(false)
@@ -113,6 +116,7 @@ export default function VariantPage({
     { id: 'specifications', name: 'Specifications' },
     { id: 'more-variants', name: 'Variants' },
     { id: 'engine-mileage', name: 'Engine & Mileage' },
+    { id: 'expert-review', name: 'Expert Review' },
     { id: 'price-across-india', name: 'Price' },
     { id: 'similar-cars', name: 'Similar Cars' }
   ]
@@ -303,19 +307,15 @@ export default function VariantPage({
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [selectedVariant, setSelectedVariant] = useState(variantData?.variant)
-  const [selectedCity, setSelectedCity] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedCity = localStorage.getItem('selectedCity')
-      if (savedCity) return savedCity
-    }
-    return 'Delhi'
-  })
+  const [selectedCity, setSelectedCity] = useState('Delhi')
   const [showVariantDropdown, setShowVariantDropdown] = useState(false)
   const [showCityDropdown, setShowCityDropdown] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showSummaryDescription, setShowSummaryDescription] = useState(false)
   const [showSummaryExterior, setShowSummaryExterior] = useState(false)
   const [showSummaryComfort, setShowSummaryComfort] = useState(false)
+  const [showAllPros, setShowAllPros] = useState(false)
+  const [showAllCons, setShowAllCons] = useState(false)
   const [expandedEngine, setExpandedEngine] = useState<boolean>(false)
 
 
@@ -580,11 +580,12 @@ export default function VariantPage({
   // Helper function to calculate on-road price using the exact same logic as CarsByBudget
   const getOnRoadPrice = (exShowroomPrice: number, fuelType: string): number => {
     // Get selected city from localStorage (same as useOnRoadPrice hook)
-    const selectedCity = typeof window !== 'undefined'
+    const currentCity = isMounted
       ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
       : 'Mumbai, Maharashtra'
 
-    const state = selectedCity.split(',')[1]?.trim() || 'Maharashtra'
+
+    const state = currentCity.split(',')[1]?.trim() || 'Maharashtra'
 
     // Use the exact same calculation function as CarsByBudget
     const breakup = calculateOnRoadPrice(exShowroomPrice, state, fuelType)
@@ -635,9 +636,33 @@ export default function VariantPage({
     mileage: 0
   } : (variant ? dynamicVariantData : variantData)
 
+
   // Get on-road price for current variant
   // currentVariantData.price is in lakhs, so convert to rupees for the hook
   const exShowroomPriceInRupees = (currentVariantData?.price || 0) * 100000
+
+  // Construct variant object for Expert Review (adapting variant data to look like model data)
+  const variantForReview = useMemo(() => {
+    if (!currentVariantData) return null
+    return {
+      ...currentVariantData,
+      brand: displayBrandName || currentVariantData.brand,
+      name: `${displayModelName} ${displayVariantName}`, // Effective name "Creta EX"
+      startingPrice: exShowroomPriceInRupees, // Expected in Rupees for logic
+      keySpecs: {
+        power: currentVariantData.power,
+        safetyRating: currentVariantData.rating ? `${currentVariantData.rating} Star` : '0 Star' // Approximation if rating is number
+      },
+      mileage: [{ value: currentVariantData.mileage }],
+      bodyType: model?.bodyType || 'Car'
+    }
+  }, [currentVariantData, displayBrandName, displayModelName, displayVariantName, exShowroomPriceInRupees, model])
+
+  // Generate dynamic expert review data (Pros, Cons, Verdict)
+  const expertReviewData = useMemo(() => {
+    if (!variantForReview) return null
+    return generateExpertReview(variantForReview)
+  }, [variantForReview])
 
   // Helper to check if electric
   const isElectric = currentVariantData?.fuelType?.toLowerCase()?.includes('electric')
@@ -649,7 +674,7 @@ export default function VariantPage({
 
   // displayPrice should be in rupees for formatPrice to work correctly
   const displayPrice = isOnRoadMode ? onRoadPrice : exShowroomPriceInRupees
-  const cityName = selectedCity.split(',')[0] || 'Delhi'
+  const cityName = (isMounted ? selectedCity : 'Delhi').split(',')[0] || 'Delhi'
   const priceLabel = isOnRoadMode ? `On-Road Price in ${cityName}` : 'Ex-showroom Price'
 
   // Calculate EMI for display (20% down, 7 years, 8% interest)
@@ -690,8 +715,9 @@ export default function VariantPage({
       price: (v.price || 0) / 100000 // Convert to lakhs
     }))
 
-  // Listen for city changes from localStorage
+  // Listen for city changes from localStorage and set isMounted
   useEffect(() => {
+    setIsMounted(true) // Set isMounted to true after initial render
     const handleStorageChange = () => {
       const savedCity = localStorage.getItem('selectedCity')
       if (savedCity) {
@@ -982,7 +1008,7 @@ export default function VariantPage({
                   const brandSlug = displayBrandName?.toLowerCase().replace(/\s+/g, '-')
                   const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
 
-                  // Get selected city from localStorage
+                  // Load saved city from localStorage after mount to avoid hydration mismatch
                   const selectedCityValue = typeof window !== 'undefined'
                     ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
                     : 'Mumbai, Maharashtra'
@@ -1050,7 +1076,7 @@ export default function VariantPage({
                 className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-left flex items-center justify-between hover:border-gray-400 transition-colors"
               >
                 <span className="text-gray-700">
-                  {selectedCity || 'Delhi'}
+                  {isMounted ? (selectedCity || 'Delhi') : 'Delhi'}
                 </span>
                 <ChevronDown className="w-5 h-5 text-gray-400" />
               </Link>
@@ -2713,7 +2739,7 @@ export default function VariantPage({
                         const modelSlug = displayModelName?.toLowerCase().replace(/\s+/g, '-')
 
                         // Get selected city from localStorage
-                        const selectedCityValue = typeof window !== 'undefined'
+                        const selectedCityValue = isMounted
                           ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
                           : 'Mumbai, Maharashtra'
                         const citySlug = selectedCityValue.split(',')[0].toLowerCase().replace(/\s+/g, '-')
@@ -2763,6 +2789,83 @@ export default function VariantPage({
         {/* Section 5: Variant Summary, AD Banner, Engine & Mileage */}
         <PageSection background="white" maxWidth="7xl">
           <div id="engine-mileage" className="space-y-8">
+            {/* Pros & Cons Section - Only show if backend data exists or dynamic data is generated */}
+            {(expertReviewData?.pros || expertReviewData?.cons || model?.pros || model?.cons) && (
+              <div className="space-y-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayBrandName || 'Car'} {displayModelName || 'Model'} {displayVariantName} Pros and Cons - Should You Buy?</h2>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Pros Column */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V18m-7-8a2 2 0 01-2-2V4a2 2 0 012-2h2.343M7 12h4m-4 0v8-8z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">Pros</h3>
+                    </div>
+
+                    <ul className="space-y-4">
+                      {(() => {
+                        const rawPros = expertReviewData?.pros || model?.pros || []
+                        const prosList = Array.isArray(rawPros) ? rawPros : []
+                        return prosList.slice(0, showAllPros ? undefined : 2).map((pro, index) => (
+                          <li key={index} className="flex items-start space-x-3">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                            <p className="text-gray-700 text-base leading-relaxed">
+                              {pro}
+                            </p>
+                          </li>
+                        ))
+                      })()}
+                    </ul>
+
+                    <button
+                      onClick={() => setShowAllPros(!showAllPros)}
+                      className="text-red-500 hover:text-red-600 text-base font-normal mt-4"
+                    >
+                      {showAllPros ? 'Show less' : '...more'}
+                    </button>
+                  </div>
+
+                  {/* Cons Column */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 13l3 3 7-7" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">Cons</h3>
+                    </div>
+
+                    <ul className="space-y-4">
+                      {(() => {
+                        const rawCons = expertReviewData?.cons || model?.cons || []
+                        const consList = Array.isArray(rawCons) ? rawCons : []
+                        return consList.slice(0, showAllCons ? undefined : 2).map((con, index) => (
+                          <li key={index} className="flex items-start space-x-3">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                            <p className="text-gray-700 text-base leading-relaxed">
+                              {con}
+                            </p>
+                          </li>
+                        ))
+                      })()}
+                    </ul>
+
+                    <button
+                      onClick={() => setShowAllCons(!showAllCons)}
+                      className="text-red-500 hover:text-red-600 text-base font-normal mt-4"
+                    >
+                      {showAllCons ? 'Show less' : '...more'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Variant Summary Section */}
             <div className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{displayModelName} {displayVariantName} Summary</h2>
@@ -2775,14 +2878,25 @@ export default function VariantPage({
                       <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                       <h3 className="text-lg font-bold text-gray-900">Description</h3>
                     </div>
-                    <ul className="space-y-2">
-                      {parseBulletPoints(variant?.description || model?.description || '').map((point: string, index: number) => (
-                        <li key={index} className="flex items-start space-x-2">
-                          <span className="text-gray-400 mt-1">•</span>
-                          <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className={`relative ${!showSummaryDescription ? 'max-h-[6rem] overflow-hidden' : ''} transition-all duration-300`}>
+                      <ul className="space-y-2">
+                        {parseBulletPoints(variant?.description || model?.description || '').map((point: string, index: number) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <span className="text-gray-400 mt-1">•</span>
+                            <span className="text-gray-700 text-base leading-relaxed">{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {!showSummaryDescription && (
+                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setShowSummaryDescription(!showSummaryDescription)}
+                      className="text-red-500 hover:text-red-600 font-normal text-base transition-colors mt-2 flex items-center gap-1"
+                    >
+                      {showSummaryDescription ? 'Read Less' : 'Read More'}
+                    </button>
                   </div>
                 )}
 
@@ -2793,14 +2907,25 @@ export default function VariantPage({
                       <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                       <h3 className="text-lg font-bold text-gray-900">Exterior Design</h3>
                     </div>
-                    <ul className="space-y-2">
-                      {parseBulletPoints(variant?.exteriorDesign || model?.exteriorDesign || '').map((point: string, index: number) => (
-                        <li key={index} className="flex items-start space-x-2">
-                          <span className="text-gray-400 mt-1">•</span>
-                          <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className={`relative ${!showSummaryExterior ? 'max-h-[6rem] overflow-hidden' : ''} transition-all duration-300`}>
+                      <ul className="space-y-2">
+                        {parseBulletPoints(variant?.exteriorDesign || model?.exteriorDesign || '').map((point: string, index: number) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <span className="text-gray-400 mt-1">•</span>
+                            <span className="text-gray-700 text-base leading-relaxed">{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {!showSummaryExterior && (
+                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setShowSummaryExterior(!showSummaryExterior)}
+                      className="text-red-500 hover:text-red-600 font-normal text-base transition-colors mt-2 flex items-center gap-1"
+                    >
+                      {showSummaryExterior ? 'Read Less' : 'Read More'}
+                    </button>
                   </div>
                 )}
 
@@ -2811,14 +2936,25 @@ export default function VariantPage({
                       <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                       <h3 className="text-lg font-bold text-gray-900">Comfort & Convenience</h3>
                     </div>
-                    <ul className="space-y-2">
-                      {parseBulletPoints(variant?.comfortConvenience || model?.comfortConvenience || '').map((point: string, index: number) => (
-                        <li key={index} className="flex items-start space-x-2">
-                          <span className="text-gray-400 mt-1">•</span>
-                          <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className={`relative ${!showSummaryComfort ? 'max-h-[6rem] overflow-hidden' : ''} transition-all duration-300`}>
+                      <ul className="space-y-2">
+                        {parseBulletPoints(variant?.comfortConvenience || model?.comfortConvenience || '').map((point: string, index: number) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <span className="text-gray-400 mt-1">•</span>
+                            <span className="text-gray-700 text-base leading-relaxed">{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {!showSummaryComfort && (
+                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setShowSummaryComfort(!showSummaryComfort)}
+                      className="text-red-500 hover:text-red-600 font-normal text-base transition-colors mt-2 flex items-center gap-1"
+                    >
+                      {showSummaryComfort ? 'Read Less' : 'Read More'}
+                    </button>
                   </div>
                 )}
               </div>
@@ -3047,6 +3183,13 @@ export default function VariantPage({
                 })()}
               </div>
             )}
+
+            {/* Expert Review Section - Integrated after Mileage */}
+            {variantForReview && (
+              <div id="expert-review" className="scroll-mt-24">
+                <ExpertReviewSection model={variantForReview} />
+              </div>
+            )}
           </div>
         </PageSection>
 
@@ -3139,11 +3282,6 @@ export default function VariantPage({
                           <CarCard
                             key={car.id}
                             car={transformedCar}
-                            onClick={() => {
-                              const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                              const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                              window.location.href = '/' + brandSlug + '-cars/' + modelSlug
-                            }}
                           />
                         )
                       })}

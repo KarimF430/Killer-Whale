@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState } from 'react'
@@ -12,13 +13,9 @@ interface ModelSummarySectionProps {
 }
 
 export default function ModelSummarySection({ carName, summaryData }: ModelSummarySectionProps) {
-  const [showFullDescription, setShowFullDescription] = useState(false)
-  const [showFullExterior, setShowFullExterior] = useState(false)
-  const [showFullComfort, setShowFullComfort] = useState(false)
-
-  const visibleDescription = showFullDescription ? summaryData.description : summaryData.description.slice(0, 1)
-  const visibleExterior = showFullExterior ? summaryData.exteriorDesign : summaryData.exteriorDesign.slice(0, 1)
-  const visibleComfort = showFullComfort ? summaryData.comfortConvenience : summaryData.comfortConvenience.slice(0, 1)
+  const [showDescription, setShowDescription] = useState(false)
+  const [showExterior, setShowExterior] = useState(false)
+  const [showComfort, setShowComfort] = useState(false)
 
   return (
     <section className="py-8 bg-gray-100">
@@ -30,74 +27,76 @@ export default function ModelSummarySection({ carName, summaryData }: ModelSumma
 
         {/* Content Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+
           {/* Description Section */}
-          <div className="mb-5">
-            <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
-              <div className="w-1.5 h-1.5 bg-gray-600 rounded-full mr-2"></div>
-              Description
-            </h3>
-            <div className="ml-4 space-y-2">
-              {visibleDescription.map((paragraph, index) => (
-                <p key={index} className="text-gray-700 text-sm leading-relaxed font-normal">
-                  {paragraph}
-                </p>
-              ))}
-              {summaryData.description.length > 1 && (
+          {summaryData.description && summaryData.description.length > 0 && (
+            <div className="mb-5 last:mb-0">
+              <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
+                <div className="w-1.5 h-1.5 bg-gray-600 rounded-full mr-2"></div>
+                Description
+              </h3>
+              <div className="ml-4">
+                <div className={`text-gray-700 text-sm leading-relaxed font-normal space-y-2 ${!showDescription ? 'line-clamp-4' : ''}`}>
+                  {summaryData.description.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
                 <button
-                  onClick={() => setShowFullDescription(!showFullDescription)}
-                  className="text-red-500 hover:text-red-600 font-normal text-sm transition-colors"
+                  onClick={() => setShowDescription(!showDescription)}
+                  className="text-red-500 hover:text-red-600 font-normal text-sm transition-colors mt-1"
                 >
-                  {showFullDescription ? 'Read Less' : 'Read More'}
+                  {showDescription ? 'Read Less' : 'Read More'}
                 </button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Exterior Design Section */}
-          <div className="mb-5">
-            <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
-              <div className="w-1.5 h-1.5 bg-gray-600 rounded-full mr-2"></div>
-              Exterior Design
-            </h3>
-            <div className="ml-4 space-y-2">
-              {visibleExterior.map((paragraph, index) => (
-                <p key={index} className="text-gray-700 text-sm leading-relaxed font-normal">
-                  {paragraph}
-                </p>
-              ))}
-              {summaryData.exteriorDesign.length > 1 && (
+          {summaryData.exteriorDesign && summaryData.exteriorDesign.length > 0 && (
+            <div className="mb-5 last:mb-0">
+              <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
+                <div className="w-1.5 h-1.5 bg-gray-600 rounded-full mr-2"></div>
+                Exterior Design
+              </h3>
+              <div className="ml-4">
+                <div className={`text-gray-700 text-sm leading-relaxed font-normal space-y-2 ${!showExterior ? 'line-clamp-4' : ''}`}>
+                  {summaryData.exteriorDesign.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
                 <button
-                  onClick={() => setShowFullExterior(!showFullExterior)}
-                  className="text-red-500 hover:text-red-600 font-normal text-sm transition-colors"
+                  onClick={() => setShowExterior(!showExterior)}
+                  className="text-red-500 hover:text-red-600 font-normal text-sm transition-colors mt-1"
                 >
-                  {showFullExterior ? 'Read Less' : 'Read More'}
+                  {showExterior ? 'Read Less' : 'Read More'}
                 </button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Comfort & Convenience Section */}
-          <div>
-            <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
-              <div className="w-1.5 h-1.5 bg-gray-600 rounded-full mr-2"></div>
-              Comfort & Convenience
-            </h3>
-            <div className="ml-4 space-y-2">
-              {visibleComfort.map((paragraph, index) => (
-                <p key={index} className="text-gray-700 text-sm leading-relaxed font-normal">
-                  {paragraph}
-                </p>
-              ))}
-              {summaryData.comfortConvenience.length > 1 && (
+          {summaryData.comfortConvenience && summaryData.comfortConvenience.length > 0 && (
+            <div className="mb-5 last:mb-0">
+              <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
+                <div className="w-1.5 h-1.5 bg-gray-600 rounded-full mr-2"></div>
+                Comfort & Convenience
+              </h3>
+              <div className="ml-4">
+                <div className={`text-gray-700 text-sm leading-relaxed font-normal space-y-2 ${!showComfort ? 'line-clamp-4' : ''}`}>
+                  {summaryData.comfortConvenience.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
                 <button
-                  onClick={() => setShowFullComfort(!showFullComfort)}
-                  className="text-red-500 hover:text-red-600 font-normal text-sm transition-colors"
+                  onClick={() => setShowComfort(!showComfort)}
+                  className="text-red-500 hover:text-red-600 font-normal text-sm transition-colors mt-1"
                 >
-                  {showFullComfort ? 'Read Less' : 'Read More'}
+                  {showComfort ? 'Read Less' : 'Read More'}
                 </button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
+
         </div>
       </div>
     </section>

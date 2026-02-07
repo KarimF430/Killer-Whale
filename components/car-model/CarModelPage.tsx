@@ -30,6 +30,7 @@ const ModelFAQ = dynamic(() => import('./ModelFAQ'), {
 
 
 import ModelOwnerReviews from './ModelOwnerReviews'
+import ExpertReviewSection from './ExpertReviewSection'
 
 interface ModelData {
   isUpcomingCar?: boolean
@@ -260,26 +261,30 @@ const userReviews = [
   }
 ]
 
+
+
 // Navigation sections for sticky ribbon
 const navigationSections = [
   { id: 'hero', label: 'Overview' },
+  { id: 'specifications', label: 'Key Specs' },
   { id: 'pricing', label: 'Pricing' },
   { id: 'variants', label: 'Variants' },
-  { id: 'specifications', label: 'Key Specs' },
   { id: 'highlights', label: 'Highlights' },
   { id: 'colors', label: 'Colors' },
   { id: 'pros-cons', label: 'Pros & Cons' },
   { id: 'engine', label: 'Engine' },
   { id: 'mileage', label: 'Mileage' },
+  { id: 'expert-review', label: 'Expert Review' }, // Moved after Mileage
   { id: 'similar-cars', label: 'Similar Cars' },
   { id: 'news', label: 'News' },
   { id: 'videos', label: 'Videos' },
   { id: 'faq', label: 'FAQ' },
-  { id: 'reviews', label: 'Reviews' }
+  { id: 'reviews', label: 'User Reviews' }
 ]
 
 export default function CarModelPage({ model, initialVariants = [], newsSlot }: CarModelPageProps) {
   const router = useRouter()
+  const [isMounted, setIsMounted] = useState(false)
   const [activeFilter, setActiveFilter] = useState('All')
   const [selectedFilters, setSelectedFilters] = useState<string[]>(['All']) // Multi-select filters
   const [selectedMileageEngine, setSelectedMileageEngine] = useState(0)
@@ -293,6 +298,9 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
   const [selectedStorageIndex, setSelectedStorageIndex] = useState(0)
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
   // Image Gallery Modal state for highlights and colors
+  const [showDescription, setShowDescription] = useState(false)
+  const [showExterior, setShowExterior] = useState(false)
+  const [showComfort, setShowComfort] = useState(false)
   const [galleryModalOpen, setGalleryModalOpen] = useState(false)
   const [galleryImages, setGalleryImages] = useState<Array<{ src: string; alt: string; caption?: string }>>([])
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0)
@@ -313,6 +321,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
   // Load saved city from localStorage after mount to avoid hydration mismatch
   useEffect(() => {
+    setIsMounted(true)
     console.log('[CarModelPage] useEffect running, model:', model?.name, 'brand:', model?.brand)
     if (typeof window !== 'undefined') {
       const savedCity = localStorage.getItem('selectedCity')
@@ -465,7 +474,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
     ? endingPriceData.onRoadPrice
     : actualEndingPrice
 
-  const cityName = selectedCity.split(',')[0] || 'Delhi'
+  const cityName = (isMounted ? selectedCity : (model?.cities?.[0]?.name || 'Delhi')).split(',')[0] || 'Delhi'
   const priceLabel = startingPriceData.isOnRoadMode ? `On-Road Price in ${cityName}` : 'Ex-showroom Price'
 
   // Calculate EMI for display (20% down, 7 years, 8% interest)
@@ -551,7 +560,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
   // Intersection Observer for sticky navigation highlighting
   useEffect(() => {
     // Section IDs for navigation
-    const sectionIds = ['overview', 'emi-highlights', 'variants', 'colors', 'pros-cons', 'engine', 'mileage', 'similar-cars', 'news-videos', 'faq-reviews']
+    const sectionIds = ['overview', 'emi-highlights', 'variants', 'colors', 'pros-cons', 'engine', 'mileage', 'expert-review', 'similar-cars', 'news-videos', 'faq-reviews']
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -949,6 +958,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
     { id: 'pros-cons', name: 'Pros & Cons' },
     { id: 'engine', name: 'Engine' },
     { id: 'mileage', name: 'Mileage' },
+    { id: 'expert-review', name: 'Expert Review' },
     { id: 'similar-cars', name: 'Similar Cars' },
     { id: 'news-videos', name: 'News & Videos' },
     { id: 'faq-reviews', name: 'FAQ & Reviews' }
@@ -1215,9 +1225,9 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                   const modelSlug = model.name.toLowerCase().replace(/\s+/g, '-')
 
                   // Get selected city from localStorage
-                  const selectedCityValue = typeof window !== 'undefined'
+                  const selectedCityValue = isMounted
                     ? localStorage.getItem('selectedCity') || 'Mumbai, Maharashtra'
-                    : 'Mumbai, Maharashtra'
+                    : (model?.cities?.[0]?.name || 'Mumbai, Maharashtra')
                   const citySlug = selectedCityValue.split(',')[0].toLowerCase().replace(/\s+/g, '-')
 
                   // Navigate directly to price-in route (no variant = will show base variant)
@@ -1298,7 +1308,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-left flex items-center justify-between hover:border-gray-400 transition-colors"
               >
                 <span className="text-gray-700">
-                  {selectedCity || 'Delhi'}
+                  {isMounted ? (selectedCity || 'Delhi') : (model?.cities?.[0]?.name || 'Delhi')}
                 </span>
                 <ChevronDown className="w-5 h-5 text-gray-400" />
               </Link>
@@ -1563,6 +1573,8 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
           </div>
         </PageSection>
 
+
+
         {/* Section 3: Model Price Details & Variants */}
         <div id="variants">
           {allVariants.length > 0 && (
@@ -1652,7 +1664,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
         </div>
 
         {/* Section 4: AD Banner + Color Options */}
-        {(model?.colorImages?.length > 0 || (model?.colors && model.colors.length > 0)) && (
+        {((model?.colorImages?.length || 0) > 0 || (model?.colors && model.colors.length > 0)) && (
           <PageSection background="white" maxWidth="7xl">
             <div id="colors" className="space-y-8">
               {/* Ad Banner */}
@@ -1860,7 +1872,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                       {(showAllPros ? allPros : allPros.slice(0, 2)).map((pro, index) => (
                         <li key={index} className="flex items-start space-x-3">
                           <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                          <p className="text-gray-700 text-sm leading-relaxed">
+                          <p className="text-gray-700 text-base leading-relaxed">
                             {pro}
                           </p>
                         </li>
@@ -1869,7 +1881,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
                     <button
                       onClick={() => setShowAllPros(!showAllPros)}
-                      className="text-red-500 hover:text-red-600 text-sm font-medium mt-4"
+                      className="text-red-500 hover:text-red-600 text-base font-normal mt-4"
                     >
                       {showAllPros ? 'Show less' : '...more'}
                     </button>
@@ -1890,7 +1902,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                       {(showAllCons ? allCons : allCons.slice(0, 2)).map((con, index) => (
                         <li key={index} className="flex items-start space-x-3">
                           <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                          <p className="text-gray-700 text-sm leading-relaxed">
+                          <p className="text-gray-700 text-base leading-relaxed">
                             {con}
                           </p>
                         </li>
@@ -1899,7 +1911,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
                     <button
                       onClick={() => setShowAllCons(!showAllCons)}
-                      className="text-red-500 hover:text-red-600 text-sm font-medium mt-4"
+                      className="text-red-500 hover:text-red-600 text-base font-normal mt-4"
                     >
                       {showAllCons ? 'Show less' : '...more'}
                     </button>
@@ -1910,25 +1922,36 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
 
             {/* Model Summary Section - Only show if any summary data exists */}
             {(model?.description || model?.exteriorDesign || model?.comfortConvenience) && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{model?.brand || 'Car'} {model?.name || 'Model'} Review - Expert Summary</h2>
 
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Description - Only show if backend data exists */}
                   {model?.description && (
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
                         <h3 className="text-lg font-bold text-gray-900">Description</h3>
                       </div>
-                      <ul className="space-y-2">
-                        {parseBulletPoints(model.description).map((point, index) => (
-                          <li key={index} className="flex items-start space-x-2">
-                            <span className="text-gray-400 mt-1">•</span>
-                            <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className={`relative ${!showDescription ? 'max-h-[6rem] overflow-hidden' : ''} transition-all duration-300`}>
+                        <ul className="space-y-2">
+                          {parseBulletPoints(model.description).map((point, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <span className="text-gray-400 mt-1">•</span>
+                              <span className="text-gray-700 text-base leading-relaxed">{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        {!showDescription && (
+                          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setShowDescription(!showDescription)}
+                        className="text-red-500 hover:text-red-600 font-normal text-base transition-colors mt-2 flex items-center gap-1"
+                      >
+                        {showDescription ? 'Read Less' : 'Read More'}
+                      </button>
                     </div>
                   )}
 
@@ -1936,17 +1959,28 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                   {model?.exteriorDesign && (
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
                         <h3 className="text-lg font-bold text-gray-900">Exterior Design</h3>
                       </div>
-                      <ul className="space-y-2">
-                        {parseBulletPoints(model.exteriorDesign).map((point, index) => (
-                          <li key={index} className="flex items-start space-x-2">
-                            <span className="text-gray-400 mt-1">•</span>
-                            <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className={`relative ${!showExterior ? 'max-h-[6rem] overflow-hidden' : ''} transition-all duration-300`}>
+                        <ul className="space-y-2">
+                          {parseBulletPoints(model.exteriorDesign).map((point, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <span className="text-gray-400 mt-1">•</span>
+                              <span className="text-gray-700 text-base leading-relaxed">{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        {!showExterior && (
+                          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setShowExterior(!showExterior)}
+                        className="text-red-500 hover:text-red-600 font-normal text-base transition-colors mt-2 flex items-center gap-1"
+                      >
+                        {showExterior ? 'Read Less' : 'Read More'}
+                      </button>
                     </div>
                   )}
 
@@ -1954,17 +1988,28 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                   {model?.comfortConvenience && (
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
                         <h3 className="text-lg font-bold text-gray-900">Comfort & Convenience</h3>
                       </div>
-                      <ul className="space-y-2">
-                        {parseBulletPoints(model.comfortConvenience).map((point, index) => (
-                          <li key={index} className="flex items-start space-x-2">
-                            <span className="text-gray-400 mt-1">•</span>
-                            <span className="text-gray-700 text-sm leading-relaxed">{point}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className={`relative ${!showComfort ? 'max-h-[6rem] overflow-hidden' : ''} transition-all duration-300`}>
+                        <ul className="space-y-2">
+                          {parseBulletPoints(model.comfortConvenience).map((point, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <span className="text-gray-400 mt-1">•</span>
+                              <span className="text-gray-700 text-base leading-relaxed">{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        {!showComfort && (
+                          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setShowComfort(!showComfort)}
+                        className="text-red-500 hover:text-red-600 font-normal text-sm transition-colors mt-2 flex items-center gap-1"
+                      >
+                        {showComfort ? 'Read Less' : 'Read More'}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -2246,6 +2291,14 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
           )
         }
 
+        {/* Expert Review Section */}
+        {/* Section 7.5: Expert Review */}
+        <PageSection background="white" maxWidth="7xl">
+          <div id="expert-review" className="scroll-mt-24">
+            <ExpertReviewSection model={model} />
+          </div>
+        </PageSection>
+
         {/* Section 8: Similar Cars */}
         {similarCars.length > 0 && (
           <PageSection background="white" maxWidth="7xl">
@@ -2310,11 +2363,6 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                           <CarCard
                             key={car.id}
                             car={car}
-                            onClick={() => {
-                              const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                              const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                              window.location.href = `/${brandSlug}-cars/${modelSlug}`
-                            }}
                           />
                         ))}
                       </div>

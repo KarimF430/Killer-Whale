@@ -205,11 +205,6 @@ export default function CarsByBudget({ allCars }: CarsByBudgetProps) {
                 <CarCard
                   key={car.id}
                   car={car}
-                  onClick={() => {
-                    const brandSlug = car.brandName.toLowerCase().replace(/\s+/g, '-')
-                    const modelSlug = car.name.toLowerCase().replace(/\s+/g, '-')
-                    window.location.href = `/${brandSlug}-cars/${modelSlug}`
-                  }}
                 />
               ))}
 

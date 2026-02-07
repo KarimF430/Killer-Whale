@@ -67,8 +67,8 @@ export default function FuelCalculatorPage() {
                                         key={f.id}
                                         onClick={() => setFuelType(f.id)}
                                         className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-all ${fuelType === f.id
-                                                ? 'bg-orange-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            ? 'bg-orange-600 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                             }`}
                                     >
                                         {f.label}
@@ -151,31 +151,137 @@ export default function FuelCalculatorPage() {
                     </div>
 
                     {/* SEO Content */}
-                    <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">How to Use the Fuel Calculator</h2>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Planning a road trip or daily commute? Our fuel calculator helps you estimate fuel costs before you hit the road.
-                            Simply enter the distance you plan to travel, your vehicle's mileage, and the current fuel price to get an instant estimate.
-                        </p>
+                    <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
+                        <section className="mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Complete Guide to Fuel Cost Calculation</h2>
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                Planning a road trip or budgeting for your daily commute? Understanding your fuel expenses is crucial for managing your monthly budget.
+                                The gadizone Fuel Cost Calculator is a simple yet powerful tool designed to help you estimate exactly how much you'll spend on fuel for any given trip.
+                                Whether you drive a petrol, diesel, or CNG vehicle, our calculator uses the latest fuel prices to provide accurate estimates.
+                            </p>
+                            <p className="text-gray-700 leading-relaxed">
+                                Simply enter your trip distance, your vehicle's mileage (fuel efficiency), and the current fuel price in your city.
+                                The calculator will instantly show you the total fuel required and the estimated cost, helping you plan your journey better.
+                            </p>
+                        </section>
 
-                        <h3 className="text-base font-semibold text-gray-900 mb-2">Understanding Fuel Efficiency</h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Fuel efficiency varies based on driving conditions, vehicle type, and maintenance. Highway driving typically
-                            gives better mileage than city driving. Regular servicing and proper tire pressure can improve your vehicle's fuel economy.
-                        </p>
+                        <section className="mb-8">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">How to Calculate Fuel Cost Manually?</h3>
+                            <p className="text-gray-700 mb-3">The formula to calculate fuel cost is straightforward:</p>
+                            <div className="bg-orange-50 p-4 rounded-lg border border-orange-100 mb-4">
+                                <p className="font-mono text-orange-800 font-medium">Fuel Cost = (Distance / Mileage) × Fuel Price</p>
+                            </div>
+                            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-2">
+                                <li><strong>Distance:</strong> The total kilometers you plan to travel.</li>
+                                <li><strong>Mileage:</strong> Your vehicle's fuel efficiency (km/l or km/kg).</li>
+                                <li><strong>Fuel Price:</strong> The current cost of fuel per litre or kg.</li>
+                            </ul>
+                        </section>
 
-                        <h3 className="text-base font-semibold text-gray-900 mb-2">Current Fuel Prices in India</h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Fuel prices in India are revised daily based on international crude oil prices. The prices shown are approximate
-                            averages for metro cities. Actual prices may vary by city and fuel station.
-                        </p>
+                        <section className="mb-8">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">5 Smart Tips to Save Fuel</h3>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 className="font-semibold text-gray-900 mb-2">1. Maintain Steady Speed</h4>
+                                    <p className="text-sm text-gray-600">Avoid sudden acceleration and braking. Driving at a constant speed of 45-55 km/h is often the most fuel-efficient for city driving.</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-900 mb-2">2. Check Tyre Pressure</h4>
+                                    <p className="text-sm text-gray-600">Under-inflated tyres increase rolling resistance, forcing the engine to work harder. Keeping tyres properly inflated can improve mileage by up to 3%.</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-900 mb-2">3. Reduce AC Usage</h4>
+                                    <p className="text-sm text-gray-600">The air conditioner puts a significant load on the engine. On pleasant days, consider turning off the AC to save fuel.</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-900 mb-2">4. Plan Your Route</h4>
+                                    <p className="text-sm text-gray-600">Use navigation apps to avoid traffic jams. Idling in traffic consumes fuel without covering any distance (0 km/l).</p>
+                                </div>
+                            </div>
+                        </section>
 
-                        <div className="mt-6 pt-4 border-t border-gray-100">
-                            <h3 className="text-base font-semibold text-gray-900 mb-3">Related Calculators</h3>
-                            <div className="flex flex-wrap gap-2">
-                                <Link href="/emi-calculator" className="text-sm text-orange-600 hover:underline">EMI Calculator →</Link>
-                                <span className="text-gray-300">|</span>
-                                <Link href="/compare" className="text-sm text-orange-600 hover:underline">Compare Cars →</Link>
+                        <section className="mb-8">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Petrol vs Diesel vs CNG: Cost Comparison</h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left border-collapse">
+                                    <thead className="bg-gray-50 text-gray-700">
+                                        <tr>
+                                            <th className="p-3 border">Fuel Type</th>
+                                            <th className="p-3 border">Avg. Price (₹)</th>
+                                            <th className="p-3 border">Avg. Mileage</th>
+                                            <th className="p-3 border">Cost per KM</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td className="p-3 border font-medium">Petrol</td>
+                                            <td className="p-3 border">₹100 - ₹110</td>
+                                            <td className="p-3 border">12 - 18 km/l</td>
+                                            <td className="p-3 border">~₹6 - ₹9</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-3 border font-medium">Diesel</td>
+                                            <td className="p-3 border">₹90 - ₹100</td>
+                                            <td className="p-3 border">18 - 24 km/l</td>
+                                            <td className="p-3 border">~₹4 - ₹5.5</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="p-3 border font-medium">CNG</td>
+                                            <td className="p-3 border">₹75 - ₹85</td>
+                                            <td className="p-3 border">24 - 32 km/kg</td>
+                                            <td className="p-3 border text-green-600 font-bold">~₹2.5 - ₹3.5</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">*Estimates based on average hatchback performance in 2024.</p>
+                        </section>
+
+                        <section>
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h3>
+                            <div className="space-y-4">
+                                <details className="group border-b border-gray-100 pb-4">
+                                    <summary className="flex justify-between items-center font-medium cursor-pointer list-none text-gray-800 hover:text-orange-600">
+                                        <span>Does using AC affect fuel consumption?</span>
+                                        <span className="transition group-open:rotate-180">
+                                            <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                        </span>
+                                    </summary>
+                                    <p className="text-gray-600 mt-3 text-sm">Yes, using the air conditioner can increase fuel consumption by 10% to 20%, especially in city traffic. However, at highway speeds, open windows can create drag that might use more fuel than the AC.</p>
+                                </details>
+                                <details className="group border-b border-gray-100 pb-4">
+                                    <summary className="flex justify-between items-center font-medium cursor-pointer list-none text-gray-800 hover:text-orange-600">
+                                        <span>Which speed is most fuel efficient?</span>
+                                        <span className="transition group-open:rotate-180">
+                                            <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                        </span>
+                                    </summary>
+                                    <p className="text-gray-600 mt-3 text-sm">For most cars, the sweet spot for fuel efficiency is between 50 km/h and 80 km/h in top gear. Driving significantly faster increases wind resistance, while driving slower usually requires lower gears, consuming more fuel.</p>
+                                </details>
+                                <details className="group border-b border-gray-100 pb-4">
+                                    <summary className="flex justify-between items-center font-medium cursor-pointer list-none text-gray-800 hover:text-orange-600">
+                                        <span>How to calculate mileage manually?</span>
+                                        <span className="transition group-open:rotate-180">
+                                            <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                        </span>
+                                    </summary>
+                                    <p className="text-gray-600 mt-3 text-sm">The "Tank-to-Tank" method is most accurate: Fill your tank to the brim and reset the trip meter. Drive for a few hundred km. Refill the tank to the brim again. Divide the kilometers driven by the litres of fuel needed to refill. Result = Actual Mileage.</p>
+                                </details>
+                            </div>
+                        </section>
+
+                        <div className="mt-8 pt-6 border-t border-gray-100">
+                            <h3 className="text-base font-semibold text-gray-900 mb-3">Explore More Tools</h3>
+                            <div className="flex flex-wrap gap-4">
+                                <Link href="/emi-calculator" className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                                    Car EMI Calculator <ArrowLeft className="w-3 h-3 rotate-180" />
+                                </Link>
+                                <Link href="/compare" className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                                    Compare Cars <ArrowLeft className="w-3 h-3 rotate-180" />
+                                </Link>
+                                <Link href="/location" className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                                    Check On-Road Price <ArrowLeft className="w-3 h-3 rotate-180" />
+                                </Link>
                             </div>
                         </div>
                     </div>

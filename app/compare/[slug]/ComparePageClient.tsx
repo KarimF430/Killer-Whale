@@ -35,7 +35,7 @@ interface Model {
 
 interface ComparisonItem {
   model: Model
-  variant: Variant
+  variant: Variant | null
 }
 
 interface ComparePageClientProps {
@@ -641,7 +641,7 @@ export default function ComparePageClient({
           {/* EMI Values - Two Columns */}
           <div className="grid grid-cols-2 gap-6">
             {comparisonItems.filter((item): item is ComparisonItem => item !== null && !!item.variant).map((item, index) => {
-              const onRoadPrice = getOnRoadPrice(item.variant.price, item.variant.fuelType)
+              const onRoadPrice = getOnRoadPrice(item.variant!.price, item.variant!.fuelType)
               const emi = calculateEMI(onRoadPrice)
 
               return (
@@ -692,7 +692,7 @@ export default function ComparePageClient({
                   <div className="pb-4 space-y-2">
                     {section.specs.map((spec) => {
                       const validItems = comparisonItems.filter((item): item is ComparisonItem => item !== null && !!item.variant)
-                      const values = validItems.map(item => item.variant[spec.key] || 'N/A')
+                      const values = validItems.map(item => item.variant![spec.key] || 'N/A')
                       const allSame = values.every(v => v === values[0])
                       if (showDifferences && allSame) return null
 
@@ -709,7 +709,7 @@ export default function ComparePageClient({
                           <div className="grid grid-cols-2 gap-4">
                             {comparisonItems.filter((item): item is ComparisonItem => item !== null && !!item.variant).map((item, idx) => (
                               <div key={idx} className={`text-sm font-medium ${!allSame ? 'text-gray-900' : 'text-gray-600'}`}>
-                                {item.variant[spec.key] || 'N/A'}
+                                {item.variant![spec.key] || 'N/A'}
                               </div>
                             ))}
                           </div>
@@ -752,7 +752,7 @@ export default function ComparePageClient({
                 const carPrice = car.startingPrice || 0
                 if (carPrice === 0) return null
 
-                const currentModelOnRoad = getOnRoadPrice(firstValidItem.variant.price, firstValidItem.variant.fuelType)
+                const currentModelOnRoad = getOnRoadPrice(firstValidItem.variant!.price, firstValidItem.variant!.fuelType)
                 const compareCarOnRoad = getOnRoadPrice(carPrice, car.fuelTypes?.[0] || car.lowestPriceFuelType || 'Petrol')
 
                 return (
@@ -945,7 +945,7 @@ export default function ComparePageClient({
                     handleVariantChange(showVariantModal, v)
                     setShowVariantModal(null)
                   }}
-                  className={`w-full text-left px-5 py-4 hover:bg-gray-50 rounded-xl transition-colors border-2 mb-3 ${v.id === comparisonItems[showVariantModal]!.variant.id
+                  className={`w-full text-left px-5 py-4 hover:bg-gray-50 rounded-xl transition-colors border-2 mb-3 ${v.id === comparisonItems[showVariantModal]!.variant?.id
                     ? 'bg-orange-50 border-orange-500'
                     : 'border-gray-100 hover:border-gray-200'
                     }`}
@@ -955,7 +955,7 @@ export default function ComparePageClient({
                       <div className="font-semibold text-gray-900 text-base mb-1">{v.name}</div>
                       <div className="text-sm text-gray-500">₹{(v.price / 100000).toFixed(2)} Lakhs</div>
                     </div>
-                    {v.id === comparisonItems[showVariantModal]!.variant.id && (
+                    {v.id === comparisonItems[showVariantModal]!.variant?.id && (
                       <div className="ml-3 w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
