@@ -16,16 +16,16 @@ export default function Footer() {
               specifications, reviews, and get the best deals from authorized dealers.
             </p>
             <div className="flex space-x-4">
-              <a href="https://facebook.com/gadizone" className="text-gray-400 hover:text-red-400 transition-colors" aria-label="Follow us on Facebook">
+              <a href="https://facebook.com/gadizone" target="_blank" rel="nofollow noopener" className="text-gray-400 hover:text-red-400 transition-colors" aria-label="Follow us on Facebook">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="https://twitter.com/gadizone" className="text-gray-400 hover:text-orange-400 transition-colors" aria-label="Follow us on Twitter">
+              <a href="https://twitter.com/gadizone" target="_blank" rel="nofollow noopener" className="text-gray-400 hover:text-orange-400 transition-colors" aria-label="Follow us on Twitter">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="https://instagram.com/gadizone" className="text-gray-400 hover:text-red-400 transition-colors" aria-label="Follow us on Instagram">
+              <a href="https://instagram.com/gadizone" target="_blank" rel="nofollow noopener" className="text-gray-400 hover:text-red-400 transition-colors" aria-label="Follow us on Instagram">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="https://youtube.com/gadizone" className="text-gray-400 hover:text-orange-400 transition-colors" aria-label="Subscribe to our YouTube channel">
+              <a href="https://youtube.com/gadizone" target="_blank" rel="nofollow noopener" className="text-gray-400 hover:text-orange-400 transition-colors" aria-label="Subscribe to our YouTube channel">
                 <Youtube className="h-5 w-5" />
               </a>
             </div>
@@ -135,7 +135,7 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              © 2024 gadizone. All rights reserved.
+              © {new Date().getFullYear()} gadizone. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
               <Link href="/privacy-policy" className="text-gray-400 hover:text-red-400 transition-colors">
@@ -154,6 +154,6 @@ export default function Footer() {
           </div>
         </div>
       </div>
-    </footer>
+    </footer >
   )
 }
