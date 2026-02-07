@@ -14,6 +14,8 @@ export default function Ad3DCarousel({
     autoRotate = true,
     rotateInterval = 4000
 }: Ad3DCarouselProps) {
+    // Temporarily hide all ads
+    return null;
     const [currentIndex, setCurrentIndex] = useState(0)
     const [isVisible, setIsVisible] = useState(true)
     const [isDragging, setIsDragging] = useState(false)

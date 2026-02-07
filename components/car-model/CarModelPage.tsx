@@ -1060,7 +1060,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
       <div>
         {/* Section 1: Overview - New Design */}
         <PageSection background="white" maxWidth="7xl">
-          <div id="overview" className="space-y-6">
+          <div id="overview" className="space-y-3">
             {/* Hero Car Image with Gallery - Scrollable */}
             <div className="relative group cursor-pointer" onClick={() => router.push(`/${model.brandSlug}-cars/${model.slug}/images`)}>
               <div id="model-gallery" className="aspect-[16/10] bg-gray-100 rounded-2xl overflow-x-auto snap-x snap-mandatory scrollbar-hide flex touch-pan-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
@@ -1126,7 +1126,7 @@ export default function CarModelPage({ model, initialVariants = [], newsSlot }: 
                 </h1>
 
                 {!model?.isUpcomingCar && (
-                  <div className="flex items-center space-x-4 mb-4">
+                  <div className="flex items-center space-x-4 mb-2">
                     {totalReviews > 0 && (
                       <div className="flex items-center bg-gradient-to-r from-red-600 to-orange-500 text-white px-3 py-1 rounded">
                         <Star className="w-4 h-4 mr-1 fill-current" />
