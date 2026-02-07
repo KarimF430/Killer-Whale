@@ -70,8 +70,7 @@ export function generateSEO({
       },
     },
     verification: {
-      google: 'your-google-verification-code',
-      yandex: 'your-yandex-verification-code',
+      // Google verification is set in layout.tsx
     },
   }
 }
@@ -111,7 +110,7 @@ export const staticPageSEO = {
   home: generateSEO({
     title: 'New Cars in India - Latest Prices, Reviews & Comparisons',
     description: 'Find new cars in India with AI-powered search. Compare prices, specs, reviews and get best deals from authorized dealers.',
-    keywords: 'new cars India, car prices 2024, car specifications, car reviews, car comparison, EMI calculator, car deals, Maruti Suzuki, Hyundai, Tata, Mahindra',
+    keywords: `new cars India, car prices ${new Date().getFullYear()}, car specifications, car reviews, car comparison, EMI calculator, car deals, Maruti Suzuki, Hyundai, Tata, Mahindra`,
     canonical: '/',
   }),
 
