@@ -153,14 +153,24 @@ app.use((req, res, next) => {
 app.use('/api', apiLimiter);
 
 // Serve uploaded files statically from a canonical path
-const uploadsStaticPath = path.join(process.cwd(), 'uploads');
+const uploadsStaticPath = path.resolve(process.cwd(), 'uploads');
 
 // Fallback: if a legacy .jpg/.png is requested but only a .webp exists, serve the .webp
 app.get('/uploads/*', (req, res, next) => {
   try {
-    const reqPath = req.path; // e.g., /uploads/image-123.jpg
-    const relPath = reqPath.replace(/^\/+/, ''); // remove leading /
-    const absPath = path.join(process.cwd(), relPath);
+    const reqPath = decodeURIComponent(req.path); // handle encoded path characters
+
+    // Normalize and resolve absolute path to prevent traversal
+    const absPath = path.normalize(path.join(process.cwd(), reqPath));
+
+    // SECURITY: Ensure the path remains within the uploads directory
+    if (!absPath.startsWith(uploadsStaticPath)) {
+      console.warn(`🚨 Security: Blocked potential path traversal attempt: ${reqPath}`);
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const relPath = reqPath.replace(/^\/+/, ''); // for R2 redirect
+
     fs.access(absPath, fs.constants.R_OK, (err) => {
       if (!err) return next(); // file exists; let static middleware handle it
 
@@ -172,9 +182,9 @@ app.get('/uploads/*', (req, res, next) => {
       }
 
       // Try .webp counterpart
-      const webpRel = relPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-      if (webpRel === relPath) return next();
-      const webpAbs = path.join(process.cwd(), webpRel);
+      const webpAbs = absPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+      if (webpAbs === absPath) return next();
+
       fs.access(webpAbs, fs.constants.R_OK, (err2) => {
         if (!err2) {
           res.type('image/webp').sendFile(webpAbs);
@@ -435,9 +445,12 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
       console.warn('⚠️  MongoDB backup sync initialization skipped:', error instanceof Error ? error.message : error);
     }
 
+    // Register administrative routes with authentication
+    const { authenticateToken } = await import('./auth');
+
     // Register backup sync routes
     const backupSyncRoutes = (await import('./routes/backup-sync')).default;
-    app.use('/api/admin/backup', backupSyncRoutes);
+    app.use('/api/admin/backup', authenticateToken, backupSyncRoutes);
     console.log('✅ Backup sync routes registered at /api/admin/backup');
 
     // Register monitoring routes (no auth required)
@@ -445,7 +458,7 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
 
     // Register cache management routes
     const cacheRoutes = (await import('./routes/cache')).default;
-    app.use('/api/cache', cacheRoutes);
+    app.use('/api/cache', authenticateToken, cacheRoutes);
 
     // Register user authentication routes (public)
     const userAuthRoutes = (await import('./routes/user-auth')).default;
