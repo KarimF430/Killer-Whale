@@ -157,18 +157,37 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "gadizone",
-              "url": "https://www.gadizone.com",
-              "description": "New cars in India - Latest prices, reviews & comparisons",
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://www.gadizone.com/search?q={search_term_string}",
-                "query-input": "required name=search_term_string"
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "gadizone",
+                "url": "https://www.gadizone.com",
+                "description": "New cars in India - Latest prices, reviews & comparisons",
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": "https://www.gadizone.com/search?q={search_term_string}",
+                  "query-input": "required name=search_term_string"
+                }
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "gadizone",
+                "url": "https://www.gadizone.com",
+                "logo": "https://www.gadizone.com/logo.png",
+                "contactPoint": {
+                  "@type": "ContactPoint",
+                  "telephone": "+91-1234567890",
+                  "contactType": "customer service"
+                },
+                "sameAs": [
+                  "https://twitter.com/gadizone",
+                  "https://facebook.com/gadizone",
+                  "https://instagram.com/gadizone"
+                ]
               }
-            })
+            ])
           }}
         />
       </head>

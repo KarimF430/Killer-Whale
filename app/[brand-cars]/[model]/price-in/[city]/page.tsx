@@ -39,6 +39,7 @@ const cityMap: { [key: string]: string } = {
 }
 
 // Generate dynamic metadata for SEO
+// Generate dynamic metadata for SEO
 export async function generateMetadata({ params }: PriceInCityPageProps): Promise<Metadata> {
   const resolvedParams = await params
 
@@ -53,6 +54,56 @@ export async function generateMetadata({ params }: PriceInCityPageProps): Promis
   const title = `${brandName} ${modelName} Price in ${cityName} - On-Road Price, EMI, Variants | gadizone`
   const description = `Get ${brandName} ${modelName} on-road price in ${cityName}. Check detailed price breakup including ex-showroom price, RTO, insurance, and calculate EMI. Compare variants and get the best deals.`
 
+  // Fetch model image for OpenGraph
+  let modelImage = 'https://www.gadizone.com/og-image.jpg' // Default fallback
+  try {
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001'
+    const start = Date.now()
+
+    // OPTIMIZATION: Use the light "models-with-pricing" or similar if available, 
+    // but for now we need the specific model image. 
+    // We can reuse the same fetch logic as getPriceBreakupData but lighter.
+    // Or just fetch brands -> find brand -> fetch models -> find model.
+    // To save time in metadata generation, let's try to hit the specific model endpoint directly if we had ID.
+    // Since we don't have ID, we have to search.
+
+    // Strategy: Fetch models list for the brand if possible, or just all models if list is cached/small.
+    // Actually, let's just fetch all models like getPriceBreakupData does but faster?
+    // No, let's rely on the fact that these are cached.
+
+    const [brandsRes, modelsRes] = await Promise.all([
+      fetch(`${backendUrl}/api/brands`, { next: { revalidate: 3600 } }),
+      fetch(`${backendUrl}/api/models`, { next: { revalidate: 3600 } }),
+    ])
+
+    if (brandsRes.ok && modelsRes.ok) {
+      const brands = await brandsRes.json()
+      const models = await modelsRes.json()
+
+      const brand = brands.find((b: any) =>
+        b.name.toLowerCase() === brandSlug.toLowerCase().replace(/-/g, ' ') ||
+        b.name.toLowerCase().replace(/\s+/g, '-') === brandSlug.toLowerCase()
+      )
+
+      if (brand) {
+        const model = models.find((m: any) =>
+          m.brandId === brand.id && (
+            m.name.toLowerCase() === modelSlug.toLowerCase().replace(/-/g, ' ') ||
+            m.name.toLowerCase().replace(/\s+/g, '-') === modelSlug.toLowerCase()
+          )
+        )
+
+        if (model && model.heroImage) {
+          modelImage = model.heroImage.startsWith('http')
+            ? model.heroImage
+            : `${backendUrl}${model.heroImage}`
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching OG image for price page:', e)
+  }
+
   return {
     title,
     description,
@@ -62,11 +113,20 @@ export async function generateMetadata({ params }: PriceInCityPageProps): Promis
       description,
       type: 'website',
       url: `/${resolvedParams['brand-cars']}/${modelSlug}/price-in/${citySlug}`,
+      images: [
+        {
+          url: modelImage,
+          width: 1200,
+          height: 630,
+          alt: `${brandName} ${modelName} Price in ${cityName}`,
+        }
+      ]
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [modelImage],
     },
     alternates: {
       canonical: `/${resolvedParams['brand-cars']}/${modelSlug}/price-in/${citySlug}`,
