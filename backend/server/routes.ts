@@ -1422,7 +1422,12 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
 
       // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      // SECURITY: Sanitize query to prevent regex injection and ReDoS
+      const sanitizedQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (!sanitizedQuery) {
+        return res.json({ results: [], count: 0, took: 0, source: 'none' });
+      }
+      const searchRegex = new RegExp(sanitizedQuery.split(/\s+/).join('.*'), 'i');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
