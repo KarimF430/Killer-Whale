@@ -97,38 +97,51 @@ async function getModelData(slug: string) {
     // Format highlight images
     const formatHighlightImages = (images: any[] | undefined): { url: string; caption: string }[] => {
       if (!images || !Array.isArray(images)) return []
-      return images.map((img: any) => ({
-        url: formatImageUrl(img.url),
-        caption: img.caption || ''
-      })).filter((img: any): img is { url: string; caption: string } => !!img.url)
+      const result: { url: string; caption: string }[] = []
+      for (const img of images) {
+        const url = formatImageUrl(img?.url)
+        if (url) {
+          result.push({ url, caption: img.caption || '' })
+        }
+      }
+      return result
     }
 
     // Format color images
     const formatColorImages = (images: any[] | undefined): { url: string; caption: string }[] => {
       if (!images || !Array.isArray(images)) return []
-      return images.map((img: any) => ({
-        url: formatImageUrl(img.url),
-        caption: img.caption || ''
-      })).filter((img: any): img is { url: string; caption: string } => !!img.url)
+      const result: { url: string; caption: string }[] = []
+      for (const img of images) {
+        const url = formatImageUrl(img?.url)
+        if (url) {
+          result.push({ url, caption: img.caption || '' })
+        }
+      }
+      return result
     }
+
+    const keyFeatureImages = formatHighlightImages(detailedModelData?.keyFeatureImages)
+    const spaceComfortImages = formatHighlightImages(detailedModelData?.spaceComfortImages)
+    const storageConvenienceImages = formatHighlightImages(detailedModelData?.storageConvenienceImages)
+    const colorImages = formatColorImages(detailedModelData?.colorImages)
 
     console.log('Gallery images from backend:', detailedModelData?.galleryImages)
     console.log('Final gallery array:', galleryImages)
     console.log('✅ Highlight images:', {
-      keyFeatureImages: formatHighlightImages(detailedModelData?.keyFeatureImages),
-      spaceComfortImages: formatHighlightImages(detailedModelData?.spaceComfortImages),
-      storageConvenienceImages: formatHighlightImages(detailedModelData?.storageConvenienceImages),
-      colorImages: formatColorImages(detailedModelData?.colorImages)
+      keyFeatureImages,
+      spaceComfortImages,
+      storageConvenienceImages,
+      colorImages
     })
 
-    const brandSlug = brandData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    const brandSlug: string = (brandData.name as string).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
     const enhancedModelData = {
       id: modelData.id,
       slug: modelData.slug,
       brand: modelData.brandName,
       brandSlug: brandSlug,
       name: modelData.name,
-      heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : modelData.image),
+      heroImage: galleryImages[0] || ((modelData.image as string | undefined)?.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : (modelData.image as string | undefined)) || '',
       gallery: galleryImages,
       rating: modelData.rating,
       reviewCount: modelData.reviews,
@@ -180,11 +193,11 @@ async function getModelData(slug: string) {
         safetyRating: '4 Star'
       },
       // Backend highlight images (with proper URL formatting)
-      keyFeatureImages: formatHighlightImages(detailedModelData?.keyFeatureImages),
-      spaceComfortImages: formatHighlightImages(detailedModelData?.spaceComfortImages),
-      storageConvenienceImages: formatHighlightImages(detailedModelData?.storageConvenienceImages),
+      keyFeatureImages,
+      spaceComfortImages,
+      storageConvenienceImages,
       // Backend color images (with proper URL formatting)
-      colorImages: formatColorImages(detailedModelData?.colorImages),
+      colorImages,
       // Backend pros, cons, and summary data
       pros: detailedModelData?.pros || [],
       cons: detailedModelData?.cons || [],
