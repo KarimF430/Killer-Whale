@@ -16,6 +16,7 @@ import helmet from "helmet";
 import { apiLimiter } from "./middleware/rateLimiter";
 import { botDetector } from "./middleware/security";
 import { warmUpCache } from "./middleware/redis-cache";
+import { authenticateToken } from "./auth";
 import compression from "compression";
 import pinoHttp from "pino-http";
 import session from "express-session";
@@ -435,31 +436,31 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
       console.warn('⚠️  MongoDB backup sync initialization skipped:', error instanceof Error ? error.message : error);
     }
 
-    // Register backup sync routes
+    // Register backup sync routes (auth required)
     const backupSyncRoutes = (await import('./routes/backup-sync')).default;
-    app.use('/api/admin/backup', backupSyncRoutes);
+    app.use('/api/admin/backup', authenticateToken, backupSyncRoutes);
     console.log('✅ Backup sync routes registered at /api/admin/backup');
 
     // Register monitoring routes (no auth required)
     app.use('/api/monitoring', monitoringRoutes);
 
-    // Register cache management routes
+    // Register cache management routes (auth required)
     const cacheRoutes = (await import('./routes/cache')).default;
-    app.use('/api/cache', cacheRoutes);
+    app.use('/api/cache', authenticateToken, cacheRoutes);
 
     // Register user authentication routes (public)
     const userAuthRoutes = (await import('./routes/user-auth')).default;
     app.use('/api/user', userAuthRoutes);
     console.log('✅ User authentication routes registered at /api/user');
 
-    // Register admin user management routes
+    // Register admin user management routes (auth required)
     const adminUsersRoutes = (await import('./routes/admin-users')).default;
-    app.use('/api/admin/users', adminUsersRoutes);
+    app.use('/api/admin/users', authenticateToken, adminUsersRoutes);
     console.log('✅ Admin users routes registered at /api/admin/users');
 
-    // Register diagnostics route
+    // Register diagnostics route (auth required)
     const diagnosticsRoutes = (await import('./routes/diagnostics')).default;
-    app.use('/api/diagnostics', diagnosticsRoutes);
+    app.use('/api/diagnostics', authenticateToken, diagnosticsRoutes);
     console.log('✅ Diagnostics routes registered at /api/diagnostics');
 
     // Register recommendations routes (personalized car suggestions)
