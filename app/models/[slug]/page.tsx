@@ -95,21 +95,21 @@ async function getModelData(slug: string) {
     }
 
     // Format highlight images
-    const formatHighlightImages = (images: any[] | undefined) => {
+    const formatHighlightImages = (images: any[] | undefined): { url: string; caption: string }[] => {
       if (!images || !Array.isArray(images)) return []
       return images.map((img: any) => ({
         url: formatImageUrl(img.url),
         caption: img.caption || ''
-      })).filter((img: any) => img.url)
+      })).filter((img: any): img is { url: string; caption: string } => !!img.url)
     }
 
     // Format color images
-    const formatColorImages = (images: any[] | undefined) => {
+    const formatColorImages = (images: any[] | undefined): { url: string; caption: string }[] => {
       if (!images || !Array.isArray(images)) return []
       return images.map((img: any) => ({
         url: formatImageUrl(img.url),
         caption: img.caption || ''
-      })).filter((img: any) => img.url)
+      })).filter((img: any): img is { url: string; caption: string } => !!img.url)
     }
 
     console.log('Gallery images from backend:', detailedModelData?.galleryImages)

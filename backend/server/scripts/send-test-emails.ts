@@ -165,10 +165,10 @@ async function sendAllEmailsToUsers() {
         console.log('\n✅ Manual email send complete!\n');
 
     } catch (error) {
-            console.error('❌ Fatal error:', error);
-            throw error;
-        }
+        console.error('❌ Fatal error:', error);
+        throw error;
     }
+}
 
 // Run the script
 connectDB()
