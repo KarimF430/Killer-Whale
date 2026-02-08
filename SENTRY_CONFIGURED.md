@@ -8,9 +8,10 @@
 ## 🎯 **SENTRY DSN ADDED**
 
 ### **Configuration:**
+# SECURITY: DSNs below are placeholders. Use environment variables for real keys.
 ```bash
-NEXT_PUBLIC_SENTRY_DSN=https://dfa8bbe92d50b1cf8171c2edddadfe61@o4510345482797056.ingest.us.sentry.io/4510345483583488
-SENTRY_DSN=https://dfa8bbe92d50b1cf8171c2edddadfe61@o4510345482797056.ingest.us.sentry.io/4510345483583488
+NEXT_PUBLIC_SENTRY_DSN=https://your-key@sentry.io/your-project-id
+SENTRY_DSN=https://your-key@sentry.io/your-project-id
 ```
 
 ### **Files Configured:**
