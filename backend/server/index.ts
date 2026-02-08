@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { registerRoutes } from "./routes";
+import { authenticateToken } from "./auth";
 import { setupVite, serveStatic, log } from "./vite";
 import { MongoDBStorage } from "./db/mongodb-storage";
 import type { IStorage } from "./storage";
@@ -443,23 +444,23 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
     // Register monitoring routes (no auth required)
     app.use('/api/monitoring', monitoringRoutes);
 
-    // Register cache management routes
+    // Register cache management routes (protected)
     const cacheRoutes = (await import('./routes/cache')).default;
-    app.use('/api/cache', cacheRoutes);
+    app.use('/api/cache', authenticateToken, cacheRoutes);
 
     // Register user authentication routes (public)
     const userAuthRoutes = (await import('./routes/user-auth')).default;
     app.use('/api/user', userAuthRoutes);
     console.log('✅ User authentication routes registered at /api/user');
 
-    // Register admin user management routes
+    // Register admin user management routes (protected)
     const adminUsersRoutes = (await import('./routes/admin-users')).default;
-    app.use('/api/admin/users', adminUsersRoutes);
+    app.use('/api/admin/users', authenticateToken, adminUsersRoutes);
     console.log('✅ Admin users routes registered at /api/admin/users');
 
-    // Register diagnostics route
+    // Register diagnostics route (protected)
     const diagnosticsRoutes = (await import('./routes/diagnostics')).default;
-    app.use('/api/diagnostics', diagnosticsRoutes);
+    app.use('/api/diagnostics', authenticateToken, diagnosticsRoutes);
     console.log('✅ Diagnostics routes registered at /api/diagnostics');
 
     // Register recommendations routes (personalized car suggestions)
