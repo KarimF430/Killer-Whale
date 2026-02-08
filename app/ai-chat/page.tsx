@@ -10,6 +10,8 @@ import { Send, Mic, ThumbsUp, ThumbsDown, Copy, Menu, Plus, Sparkles } from 'luc
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import './chat-gpt-style.css'
+import analytics from '@/lib/analytics'
+import { AnalyticsEvent } from '@/types/analytics'
 
 interface Message {
     id: string
@@ -99,6 +101,13 @@ function AICarFinderContent() {
                     conversationHistory: updatedMessages
                 })
             })
+
+            // Track message sent
+            analytics.trackEvent(AnalyticsEvent.AI_CHAT_MESSAGE_SENT, {
+                message: typeof textToSend === 'string' ? textToSend.substring(0, 50) : 'Image/Audio', // Truncate for privacy/size
+                intent: 'user_message',
+                timestamp: Date.now()
+            });
 
             const data = await response.json()
 

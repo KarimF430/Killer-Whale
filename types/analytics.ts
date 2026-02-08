@@ -111,6 +111,12 @@ export interface AIEventProperties extends BaseEventProperties {
     suggestions_shown?: number;
 }
 
+export interface EMIEventProperties extends BaseEventProperties {
+    loan_amount: number;
+    interest_rate: number;
+    tenure_years: number;
+}
+
 export interface FilterEventProperties extends BaseEventProperties {
     filter_type: string;
     filter_value: string | number;
@@ -152,6 +158,7 @@ export type AnalyticsEventProperties =
     | SearchEventProperties
     | ComparisonEventProperties
     | PriceEventProperties
+    | EMIEventProperties
     | AIEventProperties
     | FilterEventProperties
     | EngagementEventProperties;

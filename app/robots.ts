@@ -7,23 +7,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: [
             {
                 userAgent: '*',
-                allow: [
-                    '/',
-                    '/*-cars/',
-                    '/*-cars/*/',
-                    '/news/',
-                    '/news/*',
-                    '/top-selling-cars-in-india',
-                    '/electric-cars',
-                    '/upcoming-cars-in-india',
-                    '/new-car-launches-in-india',
-                    '/popular-cars-in-india',
-                    '/about-us',
-                    '/contact-us',
-                    '/fuel-cost-calculator',
-                    '/emi-calculator',
-                    '/compare',
-                ],
+                allow: '/',
                 disallow: [
                     // API and Admin routes
                     '/api/',
@@ -39,25 +23,15 @@ export default function robots(): MetadataRoute.Robots {
                     // Debug/Test routes
                     '/debug-env',
                     '/test-honda',
+                    '/_next/',
 
-                    // Parameter URLs (CRITICAL - wastes crawl budget)
-                    '/*?*',
-                    '/emi-calculator?*',
-                    '/insurance?*',
-                    '/service?*',
-                    '/sell-car?*',
-                    '/compare?*',
-                    '/search?*',
-                    '/location?*',
-
-                    // Rate/Review pages (low SEO value)
-                    '/*/rate-review',
-                    '/*/write-review',
-
-                    // Technical files (Next.js chunks)
-                    '/_next/static/',
-                    '/_next/data/',
-                    '/_next/image/',
+                    // Parameter URLs (CRITICAL - conserve crawl budget)
+                    '/*?*', // Block all query parameters generally
+                    '/search',
+                    '/location',
+                    '/insurance',
+                    '/service',
+                    '/sell-car',
 
                     // Utility pages with low SEO value
                     '/feedback',
@@ -65,41 +39,25 @@ export default function robots(): MetadataRoute.Robots {
                     '/terms-and-conditions',
                     '/visitor-agreement',
                     '/google-terms',
-
-                    // Duplicate car routes (legacy)
-                    '/cars/',
                 ],
-            },
-            {
-                userAgent: 'GPTBot',
-                allow: '/',
-                disallow: ['/api/', '/admin/', '/_next/'],
-            },
-            {
-                userAgent: 'Google-Extended',
-                allow: '/',
-                disallow: ['/api/', '/admin/', '/_next/'],
-            },
-            {
-                userAgent: 'CCBot',
-                allow: '/',
-                disallow: ['/api/', '/admin/', '/_next/'],
             },
             {
                 userAgent: 'Googlebot',
-                allow: [
-                    '/',
-                    '/*-cars/',
-                    '/*-cars/*/',
-                    '/news/',
-                ],
+                allow: '/',
                 disallow: [
-                    '/*?*',
-                    '/_next/',
                     '/api/',
-                    '/*/rate-review',
-                    '/*/write-review',
+                    '/admin/',
+                    '/_next/',
+                    '/*?*',
+                    '/search',
+                    // Allowed /compare for SEO
                 ],
+            },
+            // Explicitly ALLOW AI Bots for SEO Dominance (GEO)
+            {
+                userAgent: ['GPTBot', 'ChatGPT-User', 'Google-Extended', 'CCBot', 'ClaudeBot', 'PerplexityBot'],
+                allow: ['/'],
+                disallow: ['/api/', '/admin/'],
             }
         ],
         sitemap: `${baseUrl}/sitemap.xml`,

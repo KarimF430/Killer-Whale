@@ -19,10 +19,13 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.gadizone.com'),
-  title: 'gadizone - New Cars in India | Latest Prices, Reviews & Comparisons',
-  description: 'Discover new cars in India with AI-powered search. Compare latest prices, detailed specifications, expert reviews, and get the best deals from authorized dealers across India.',
-  keywords: 'new cars India, car prices 2024, car specifications, car reviews, car comparison, EMI calculator, car deals, Maruti Suzuki, Hyundai, Tata, Mahindra',
-  authors: [{ name: 'gadizone' }],
+  title: {
+    default: 'gadizone - New Cars in India | Check Prices, Specs & Reviews',
+    template: '%s | gadizone'
+  },
+  description: 'Find your perfect car with gadizone. Compare latest car prices in India, read expert reviews, check detailed specifications, and get the best on-road price deals.',
+  keywords: ['new cars India', 'car prices', 'car reviews', 'compare cars', 'on road price', 'car dealers', 'gadizone', 'automotive news'],
+  authors: [{ name: 'gadizone Team' }],
   creator: 'gadizone',
   publisher: 'gadizone',
   formatDetection: {
@@ -46,14 +49,14 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: 'https://www.gadizone.com',
     siteName: 'gadizone',
-    title: 'gadizone - New Cars in India | Latest Prices & Reviews',
-    description: 'Discover new cars in India with AI-powered search. Compare latest prices, detailed specifications, and expert reviews from authorized dealers.',
+    title: 'gadizone - The Best Way to Buy a New Car in India',
+    description: 'Detailed specs, real owner reviews, and instant on-road price quotes for all cars in India.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'gadizone - New Cars in India',
+        alt: 'gadizone - Find Your Dream Car',
       },
     ],
   },

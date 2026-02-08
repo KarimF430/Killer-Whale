@@ -98,3 +98,23 @@ export function generateFAQSchema(faqs: { question: string; answer: string }[]) 
         }))
     }
 }
+
+export function generateFinancialProductSchema() {
+    return {
+        "@context": "https://schema.org",
+        "@type": "FinancialProduct",
+        "name": "Car Loan EMI Calculator",
+        "description": "Calculate your monthly car loan payments with our free EMI calculator. Compare interest rates and loan tenures.",
+        "brand": {
+            "@type": "Brand",
+            "name": "gadizone"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "INR"
+        },
+        "annualPercentageRate": "8.5",
+        "feesAndCommissionsSpecification": "No hidden fees"
+    }
+}

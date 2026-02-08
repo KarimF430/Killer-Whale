@@ -6,6 +6,8 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { ChevronDown, Info, X, Pencil, Search, ArrowLeft } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import PageContainer, { PageSection } from '../layout/PageContainer'
+import analytics from '@/lib/analytics'
+import { AnalyticsEvent } from '@/types/analytics'
 
 // Dynamically import the TataSierraAdBanner
 const TataSierraAdBanner = dynamic(() => import('@/components/ads/TataSierraAdBanner'), { ssr: false })
@@ -45,6 +47,21 @@ export default function EMICalculatorPage() {
   const [tenure, setTenure] = useState(7)
   const [tenureMonths, setTenureMonths] = useState(84)
   const [interestRate, setInterestRate] = useState(8)
+
+  // Analytics tracking for calculation
+  useEffect(() => {
+    // Debounce the tracking to avoid firing on every slider change
+    const timer = setTimeout(() => {
+      analytics.trackEvent(AnalyticsEvent.EMI_CALCULATED, {
+        loan_amount: carPrice - downPayment,
+        interest_rate: interestRate,
+        tenure_years: tenure,
+        timestamp: Date.now()
+      });
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [carPrice, downPayment, interestRate, tenure]);
 
   // Section visibility - all open by default
   const [showDownPayment, setShowDownPayment] = useState(true)
