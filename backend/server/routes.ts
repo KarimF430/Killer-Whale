@@ -29,7 +29,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { readFileSync } from "fs";
-import { randomUUID } from "crypto";
+import { randomUUID, randomInt } from "node:crypto";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -133,7 +133,8 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: uploadDir,
     filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      // SECURE: Use randomInt for unpredictable filename suffix to prevent collision and predictability attacks
+      const uniqueSuffix = Date.now() + '-' + randomInt(0, 1000000000);
       cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
   }),
@@ -225,7 +226,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         summary.r2Ok = true;
       } catch (error: any) {
         summary.r2Ok = false;
-        summary.error = error?.message || String(error);
+        // SECURE: Don't leak internal storage error details to the client
+        summary.error = 'Failed to connect to storage';
       }
 
       return res.json(summary);
@@ -838,10 +840,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
           // In production or when R2 is required, fail the upload
           if (requireR2) {
-            const message = error instanceof Error ? error.message : String(error);
             return res.status(500).json({
               error: 'Cloud storage upload failed. Logo not saved.',
-              details: message,
               suggestion: 'Please check R2 configuration or try again later.'
             });
           }
