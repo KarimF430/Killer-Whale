@@ -1,4 +1,4 @@
-import { ContentBlock } from '@/backend/server/db/news-storage'
+import { ContentBlock } from '@/types/news'
 import Link from 'next/link'
 
 interface ArticleRendererProps {

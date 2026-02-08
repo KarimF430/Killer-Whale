@@ -25,12 +25,14 @@ async function getModelData(slug: string) {
     // Find the brand by matching slug patterns
     let brandData = null
     let model = null
+    let brandSlug = ''
 
     for (const brand of brands) {
-      const brandSlug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      if (slug.startsWith(brandSlug + '-')) {
+      const currentBrandSlug = brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      if (slug.startsWith(currentBrandSlug + '-')) {
         brandData = brand
-        model = slug.substring(brandSlug.length + 1) // Remove brand slug and hyphen
+        brandSlug = currentBrandSlug
+        model = slug.substring(currentBrandSlug.length + 1) // Remove brand slug and hyphen
         break
       }
     }
@@ -97,19 +99,23 @@ async function getModelData(slug: string) {
     // Format highlight images
     const formatHighlightImages = (images: any[] | undefined) => {
       if (!images || !Array.isArray(images)) return []
-      return images.map((img: any) => ({
-        url: formatImageUrl(img.url),
-        caption: img.caption || ''
-      })).filter((img: any) => img.url)
+      return images
+        .map((img: any) => ({
+          url: formatImageUrl(img.url),
+          caption: img.caption || ''
+        }))
+        .filter((img): img is { url: string; caption: string } => typeof img.url === 'string')
     }
 
     // Format color images
     const formatColorImages = (images: any[] | undefined) => {
       if (!images || !Array.isArray(images)) return []
-      return images.map((img: any) => ({
-        url: formatImageUrl(img.url),
-        caption: img.caption || ''
-      })).filter((img: any) => img.url)
+      return images
+        .map((img: any) => ({
+          url: formatImageUrl(img.url),
+          caption: img.caption || ''
+        }))
+        .filter((img): img is { url: string; caption: string } => typeof img.url === 'string')
     }
 
     console.log('Gallery images from backend:', detailedModelData?.galleryImages)
@@ -125,6 +131,7 @@ async function getModelData(slug: string) {
       id: modelData.id,
       slug: modelData.slug,
       brand: modelData.brandName,
+      brandSlug: brandSlug,
       name: modelData.name,
       heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : modelData.image),
       gallery: galleryImages,
