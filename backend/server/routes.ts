@@ -1421,15 +1421,15 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      // Optimized search using MongoDB string-based $regex to prevent ReDoS
+      const searchPattern = query.split(/\s+/).map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
         db.collection('models').find({
           $or: [
-            { name: searchRegex },
-            { brandId: searchRegex }
+            { name: { $regex: searchPattern, $options: 'i' } },
+            { brandId: { $regex: searchPattern, $options: 'i' } }
           ],
           status: 'active'
         }, {
@@ -2790,7 +2790,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.use('/api/news', newsRoutes);
 
   // AI Chat endpoint
-  app.post('/api/ai-chat', publicLimiter, aiChatHandler);
+  app.post('/api/ai-chat', publicLimiter, securityMiddleware, aiChatHandler);
 
   // Quirky Bits endpoint (for floating AI bot)
   app.use('/api/quirky-bit', publicLimiter, quirkyBitRoutes);
