@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Review, ReviewComment } from '../db/schemas';
-import { authenticateToken } from '../auth';
+import { authenticateToken, authorizeRole } from '../auth';
 import { randomUUID } from 'crypto';
 
 const router = Router();
@@ -15,7 +15,8 @@ const calculateOverallRating = (starRatings: any): number => {
 };
 
 // All admin routes require authentication
-// router.use(authenticateToken);
+router.use(authenticateToken);
+router.use(authorizeRole('admin', 'editor', 'super_admin'));
 
 // GET /api/admin/reviews - List all reviews with filters
 router.get('/', async (req: Request, res: Response) => {

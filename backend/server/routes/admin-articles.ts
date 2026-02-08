@@ -1,9 +1,12 @@
 import express from 'express'
 import { newsStorage } from '../db/news-storage'
+import { authenticateToken, authorizeRole } from '../auth'
 
 const router = express.Router()
 
-// Removed authentication for now - open access
+// Protect all admin article routes - allow admins and editors
+router.use(authenticateToken)
+router.use(authorizeRole('admin', 'editor', 'super_admin'))
 
 // Helper function to generate slug from title
 function generateSlug(title: string): string {
