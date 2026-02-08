@@ -13,6 +13,7 @@
  */
 
 import mongoose from 'mongoose'
+import { escapeRegExp } from '../utils/security'
 
 // ============================================
 // MONGODB SCHEMAS FOR LEARNING
@@ -148,7 +149,7 @@ function extractPatternKey(query: string): string {
 
     // Replace car names with placeholder
     for (const car of carPatterns) {
-        pattern = pattern.replace(new RegExp(`\\b${car}\\b`, 'gi'), '{CAR}')
+        pattern = pattern.replace(new RegExp(`\\b${escapeRegExp(car)}\\b`, 'gi'), '{CAR}')
     }
 
     // Replace numbers and prices

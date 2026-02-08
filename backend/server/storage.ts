@@ -1,6 +1,7 @@
 import type { Brand, InsertBrand, Model, InsertModel, UpcomingCar, InsertUpcomingCar, Variant, InsertVariant, PopularComparison, InsertPopularComparison, AdminUser, InsertAdminUser } from "@shared/schema";
 import fs from "fs";
 import path from "path";
+import { randomUUID, randomInt } from "crypto";
 import { hashPassword } from "./auth";
 
 export interface IStorage {
@@ -200,7 +201,8 @@ export class PersistentStorage implements IStorage {
 
   // Helper to generate 10-digit brand ID
   private generateBrandId(): string {
-    const id = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+    // SECURITY: Use CSPRNG for ID generation
+    const id = randomInt(1000000000, 9999999999).toString();
     // Check if ID exists, regenerate if it does
     if (this.brands.some(b => b.id === id)) {
       return this.generateBrandId();
@@ -212,7 +214,8 @@ export class PersistentStorage implements IStorage {
   private generateModelId(brandName: string, modelName: string): string {
     const brandCode = brandName.substring(0, 2).toUpperCase();
     const modelCode = modelName.substring(0, 2).toUpperCase();
-    const digits = Math.floor(1000 + Math.random() * 9000).toString();
+    // SECURITY: Use CSPRNG for ID generation
+    const digits = randomInt(1000, 9999).toString();
     return `${brandCode}${modelCode}${digits}`;
   }
 
@@ -404,7 +407,7 @@ export class PersistentStorage implements IStorage {
   async createUpcomingCar(car: InsertUpcomingCar): Promise<UpcomingCar> {
     const newCar: UpcomingCar = {
       ...car as any,
-      id: `upcoming-${Date.now()}`,
+      id: `upcoming-${randomUUID()}`,
       createdAt: new Date()
     };
     this.upcomingCars.push(newCar);
@@ -529,7 +532,7 @@ export class PersistentStorage implements IStorage {
 
     // Create new comparisons with IDs
     const newComparisons: PopularComparison[] = comparisons.map((comp, index) => ({
-      id: `comparison-${Date.now()}-${index}`,
+      id: `comparison-${randomUUID()}`,
       model1Id: comp.model1Id,
       model2Id: comp.model2Id,
       order: comp.order || index + 1,
@@ -553,7 +556,7 @@ export class PersistentStorage implements IStorage {
 
   async createAdminUser(user: InsertAdminUser): Promise<AdminUser> {
     const newUser: AdminUser = {
-      id: `admin-${Date.now()}`,
+      id: `admin-${randomUUID()}`,
       email: user.email,
       password: user.password, // Should already be hashed
       name: user.name,

@@ -37,13 +37,14 @@ async function resolveLocalPathFromUploadsUrl(uploadsUrl: string): Promise<{ abs
   // Keep the same key path in R2
   const rel = uploadsUrl.replace(/^\//, '') // remove leading /
   const absCandidate = path.join(process.cwd(), rel)
-  const ext = path.extname(rel) || '.webp'
+  const ext = path.extname(rel)
+  const base = ext ? absCandidate.slice(0, -ext.length) : absCandidate
   const candidates = [absCandidate]
   // Try popular alternates if the specific ext missing
-  if (ext !== '.webp') candidates.push(absCandidate.replace(new RegExp(ext + '$'), '.webp'))
-  if (ext !== '.jpg') candidates.push(absCandidate.replace(new RegExp(ext + '$'), '.jpg'))
-  if (ext !== '.jpeg') candidates.push(absCandidate.replace(new RegExp(ext + '$'), '.jpeg'))
-  if (ext !== '.png') candidates.push(absCandidate.replace(new RegExp(ext + '$'), '.png'))
+  if (ext !== '.webp') candidates.push(base + '.webp')
+  if (ext !== '.jpg') candidates.push(base + '.jpg')
+  if (ext !== '.jpeg') candidates.push(base + '.jpeg')
+  if (ext !== '.png') candidates.push(base + '.png')
 
   for (const abs of candidates) {
     if (await fileExists(abs)) {

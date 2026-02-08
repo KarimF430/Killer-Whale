@@ -344,6 +344,7 @@ export async function semanticCarSearch(
 // ============================================
 
 import { findBestCarMatches, CAR_ALIASES, resolveCarAlias } from './fuzzy-match'
+import { sanitizeForRegExp } from '../utils/security'
 
 // Common car names for extraction
 const KNOWN_CAR_NAMES = [
@@ -413,9 +414,12 @@ export async function exactNameSearch(
     console.log(`🎯 Exact search: found car names [${carNames.join(', ')}] in query`)
 
     // Build regex patterns for each car name
-    const namePatterns = carNames.map(name => ({
-        name: { $regex: new RegExp(`^${name}$|^${name}\\s|\\s${name}$|\\s${name}\\s`, 'i') }
-    }))
+    const namePatterns = carNames.map(name => {
+        const s = sanitizeForRegExp(name);
+        return {
+            name: { $regex: `^${s}$|^${s}\\s|\\s${s}$|\\s${s}\\s`, $options: 'i' }
+        };
+    })
 
     // Also search by brand name
     const brandPatterns = carNames.map(name => ({

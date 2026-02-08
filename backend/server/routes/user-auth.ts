@@ -806,7 +806,8 @@ router.post('/send-otp', otpLimiter, async (req, res) => {
         }
 
         // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // SECURITY: Use crypto.randomInt for cryptographically strong OTP generation
+        const otp = crypto.randomInt(100000, 999999).toString();
 
         // Hash OTP before storing (security)
         const hashedOtp = await bcrypt.hash(otp, 10);
@@ -1035,7 +1036,8 @@ router.post('/register-send-otp', otpLimiter, async (req, res) => {
         }
 
         // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // SECURITY: Use crypto.randomInt for cryptographically strong OTP generation
+        const otp = crypto.randomInt(100000, 999999).toString();
 
         // Hash OTP
         const hashedOtp = await bcrypt.hash(otp, 10);

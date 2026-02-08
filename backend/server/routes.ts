@@ -9,6 +9,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   authenticateToken,
+  authorizeRole,
   isValidEmail,
   isStrongPassword,
   sanitizeUser,
@@ -29,7 +30,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { readFileSync } from "fs";
-import { randomUUID } from "crypto";
+import { randomUUID, randomInt } from "crypto";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -52,6 +53,7 @@ import adminEmailRoutes from "./routes/admin-emails.routes";
 import priceHistoryRoutes from "./routes/price-history.routes";
 import adminHumanizeRoutes from "./routes/admin-humanize";
 import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
+import { sanitizeForRegExp } from "./utils/security";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -133,7 +135,8 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: uploadDir,
     filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      // SECURITY: Using randomUUID for unpredictable filenames
+      const uniqueSuffix = Date.now() + '-' + randomUUID();
       cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
   }),
@@ -1422,7 +1425,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
 
       // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      const searchRegex = { $regex: sanitizeForRegExp(query).split(' ').join('.*'), $options: 'i' };
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
@@ -2509,7 +2512,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(variant);
   });
 
-  app.post("/api/variants", async (req, res) => {
+  app.post("/api/variants", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
 
@@ -2536,14 +2539,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('❌ Variant creation error:', error);
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message, stack: error.stack });
+        res.status(400).json({ error: error.message });
       } else {
         res.status(400).json({ error: "Invalid variant data" });
       }
     }
   });
 
-  app.patch("/api/variants/:id", async (req, res) => {
+  app.patch("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2599,7 +2602,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/variants/:id", async (req, res) => {
+  app.delete("/api/variants/:id", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
 
@@ -2763,7 +2766,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.post("/api/popular-comparisons", async (req, res) => {
+  app.post("/api/popular-comparisons", authenticateToken, authorizeRole('admin', 'super_admin'), modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       const comparisons = req.body;
 
@@ -2803,20 +2806,21 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
 
   // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
-  app.use('/api/admin/articles', adminArticlesRoutes);
-  app.use('/api/admin/categories', adminCategoriesRoutes);
-  app.use('/api/admin/tags', adminTagsRoutes);
-  app.use('/api/admin/authors', adminAuthorsRoutes);
-  app.use('/api/admin/media', adminMediaRoutes);
-  app.use('/api/admin/reviews', adminReviewsRoutes);
-  app.use('/api/admin/emails', adminEmailRoutes);
+  // Protected with authentication and role-based authorization
+  app.use('/api/admin/articles', authenticateToken, authorizeRole('admin', 'super_admin', 'editor'), adminArticlesRoutes);
+  app.use('/api/admin/categories', authenticateToken, authorizeRole('admin', 'super_admin', 'editor'), adminCategoriesRoutes);
+  app.use('/api/admin/tags', authenticateToken, authorizeRole('admin', 'super_admin', 'editor'), adminTagsRoutes);
+  app.use('/api/admin/authors', authenticateToken, authorizeRole('admin', 'super_admin'), adminAuthorsRoutes);
+  app.use('/api/admin/media', authenticateToken, authorizeRole('admin', 'super_admin', 'editor'), adminMediaRoutes);
+  app.use('/api/admin/reviews', authenticateToken, authorizeRole('admin', 'super_admin'), adminReviewsRoutes);
+  app.use('/api/admin/emails', authenticateToken, authorizeRole('admin', 'super_admin'), adminEmailRoutes);
 
   // Price history routes (public)
   app.use('/api/price-history', publicLimiter, priceHistoryRoutes);
 
   // Public reviews routes
   app.use('/api/reviews', publicLimiter, reviewsRoutes);
-  app.use('/api/admin/analytics', adminAnalyticsRoutes);
+  app.use('/api/admin/analytics', authenticateToken, authorizeRole('admin', 'super_admin'), adminAnalyticsRoutes);
 
   // Admin authentication routes (with rate limiting) - MUST come AFTER specific routes
   app.use('/api/admin', authLimiter, adminAuthRoutes);
@@ -2903,8 +2907,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Humanize AI Content Routes
-  app.use('/api/admin/humanize', adminHumanizeRoutes);
+  // Register humanize routes (admin/editor only)
+  app.use('/api/admin/humanize', authenticateToken, authorizeRole('admin', 'super_admin', 'editor'), adminHumanizeRoutes);
 }
 
 

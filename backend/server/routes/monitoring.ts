@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getRedisCacheStats } from '../middleware/redis-cache';
 import { getCacheStats } from '../middleware/cache';
 import mongoose from 'mongoose';
+import { authenticateToken, authorizeRole } from '../auth';
 
 const router = Router();
 
@@ -65,9 +66,9 @@ router.get('/health', async (req, res) => {
 
 /**
  * Metrics Endpoint
- * Returns detailed system metrics
+ * Returns detailed system metrics (Protected)
  */
-router.get('/metrics', async (req, res) => {
+router.get('/metrics', authenticateToken, authorizeRole('admin', 'super_admin'), async (req, res) => {
   try {
     const metrics = {
       timestamp: new Date().toISOString(),
@@ -172,9 +173,9 @@ router.get('/live', (req, res) => {
 
 /**
  * Performance Stats
- * Returns performance statistics
+ * Returns performance statistics (Protected)
  */
-router.get('/stats', async (req, res) => {
+router.get('/stats', authenticateToken, authorizeRole('admin', 'super_admin'), async (req, res) => {
   try {
     const stats = {
       timestamp: new Date().toISOString(),
