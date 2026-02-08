@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     images: ['/og-image.jpg'],
   },
   alternates: {
-    canonical: 'https://www.gadizone.com',
+    // canonical: 'https://www.gadizone.com', // REMOVED: This was causing all pages to canonicalize to home
   },
   verification: {
     google: 'LFtjPhYM1moenJzbsp_pbaHepFH24i14Qwf6h5Z5-as',

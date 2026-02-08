@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { BACKEND_URL } from '@/lib/config';
 
 // Use Node.js runtime for Vercel Free plan compatibility
 export const runtime = 'nodejs';
@@ -33,11 +34,11 @@ export async function GET(request: NextRequest) {
     const includeInactive = searchParams.get('includeInactive') === 'true';
 
     console.log(`🚀 API Route: GET /api/brands (includeInactive: ${includeInactive})`);
-    
+
     const startTime = Date.now();
-    
+
     // Direct fetch to backend instead of using brandApi
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+    const backendUrl = BACKEND_URL;
     const backendResponse = await fetch(`${backendUrl}/api/brands`, {
       headers: {
         'Accept': 'application/json',
@@ -68,14 +69,14 @@ export async function GET(request: NextRequest) {
         status: brand.status,
         summary: brand.summary || `${brand.name} - Premium automotive brand`,
         description: brand.summary ? brand.summary.split('.')[0] + '.' : 'Premium automotive brand',
-        popularModel: brand.name === 'Honda' ? 'City' : 
-                     brand.name === 'Maruti Suzuki' ? 'Swift' :
-                     brand.name === 'Hyundai' ? 'Creta' :
-                     brand.name === 'Tata' ? 'Nexon' : 'Popular Model',
+        popularModel: brand.name === 'Honda' ? 'City' :
+          brand.name === 'Maruti Suzuki' ? 'Swift' :
+            brand.name === 'Hyundai' ? 'Creta' :
+              brand.name === 'Tata' ? 'Nexon' : 'Popular Model',
         startingPrice: brand.name === 'Honda' ? '₹7.71 Lakh' :
-                      brand.name === 'Maruti Suzuki' ? '₹3.54 Lakh' :
-                      brand.name === 'Hyundai' ? '₹5.89 Lakh' :
-                      brand.name === 'Tata' ? '₹5.12 Lakh' : '₹6.00 Lakh',
+          brand.name === 'Maruti Suzuki' ? '₹3.54 Lakh' :
+            brand.name === 'Hyundai' ? '₹5.89 Lakh' :
+              brand.name === 'Tata' ? '₹5.12 Lakh' : '₹6.00 Lakh',
         href: `/brands/${brand.name.toLowerCase().replace(/\s+/g, '-')}`,
         models: '6+ Models',
         faqs: brand.faqs || []
@@ -100,12 +101,12 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('❌ Error in GET /api/brands:', error);
-    
+
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch brands',
       timestamp: new Date().toISOString()
-    }, { 
+    }, {
       status: 500,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate'
