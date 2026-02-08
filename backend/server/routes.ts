@@ -23,15 +23,13 @@ import {
 } from "./middleware/rateLimiter";
 import { redisCacheMiddleware, invalidateRedisCache, CacheTTL as RedisCacheTTL } from "./middleware/redis-cache";
 import { securityMiddleware, validateFileUpload } from "./middleware/sanitize";
-// Note: News routes use authMiddleware (Author-based), while car data routes use authenticateToken (AdminUser-based)
-import { authMiddleware } from "./middleware/auth";
 import { ipWhitelist, botDetector, ddosShield } from "./middleware/security";
 import { imageProcessingConfigs, ImageProcessor } from "./middleware/image-processor";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { readFileSync } from "fs";
-import { randomUUID } from "crypto";
+import { randomUUID, randomInt } from "node:crypto";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -135,7 +133,8 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: uploadDir,
     filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      // SECURE: Use randomInt for unpredictable filename suffix to prevent collision and predictability attacks
+      const uniqueSuffix = Date.now() + '-' + randomInt(0, 1000000000);
       cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
   }),
@@ -227,7 +226,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         summary.r2Ok = true;
       } catch (error: any) {
         summary.r2Ok = false;
-        summary.error = error?.message || String(error);
+        // SECURE: Don't leak internal storage error details to the client
+        summary.error = 'Failed to connect to storage';
       }
 
       return res.json(summary);
@@ -840,10 +840,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
           // In production or when R2 is required, fail the upload
           if (requireR2) {
-            const message = error instanceof Error ? error.message : String(error);
             return res.status(500).json({
               error: 'Cloud storage upload failed. Logo not saved.',
-              details: message,
               suggestion: 'Please check R2 configuration or try again later.'
             });
           }
@@ -2357,71 +2355,145 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  // Variants Router
-  const variantRouter = express.Router();
-
-  // Public GET routes
-  variantRouter.get("/", publicLimiter, redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
+  // Variants (public endpoint + caching + NO PAGINATION)
+  app.get("/api/variants", publicLimiter, redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
+    // Set browser cache headers (15 minutes)
     res.set('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=1800');
+
     const modelId = req.query.modelId as string | undefined;
     const brandId = req.query.brandId as string | undefined;
     const fields = req.query.fields as string | undefined;
 
     try {
       let allVariants = await storage.getVariants(modelId);
+
+      // Filter by brand if provided
       if (brandId) {
         const models = await storage.getModels(brandId);
         const modelIds = new Set(models.map(m => m.id));
         allVariants = allVariants.filter(v => modelIds.has(v.modelId));
       }
 
+      // Field projection optimization
       if (fields) {
         if (fields === 'minimal') {
+          // Minimal fields for list views - expanded to include all display fields
           const minimalVariants = allVariants.map(v => ({
-            id: v.id, name: v.name, price: v.price, fuelType: v.fuelType, fuel: v.fuel,
-            transmission: v.transmission, modelId: v.modelId, keyFeatures: v.keyFeatures,
-            headerSummary: v.headerSummary, power: v.power, maxPower: v.maxPower,
-            enginePower: v.enginePower, isValueForMoney: v.isValueForMoney,
-            mileage: v.mileageCompanyClaimed, mileageCompanyClaimed: v.mileageCompanyClaimed,
-            ventilatedSeats: v.ventilatedSeats, sunroof: v.sunroof, airPurifier: v.airPurifier,
-            headsUpDisplay: v.headsUpDisplay, cruiseControl: v.cruiseControl,
-            rainSensingWipers: v.rainSensingWipers, automaticHeadlamp: v.automaticHeadlamp,
-            followMeHomeHeadlights: v.followMeHomeHeadlights, keylessEntry: v.keylessEntry,
-            ignition: v.ignition, ambientLighting: v.ambientLighting, steeringAdjustment: v.steeringAdjustment,
-            airConditioning: v.airConditioning, climateZones: v.climateZones, rearACVents: v.rearACVents,
-            frontArmrest: v.frontArmrest, rearArmrest: v.rearArmrest, insideRearViewMirror: v.insideRearViewMirror,
-            outsideRearViewMirrors: v.outsideRearViewMirrors, steeringMountedControls: v.steeringMountedControls,
-            rearWindshieldDefogger: v.rearWindshieldDefogger, frontWindshieldDefogger: v.frontWindshieldDefogger,
-            cooledGlovebox: v.cooledGlovebox, globalNCAPRating: v.globalNCAPRating, airbags: v.airbags,
-            airbagsLocation: v.airbagsLocation, adasLevel: v.adasLevel, adasFeatures: v.adasFeatures,
-            reverseCamera: v.reverseCamera, reverseCameraGuidelines: v.reverseCameraGuidelines,
-            tyrePressureMonitor: v.tyrePressureMonitor, hillHoldAssist: v.hillHoldAssist,
-            hillDescentControl: v.hillDescentControl, rollOverMitigation: v.rollOverMitigation,
-            parkingSensor: v.parkingSensor, discBrakes: v.discBrakes, electronicStabilityProgram: v.electronicStabilityProgram,
-            abs: v.abs, ebd: v.ebd, brakeAssist: v.brakeAssist, isofixMounts: v.isofixMounts,
-            seatbeltWarning: v.seatbeltWarning, speedAlertSystem: v.speedAlertSystem,
-            speedSensingDoorLocks: v.speedSensingDoorLocks, immobiliser: v.immobiliser,
-            touchScreenInfotainment: v.touchScreenInfotainment, androidAppleCarplay: v.androidAppleCarplay,
-            speakers: v.speakers, tweeters: v.tweeters, subwoofers: v.subwoofers,
-            usbCChargingPorts: v.usbCChargingPorts, usbAChargingPorts: v.usbAChargingPorts,
-            twelvevChargingPorts: v.twelvevChargingPorts, wirelessCharging: v.wirelessCharging,
-            connectedCarTech: v.connectedCarTech, engineName: v.engineName, engineSummary: v.engineSummary,
-            engineTransmission: v.engineTransmission, engineTorque: v.engineTorque,
-            engineSpeed: v.engineSpeed, torque: v.torque, mileageEngineName: v.mileageEngineName,
-            mileageCityRealWorld: v.mileageCityRealWorld, mileageHighwayRealWorld: v.mileageHighwayRealWorld,
-            highlightImages: v.highlightImages, description: v.description,
-            exteriorDesign: v.exteriorDesign, comfortConvenience: v.comfortConvenience
+            id: v.id,
+            name: v.name,
+            price: v.price,
+            fuelType: v.fuelType,
+            fuel: v.fuel,
+            transmission: v.transmission,
+            modelId: v.modelId,
+            keyFeatures: v.keyFeatures,
+            headerSummary: v.headerSummary,
+            power: v.power,
+            maxPower: v.maxPower,
+            enginePower: v.enginePower,
+            isValueForMoney: v.isValueForMoney,
+            mileage: v.mileageCompanyClaimed,
+            mileageCompanyClaimed: v.mileageCompanyClaimed,
+
+            // Comfort & Convenience
+            ventilatedSeats: v.ventilatedSeats,
+            sunroof: v.sunroof,
+            airPurifier: v.airPurifier,
+            headsUpDisplay: v.headsUpDisplay,
+            cruiseControl: v.cruiseControl,
+            rainSensingWipers: v.rainSensingWipers,
+            automaticHeadlamp: v.automaticHeadlamp,
+            followMeHomeHeadlights: v.followMeHomeHeadlights,
+            keylessEntry: v.keylessEntry,
+            ignition: v.ignition,
+            ambientLighting: v.ambientLighting,
+            steeringAdjustment: v.steeringAdjustment,
+            airConditioning: v.airConditioning,
+            climateZones: v.climateZones,
+            rearACVents: v.rearACVents,
+            frontArmrest: v.frontArmrest,
+            rearArmrest: v.rearArmrest,
+            insideRearViewMirror: v.insideRearViewMirror,
+            outsideRearViewMirrors: v.outsideRearViewMirrors,
+            steeringMountedControls: v.steeringMountedControls,
+            rearWindshieldDefogger: v.rearWindshieldDefogger,
+            frontWindshieldDefogger: v.frontWindshieldDefogger,
+            cooledGlovebox: v.cooledGlovebox,
+
+            // Safety Features
+            globalNCAPRating: v.globalNCAPRating,
+            airbags: v.airbags,
+            airbagsLocation: v.airbagsLocation,
+            adasLevel: v.adasLevel,
+            adasFeatures: v.adasFeatures,
+            reverseCamera: v.reverseCamera,
+            reverseCameraGuidelines: v.reverseCameraGuidelines,
+            tyrePressureMonitor: v.tyrePressureMonitor,
+            hillHoldAssist: v.hillHoldAssist,
+            hillDescentControl: v.hillDescentControl,
+            rollOverMitigation: v.rollOverMitigation,
+            parkingSensor: v.parkingSensor,
+            discBrakes: v.discBrakes,
+            electronicStabilityProgram: v.electronicStabilityProgram,
+            abs: v.abs,
+            ebd: v.ebd,
+            brakeAssist: v.brakeAssist,
+            isofixMounts: v.isofixMounts,
+            seatbeltWarning: v.seatbeltWarning,
+            speedAlertSystem: v.speedAlertSystem,
+            speedSensingDoorLocks: v.speedSensingDoorLocks,
+            immobiliser: v.immobiliser,
+
+            // Entertainment & Connectivity
+            touchScreenInfotainment: v.touchScreenInfotainment,
+            androidAppleCarplay: v.androidAppleCarplay,
+            speakers: v.speakers,
+            tweeters: v.tweeters,
+            subwoofers: v.subwoofers,
+            usbCChargingPorts: v.usbCChargingPorts,
+            usbAChargingPorts: v.usbAChargingPorts,
+            twelvevChargingPorts: v.twelvevChargingPorts,
+            wirelessCharging: v.wirelessCharging,
+            connectedCarTech: v.connectedCarTech,
+
+            // Engine Data
+            engineName: v.engineName,
+            engineSummary: v.engineSummary,
+            engineTransmission: v.engineTransmission,
+            engineTorque: v.engineTorque,
+            engineSpeed: v.engineSpeed,
+            torque: v.torque,
+
+            // Mileage
+            mileageEngineName: v.mileageEngineName,
+            mileageCityRealWorld: v.mileageCityRealWorld,
+            mileageHighwayRealWorld: v.mileageHighwayRealWorld,
+
+            // Other
+            highlightImages: v.highlightImages,
+            description: v.description,
+            exteriorDesign: v.exteriorDesign,
+            comfortConvenience: v.comfortConvenience
           }));
           return res.json(minimalVariants);
         } else {
+          // Custom field selection (comma-separated)
           const fieldList = fields.split(',').map(f => f.trim());
-          return res.json(allVariants.map(v => {
+          const projectedVariants = allVariants.map(v => {
             const projected: any = {};
-            fieldList.forEach(f => { if ((v as any).hasOwnProperty(f)) projected[f] = (v as any)[f]; });
+            const variantAny = v as any;
+            fieldList.forEach(field => {
+              if (variantAny.hasOwnProperty(field)) {
+                projected[field] = variantAny[field];
+              }
+            });
             return projected;
-          }));
+          });
+          return res.json(projectedVariants);
         }
       }
+
+      // Return all variants directly as an array
       res.json(allVariants);
     } catch (error) {
       console.error('Error fetching variants:', error);
@@ -2429,64 +2501,126 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  variantRouter.get("/:id", redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
+  app.get("/api/variants/:id", redisCacheMiddleware(RedisCacheTTL.VARIANTS), async (req, res) => {
     const variant = await storage.getVariant(req.params.id);
-    if (!variant) return res.status(404).json({ error: "Variant not found" });
+    if (!variant) {
+      return res.status(404).json({ error: "Variant not found" });
+    }
     res.json(variant);
   });
 
-  // Protected mutation routes
-  variantRouter.use(authenticateToken, modifyLimiter);
-
-  variantRouter.post("/", securityMiddleware, async (req, res) => {
+  app.post("/api/variants", async (req, res) => {
     try {
+      console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
+
+      // Validate required fields
       if (!req.body.brandId || !req.body.modelId || !req.body.name || !req.body.price) {
-        return res.status(400).json({ error: "Missing required fields" });
+        console.error('❌ Missing required fields:', {
+          brandId: !!req.body.brandId,
+          modelId: !!req.body.modelId,
+          name: !!req.body.name,
+          price: !!req.body.price
+        });
+        return res.status(400).json({
+          error: "Missing required fields: brandId, modelId, name, and price are required"
+        });
       }
+
       const variant = await storage.createVariant(req.body);
+      console.log('✅ Variant created successfully:', variant.id);
+
+      // Invalidate variants cache
       await invalidateRedisCache('/api/variants');
+
       res.status(201).json(variant);
-    } catch (error: any) {
-      res.status(400).json({ error: error.message || "Invalid variant data" });
+    } catch (error) {
+      console.error('❌ Variant creation error:', error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message, stack: error.stack });
+      } else {
+        res.status(400).json({ error: "Invalid variant data" });
+      }
     }
   });
 
-  variantRouter.patch("/:id", securityMiddleware, async (req, res) => {
+  app.patch("/api/variants/:id", async (req, res) => {
     try {
-      const oldVariant = await storage.getVariant(req.params.id);
-      const variant = await storage.updateVariant(req.params.id, req.body);
-      if (!variant) return res.status(404).json({ error: "Variant not found" });
+      console.log('🔄 Updating variant:', req.params.id);
+      console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
 
-      if (oldVariant && req.body.price && oldVariant.price !== req.body.price) {
-        import('./services/price-monitoring.service').then(async ({ priceMonitoringService }) => {
-          const model = await storage.getModel(variant.modelId);
-          const brand = model ? await storage.getBrand(model.brandId) : null;
-          await priceMonitoringService.recordPriceChange({
-            variantId: variant.id, modelId: variant.modelId, brandId: variant.brandId,
-            variantName: variant.name, modelName: model?.name || 'Unknown',
-            brandName: brand?.name || 'Unknown', previousPrice: oldVariant.price, newPrice: req.body.price
-          });
-        }).catch(err => console.error('Price monitoring error:', err));
+      // Get old variant data before update for price comparison
+      const oldVariant = await storage.getVariant(req.params.id);
+
+      const variant = await storage.updateVariant(req.params.id, req.body);
+      if (!variant) {
+        return res.status(404).json({ error: "Variant not found" });
       }
+
+      console.log('✅ Variant updated successfully');
+
+      // Check for price changes and record in history
+      if (oldVariant && req.body.price && oldVariant.price !== req.body.price) {
+        console.log(`💰 Price change detected: ${oldVariant.price} → ${req.body.price}`);
+
+        // Record price change (async, don't block response)
+        if (process.env.EMAIL_SCHEDULER_ENABLED === 'true') {
+          import('./services/price-monitoring.service').then(async ({ priceMonitoringService }) => {
+            try {
+              // Get model and brand info
+              const model = await storage.getModel(variant.modelId);
+              const brand = model ? await storage.getBrand(model.brandId) : null;
+
+              await priceMonitoringService.recordPriceChange({
+                variantId: variant.id,
+                modelId: variant.modelId,
+                brandId: variant.brandId,
+                variantName: variant.name,
+                modelName: model?.name || 'Unknown',
+                brandName: brand?.name || 'Unknown',
+                previousPrice: oldVariant.price,
+                newPrice: req.body.price
+              });
+            } catch (error) {
+              console.error('Failed to record price change:', error);
+            }
+          }).catch(err => {
+            console.error('Failed to load price monitoring service:', err);
+          });
+        }
+      }
+
+      // Invalidate variants cache
       invalidateRedisCache('/api/variants');
+
       res.json(variant);
     } catch (error) {
+      console.error('❌ Variant update error:', error);
       res.status(500).json({ error: "Failed to update variant" });
     }
   });
 
-  variantRouter.delete("/:id", async (req, res) => {
+  app.delete("/api/variants/:id", async (req, res) => {
     try {
+      console.log('🗑️ DELETE request for variant ID:', req.params.id);
+
       const success = await storage.deleteVariant(req.params.id);
-      if (!success) return res.status(404).json({ error: "Variant not found" });
+
+      if (!success) {
+        console.log('❌ Variant not found or delete failed');
+        return res.status(404).json({ error: "Variant not found" });
+      }
+
+      console.log('✅ Variant deleted successfully, invalidating cache...');
+
+      // Invalidate variants cache
       invalidateRedisCache('/api/variants');
+
       res.status(204).send();
     } catch (error) {
+      console.error('❌ Delete variant route error:', error);
       res.status(500).json({ error: "Failed to delete variant" });
     }
   });
-
-  app.use('/api/variants', variantRouter);
 
   // Frontend API endpoints
   app.get("/api/frontend/brands/:brandId/models",
@@ -2629,7 +2763,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.post("/api/popular-comparisons", authenticateToken, async (req, res) => {
+  app.post("/api/popular-comparisons", async (req, res) => {
     try {
       const comparisons = req.body;
 
@@ -2668,26 +2802,21 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.use('/api/youtube', publicLimiter, createYouTubeRoutes(storage));
 
 
-  // SECURE: Admin management routes (Author-based auth)
-  [
-    ['articles', adminArticlesRoutes],
-    ['categories', adminCategoriesRoutes],
-    ['tags', adminTagsRoutes],
-    ['authors', adminAuthorsRoutes],
-    ['media', adminMediaRoutes],
-    ['reviews', adminReviewsRoutes],
-    ['emails', adminEmailRoutes],
-    ['analytics', adminAnalyticsRoutes],
-    ['humanize', adminHumanizeRoutes],
-  ].forEach(([path, handler]) => {
-    app.use(`/api/admin/${path}`, authMiddleware, handler as any);
-  });
+  // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
+  app.use('/api/admin/articles', adminArticlesRoutes);
+  app.use('/api/admin/categories', adminCategoriesRoutes);
+  app.use('/api/admin/tags', adminTagsRoutes);
+  app.use('/api/admin/authors', adminAuthorsRoutes);
+  app.use('/api/admin/media', adminMediaRoutes);
+  app.use('/api/admin/reviews', adminReviewsRoutes);
+  app.use('/api/admin/emails', adminEmailRoutes);
 
   // Price history routes (public)
   app.use('/api/price-history', publicLimiter, priceHistoryRoutes);
 
   // Public reviews routes
   app.use('/api/reviews', publicLimiter, reviewsRoutes);
+  app.use('/api/admin/analytics', adminAnalyticsRoutes);
 
   // Admin authentication routes (with rate limiting) - MUST come AFTER specific routes
   app.use('/api/admin', authLimiter, adminAuthRoutes);
@@ -2774,6 +2903,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
+  // Humanize AI Content Routes
+  app.use('/api/admin/humanize', adminHumanizeRoutes);
 }
 
 

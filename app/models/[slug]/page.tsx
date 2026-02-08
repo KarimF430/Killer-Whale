@@ -124,7 +124,6 @@ async function getModelData(slug: string) {
     const enhancedModelData = {
       id: modelData.id,
       slug: modelData.slug,
-      brandSlug: brandData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       brand: modelData.brandName,
       name: modelData.name,
       heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : modelData.image),
@@ -242,5 +241,5 @@ export default async function ModelPage({ params }: ModelPageProps) {
     notFound()
   }
 
-  return <CarModelPage model={modelData as any} />
+  return <CarModelPage model={modelData} />
 }

@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { User } from '../db/schemas';
 import { v4 as uuidv4 } from 'uuid';
 import passport from '../config/passport';
-import crypto from 'crypto';
+import { randomBytes, randomInt } from 'node:crypto';
 import { sendEmail } from '../services/email.service';
 import rateLimit from 'express-rate-limit';
 
@@ -66,7 +66,7 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Generate verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationToken = randomBytes(32).toString('hex');
         const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
         // Create user
@@ -619,7 +619,7 @@ router.post('/resend-verification', async (req, res) => {
         }
 
         // Generate new verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationToken = randomBytes(32).toString('hex');
         user.emailVerificationToken = verificationToken;
         user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
         user.updatedAt = new Date();
@@ -676,7 +676,7 @@ router.post('/forgot-password', async (req, res) => {
         }
 
         // Generate reset token
-        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetToken = randomBytes(32).toString('hex');
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
         user.updatedAt = new Date();
@@ -805,8 +805,8 @@ router.post('/send-otp', otpLimiter, async (req, res) => {
             });
         }
 
-        // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // Generate 6-digit OTP - SECURE: Use randomInt for cryptographic unpredictability
+        const otp = randomInt(100000, 1000000).toString();
 
         // Hash OTP before storing (security)
         const hashedOtp = await bcrypt.hash(otp, 10);
@@ -1034,8 +1034,8 @@ router.post('/register-send-otp', otpLimiter, async (req, res) => {
             });
         }
 
-        // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // Generate 6-digit OTP - SECURE: Use randomInt for cryptographic unpredictability
+        const otp = randomInt(100000, 1000000).toString();
 
         // Hash OTP
         const hashedOtp = await bcrypt.hash(otp, 10);

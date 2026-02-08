@@ -734,7 +734,7 @@ export class MongoDBStorage implements IStorage {
         const upcomingCar = await MongoUpcomingCar.findOne({ id: variant.modelId }).lean();
         if (upcomingCar) {
           console.log(`✅ Found upcoming car: ${upcomingCar.name}`);
-          model = upcomingCar as any;
+          model = upcomingCar;
           isUpcoming = true;
         } else {
           console.log(`❌ Model not found in upcoming cars either: ${variant.modelId}`);
