@@ -16,7 +16,8 @@ NC='\033[0m' # No Color
 # Configuration
 FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
 BACKEND_URL="${BACKEND_URL:-http://localhost:5001}"
-MONGODB_URI="${MONGODB_URI:-mongodb+srv://motoroctane_user21:Yp4YeD5obT4iAOuy@cluster0.hok00oq.mongodb.net/motoroctane?retryWrites=true&w=majority}"
+# SECURITY: Never hardcode production credentials. Use environment variables.
+MONGODB_URI="${MONGODB_URI:-mongodb://localhost:27017/motoroctane}"
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
 echo -e "${BLUE}        MotorOctane Complete System Test${NC}"
