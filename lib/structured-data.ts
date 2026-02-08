@@ -62,8 +62,10 @@ export function generateCarProductSchema(car: {
     lowPrice: number
     highPrice?: number
     currency?: string
+    rating?: number
+    reviewCount?: number
 }) {
-    return {
+    const schema: any = {
         '@context': 'https://schema.org',
         '@type': 'Product',
         name: car.name,
@@ -82,6 +84,18 @@ export function generateCarProductSchema(car: {
             availability: 'https://schema.org/InStock'
         }
     }
+
+    if (car.rating && car.rating > 0) {
+        schema.aggregateRating = {
+            '@type': 'AggregateRating',
+            ratingValue: car.rating,
+            reviewCount: car.reviewCount || 1,
+            bestRating: '5',
+            worstRating: '1'
+        }
+    }
+
+    return schema
 }
 
 export function generateFAQSchema(faqs: { question: string; answer: string }[]) {

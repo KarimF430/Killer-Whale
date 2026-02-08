@@ -665,7 +665,9 @@ export default async function ModelPage({ params }: ModelPageProps) {
     image: modelData.heroImage,
     description: modelData.summary,
     lowPrice: modelData.startingPrice,
-    highPrice: modelData.endingPrice
+    highPrice: modelData.endingPrice,
+    rating: modelData.rating,
+    reviewCount: modelData.reviewCount
   })
 
   // Format FAQs for schema if they exist
