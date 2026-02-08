@@ -153,14 +153,25 @@ app.use((req, res, next) => {
 app.use('/api', apiLimiter);
 
 // Serve uploaded files statically from a canonical path
-const uploadsStaticPath = path.join(process.cwd(), 'uploads');
+const uploadsStaticPath = path.resolve(process.cwd(), 'uploads');
 
 // Fallback: if a legacy .jpg/.png is requested but only a .webp exists, serve the .webp
 app.get('/uploads/*', (req, res, next) => {
   try {
-    const reqPath = req.path; // e.g., /uploads/image-123.jpg
-    const relPath = reqPath.replace(/^\/+/, ''); // remove leading /
-    const absPath = path.join(process.cwd(), relPath);
+    const reqPath = decodeURIComponent(req.path); // handle encoded characters
+
+    // Normalize path to resolve relative segments and prevent traversal
+    const absPath = path.normalize(path.join(process.cwd(), reqPath));
+
+    // SECURITY: Ensure the normalized path still resides within the uploads directory
+    // We add path.sep to prevent matching directories like "uploads_secret"
+    if (!absPath.startsWith(uploadsStaticPath + path.sep) && absPath !== uploadsStaticPath) {
+      console.warn(`🚨 Security: Blocked potential path traversal attempt: ${reqPath}`);
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const relPath = reqPath.replace(/^\/+/, ''); // for R2 redirect logic
+
     fs.access(absPath, fs.constants.R_OK, (err) => {
       if (!err) return next(); // file exists; let static middleware handle it
 
@@ -172,9 +183,9 @@ app.get('/uploads/*', (req, res, next) => {
       }
 
       // Try .webp counterpart
-      const webpRel = relPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-      if (webpRel === relPath) return next();
-      const webpAbs = path.join(process.cwd(), webpRel);
+      const webpAbs = absPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+      if (webpAbs === absPath) return next();
+
       fs.access(webpAbs, fs.constants.R_OK, (err2) => {
         if (!err2) {
           res.type('image/webp').sendFile(webpAbs);

@@ -29,7 +29,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { readFileSync } from "fs";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -133,7 +133,7 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: uploadDir,
     filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const uniqueSuffix = Date.now() + '-' + randomUUID().split('-')[0];
       cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
   }),

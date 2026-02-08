@@ -110,6 +110,9 @@ dist
 # Temporary folders
 tmp/
 temp/
+.history/
+*.env.bak
+cookies.txt
 
 # Editor directories and files
 .vscode/*
