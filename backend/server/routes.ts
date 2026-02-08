@@ -1421,15 +1421,16 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      // Optimized search with regex (case-insensitive) - Sanitized to prevent ReDoS
+      const sanitizedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchPattern = sanitizedQuery.split(' ').join('.*');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
         db.collection('models').find({
           $or: [
-            { name: searchRegex },
-            { brandId: searchRegex }
+            { name: { $regex: searchPattern, $options: 'i' } },
+            { brandId: { $regex: searchPattern, $options: 'i' } }
           ],
           status: 'active'
         }, {
@@ -2536,7 +2537,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('❌ Variant creation error:', error);
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message, stack: error.stack });
+        // SECURITY: Removed stack trace to prevent information leakage
+        res.status(400).json({ error: error.message });
       } else {
         res.status(400).json({ error: "Invalid variant data" });
       }

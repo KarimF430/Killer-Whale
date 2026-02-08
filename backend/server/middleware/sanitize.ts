@@ -13,8 +13,8 @@ function sanitizeString(input: string): string {
   if (typeof input !== 'string') return input;
   
   return input
-    // Remove script tags and content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // Remove script tags and content - Safer regex to prevent ReDoS
+    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
     // Remove event handlers
     .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
     .replace(/on\w+\s*=\s*[^\s>]*/gi, '')
