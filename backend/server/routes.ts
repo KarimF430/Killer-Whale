@@ -52,6 +52,7 @@ import adminEmailRoutes from "./routes/admin-emails.routes";
 import priceHistoryRoutes from "./routes/price-history.routes";
 import adminHumanizeRoutes from "./routes/admin-humanize";
 import { buildSearchIndex, searchFromIndex, invalidateSearchIndex, getSearchIndexStats } from "./services/search-index";
+import { sanitizeForRegExp } from "./utils/security";
 
 // Function to format brand summary with proper sections
 function formatBrandSummary(summary: string, brandName: string): {
@@ -1421,15 +1422,23 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      // Optimized search with regex (case-insensitive) - sanitize user input to prevent ReDoS
+      const sanitizedQuery = sanitizeForRegExp(query);
+
+      // If query is empty after sanitization, return no results (prevents matching everything)
+      if (!sanitizedQuery) {
+        return res.json({ results: [], count: 0, took: 0, query, source: 'none' });
+      }
+
+      // Use string-based regex pattern
+      const searchRegexPattern = sanitizedQuery.replace(/\s+/g, '.*');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
         db.collection('models').find({
           $or: [
-            { name: searchRegex },
-            { brandId: searchRegex }
+            { name: { $regex: searchRegexPattern, $options: 'i' } },
+            { brandId: { $regex: searchRegexPattern, $options: 'i' } }
           ],
           status: 'active'
         }, {

@@ -137,19 +137,10 @@ function extractPatternKey(query: string): string {
     let pattern = query.toLowerCase()
 
     // Common car names to normalize
-    const carPatterns = [
-        'creta', 'seltos', 'nexon', 'brezza', 'venue', 'sonet', 'punch',
-        'swift', 'baleno', 'i20', 'altroz', 'tiago', 'glanza',
-        'city', 'verna', 'ciaz', 'amaze', 'dzire',
-        'xuv700', 'xuv400', 'hector', 'harrier', 'safari', 'thar',
-        'fortuner', 'innova', 'ertiga', 'carens', 'alcazar',
-        'hyundai', 'tata', 'maruti', 'mahindra', 'kia', 'honda', 'toyota', 'mg'
-    ]
+    const carRegex = /\b(creta|seltos|nexon|brezza|venue|sonet|punch|swift|baleno|i20|altroz|tiago|glanza|city|verna|ciaz|amaze|dzire|xuv700|xuv400|hector|harrier|safari|thar|fortuner|innova|ertiga|carens|alcazar|hyundai|tata|maruti|mahindra|kia|honda|toyota|mg)\b/gi;
 
     // Replace car names with placeholder
-    for (const car of carPatterns) {
-        pattern = pattern.replace(new RegExp(`\\b${car}\\b`, 'gi'), '{CAR}')
-    }
+    pattern = pattern.replace(carRegex, '{CAR}');
 
     // Replace numbers and prices
     pattern = pattern.replace(/₹?\s*\d+\.?\d*\s*(lakh|lakhs|l|k|cr)?/gi, '{PRICE}')

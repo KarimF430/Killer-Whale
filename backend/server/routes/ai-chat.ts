@@ -23,6 +23,7 @@ import {
     classifyQuery,
     getLearningMetrics
 } from '../ai-engine/self-learning'
+import { sanitizeForRegExp, escapeRegExp } from '../utils/security'
 
 // Initialize Groq client only if API key is available (prevents test failures)
 const groqApiKey = process.env.GROQ_API_KEY || process.env.HF_API_KEY || ''
@@ -335,7 +336,7 @@ export default async function aiChatHandler(req: Request, res: Response) {
 
             try {
                 const regexQueries = carNames.map(name => ({
-                    name: { $regex: name, $options: 'i' }
+                    name: { $regex: escapeRegExp(name), $options: 'i' }
                 }))
 
                 const carData = await CarVariant.find({
@@ -506,7 +507,7 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
 
         // Fuel type filter
         if (requirements.fuelType && requirements.fuelType !== 'any') {
-            query.fuelType = { $regex: new RegExp(requirements.fuelType, 'i') }
+            query.fuelType = { $regex: sanitizeForRegExp(requirements.fuelType), $options: 'i' }
             console.log(`⛽ Fuel filter: ${requirements.fuelType} `)
         }
 

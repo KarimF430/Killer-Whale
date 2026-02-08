@@ -344,6 +344,7 @@ export async function semanticCarSearch(
 // ============================================
 
 import { findBestCarMatches, CAR_ALIASES, resolveCarAlias } from './fuzzy-match'
+import { escapeRegExp } from '../utils/security'
 
 // Common car names for extraction
 const KNOWN_CAR_NAMES = [
@@ -413,13 +414,17 @@ export async function exactNameSearch(
     console.log(`🎯 Exact search: found car names [${carNames.join(', ')}] in query`)
 
     // Build regex patterns for each car name
-    const namePatterns = carNames.map(name => ({
-        name: { $regex: new RegExp(`^${name}$|^${name}\\s|\\s${name}$|\\s${name}\\s`, 'i') }
-    }))
+    const namePatterns = carNames.map(name => {
+        const escapedName = escapeRegExp(name)
+        // Match name at start, end or surrounded by spaces
+        return {
+            name: { $regex: `(^|\\s)${escapedName}($|\\s)`, $options: 'i' }
+        }
+    })
 
     // Also search by brand name
     const brandPatterns = carNames.map(name => ({
-        brandId: { $regex: name, $options: 'i' }
+        brandId: { $regex: escapeRegExp(name), $options: 'i' }
     }))
 
     const results = await Model.find({
@@ -510,11 +515,14 @@ export async function hybridCarSearch(
     // Build keyword query - exclude EV models if not an EV query
     const baseQuery: any = {
         status: 'active',
-        $or: keywords.flatMap(kw => [
-            { name: { $regex: kw, $options: 'i' } },
-            { summary: { $regex: kw, $options: 'i' } },
-            { pros: { $regex: kw, $options: 'i' } }
-        ])
+        $or: keywords.flatMap(kw => {
+            const escapedKw = escapeRegExp(kw);
+            return [
+                { name: { $regex: escapedKw, $options: 'i' } },
+                { summary: { $regex: escapedKw, $options: 'i' } },
+                { pros: { $regex: escapedKw, $options: 'i' } }
+            ];
+        })
     }
 
     // Exclude EV models if user didn't ask for EV

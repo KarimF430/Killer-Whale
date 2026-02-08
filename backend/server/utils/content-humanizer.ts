@@ -162,27 +162,27 @@ function getRandomItem<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// Pre-compile regexes for performance and security - use single regexes to satisfy SonarCloud
+const POSITIVE_WORDS_REGEX = new RegExp(`\\b(${Object.keys(POSITIVE_REPLACEMENTS).join('|')})\\b`, 'gi');
+
+const CASUAL_PHRASES_PATTERN = Object.keys(CASUAL_REPLACEMENTS)
+    .sort((a, b) => b.length - a.length) // Match longer phrases first
+    .map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
+const CASUAL_PHRASES_REGEX = new RegExp(`(${CASUAL_PHRASES_PATTERN})`, 'g');
+
 function neutralizePositiveLanguage(text: string): string {
-    let result = text;
-
-    for (const [positive, neutralOptions] of Object.entries(POSITIVE_REPLACEMENTS)) {
-        const regex = new RegExp(`\\b${positive}\\b`, 'gi');
-        result = result.replace(regex, () => getRandomItem(neutralOptions));
-    }
-
-    return result;
+    return text.replace(POSITIVE_WORDS_REGEX, (matched) => {
+        const replacements = POSITIVE_REPLACEMENTS[matched.toLowerCase()];
+        return replacements ? getRandomItem(replacements) : matched;
+    });
 }
 
 function addContractions(text: string): string {
-    let result = text;
-
-    for (const [formal, casualOptions] of Object.entries(CASUAL_REPLACEMENTS)) {
-        // Use case-sensitive replacement
-        const regex = new RegExp(formal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-        result = result.replace(regex, () => getRandomItem(casualOptions));
-    }
-
-    return result;
+    return text.replace(CASUAL_PHRASES_REGEX, (matched) => {
+        const replacements = CASUAL_REPLACEMENTS[matched];
+        return replacements ? getRandomItem(replacements) : matched;
+    });
 }
 
 function varySentenceStarters(text: string): string {

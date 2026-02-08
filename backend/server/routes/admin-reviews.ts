@@ -49,10 +49,12 @@ router.get('/', async (req: Request, res: Response) => {
         if (isApproved !== undefined) query.isApproved = isApproved === 'true';
 
         if (search) {
+            const { escapeRegExp } = require('../utils/security');
+            const escapedSearch = escapeRegExp(search as string);
             query.$or = [
-                { userName: { $regex: search, $options: 'i' } },
-                { reviewTitle: { $regex: search, $options: 'i' } },
-                { reviewText: { $regex: search, $options: 'i' } }
+                { userName: { $regex: escapedSearch, $options: 'i' } },
+                { reviewTitle: { $regex: escapedSearch, $options: 'i' } },
+                { reviewText: { $regex: escapedSearch, $options: 'i' } }
             ];
         }
 
