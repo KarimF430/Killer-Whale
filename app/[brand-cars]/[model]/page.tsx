@@ -223,7 +223,8 @@ async function getUpcomingCarData(brandSlug: string, modelSlug: string) {
       summary: upcomingCarData.summary || `The ${brandData.name} ${upcomingCarData.name} is an exciting upcoming vehicle.`,
       engineHighlights: 'Engine details will be announced closer to launch.',
       mileage: [] as any[],
-      similarCars: [] as any[]
+      similarCars: [] as any[],
+      reviews: [] as any[]
     }
   } catch (error) {
     console.log('Not an upcoming car:', error)
@@ -633,7 +634,8 @@ async function getModelData(brandSlug: string, modelSlug: string) {
         { condition: 'Highway', value: 24.2, unit: 'kmpl' },
         { condition: 'Combined', value: 21.0, unit: 'kmpl' }
       ],
-      similarCars: [] as any[]
+      similarCars: [] as any[],
+      reviews: [] as any[]
     }
   }
 }
@@ -667,7 +669,8 @@ export default async function ModelPage({ params }: ModelPageProps) {
     lowPrice: modelData.startingPrice,
     highPrice: modelData.endingPrice,
     rating: modelData.rating,
-    reviewCount: modelData.reviewCount
+    reviewCount: modelData.reviewCount,
+    reviews: modelData.reviews
   })
 
   // Format FAQs for schema if they exist

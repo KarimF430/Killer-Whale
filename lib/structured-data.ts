@@ -64,6 +64,7 @@ export function generateCarProductSchema(car: {
     currency?: string
     rating?: number
     reviewCount?: number
+    reviews?: any[]
 }) {
     const schema: any = {
         '@context': 'https://schema.org',
@@ -93,6 +94,24 @@ export function generateCarProductSchema(car: {
             bestRating: '5',
             worstRating: '1'
         }
+    }
+
+    if (car.reviews && car.reviews.length > 0) {
+        schema.review = car.reviews.map((review: any) => ({
+            '@type': 'Review',
+            author: {
+                '@type': 'Person',
+                name: review.userName || review.user?.name || 'Anonymous'
+            },
+            datePublished: review.createdAt ? new Date(review.createdAt).toISOString().split('T')[0] : undefined,
+            reviewBody: review.comment || review.content,
+            reviewRating: {
+                '@type': 'Rating',
+                ratingValue: review.rating || 5,
+                bestRating: '5',
+                worstRating: '1'
+            }
+        }))
     }
 
     return schema
