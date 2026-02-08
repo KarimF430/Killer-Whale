@@ -121,10 +121,12 @@ async function getModelData(slug: string) {
       colorImages: formatColorImages(detailedModelData?.colorImages)
     })
 
+    const brandSlug = brandData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
     const enhancedModelData = {
       id: modelData.id,
       slug: modelData.slug,
       brand: modelData.brandName,
+      brandSlug: brandSlug,
       name: modelData.name,
       heroImage: galleryImages[0] || (modelData.image.startsWith('/uploads/') ? `${backendUrl}${modelData.image}` : modelData.image),
       gallery: galleryImages,

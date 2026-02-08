@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { storage } from '../../../backend/server/storage'
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 

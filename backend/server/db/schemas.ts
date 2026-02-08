@@ -103,7 +103,7 @@ const modelSchema = new mongoose.Schema({
 });
 
 // Add foreign key validation for models
-modelSchema.pre('save', async function () {
+modelSchema.pre('save', async function (this: any) {
   const Brand = mongoose.model('Brand');
   const brand = await Brand.findOne({ id: this.brandId });
   if (!brand) {
@@ -206,7 +206,7 @@ const upcomingCarSchema = new mongoose.Schema({
 });
 
 // Add foreign key validation for upcoming cars
-upcomingCarSchema.pre('save', async function () {
+upcomingCarSchema.pre('save', async function (this: any) {
   const Brand = mongoose.model('Brand');
   const brand = await Brand.findOne({ id: this.brandId });
   if (!brand) {
@@ -448,7 +448,7 @@ const variantSchema = new mongoose.Schema({
 });
 
 // Add foreign key validation for variants
-variantSchema.pre('save', async function () {
+variantSchema.pre('save', async function (this: any) {
   const Brand = mongoose.model('Brand');
   const Model = mongoose.model('Model');
   const UpcomingCar = mongoose.model('UpcomingCar');
@@ -819,7 +819,7 @@ const reviewSchema = new mongoose.Schema({
 });
 
 // Calculate overall rating before save
-reviewSchema.pre('save', function () {
+reviewSchema.pre('save', function (this: any) {
   const ratings = this.starRatings;
   if (ratings) {
     const sum = (
