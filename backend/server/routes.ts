@@ -2,8 +2,14 @@ import type { Express, Request, Response } from "express";
 import express from "express";
 import type { IStorage } from "./storage";
 import type { BackupService } from "./backup-service";
-import { insertBrandSchema, insertModelSchema } from "./validation/schemas";
+import {
+  insertBrandSchema,
+  insertModelSchema,
+  insertVariantSchema,
+  insertPopularComparisonSchema
+} from "./validation/schemas";
 import { Review } from "./db/schemas";
+import { z } from "zod";
 import {
   comparePassword,
   generateAccessToken,
@@ -1421,15 +1427,16 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
         throw new Error('Database connection not established');
       }
 
-      // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      // Optimized search with regex (case-insensitive) - escape special characters to prevent ReDoS
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchPattern = escapedQuery.split(/\s+/).join('.*');
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
         db.collection('models').find({
           $or: [
-            { name: searchRegex },
-            { brandId: searchRegex }
+            { name: { $regex: searchPattern, $options: 'i' } },
+            { brandId: { $regex: searchPattern, $options: 'i' } }
           ],
           status: 'active'
         }, {
@@ -2513,20 +2520,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
 
-      // Validate required fields
-      if (!req.body.brandId || !req.body.modelId || !req.body.name || !req.body.price) {
-        console.error('❌ Missing required fields:', {
-          brandId: !!req.body.brandId,
-          modelId: !!req.body.modelId,
-          name: !!req.body.name,
-          price: !!req.body.price
-        });
-        return res.status(400).json({
-          error: "Missing required fields: brandId, modelId, name, and price are required"
-        });
-      }
-
-      const variant = await storage.createVariant(req.body);
+      const validatedData = insertVariantSchema.parse(req.body);
+      const variant = await storage.createVariant(validatedData);
       console.log('✅ Variant created successfully:', variant.id);
 
       // Invalidate variants cache
@@ -2550,8 +2545,9 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
       // Get old variant data before update for price comparison
       const oldVariant = await storage.getVariant(req.params.id);
+      const validatedData = insertVariantSchema.partial().parse(req.body);
 
-      const variant = await storage.updateVariant(req.params.id, req.body);
+      const variant = await storage.updateVariant(req.params.id, validatedData);
       if (!variant) {
         return res.status(404).json({ error: "Variant not found" });
       }
@@ -2765,13 +2761,8 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
 
   app.post("/api/popular-comparisons", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
-      const comparisons = req.body;
-
-      if (!Array.isArray(comparisons)) {
-        return res.status(400).json({ error: "Expected array of comparisons" });
-      }
-
-      const savedComparisons = await storage.savePopularComparisons(comparisons);
+      const validatedData = z.array(insertPopularComparisonSchema).parse(req.body);
+      const savedComparisons = await storage.savePopularComparisons(validatedData);
       res.json({
         success: true,
         count: savedComparisons.length,
