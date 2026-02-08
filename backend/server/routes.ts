@@ -1224,7 +1224,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/brands/:id", authenticateToken, modifyLimiter, async (req, res) => {
+  app.delete("/api/brands/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log(`🗑️ DELETE request for brand: ${req.params.id}`);
       const success = await storage.deleteBrand(req.params.id);
@@ -1422,15 +1422,22 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
 
       // Optimized search with regex (case-insensitive)
-      const searchRegex = new RegExp(query.split(' ').join('.*'), 'i');
+      // Use string-based regex to avoid ReDoS and satisfy security gates
+      const searchTerms = query.split(/\s+/).filter(Boolean);
+      const searchConditions = searchTerms.map(term => {
+        const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return {
+          $or: [
+            { name: { $regex: escaped, $options: 'i' } },
+            { brandId: { $regex: escaped, $options: 'i' } }
+          ]
+        };
+      });
 
       // Search in both models and brands collections
       const [models, brands] = await Promise.all([
         db.collection('models').find({
-          $or: [
-            { name: searchRegex },
-            { brandId: searchRegex }
-          ],
+          $and: searchConditions,
           status: 'active'
         }, {
           projection: {
@@ -2509,7 +2516,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(variant);
   });
 
-  app.post("/api/variants", async (req, res) => {
+  app.post("/api/variants", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
 
@@ -2536,14 +2543,14 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     } catch (error) {
       console.error('❌ Variant creation error:', error);
       if (error instanceof Error) {
-        res.status(400).json({ error: error.message, stack: error.stack });
+        res.status(400).json({ error: error.message });
       } else {
         res.status(400).json({ error: "Invalid variant data" });
       }
     }
   });
 
-  app.patch("/api/variants/:id", async (req, res) => {
+  app.patch("/api/variants/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2599,7 +2606,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/variants/:id", async (req, res) => {
+  app.delete("/api/variants/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
 
@@ -2763,7 +2770,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.post("/api/popular-comparisons", async (req, res) => {
+  app.post("/api/popular-comparisons", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       const comparisons = req.body;
 

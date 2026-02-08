@@ -140,3 +140,5 @@ prometheus.yml
 grafana_dashboard.json
 /monitoring/
 render.yaml
+.history/
+cookies.txt
