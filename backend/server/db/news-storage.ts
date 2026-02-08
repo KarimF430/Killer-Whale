@@ -1,12 +1,98 @@
 import { v4 as uuidv4 } from 'uuid'
-import { NewsArticle as NewsArticleModel, NewsCategory as NewsCategoryModel, NewsTag as NewsTagModel, NewsAuthor as NewsAuthorModel, NewsMedia } from './schemas'
-import type { ContentBlock, NewsArticle, NewsCategory, NewsTag, NewsAuthor, Media } from '../../../types/news'
+import { NewsArticle, NewsCategory, NewsTag, NewsAuthor, NewsMedia } from './schemas'
+
+// Content Block Interface for flexible article content
+export interface ContentBlock {
+  id: string
+  type: 'paragraph' | 'heading1' | 'heading2' | 'heading3' | 'image' | 'bulletList' | 'numberedList' | 'quote' | 'code'
+  content: string
+  imageUrl?: string
+  imageCaption?: string
+}
+
+// News Article Interface
+export interface NewsArticle {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  contentBlocks: ContentBlock[]
+  categoryId: string
+  tags: string[]
+  authorId: string
+  linkedCars: string[]
+  featuredImage: string
+  seoTitle: string
+  seoDescription: string
+  seoKeywords: string[]
+  status: 'draft' | 'published' | 'scheduled'
+  publishDate: string
+  views: number
+  likes: number
+  comments: number
+  isFeatured: boolean
+  isBreaking: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// Category Interface
+export interface NewsCategory {
+  id: string
+  name: string
+  slug: string
+  description: string
+  isFeatured: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// Tag Interface
+export interface NewsTag {
+  id: string
+  name: string
+  slug: string
+  type: 'brand' | 'segment' | 'fuel' | 'general'
+  createdAt: string
+  updatedAt: string
+}
+
+// Author Interface
+export interface NewsAuthor {
+  id: string
+  name: string
+  email: string
+  password: string
+  role: 'admin' | 'editor' | 'author'
+  bio: string
+  profileImage: string
+  socialLinks: {
+    twitter?: string
+    linkedin?: string
+    facebook?: string
+  }
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// Media Interface
+export interface Media {
+  id: string
+  filename: string
+  originalName: string
+  url: string
+  type: 'image' | 'video'
+  size: number
+  uploaderId: string
+  createdAt: string
+}
 
 class NewsStorage {
   async initialize() {
     try {
       // Initialize default categories if none exist
-      const categoriesCount = await NewsCategoryModel.countDocuments()
+      const categoriesCount = await NewsCategory.countDocuments()
       if (categoriesCount === 0) {
         await this.createDefaultCategories()
       }
@@ -56,28 +142,28 @@ class NewsStorage {
       }
     ]
 
-    await NewsCategoryModel.insertMany(defaultCategories)
+    await NewsCategory.insertMany(defaultCategories)
     console.log('✅ Created default news categories')
   }
 
   // ==================== ARTICLES ====================
   async getAllArticles(): Promise<NewsArticle[]> {
-    const articles = await NewsArticleModel.find().lean()
+    const articles = await NewsArticle.find().lean()
     return articles.map(this.mapArticle)
   }
 
   async getArticleById(id: string): Promise<NewsArticle | undefined> {
-    const article = await NewsArticleModel.findOne({ id }).lean()
+    const article = await NewsArticle.findOne({ id }).lean()
     return article ? this.mapArticle(article) : undefined
   }
 
   async getArticleBySlug(slug: string): Promise<NewsArticle | undefined> {
-    const article = await NewsArticleModel.findOne({ slug }).lean()
+    const article = await NewsArticle.findOne({ slug }).lean()
     return article ? this.mapArticle(article) : undefined
   }
 
   async createArticle(articleData: Omit<NewsArticle, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'likes' | 'comments'>): Promise<NewsArticle> {
-    const article = new NewsArticleModel({
+    const article = new NewsArticle({
       ...articleData,
       id: uuidv4(),
       views: 0,
@@ -91,7 +177,7 @@ class NewsStorage {
   }
 
   async updateArticle(id: string, updates: Partial<NewsArticle>): Promise<NewsArticle | null> {
-    const article = await NewsArticleModel.findOneAndUpdate(
+    const article = await NewsArticle.findOneAndUpdate(
       { id },
       { ...updates, updatedAt: new Date() },
       { new: true }
@@ -100,27 +186,27 @@ class NewsStorage {
   }
 
   async deleteArticle(id: string): Promise<boolean> {
-    const result = await NewsArticleModel.deleteOne({ id })
+    const result = await NewsArticle.deleteOne({ id })
     return result.deletedCount > 0
   }
 
   async incrementArticleViews(id: string): Promise<void> {
-    await NewsArticleModel.updateOne({ id }, { $inc: { views: 1 } })
+    await NewsArticle.updateOne({ id }, { $inc: { views: 1 } })
   }
 
   // ==================== CATEGORIES ====================
   async getAllCategories(): Promise<NewsCategory[]> {
-    const categories = await NewsCategoryModel.find().lean()
+    const categories = await NewsCategory.find().lean()
     return categories.map(this.mapCategory)
   }
 
   async getCategoryById(id: string): Promise<NewsCategory | undefined> {
-    const category = await NewsCategoryModel.findOne({ id }).lean()
+    const category = await NewsCategory.findOne({ id }).lean()
     return category ? this.mapCategory(category) : undefined
   }
 
   async createCategory(categoryData: Omit<NewsCategory, 'id' | 'createdAt' | 'updatedAt'>): Promise<NewsCategory> {
-    const category = new NewsCategoryModel({
+    const category = new NewsCategory({
       ...categoryData,
       id: uuidv4(),
       createdAt: new Date(),
@@ -131,7 +217,7 @@ class NewsStorage {
   }
 
   async updateCategory(id: string, updates: Partial<NewsCategory>): Promise<NewsCategory | null> {
-    const category = await NewsCategoryModel.findOneAndUpdate(
+    const category = await NewsCategory.findOneAndUpdate(
       { id },
       { ...updates, updatedAt: new Date() },
       { new: true }
@@ -140,23 +226,23 @@ class NewsStorage {
   }
 
   async deleteCategory(id: string): Promise<boolean> {
-    const result = await NewsCategoryModel.deleteOne({ id })
+    const result = await NewsCategory.deleteOne({ id })
     return result.deletedCount > 0
   }
 
   // ==================== TAGS ====================
   async getAllTags(): Promise<NewsTag[]> {
-    const tags = await NewsTagModel.find().lean()
+    const tags = await NewsTag.find().lean()
     return tags.map(this.mapTag)
   }
 
   async getTagById(id: string): Promise<NewsTag | undefined> {
-    const tag = await NewsTagModel.findOne({ id }).lean()
+    const tag = await NewsTag.findOne({ id }).lean()
     return tag ? this.mapTag(tag) : undefined
   }
 
   async createTag(tagData: Omit<NewsTag, 'id' | 'createdAt' | 'updatedAt'>): Promise<NewsTag> {
-    const tag = new NewsTagModel({
+    const tag = new NewsTag({
       ...tagData,
       id: uuidv4(),
       createdAt: new Date(),
@@ -167,7 +253,7 @@ class NewsStorage {
   }
 
   async updateTag(id: string, updates: Partial<NewsTag>): Promise<NewsTag | null> {
-    const tag = await NewsTagModel.findOneAndUpdate(
+    const tag = await NewsTag.findOneAndUpdate(
       { id },
       { ...updates, updatedAt: new Date() },
       { new: true }
@@ -176,28 +262,28 @@ class NewsStorage {
   }
 
   async deleteTag(id: string): Promise<boolean> {
-    const result = await NewsTagModel.deleteOne({ id })
+    const result = await NewsTag.deleteOne({ id })
     return result.deletedCount > 0
   }
 
   // ==================== AUTHORS ====================
   async getAllAuthors(): Promise<NewsAuthor[]> {
-    const authors = await NewsAuthorModel.find().lean()
+    const authors = await NewsAuthor.find().lean()
     return authors.map(this.mapAuthor)
   }
 
   async getAuthorById(id: string): Promise<NewsAuthor | undefined> {
-    const author = await NewsAuthorModel.findOne({ id }).lean()
+    const author = await NewsAuthor.findOne({ id }).lean()
     return author ? this.mapAuthor(author) : undefined
   }
 
   async getAuthorByEmail(email: string): Promise<NewsAuthor | undefined> {
-    const author = await NewsAuthorModel.findOne({ email }).lean()
+    const author = await NewsAuthor.findOne({ email }).lean()
     return author ? this.mapAuthor(author) : undefined
   }
 
   async createAuthor(authorData: Omit<NewsAuthor, 'id' | 'createdAt' | 'updatedAt'>): Promise<NewsAuthor> {
-    const author = new NewsAuthorModel({
+    const author = new NewsAuthor({
       ...authorData,
       id: uuidv4(),
       createdAt: new Date(),
@@ -208,7 +294,7 @@ class NewsStorage {
   }
 
   async updateAuthor(id: string, updates: Partial<NewsAuthor>): Promise<NewsAuthor | null> {
-    const author = await NewsAuthorModel.findOneAndUpdate(
+    const author = await NewsAuthor.findOneAndUpdate(
       { id },
       { ...updates, updatedAt: new Date() },
       { new: true }
@@ -217,7 +303,7 @@ class NewsStorage {
   }
 
   async deleteAuthor(id: string): Promise<boolean> {
-    const result = await NewsAuthorModel.deleteOne({ id })
+    const result = await NewsAuthor.deleteOne({ id })
     return result.deletedCount > 0
   }
 
@@ -258,20 +344,20 @@ class NewsStorage {
       authors,
       topArticles
     ] = await Promise.all([
-      NewsArticleModel.countDocuments(),
-      NewsArticleModel.countDocuments({ status: 'published' }),
-      NewsArticleModel.countDocuments({ status: 'draft' }),
-      NewsArticleModel.countDocuments({ status: 'scheduled' }),
-      NewsCategoryModel.find().lean(),
-      NewsAuthorModel.find().lean(),
-      NewsArticleModel.find({ status: 'published' })
+      NewsArticle.countDocuments(),
+      NewsArticle.countDocuments({ status: 'published' }),
+      NewsArticle.countDocuments({ status: 'draft' }),
+      NewsArticle.countDocuments({ status: 'scheduled' }),
+      NewsCategory.find().lean(),
+      NewsAuthor.find().lean(),
+      NewsArticle.find({ status: 'published' })
         .sort({ views: -1 })
         .limit(5)
         .select('id title views publishDate')
         .lean()
     ])
 
-    const totalViews = await NewsArticleModel.aggregate([
+    const totalViews = await NewsArticle.aggregate([
       { $group: { _id: null, total: { $sum: '$views' } } }
     ])
 
@@ -279,7 +365,7 @@ class NewsStorage {
     const categoryStats = await Promise.all(
       categories.map(async (cat: any) => ({
         category: cat.name,
-        count: await NewsArticleModel.countDocuments({ categoryId: cat.id })
+        count: await NewsArticle.countDocuments({ categoryId: cat.id })
       }))
     )
 
@@ -287,7 +373,7 @@ class NewsStorage {
     const authorStats = await Promise.all(
       authors.map(async (author: any) => ({
         author: author.name,
-        count: await NewsArticleModel.countDocuments({ authorId: author.id })
+        count: await NewsArticle.countDocuments({ authorId: author.id })
       }))
     )
 

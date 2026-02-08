@@ -37,11 +37,6 @@
   ],
   "exclude": [
     "node_modules",
-    "backend/**/*",
-    "mobile-app/**/*",
-    "**/*_backup.tsx",
-    "debug_api.ts",
-    "measure_performance.ts",
-    "temp_cars_by_budget.tsx"
+    "backend/**/*"
   ]
 }

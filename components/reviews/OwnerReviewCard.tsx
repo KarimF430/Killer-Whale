@@ -1,6 +1,6 @@
 import React from 'react'
 import { Star, MapPin, Calendar, CheckCircle2, XCircle, User } from 'lucide-react'
-import { cn } from '@/utils/cn'
+import { cn } from '@/lib/utils'
 
 export interface OwnerReview {
     id: string

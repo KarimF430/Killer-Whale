@@ -36,6 +36,7 @@ import path from "path";
 import fs from "fs";
 import { readFileSync } from "fs";
 import { randomUUID } from "crypto";
+import { escapeRegExp } from "./utils/security";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -1428,7 +1429,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
       }
 
       // Optimized search with regex (case-insensitive) - escape special characters to prevent ReDoS
-      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escapedQuery = escapeRegExp(query);
       const searchPattern = escapedQuery.split(/\s+/).join('.*');
 
       // Search in both models and brands collections
