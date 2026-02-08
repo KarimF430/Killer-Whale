@@ -282,8 +282,6 @@ export default async function BrandPage({ params }: BrandPageProps) {
   }
 
   const breadcrumbs = [
-    { label: 'Home', href: '/' },
-    { label: 'Brands', href: '/brands' },
     { label: brand.name }
   ]
 

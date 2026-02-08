@@ -3,6 +3,7 @@ import PageContainer, { PageSection } from '@/components/layout/PageContainer'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 export const metadata: Metadata = {
     title: 'Privacy Policy | gadizone',
@@ -151,6 +152,7 @@ export default function PrivacyPolicyPage() {
                     </PageSection>
                 </PageContainer>
             </div>
+            <Breadcrumb items={[{ label: 'Privacy Policy' }]} />
             <Footer />
         </>
     )

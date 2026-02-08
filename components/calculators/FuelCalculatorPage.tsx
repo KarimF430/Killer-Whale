@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import PageContainer, { PageSection } from '../layout/PageContainer'
+import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 const FUEL_TYPES = [
     { id: 'petrol', label: 'Petrol', price: 104.21 },
@@ -287,6 +289,9 @@ export default function FuelCalculatorPage() {
                     </div>
                 </PageSection>
             </PageContainer>
+
+            <Breadcrumb items={[{ label: 'Fuel Cost Calculator' }]} />
+            <Footer />
         </div>
     )
 }

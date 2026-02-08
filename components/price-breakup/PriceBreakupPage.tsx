@@ -10,6 +10,7 @@ import PageSection from '../common/PageSection'
 import AdBanner from '../home/AdBanner'
 import Ad3DCarousel from '../ads/Ad3DCarousel'
 import Footer from '../Footer'
+import Breadcrumb from '../common/Breadcrumb'
 import VariantCard from '../car-model/VariantCard'
 import CarCard from '../home/CarCard'
 import ModelOwnerReviews from '../car-model/ModelOwnerReviews'
@@ -1471,20 +1472,25 @@ export default function PriceBreakupPage({
 
           {/* FAQ Section */}
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brandName} {modelName} Frequently Asked Questions</h2>
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1.5 sm:mb-2">{brandName} {modelName} FAQ</h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                {faqs.length > 0 ? `${faqs.length} questions about ${brandName} ${modelName}` : 'No FAQs available'}
+              </p>
+            </div>
 
-            <div className="space-y-4 max-w-4xl mx-auto">
+            <div className="space-y-3 sm:space-y-4 max-w-4xl mx-auto">
               {faqs.map((faq, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg border border-gray-200">
+                <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                   <button
                     onClick={() => toggleFAQ(index)}
-                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-100 transition-colors"
+                    className="w-full px-4 py-3 sm:px-6 sm:py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors min-h-[56px]"
                   >
-                    <span className="text-base font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 pr-3 sm:pr-4 text-sm sm:text-base">
                       {faq.question}
                     </span>
                     <svg
-                      className={`h-5 w-5 text-gray-500 transition-transform flex-shrink-0 ml-4 ${openFAQ === index ? 'rotate-180' : ''}`}
+                      className={`h-4 w-4 sm:h-5 sm:w-5 text-gray-500 transition-transform flex-shrink-0 ${openFAQ === index ? 'rotate-180' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1493,8 +1499,12 @@ export default function PriceBreakupPage({
                     </svg>
                   </button>
                   {openFAQ === index && (
-                    <div className="px-6 pb-4 text-gray-600 leading-relaxed">
-                      {faq.answer}
+                    <div className="px-4 pb-3 sm:px-6 sm:pb-4">
+                      <div className="border-t border-gray-100 pt-3 sm:pt-4">
+                        <div className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                          {faq.answer}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1504,38 +1514,44 @@ export default function PriceBreakupPage({
         </div>
       </PageSection>
 
-      {/* Section 7: Price across India, AD Banner & Share Feedback */}
+      {/* Section 7: AD Banner */}
       <PageSection background="white" maxWidth="7xl">
         <div className="py-4 space-y-6">
           {/* Ad Banner */}
           <Ad3DCarousel className="mb-6" />
+        </div>
+      </PageSection>
 
-          {/* Share Your Feedback */}
-          <div id="feedback" className="max-w-2xl mx-auto">
-            <div className="bg-white border border-gray-200 rounded-xl p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">Rate & Review {brandName} {modelName}</h2>
-              <p className="text-gray-600 text-center mb-8">
-                Help us improve by sharing your thoughts about this page
-              </p>
+      {/* Website Feedback Section */}
+      <section className="py-6 sm:py-8 bg-gray-50">
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 text-center mb-2 sm:mb-3">
+              Share Your Feedback
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">
+              Help us improve our website by sharing your experience
+            </p>
 
-              <form className="space-y-6">
-                {/* Feedback Textarea */}
+            <form className="space-y-4 sm:space-y-5">
+              {/* Feedback Textarea */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                  Your Feedback
+                </label>
+                <textarea
+                  value={feedbackForm.feedback}
+                  onChange={(e) => setFeedbackForm({ ...feedbackForm, feedback: e.target.value })}
+                  placeholder="Tell us what you think about our website..."
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                />
+              </div>
+
+              {/* Name and Email - Stack on mobile, side-by-side on larger screens */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Feedback
-                  </label>
-                  <textarea
-                    value={feedbackForm.feedback}
-                    onChange={(e) => setFeedbackForm({ ...feedbackForm, feedback: e.target.value })}
-                    placeholder="Tell us what you think about this car page..."
-                    rows={4}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                  />
-                </div>
-
-                {/* Name Input */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                     Your Name
                   </label>
                   <input
@@ -1543,13 +1559,11 @@ export default function PriceBreakupPage({
                     value={feedbackForm.name}
                     onChange={(e) => setFeedbackForm({ ...feedbackForm, name: e.target.value })}
                     placeholder="Enter your name"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
-
-                {/* Email Input */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                     Email Address
                   </label>
                   <input
@@ -1557,26 +1571,34 @@ export default function PriceBreakupPage({
                     value={feedbackForm.email}
                     onChange={(e) => setFeedbackForm({ ...feedbackForm, email: e.target.value })}
                     placeholder="Enter your email"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
+              </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>Submit Feedback</span>
-                </button>
-              </form>
-            </div>
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2.5 sm:py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base min-h-[44px]"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Submit Feedback</span>
+              </button>
+            </form>
           </div>
         </div>
-      </PageSection>
+      </section>
 
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: brandName, href: `/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars` },
+          { label: modelName, href: `/${brandName.toLowerCase().replace(/\s+/g, '-')}-cars/${modelName.toLowerCase().replace(/\s+/g, '-')}` },
+          { label: `Price in ${selectedCity.split(',')[0]}` }
+        ]}
+      />
       {/* Footer */}
       < Footer />
     </div>

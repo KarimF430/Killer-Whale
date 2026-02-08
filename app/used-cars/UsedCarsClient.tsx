@@ -7,6 +7,7 @@ import { MapPin, ChevronRight, Fuel, Car, Users, Calendar, IndianRupee, Search, 
 import { subscribeToCityChange } from '@/lib/city-events'
 import Footer from '@/components/Footer'
 import FeedbackSection from '@/components/car-model/FeedbackSection'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 // Used Car Platforms with URL generators - Universal list
 const usedCarPlatforms = [
@@ -794,6 +795,9 @@ export default function UsedCarsClient() {
 
             {/* Feedback Section */}
             <FeedbackSection />
+
+            {/* Breadcrumb */}
+            <Breadcrumb items={[{ label: 'Used Cars' }]} />
 
             {/* Footer */}
             <Footer />

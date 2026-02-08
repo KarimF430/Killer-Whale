@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronDown, Plus, Share2, X, TrendingUp, TrendingDown, Award, Landmark } from 'lucide-react'
 import { calculateOnRoadPrice } from '@/lib/rto-data-optimized'
 import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 import PopularComparisons from '@/components/home/PopularComparisons'
 import PopularCars from '@/components/home/PopularCars'
 import UpcomingCars from '@/components/home/UpcomingCars'
@@ -1052,6 +1053,12 @@ export default function ComparePageClient({
       )}
 
 
+      <Breadcrumb
+        items={[
+          { label: 'Compare', href: '/compare' },
+          { label: comparisonItems.filter((item): item is ComparisonItem => item !== null).map(item => `${item.model.brandName} ${item.model.name}`).join(' vs ') }
+        ]}
+      />
       <Footer />
       <FloatingAIBot
         type="comparison"

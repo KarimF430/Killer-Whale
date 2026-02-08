@@ -6,6 +6,7 @@ import Footer from '@/components/Footer'
 import { FloatingAIBot } from '@/components/FloatingAIBot'
 import PopularComparisons from '@/components/home/PopularComparisons'
 import PageContainer, { PageSection } from '@/components/layout/PageContainer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 interface Car {
     id: string
@@ -193,6 +194,7 @@ export default function CompareSelectionClient({ initialCars, initialBrands }: C
                 </div>
             )}
 
+            <Breadcrumb items={[{ label: 'Compare Cars' }]} />
             <Footer />
             <FloatingAIBot type="comparison" id="general" name="Comparison Tool" />
         </div>

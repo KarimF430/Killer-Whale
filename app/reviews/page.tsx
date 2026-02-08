@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { Calendar, User, Star } from 'lucide-react'
 import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 export const metadata: Metadata = {
     title: 'Expert Car Reviews & Road Tests | gadizone',
@@ -59,100 +60,103 @@ const REVIEWS = [
 
 export default function ReviewsPage() {
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <>
+            <div className="min-h-screen bg-gray-50 font-sans">
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-                {/* Header */}
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
-                        Expert <span className="text-red-600">Reviews</span> & Road Tests
-                    </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Deep-dive analysis, real-world mileage tests, and definitive verdicts from the gadizone expert team.
-                    </p>
-                </div>
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+                            Expert <span className="text-red-600">Reviews</span> & Road Tests
+                        </h1>
+                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                            Deep-dive analysis, real-world mileage tests, and definitive verdicts from the gadizone expert team.
+                        </p>
+                    </div>
 
-                {/* Featured Review (First Item) */}
-                <div className="mb-16">
-                    <Link href={`/reviews/${REVIEWS[0].slug}`} className="group relative block rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-300">
-                        <div className="md:flex h-[500px]">
-                            <div className="md:w-2/3 h-64 md:h-full relative overflow-hidden">
-                                <img
-                                    src={REVIEWS[0].image}
-                                    alt={REVIEWS[0].title}
-                                    className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-                                />
-                                <div className="absolute top-6 left-6 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                                    Latest Review
-                                </div>
-                            </div>
-                            <div className="md:w-1/3 bg-gray-900 p-8 md:p-12 flex flex-col justify-center">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                                    <span className="text-yellow-400 font-bold text-xl">{REVIEWS[0].rating}/10</span>
-                                </div>
-                                <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight group-hover:text-red-400 transition-colors">
-                                    {REVIEWS[0].title}
-                                </h2>
-                                <p className="text-gray-400 mb-6 line-clamp-3">
-                                    {REVIEWS[0].excerpt}
-                                </p>
-                                <div className="flex items-center text-gray-500 text-sm mt-auto">
-                                    <User className="w-4 h-4 mr-2" />
-                                    <span className="mr-4">{REVIEWS[0].author}</span>
-                                    <Calendar className="w-4 h-4 mr-2" />
-                                    <span>{REVIEWS[0].date}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </Link>
-                </div>
-
-                {/* Reviews Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {REVIEWS.slice(1).map((review) => (
-                        <Link key={review.id} href={`/reviews/${review.slug}`} className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
-                            <div className="h-56 relative overflow-hidden">
-                                <img
-                                    src={review.image}
-                                    alt={review.title}
-                                    className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
-                                />
-                                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg shadow-sm flex items-center gap-1">
-                                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                    <span className="font-bold text-gray-900">{review.rating}</span>
-                                </div>
-                            </div>
-                            <div className="p-6 flex-1 flex flex-col">
-                                <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-red-600 transition-colors">
-                                    {review.title}
-                                </h3>
-                                <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
-                                    {review.excerpt}
-                                </p>
-
-                                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                                    <div className="flex items-center">
-                                        <User className="w-3 h-3 mr-1" />
-                                        {review.author}
-                                    </div>
-                                    <div className="flex items-center">
-                                        <Calendar className="w-3 h-3 mr-1" />
-                                        {review.date}
+                    {/* Featured Review (First Item) */}
+                    <div className="mb-16">
+                        <Link href={`/reviews/${REVIEWS[0].slug}`} className="group relative block rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-300">
+                            <div className="md:flex h-[500px]">
+                                <div className="md:w-2/3 h-64 md:h-full relative overflow-hidden">
+                                    <img
+                                        src={REVIEWS[0].image}
+                                        alt={REVIEWS[0].title}
+                                        className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+                                    />
+                                    <div className="absolute top-6 left-6 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                        Latest Review
                                     </div>
                                 </div>
-
-                                <div className="mt-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">Verdict</span>
-                                    <p className="text-sm font-medium text-gray-800 italic">"{review.verdict}"</p>
+                                <div className="md:w-1/3 bg-gray-900 p-8 md:p-12 flex flex-col justify-center">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                                        <span className="text-yellow-400 font-bold text-xl">{REVIEWS[0].rating}/10</span>
+                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight group-hover:text-red-400 transition-colors">
+                                        {REVIEWS[0].title}
+                                    </h2>
+                                    <p className="text-gray-400 mb-6 line-clamp-3">
+                                        {REVIEWS[0].excerpt}
+                                    </p>
+                                    <div className="flex items-center text-gray-500 text-sm mt-auto">
+                                        <User className="w-4 h-4 mr-2" />
+                                        <span className="mr-4">{REVIEWS[0].author}</span>
+                                        <Calendar className="w-4 h-4 mr-2" />
+                                        <span>{REVIEWS[0].date}</span>
+                                    </div>
                                 </div>
                             </div>
                         </Link>
-                    ))}
-                </div>
+                    </div>
 
-            </main>
+                    {/* Reviews Grid */}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {REVIEWS.slice(1).map((review) => (
+                            <Link key={review.id} href={`/reviews/${review.slug}`} className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
+                                <div className="h-56 relative overflow-hidden">
+                                    <img
+                                        src={review.image}
+                                        alt={review.title}
+                                        className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg shadow-sm flex items-center gap-1">
+                                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                        <span className="font-bold text-gray-900">{review.rating}</span>
+                                    </div>
+                                </div>
+                                <div className="p-6 flex-1 flex flex-col">
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-red-600 transition-colors">
+                                        {review.title}
+                                    </h3>
+                                    <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+                                        {review.excerpt}
+                                    </p>
+
+                                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                                        <div className="flex items-center">
+                                            <User className="w-3 h-3 mr-1" />
+                                            {review.author}
+                                        </div>
+                                        <div className="flex items-center">
+                                            <Calendar className="w-3 h-3 mr-1" />
+                                            {review.date}
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">Verdict</span>
+                                        <p className="text-sm font-medium text-gray-800 italic">"{review.verdict}"</p>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+
+                </main>
+            </div>
+            <Breadcrumb items={[{ label: 'Reviews' }]} />
             <Footer />
-        </div>
+        </>
     )
 }

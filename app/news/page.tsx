@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Footer from '@/components/Footer'
 import NewsListing from '@/components/news/NewsListing'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 export const metadata: Metadata = {
   title: 'Car News, Reviews & Expert Insights | gadizone',
@@ -19,13 +20,15 @@ export const metadata: Metadata = {
 
 export default function NewsPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main>
-        {/* News Listing */}
-        <NewsListing />
-      </main>
-
+    <>
+      <div className="min-h-screen bg-gray-50">
+        <main>
+          {/* News Listing */}
+          <NewsListing />
+        </main>
+      </div>
+      <Breadcrumb items={[{ label: 'News' }]} />
       <Footer />
-    </div>
+    </>
   )
 }

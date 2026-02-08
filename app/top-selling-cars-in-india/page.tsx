@@ -5,6 +5,7 @@ import PageSection from '@/components/common/PageSection'
 import Footer from '@/components/Footer'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 import TopSellingCarsClient from './TopSellingCarsClient'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 // Enable ISR with 1-hour revalidation
 export const revalidate = 3600
@@ -177,35 +178,37 @@ export default async function TopSellingCarsPage() {
     const { carsByBodyType, popularCars, newLaunchedCars, dynamicDescription } = await getTopSellingCarsData()
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <Ad3DCarousel className="my-4" />
-                </div>
+        <>
+            <div className="min-h-screen bg-gray-50">
+                <main>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <Ad3DCarousel className="my-4" />
+                    </div>
 
-                <PageSection background="white">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5 mr-1" />
-                        Back to Home
-                    </Link>
+                    <PageSection background="white">
+                        <Link
+                            href="/"
+                            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+                        >
+                            <ChevronLeft className="w-5 h-5 mr-1" />
+                            Back to Home
+                        </Link>
 
-                    <TopSellingCarsClient
-                        carsByBodyType={carsByBodyType}
-                        popularCars={popularCars}
-                        newLaunchedCars={newLaunchedCars}
-                        dynamicDescription={dynamicDescription || ''}
-                    />
-                </PageSection>
+                        <TopSellingCarsClient
+                            carsByBodyType={carsByBodyType}
+                            popularCars={popularCars}
+                            newLaunchedCars={newLaunchedCars}
+                            dynamicDescription={dynamicDescription || ''}
+                        />
+                    </PageSection>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <Ad3DCarousel className="my-4" />
-                </div>
-            </main>
-
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <Ad3DCarousel className="my-4" />
+                    </div>
+                </main>
+            </div>
+            <Breadcrumb items={[{ label: 'Top Selling Cars' }]} />
             <Footer />
-        </div>
+        </>
     )
 }

@@ -9,6 +9,7 @@ import { formatPrice, formatPriceRange } from '@/utils/priceFormatter'
 import { Heart, Star, Share2, ChevronDown, ChevronRight, Calendar, Users, Fuel, ChevronLeft, Clock, Eye, MessageCircle, ArrowRight, Play, ExternalLink, ThumbsUp, Phone, CheckCircle, Settings, Camera } from 'lucide-react'
 import Footer from '../Footer'
 import PageSection from '../common/PageSection'
+import Breadcrumb from '../common/Breadcrumb'
 import AdBanner from '../home/AdBanner'
 import { useOnRoadPrice } from '@/hooks/useOnRoadPrice'
 import VariantCard from '../car-model/VariantCard'
@@ -3400,70 +3401,80 @@ export default function VariantPage({
 
             {/* Ad Banner */}
             <Ad3DCarousel className="mb-6" />
-
-            {/* Feedback Section */}
-            <div className="max-w-2xl mx-auto">
-              <div className="text-center mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Share Your Feedback</h2>
-                <p className="text-gray-600">Help us improve by sharing your thoughts about this page</p>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <form className="space-y-6">
-                  {/* Feedback Textarea */}
-                  <div>
-                    <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-2">
-                      Your Feedback
-                    </label>
-                    <textarea
-                      id="feedback"
-                      rows={4}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
-                      placeholder="Tell us what you think about this car page..."
-                    ></textarea>
-                  </div>
-
-                  {/* Name Input */}
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Your Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      placeholder="Enter your name"
-                    />
-                  </div>
-
-                  {/* Email Input */}
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      placeholder="Enter your email"
-                    />
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
-                  >
-                    <CheckCircle className="h-5 w-5 mr-2" />
-                    Submit Feedback
-                  </button>
-                </form>
-              </div>
-            </div>
           </div>
         </PageSection>
       </div >
 
+      {/* Website Feedback Section */}
+      <section className="py-6 sm:py-8 bg-gray-50">
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 text-center mb-2 sm:mb-3">
+              Share Your Feedback
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">
+              Help us improve our website by sharing your experience
+            </p>
+
+            <form className="space-y-4 sm:space-y-5">
+              {/* Feedback Textarea */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                  Your Feedback
+                </label>
+                <textarea
+                  placeholder="Tell us what you think about our website..."
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                />
+              </div>
+
+              {/* Name and Email - Stack on mobile, side-by-side on larger screens */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter your name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2.5 sm:py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base min-h-[44px]"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Submit Feedback</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <Breadcrumb
+        items={[
+          { label: displayBrandName || 'Brand', href: `/${(displayBrandName?.toLowerCase().replace(/\s+/g, '-') || 'brand')}-cars` },
+          { label: displayModelName || 'Model', href: `/${(displayBrandName?.toLowerCase().replace(/\s+/g, '-') || 'brand')}-cars/${displayModelName?.toLowerCase().replace(/\s+/g, '-') || 'model'}` },
+          { label: displayVariantName || 'Variant' }
+        ]}
+      />
       <Footer />
 
       {/* Image Gallery Modal for Highlights */}

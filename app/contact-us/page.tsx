@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import PageContainer, { PageSection } from '@/components/layout/PageContainer'
 import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 export default function ContactUsPage() {
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' })
@@ -135,6 +136,7 @@ export default function ContactUsPage() {
                     </PageSection>
                 </PageContainer>
             </div>
+            <Breadcrumb items={[{ label: 'Contact Us' }]} />
             <Footer />
         </>
     )

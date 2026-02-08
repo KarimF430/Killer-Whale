@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import PageContainer, { PageSection } from '@/components/layout/PageContainer'
 import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 export const metadata: Metadata = {
     title: 'About gadizone - Your Car Research Partner in India',
@@ -93,6 +94,7 @@ export default function AboutUsPage() {
                     </PageSection>
                 </PageContainer>
             </div>
+            <Breadcrumb items={[{ label: 'About Us' }]} />
             <Footer />
         </>
     )

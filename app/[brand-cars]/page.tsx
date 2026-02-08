@@ -19,6 +19,7 @@ import CarComparison from '@/components/common/CarComparison'
 import { FloatingAIBot } from '@/components/FloatingAIBot'
 import { generateBrandSEO } from '@/lib/seo'
 import { generateBreadcrumbSchema } from '@/lib/structured-data'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 // Enable ISR with 1-hour revalidation
 export const revalidate = 3600
@@ -300,8 +301,6 @@ export default async function BrandPage({ params }: BrandPageProps) {
       }
 
       const breadcrumbs = [
-        { label: 'Home', href: '/' },
-        { label: 'Brands', href: '/brands' },
         { label: staticBrand.name }
       ]
 
@@ -312,6 +311,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
               <BrandHeroSection brand={staticBrand} brands={brands} models={[]} />
             </SafeComponent>
           </main>
+          <Breadcrumb items={breadcrumbs} />
           <Footer />
         </div>
       )
@@ -370,12 +370,10 @@ export default async function BrandPage({ params }: BrandPageProps) {
     }
 
     const breadcrumbs = [
-      { label: 'Home', href: '/' },
-      { label: 'Brands', href: '/brands' },
       { label: brand.name }
     ]
 
-    const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs.map(b => ({
+    const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs.map((b: { label: string; href?: string }) => ({
       name: b.label,
       item: b.href || ''
     })))
@@ -407,6 +405,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
           name={brand.name}
         />
 
+        <Breadcrumb items={breadcrumbs} />
         <Footer />
       </div>
     )

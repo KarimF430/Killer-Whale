@@ -5,6 +5,7 @@ import PageSection from '@/components/common/PageSection'
 import Footer from '@/components/Footer'
 import Ad3DCarousel from '@/components/ads/Ad3DCarousel'
 import BudgetCarsClient from '@/app/cars-by-budget/[budget]/BudgetCarsClient'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 const BUDGET_INFO = {
     label: 'Under ₹10 Lakh',
@@ -164,6 +165,7 @@ export default async function BestCarsUnder10LakhPage() {
                     <Ad3DCarousel className="my-4" />
                 </div>
             </main>
+            <Breadcrumb items={[{ label: 'Best Cars Under 10 Lakh' }]} />
             <Footer />
         </div>
     )

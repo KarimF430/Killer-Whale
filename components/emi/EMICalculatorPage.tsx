@@ -8,6 +8,8 @@ import dynamic from 'next/dynamic'
 import PageContainer, { PageSection } from '../layout/PageContainer'
 import analytics from '@/lib/analytics'
 import { AnalyticsEvent } from '@/types/analytics'
+import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 // Dynamically import the TataSierraAdBanner
 const TataSierraAdBanner = dynamic(() => import('@/components/ads/TataSierraAdBanner'), { ssr: false })
@@ -705,6 +707,9 @@ export default function EMICalculatorPage() {
           </div>
         </PageSection>
       </PageContainer>
+
+      <Breadcrumb items={[{ label: 'EMI Calculator' }]} />
+      <Footer />
     </div >
   )
 }

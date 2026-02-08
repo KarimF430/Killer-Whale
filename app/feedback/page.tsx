@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Star } from 'lucide-react'
 import PageContainer, { PageSection } from '@/components/layout/PageContainer'
 import Footer from '@/components/Footer'
+import Breadcrumb from '@/components/common/Breadcrumb'
 
 export default function FeedbackPage() {
     const [formData, setFormData] = useState({ name: '', email: '', rating: 0, category: '', feedback: '' })
@@ -141,6 +142,7 @@ export default function FeedbackPage() {
                     </PageSection>
                 </PageContainer>
             </div>
+            <Breadcrumb items={[{ label: 'Feedback' }]} />
             <Footer />
         </>
     )

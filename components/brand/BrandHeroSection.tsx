@@ -234,23 +234,83 @@ export default function BrandHeroSection({ brand, brands = [], models = [], bran
       <BrandFAQ brandName={brand.name} initialBrand={backendBrand} />
 
       {/* Section 8: Owner Reviews */}
-      {/* Section 8: Owner Reviews */}
       <section className="py-6 sm:py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8">{brand.name} Owner Reviews</h2>
-          <div className="bg-white rounded-lg border border-gray-200 p-5 sm:p-6">
-            <div className="bg-gray-50 rounded-lg p-4 sm:p-6 text-center">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Own a {brand.name.toLowerCase()} car? Share your experience!</h3>
-              <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
-                Help other buyers make informed decisions by sharing your honest review
-              </p>
-              <Link
-                href={`/${brand.slug}-cars/write-review`}
-                className="inline-block bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2 sm:px-6 sm:py-2 rounded-lg font-medium transition-all duration-200 shadow-md text-sm sm:text-base"
+          <div className="bg-gray-50 rounded-lg p-4 sm:p-6 text-center">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Own a {brand.name.toLowerCase()} car? Share your experience!</h3>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
+              Be the first to review this car and help other buyers make informed decisions
+            </p>
+            <Link
+              href={`/${brand.slug}-cars/write-review`}
+              className="inline-block bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-5 py-2 sm:px-6 sm:py-2 rounded-lg font-medium transition-all duration-200 shadow-md text-sm sm:text-base"
+            >
+              Write a Review
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Website Feedback Section */}
+      <section className="py-6 sm:py-8 bg-gray-50">
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 text-center mb-2 sm:mb-3">
+              Share Your Feedback
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">
+              Help us improve our website by sharing your experience
+            </p>
+
+            <form className="space-y-4 sm:space-y-5">
+              {/* Feedback Textarea */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                  Your Feedback
+                </label>
+                <textarea
+                  placeholder="Tell us what you think about our website..."
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                />
+              </div>
+
+              {/* Name and Email - Stack on mobile, side-by-side on larger screens */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter your name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white py-2.5 sm:py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base min-h-[44px]"
               >
-                Write a Review
-              </Link>
-            </div>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Submit Feedback</span>
+              </button>
+            </form>
           </div>
         </div>
       </section>
