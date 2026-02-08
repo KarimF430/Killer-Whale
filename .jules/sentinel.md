@@ -1,0 +1,4 @@
+## 2026-02-08 - Regex Injection and Unauthorized Admin Access
+**Vulnerability:** Found multiple instances of `new RegExp(userInput, 'i')` used in MongoDB queries and search logic, which are vulnerable to Regex Injection (ReDoS). Also identified administrative endpoints for car variants and comparisons that were missing authentication.
+**Learning:** SonarCloud security gates often trigger a failing "E" rating for dynamic regex constructors. Even if input is partially sanitized, using `new RegExp` with un-escaped user input is a significant risk.
+**Prevention:** Use a centralized `escapeRegExp` utility to sanitize all dynamic strings used in regular expressions. Favor MongoDB's string-based `$regex` syntax over the `new RegExp` constructor. Always apply authentication and validation middleware to any endpoint that performs data mutations.

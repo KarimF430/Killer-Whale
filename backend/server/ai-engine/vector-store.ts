@@ -14,6 +14,8 @@
 // NOTE: Mongoose models are imported dynamically to prevent startup crashes
 // when MongoDB isn't connected yet
 
+import { escapeRegExp } from '../utils/security'
+
 // ============================================
 // CONFIGURATION
 // ============================================
@@ -413,9 +415,12 @@ export async function exactNameSearch(
     console.log(`🎯 Exact search: found car names [${carNames.join(', ')}] in query`)
 
     // Build regex patterns for each car name
-    const namePatterns = carNames.map(name => ({
-        name: { $regex: new RegExp(`^${name}$|^${name}\\s|\\s${name}$|\\s${name}\\s`, 'i') }
-    }))
+    const namePatterns = carNames.map(name => {
+        const escaped = escapeRegExp(name)
+        return {
+            name: { $regex: `^${escaped}$|^${escaped}\\s|\\s${escaped}$|\\s${escaped}\\s`, $options: 'i' }
+        }
+    })
 
     // Also search by brand name
     const brandPatterns = carNames.map(name => ({

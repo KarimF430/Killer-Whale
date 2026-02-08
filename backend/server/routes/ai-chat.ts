@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import Groq from 'groq-sdk'
 import { Variant as CarVariant, Model } from '../db/schemas'
+import { escapeRegExp } from '../utils/security'
 import { getCarIntelligence, type CarIntelligence } from '../ai-engine/web-scraper'
 import { handleQuestionWithRAG } from '../ai-engine/rag-system'
 import {
@@ -506,7 +507,7 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
 
         // Fuel type filter
         if (requirements.fuelType && requirements.fuelType !== 'any') {
-            query.fuelType = { $regex: new RegExp(requirements.fuelType, 'i') }
+            query.fuelType = { $regex: escapeRegExp(requirements.fuelType), $options: 'i' }
             console.log(`⛽ Fuel filter: ${requirements.fuelType} `)
         }
 
