@@ -16,7 +16,9 @@ NC='\033[0m' # No Color
 # Configuration
 FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
 BACKEND_URL="${BACKEND_URL:-http://localhost:5001}"
-MONGODB_URI="${MONGODB_URI:-mongodb+srv://motoroctane_user21:Yp4YeD5obT4iAOuy@cluster0.hok00oq.mongodb.net/motoroctane?retryWrites=true&w=majority}"
+# SECURITY: Never hardcode production credentials in scripts.
+# Use environment variables or local defaults for testing.
+MONGODB_URI="${MONGODB_URI:-mongodb://localhost:27017/motoroctane_test}"
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
 echo -e "${BLUE}        MotorOctane Complete System Test${NC}"
@@ -181,9 +183,13 @@ echo ""
 TOTAL_TESTS=$((TOTAL_TESTS + 1))
 echo -e "${CYAN}🧪 Testing: Authentication Login${NC}"
 
+# SECURITY: Use environment variables for admin credentials in tests
+TEST_ADMIN_EMAIL="${ADMIN_EMAIL:-admin@local.test}"
+TEST_ADMIN_PASSWORD="${ADMIN_PASSWORD:-Admin@123_change_me}"
+
 login_response=$(curl -s -X POST "$BACKEND_URL/api/auth/login" \
     -H "Content-Type: application/json" \
-    -d '{"email":"admin@motoroctane.com","password":"Admin@123"}' 2>/dev/null || echo "{}")
+    -d "{\"email\":\"$TEST_ADMIN_EMAIL\",\"password\":\"$TEST_ADMIN_PASSWORD\"}" 2>/dev/null || echo "{}")
 
 if echo "$login_response" | grep -q '"success":true'; then
     echo -e "${GREEN}✅ PASS: Authentication Login${NC}"

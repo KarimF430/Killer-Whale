@@ -85,8 +85,9 @@ function generateModelUrl(modelName: string, brandName?: string): string {
   }
 
   // Clean model name for URL (remove brand prefix, convert to slug)
+  const escapedBrand = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   let cleanModelName = modelName
-    .replace(new RegExp(`^${brand}\\s+`, 'i'), '') // Remove brand prefix
+    .replace(new RegExp(`^${escapedBrand}\\s+`, 'i'), '') // Remove brand prefix
     .toLowerCase()
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/[^a-z0-9-]/g, '') // Remove special characters

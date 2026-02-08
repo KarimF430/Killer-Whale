@@ -65,8 +65,6 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 31536000, // 1 year
-    // Configure allowed quality values for Next.js 16+
-    qualities: [25, 50, 75, 85, 100],
   },
   // Security headers and cache control for production
   async headers() {

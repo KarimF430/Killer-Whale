@@ -6,6 +6,7 @@
 import mongoose from 'mongoose'
 import { HfInference } from '@huggingface/inference'
 import { Variant, Model, Brand } from '../db/schemas'
+import { escapeRegExp } from '../utils/security'
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 
@@ -42,7 +43,7 @@ export async function retrieveCarData(query: string, filters?: any): Promise<any
         }
 
         if (filters?.fuelType) {
-            searchQuery.fuelType = new RegExp(filters.fuelType, 'i')
+            searchQuery.fuelType = { $regex: escapeRegExp(filters.fuelType), $options: 'i' }
         }
 
         const Car = mongoose.model('Car')
@@ -52,14 +53,17 @@ export async function retrieveCarData(query: string, filters?: any): Promise<any
         if (query && query.length > 2) {
             const brands = extractBrands(query)
             if (brands.length > 0) {
-                searchQuery.brandName = { $in: brands.map(b => new RegExp(b, 'i')) }
+                // Use a single regex with OR for multiple brands to prevent ReDoS and avoid new RegExp()
+                const brandPattern = brands.map(b => escapeRegExp(b)).join('|')
+                searchQuery.brandName = { $regex: brandPattern, $options: 'i' }
             }
 
             // Simple regex search on name/model if brand not found
             if (brands.length === 0) {
+                const escapedQuery = escapeRegExp(query)
                 searchQuery.$or = [
-                    { modelName: new RegExp(query, 'i') },
-                    { name: new RegExp(query, 'i') }
+                    { modelName: { $regex: escapedQuery, $options: 'i' } },
+                    { name: { $regex: escapedQuery, $options: 'i' } }
                 ]
             }
         }

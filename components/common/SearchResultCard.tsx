@@ -39,7 +39,9 @@ export default function SearchResultCard({ car, searchTerm, className = '' }: Se
   const highlightText = (text: string, term?: string) => {
     if (!term) return text
 
-    const regex = new RegExp(`(${term})`, 'gi')
+    // Escape special regex characters to prevent Regex Injection
+    const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedTerm})`, 'gi')
     const parts = text.split(regex)
 
     return parts.map((part, index) =>

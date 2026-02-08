@@ -15,6 +15,7 @@ import {
 } from '../ai-engine/expert-knowledge'
 // Vector search and self-learning imports
 import { hybridCarSearch, initializeVectorStore, getVectorStoreStats } from '../ai-engine/vector-store'
+import { escapeRegExp } from '../utils/security'
 import {
     recordInteraction,
     recordFeedback,
@@ -506,7 +507,7 @@ async function findMatchingCars(requirements: any): Promise<any[]> {
 
         // Fuel type filter
         if (requirements.fuelType && requirements.fuelType !== 'any') {
-            query.fuelType = { $regex: new RegExp(requirements.fuelType, 'i') }
+            query.fuelType = { $regex: escapeRegExp(requirements.fuelType), $options: 'i' }
             console.log(`⛽ Fuel filter: ${requirements.fuelType} `)
         }
 
