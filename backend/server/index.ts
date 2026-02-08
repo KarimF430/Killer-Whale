@@ -23,6 +23,7 @@ import RedisStore from "connect-redis";
 import { init as sentryInit, setupExpressErrorHandler } from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import { register, httpRequestDurationMicroseconds, frontendWebVitals } from "./monitoring/metrics";
+import { handleUploads } from "./uploads-handler";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -156,37 +157,7 @@ app.use('/api', apiLimiter);
 const uploadsStaticPath = path.join(process.cwd(), 'uploads');
 
 // Fallback: if a legacy .jpg/.png is requested but only a .webp exists, serve the .webp
-app.get('/uploads/*', (req, res, next) => {
-  try {
-    const reqPath = req.path; // e.g., /uploads/image-123.jpg
-    const relPath = reqPath.replace(/^\/+/, ''); // remove leading /
-    const absPath = path.join(process.cwd(), relPath);
-    fs.access(absPath, fs.constants.R_OK, (err) => {
-      if (!err) return next(); // file exists; let static middleware handle it
-
-      // If R2 public base is configured, redirect to it as a primary fallback
-      const publicBase = process.env.R2_PUBLIC_BASE_URL;
-      if (publicBase) {
-        const target = `${publicBase}/${relPath}`;
-        return res.redirect(302, target);
-      }
-
-      // Try .webp counterpart
-      const webpRel = relPath.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-      if (webpRel === relPath) return next();
-      const webpAbs = path.join(process.cwd(), webpRel);
-      fs.access(webpAbs, fs.constants.R_OK, (err2) => {
-        if (!err2) {
-          res.type('image/webp').sendFile(webpAbs);
-        } else {
-          next();
-        }
-      });
-    });
-  } catch {
-    next();
-  }
-});
+app.get('/uploads/*', handleUploads);
 if (!isProd) {
   app.use(
     '/uploads',
