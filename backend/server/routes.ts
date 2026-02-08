@@ -23,6 +23,8 @@ import {
 } from "./middleware/rateLimiter";
 import { redisCacheMiddleware, invalidateRedisCache, CacheTTL as RedisCacheTTL } from "./middleware/redis-cache";
 import { securityMiddleware, validateFileUpload } from "./middleware/sanitize";
+// Note: News routes use authMiddleware (Author-based), while car data routes use authenticateToken (AdminUser-based)
+import { authMiddleware } from "./middleware/auth";
 import { ipWhitelist, botDetector, ddosShield } from "./middleware/security";
 import { imageProcessingConfigs, ImageProcessor } from "./middleware/image-processor";
 import multer from "multer";
@@ -2509,7 +2511,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     res.json(variant);
   });
 
-  app.post("/api/variants", async (req, res) => {
+  app.post("/api/variants", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🚗 Received variant data:', JSON.stringify(req.body, null, 2));
 
@@ -2543,7 +2545,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.patch("/api/variants/:id", async (req, res) => {
+  app.patch("/api/variants/:id", authenticateToken, modifyLimiter, securityMiddleware, async (req, res) => {
     try {
       console.log('🔄 Updating variant:', req.params.id);
       console.log('📊 Update data received:', JSON.stringify(req.body, null, 2));
@@ -2599,7 +2601,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.delete("/api/variants/:id", async (req, res) => {
+  app.delete("/api/variants/:id", authenticateToken, modifyLimiter, async (req, res) => {
     try {
       console.log('🗑️ DELETE request for variant ID:', req.params.id);
 
@@ -2763,7 +2765,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
     }
   });
 
-  app.post("/api/popular-comparisons", async (req, res) => {
+  app.post("/api/popular-comparisons", authenticateToken, async (req, res) => {
     try {
       const comparisons = req.body;
 
@@ -2802,21 +2804,21 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   app.use('/api/youtube', publicLimiter, createYouTubeRoutes(storage));
 
 
-  // Admin news management routes (MUST come BEFORE /api/admin to avoid rate limiting)
-  app.use('/api/admin/articles', adminArticlesRoutes);
-  app.use('/api/admin/categories', adminCategoriesRoutes);
-  app.use('/api/admin/tags', adminTagsRoutes);
-  app.use('/api/admin/authors', adminAuthorsRoutes);
-  app.use('/api/admin/media', adminMediaRoutes);
-  app.use('/api/admin/reviews', adminReviewsRoutes);
-  app.use('/api/admin/emails', adminEmailRoutes);
+  // Admin news management routes (Secured with authMiddleware)
+  app.use('/api/admin/articles', authMiddleware, adminArticlesRoutes);
+  app.use('/api/admin/categories', authMiddleware, adminCategoriesRoutes);
+  app.use('/api/admin/tags', authMiddleware, adminTagsRoutes);
+  app.use('/api/admin/authors', authMiddleware, adminAuthorsRoutes);
+  app.use('/api/admin/media', authMiddleware, adminMediaRoutes);
+  app.use('/api/admin/reviews', authMiddleware, adminReviewsRoutes);
+  app.use('/api/admin/emails', authMiddleware, adminEmailRoutes);
 
   // Price history routes (public)
   app.use('/api/price-history', publicLimiter, priceHistoryRoutes);
 
   // Public reviews routes
   app.use('/api/reviews', publicLimiter, reviewsRoutes);
-  app.use('/api/admin/analytics', adminAnalyticsRoutes);
+  app.use('/api/admin/analytics', authMiddleware, adminAnalyticsRoutes);
 
   // Admin authentication routes (with rate limiting) - MUST come AFTER specific routes
   app.use('/api/admin', authLimiter, adminAuthRoutes);
@@ -2904,7 +2906,7 @@ export function registerRoutes(app: Express, storage: IStorage, backupService?: 
   });
 
   // Humanize AI Content Routes
-  app.use('/api/admin/humanize', adminHumanizeRoutes);
+  app.use('/api/admin/humanize', authMiddleware, adminHumanizeRoutes);
 }
 
 

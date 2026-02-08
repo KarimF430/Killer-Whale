@@ -11,6 +11,7 @@ import type { IStorage } from "./storage";
 import { createBackupService } from "./backup-service";
 import { newsStorage } from "./db/news-storage";
 import monitoringRoutes from "./routes/monitoring";
+import { authenticateToken } from "./auth";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import { apiLimiter } from "./middleware/rateLimiter";
@@ -452,14 +453,14 @@ if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'developme
     app.use('/api/user', userAuthRoutes);
     console.log('✅ User authentication routes registered at /api/user');
 
-    // Register admin user management routes
+    // Register admin user management routes (Secured with authenticateToken)
     const adminUsersRoutes = (await import('./routes/admin-users')).default;
-    app.use('/api/admin/users', adminUsersRoutes);
+    app.use('/api/admin/users', authenticateToken, adminUsersRoutes);
     console.log('✅ Admin users routes registered at /api/admin/users');
 
-    // Register diagnostics route
+    // Register diagnostics route (Secured with authenticateToken)
     const diagnosticsRoutes = (await import('./routes/diagnostics')).default;
-    app.use('/api/diagnostics', diagnosticsRoutes);
+    app.use('/api/diagnostics', authenticateToken, diagnosticsRoutes);
     console.log('✅ Diagnostics routes registered at /api/diagnostics');
 
     // Register recommendations routes (personalized car suggestions)
